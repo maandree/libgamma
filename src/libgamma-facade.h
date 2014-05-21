@@ -231,9 +231,9 @@ char* libgamma_behex_edid_uppercase(const unsigned char* restrict edid, size_t l
  * Convert an hexadecimal representation of an EDID to a raw representation
  * 
  * @param   edid  The EDID in hexadecimal representation
- * @retrun        The EDID in raw representation, it will be twice the length
- *                of `edid` (the input value). `NULL` on allocation error,
- *                `errno` will be set accordingly.
+ * @retrun        The EDID in raw representation, it will be half the length
+ *                of `edid` (the input value). `NULL` on allocation error or
+ *                if the EDID is malformated, `errno` will be set accordingly.
  */
 unsigned char* libgamma_unhex_edid(const char* restrict edid);
 
