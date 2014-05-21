@@ -23,13 +23,13 @@
  * The selected adjustment method does not exist
  * or has been excluded at compile-time
  */
-#define  LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD  -1
+#define LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD  -1
 
 /**
  * `errno` has be set with a standard error number
  * to indicate the what has gone wrong
  */
-#define  LIBGAMMA_ERRNO_SET -2
+#define LIBGAMMA_ERRNO_SET  -2
 
 
 #endif
