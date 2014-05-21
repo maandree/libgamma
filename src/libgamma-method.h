@@ -135,6 +135,11 @@ typedef struct libgamma_method_capabilities {
   int multiple_crtcs : 1;
   
   /**
+   * Whether the partition to graphics card is a bijection
+   */
+  int partitions_are_graphics_cards : 1;
+  
+  /**
    * Whether the adjustment method supports `libgamma_site_restore`
    */
   int site_restore : 1;
