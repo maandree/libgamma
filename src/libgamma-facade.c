@@ -56,6 +56,7 @@
 # endif
 #endif
 
+#include <unistd.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -72,6 +73,137 @@
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
 #endif
+
+
+
+#ifdef HAVE_GAMMA_METHODS
+# ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+/**
+ * Test whether a file descriptor refers to a VT
+ * 
+ * @param   fd  The file descriptor
+ * @return      Whether the file descriptor refers to a VT
+ */
+static int libgamma_is_vt_proper(int fd)
+{
+  char buf[32];
+  char digit0;
+  
+  if (ttyname_r(fd, buf, sizeof(buf) / sizeof(char)))
+    return 0;
+  
+  if (strstr(buf, "/dev/tty") != buf)
+    return 0;
+  
+  digit0 = buf[strlen("/dev/tty")];
+  return ('1' <= digit0) && (digit0 <= '9');
+}
+# endif
+
+
+/**
+ * Test the availability of an adjustment method
+ * 
+ * @param  method     The adjustment method
+ * @param  operation  Allowed values:
+ *                      0: Pass if the environment suggests it will work but is not fake.
+ *                      1: Pass if the environment suggests it will work.
+ *                      2: Pass if real and not fake.
+ *                      3: Pass if real.
+ *                      4: Always pass.
+ *                    Other values invoke undefined behaviour.
+ * @return            Whether the test passed
+ */
+static int libgamma_list_method_test(int method, int operation)
+{
+  libgamma_method_capabilities_t caps;
+  libgamma_method_capabilities(&caps, method);
+  
+  switch (operation)
+    {
+    case 0: /* Methods that the environment suggests will work, excluding fake. */
+      if (caps.fake)
+	return 0;
+      /* Fall through. */
+      
+    case 1: /* Methods that the environment suggests will work, including fake. */
+      if (caps.real == 0)
+	return 0;
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+      if (method == GAMMA_METHOD_LINUX_DRM)
+	return libgamma_is_vt_proper(STDIN_FILENO) ||
+	       libgamma_is_vt_proper(STDOUT_FILENO) ||
+	       libgamma_is_vt_proper(STDERR_FILENO);
+#endif
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+      if (method == GAMMA_METHOD_DUMMY)
+	return 0;
+#endif
+      return caps.default_site_known;
+      
+    case 2: /* All real non-fake methods. */
+      return caps.real && (caps.fake == 0);
+      
+    case 3: /* All real methods. */
+      return caps.real;
+      
+    default: /* All methods. */
+      return 1;
+    }
+}
+#endif
+
+
+/**
+ * List available adjustment methods by their order of preference based on the environment
+ * 
+ * @param  methods    Output array of methods, should be able to hold `GAMMA_METHOD_COUNT` elements
+ * @param  operation  Allowed values:
+ *                      0: Methods that the environment suggests will work, excluding fake.
+ *                      1: Methods that the environment suggests will work, including fake.
+ *                      2: All real non-fake methods.
+ *                      3: All real methods.
+ *                      4: All methods.
+ *                    Other values invoke undefined behaviour.
+ * @return            The number of element that have been stored in `methods`
+ */
+size_t libgamma_list_methods(int* methods, int operation)
+{
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) methods;
+  (void) operation;
+  return 0;
+#else
+  size_t n = 0;
+  
+#ifdef HAVE_GAMMA_METHOD_RANDR
+  if (libgamma_list_method_test(GAMMA_METHOD_RANDR, operation))
+    methods[n++] = GAMMA_METHOD_RANDR;
+#endif
+#ifdef HAVE_GAMMA_METHOD_VIDMODE
+  if (libgamma_list_method_test(GAMMA_METHOD_VIDMODE, operation))
+    methods[n++] = GAMMA_METHOD_VIDMODE;
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+  if (libgamma_list_method_test(GAMMA_METHOD_LINUX_DRM, operation))
+    methods[n++] = GAMMA_METHOD_LINUX_DRM;
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+  if (libgamma_list_method_test(GAMMA_METHOD_W32_GDI, operation))
+    methods[n++] = GAMMA_METHOD_W32_GDI;
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+  if (libgamma_list_method_test(GAMMA_METHOD_QUARTZ_CORE_GRAPHICS, operation))
+    methods[n++] = GAMMA_METHOD_QUARTZ_CORE_GRAPHICS;
+#endif
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+  if (libgamma_list_method_test(GAMMA_METHOD_DUMMY, operation))
+    methods[n++] = GAMMA_METHOD_DUMMY;
+#endif
+  
+  return n;
+#endif
+}
 
 
 /**

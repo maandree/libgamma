@@ -97,6 +97,13 @@
  */
 #define GAMMA_METHOD_MAX  5
 
+/**
+ * The number adjustment methods provided by this library.
+ * Note however that this includes adjstment methods that
+ * have been removed at compile-time.
+ */
+#define GAMMA_METHOD_COUNT  (GAMMA_METHOD_MAX + 1)
+
 
 
 /**

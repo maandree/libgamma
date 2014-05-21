@@ -70,6 +70,21 @@ typedef double libgamma_gamma_rampsd_fun(double encoding);
 
 
 /**
+ * List available adjustment methods by their order of preference based on the environment
+ * 
+ * @param  methods    Output array of methods, should be able to hold `GAMMA_METHOD_COUNT` elements
+ * @param  operation  Allowed values:
+ *                      0: Methods that the environment suggests will work, excluding fake.
+ *                      1: Methods that the environment suggests will work, including fake.
+ *                      2: All real non-fake methods.
+ *                      3: All real methods.
+ *                      4: All methods.
+ *                    Other values invoke undefined behaviour.
+ * @return            The number of element that have been stored in `methods`
+ */
+size_t libgamma_list_methods(int* methods, int operation);
+
+/**
  * Return the capabilities of an adjustment method
  * 
  * @param  this    The data structure to fill with the method's capabilities
@@ -303,7 +318,7 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
  *                 error identifier provided by this library
  */
 int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
-				  libgamma_gamma_ramps_t ramps);
+				  libgamma_gamma_ramps_t ramps) __attribute__((hot));
 
 
 /**
@@ -411,7 +426,7 @@ int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps_fun* red_function,
 				    libgamma_gamma_ramps_fun* green_function,
-				    libgamma_gamma_ramps_fun* blue_function);
+				    libgamma_gamma_ramps_fun* blue_function) __attribute__((cold));
 
 /**
  * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version
@@ -426,7 +441,7 @@ int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
 				      libgamma_gamma_ramps32_fun* red_function,
 				      libgamma_gamma_ramps32_fun* green_function,
-				      libgamma_gamma_ramps32_fun* blue_function);
+				      libgamma_gamma_ramps32_fun* blue_function) __attribute__((cold));
 
 /**
  * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version
@@ -441,7 +456,7 @@ int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
 				      libgamma_gamma_ramps64_fun* red_function,
 				      libgamma_gamma_ramps64_fun* green_function,
-				      libgamma_gamma_ramps64_fun* blue_function);
+				      libgamma_gamma_ramps64_fun* blue_function) __attribute__((cold));
 
 /**
  * Set the gamma ramps for a CRTC, `float` function version
@@ -456,7 +471,7 @@ int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
 				     libgamma_gamma_rampsf_fun* red_function,
 				     libgamma_gamma_rampsf_fun* green_function,
-				     libgamma_gamma_rampsf_fun* blue_function);
+				     libgamma_gamma_rampsf_fun* blue_function) __attribute__((cold));
 
 /**
  * Set the gamma ramps for a CRTC, `double` function version
@@ -471,7 +486,7 @@ int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t* restrict this,
 				     libgamma_gamma_rampsd_fun* red_function,
 				     libgamma_gamma_rampsd_fun* green_function,
-				     libgamma_gamma_rampsd_fun* blue_function);
+				     libgamma_gamma_rampsd_fun* blue_function) __attribute__((cold));
 
 
 #endif
