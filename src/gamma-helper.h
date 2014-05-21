@@ -55,9 +55,25 @@ typedef union libgamma_gamma_ramps_any
 } libgamma_gamma_ramps_any_t;
 
 
+/**
+ * A function for reading the gamma ramps from a CRTC
+ *
+ * @param   this   The CRTC state
+ * @param   ramps  The store for the gamma ramps
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
 typedef int libgamma_get_ramps_any_fun(libgamma_crtc_state_t* restrict this,
 				       libgamma_gamma_ramps_any_t* restrict ramps);
 
+/**
+ * A function for writing the gamma ramps to a CRTC
+ *
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
 typedef int libgamma_set_ramps_any_fun(libgamma_crtc_state_t* restrict this,
 				       libgamma_gamma_ramps_any_t ramps);
 
