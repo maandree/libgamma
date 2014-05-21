@@ -21,7 +21,7 @@
 
 #include "gamma-quartz-cg.h"
 
-#include "gamma-error.h"
+#include "libgamma-error.h"
 
 
 /**

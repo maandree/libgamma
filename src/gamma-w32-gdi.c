@@ -21,7 +21,7 @@
 
 #include "gamma-w32-gdi.h"
 
-#include "gamma-error.h"
+#include "libgamma-error.h"
 
 
 /**

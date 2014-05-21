@@ -21,7 +21,7 @@
 
 #include "gamma-linux-drm.h"
 
-#include "gamma-error.h"
+#include "libgamma-error.h"
 
 
 /**

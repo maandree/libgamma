@@ -21,7 +21,7 @@
 
 #include "gamma-x-vidmode.h"
 
-#include "gamma-error.h"
+#include "libgamma-error.h"
 
 
 /**
