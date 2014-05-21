@@ -23,6 +23,7 @@
 
 #include "libgamma-error.h"
 
+#include <stdlib.h>
 #include <errno.h>
 
 
