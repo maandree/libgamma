@@ -840,5 +840,167 @@ typedef struct libgamma_gamma_rampsd
 } libgamma_gamma_rampsd_t;
 
 
+
+/**
+ * Initialise a gamma ramp in the proper way that allows all adjustment
+ * methods to read from and write to it without causing segmentation violation
+ * 
+ * The input must have `red_size`, `green_size` and `blue_size` set to the
+ * sizes of the gamma ramps that should be allocated
+ * 
+ * @param   this  The gamma ramps
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ */
+int libgamma_gamma_ramps_initialise(libgamma_gamma_ramps_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps_initialise` or otherwise
+ * initialises in the proper manner
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_ramps_destroy(libgamma_gamma_ramps_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps_initialise` or otherwise
+ * initialises in the proper manner, as well as release the pointer
+ * to the structure
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_ramps_free(libgamma_gamma_ramps_t* restrict this);
+
+
+/**
+ * Initialise a gamma ramp in the proper way that allows all adjustment
+ * methods to read from and write to it without causing segmentation violation
+ * 
+ * The input must have `red_size`, `green_size` and `blue_size` set to the
+ * sizes of the gamma ramps that should be allocated
+ * 
+ * @param   this  The gamma ramps
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ */
+int libgamma_gamma_ramps32_initialise(libgamma_gamma_ramps32_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps32_initialise` or otherwise
+ * initialises in the proper manner
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_ramps32_destroy(libgamma_gamma_ramps32_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps32_initialise` or otherwise
+ * initialises in the proper manner, as well as release the pointer
+ * to the structure
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_ramps32_free(libgamma_gamma_ramps32_t* restrict this);
+
+
+/**
+ * Initialise a gamma ramp in the proper way that allows all adjustment
+ * methods to read from and write to it without causing segmentation violation
+ * 
+ * The input must have `red_size`, `green_size` and `blue_size` set to the
+ * sizes of the gamma ramps that should be allocated
+ * 
+ * @param   this  The gamma ramps
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ */
+int libgamma_gamma_ramps64_initialise(libgamma_gamma_ramps64_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps64_initialise` or otherwise
+ * initialises in the proper manner
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_ramps64_destroy(libgamma_gamma_ramps64_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps64_initialise` or otherwise
+ * initialises in the proper manner, as well as release the pointer
+ * to the structure
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_ramps64_free(libgamma_gamma_ramps64_t* restrict this);
+
+
+/**
+ * Initialise a gamma ramp in the proper way that allows all adjustment
+ * methods to read from and write to it without causing segmentation violation
+ * 
+ * The input must have `red_size`, `green_size` and `blue_size` set to the
+ * sizes of the gamma ramps that should be allocated
+ * 
+ * @param   this  The gamma ramps
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ */
+int libgamma_gamma_rampsf_initialise(libgamma_gamma_rampsf_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_rampsf_initialise` or otherwise
+ * initialises in the proper manner
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_rampsf_destroy(libgamma_gamma_rampsf_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_rampsf_initialise` or otherwise
+ * initialises in the proper manner, as well as release the pointer
+ * to the structure
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_rampsf_free(libgamma_gamma_rampsf_t* restrict this);
+
+
+/**
+ * Initialise a gamma ramp in the proper way that allows all adjustment
+ * methods to read from and write to it without causing segmentation violation
+ * 
+ * The input must have `red_size`, `green_size` and `blue_size` set to the
+ * sizes of the gamma ramps that should be allocated
+ * 
+ * @param   this  The gamma ramps
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ */
+int libgamma_gamma_rampsd_initialise(libgamma_gamma_rampsd_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_rampsd_initialise` or otherwise
+ * initialises in the proper manner
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_rampsd_destroy(libgamma_gamma_rampsd_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_rampsd_initialise` or otherwise
+ * initialises in the proper manner, as well as release the pointer
+ * to the structure
+ * 
+ * @param  this  The gamma ramps
+ */
+void libgamma_gamma_rampsd_free(libgamma_gamma_rampsd_t* restrict this);
+
+
+
 #endif
 
