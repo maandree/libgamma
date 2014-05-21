@@ -308,5 +308,51 @@ int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps64_t* restrict ramps);
 
 
+/**
+ * Set the gamma ramps for a CRTC, `float` version
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_rampsf_t ramps);
+
+/**
+ * Get current the gamma ramps for a CRTC, `float` version
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to fill with the current values
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_rampsf_t* restrict ramps);
+
+
+/**
+ * Set the gamma ramps for a CRTC, `double` version
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_rampsd_t ramps);
+
+/**
+ * Get current the gamma ramps for a CRTC, `double` version
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to fill with the current values
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_rampsd_t* restrict ramps);
+
+
 #endif
 

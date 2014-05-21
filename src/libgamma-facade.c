@@ -1107,6 +1107,199 @@ int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 }
 
 
+
+/**
+ * Set the gamma ramps for a CRTC, `float` version
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_rampsf_t ramps)
+{
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_set_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_set_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_set_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_set_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_set_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_set_gamma_rampsf(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
+}
+
+
+/**
+ * Get current the gamma ramps for a CRTC, `float` version
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to fill with the current values
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_rampsf_t* restrict ramps)
+{
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_get_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_get_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_get_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_get_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_get_gamma_rampsf(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_get_gamma_rampsf(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
+}
+
+
+/**
+ * Set the gamma ramps for a CRTC, `double` version
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_rampsd_t ramps)
+{
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_set_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_set_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_set_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_set_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_set_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_set_gamma_rampsd(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
+}
+
+
+/**
+ * Get current the gamma ramps for a CRTC, `double` version
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to fill with the current values
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_rampsd_t* restrict ramps)
+{
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_get_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_get_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_get_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_get_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_get_gamma_rampsd(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_get_gamma_rampsd(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
+}
+
+
 #ifdef HAVE_NO_GAMMA_METHODS
 # pragma GCC diagnostic pop
 #endif

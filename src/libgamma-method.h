@@ -729,5 +729,81 @@ typedef struct libgamma_gamma_ramps64
 } libgamma_gamma_ramps64_t;
 
 
+/**
+ * Gamma ramp structure for `float` gamma ramps
+ */
+typedef struct libgamma_gamma_rampsf
+{
+  /**
+   * The size of `red`
+   */
+  size_t red_size;
+  
+  /**
+   * The size of `green`
+   */
+  size_t green_size;
+  
+  /**
+   * The size of `blue`
+   */
+  size_t blue_size;
+  
+  /**
+   * The gamma ramp for the red channel
+   */
+  float* red;
+  
+  /**
+   * The gamma ramp for the green channel
+   */
+  float* green;
+  
+  /**
+   * The gamma ramp for the blue channel
+   */
+  float* blue;
+  
+} libgamma_gamma_rampsf_t;
+
+
+/**
+ * Gamma ramp structure for `double` gamma ramps
+ */
+typedef struct libgamma_gamma_rampsd
+{
+  /**
+   * The size of `red`
+   */
+  size_t red_size;
+  
+  /**
+   * The size of `green`
+   */
+  size_t green_size;
+  
+  /**
+   * The size of `blue`
+   */
+  size_t blue_size;
+  
+  /**
+   * The gamma ramp for the red channel
+   */
+  float* red;
+  
+  /**
+   * The gamma ramp for the green channel
+   */
+  float* green;
+  
+  /**
+   * The gamma ramp for the blue channel
+   */
+  float* blue;
+  
+} libgamma_gamma_rampsd_t;
+
+
 #endif
 
