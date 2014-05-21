@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef HAVE_GAMMA_METHOD_VIDMODE
-# error Compiling gamma-vidmode.c without HAVE_GAMMA_METHOD_VIDMODE
+#ifndef HAVE_GAMMA_METHOD_X_VIDMODE
+# error Compiling gamma-x-vidmode.c without HAVE_GAMMA_METHOD_X_VIDMODE
 #endif
 
-#include "gamma-vidmode.h"
+#include "gamma-x-vidmode.h"
 
 #include "gamma-error.h"
 
@@ -29,7 +29,7 @@
  * 
  * @param  this  The data structure to fill with the method's capabilities
  */
-void libgamma_vidmode_method_capabilities(libgamma_method_capabilities_t* restrict this)
+void libgamma_x_vidmode_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
 }
 
@@ -47,8 +47,8 @@ void libgamma_vidmode_method_capabilities(libgamma_method_capabilities_t* restri
  * @return          Zero on success, otherwise (negative) the value of an
  *                  error identifier provided by this library
  */
-int libgamma_vidmode_site_initialise(libgamma_site_state_t* restrict this,
-				     char* restrict site)
+int libgamma_x_vidmode_site_initialise(libgamma_site_state_t* restrict this,
+				       char* restrict site)
 {
 }
 
@@ -58,7 +58,7 @@ int libgamma_vidmode_site_initialise(libgamma_site_state_t* restrict this,
  * 
  * @param  this  The site state
  */
-void libgamma_vidmode_site_destroy(libgamma_site_state_t* restrict this)
+void libgamma_x_vidmode_site_destroy(libgamma_site_state_t* restrict this)
 {
 }
 
@@ -70,7 +70,7 @@ void libgamma_vidmode_site_destroy(libgamma_site_state_t* restrict this)
  * @return        Zero on success, otherwise (negative) the value of an
  *                error identifier provided by this library
  */
-int libgamma_vidmode_site_restore(libgamma_site_state_t* restrict this)
+int libgamma_x_vidmode_site_restore(libgamma_site_state_t* restrict this)
 {
 }
 
@@ -85,8 +85,8 @@ int libgamma_vidmode_site_restore(libgamma_site_state_t* restrict this)
  * @return             Zero on success, otherwise (negative) the value of an
  *                     error identifier provided by this library
  */
-int libgamma_vidmode_partition_initialise(libgamma_partition_state_t* restrict this,
-					  libgamma_site_state_t* restrict site, size_t partition)
+int libgamma_x_vidmode_partition_initialise(libgamma_partition_state_t* restrict this,
+					    libgamma_site_state_t* restrict site, size_t partition)
 {
 }
 
@@ -96,7 +96,7 @@ int libgamma_vidmode_partition_initialise(libgamma_partition_state_t* restrict t
  * 
  * @param  this  The partition state
  */
-void libgamma_vidmode_partition_destroy(libgamma_partition_state_t* restrict this)
+void libgamma_x_vidmode_partition_destroy(libgamma_partition_state_t* restrict this)
 {
 }
 
@@ -107,7 +107,7 @@ void libgamma_vidmode_partition_destroy(libgamma_partition_state_t* restrict thi
  * 
  * @param  this  The partition state
  */
-void libgamma_vidmode_partition_free(libgamma_partition_state_t* restrict this)
+void libgamma_x_vidmode_partition_free(libgamma_partition_state_t* restrict this)
 {
 }
 
@@ -119,7 +119,7 @@ void libgamma_vidmode_partition_free(libgamma_partition_state_t* restrict this)
  * @return        Zero on success, otherwise (negative) the value of an
  *                error identifier provided by this library
  */
-int libgamma_vidmode_partition_restore(libgamma_partition_state_t* restrict this)
+int libgamma_x_vidmode_partition_restore(libgamma_partition_state_t* restrict this)
 {
 }
 
@@ -134,8 +134,8 @@ int libgamma_vidmode_partition_restore(libgamma_partition_state_t* restrict this
  * @return             Zero on success, otherwise (negative) the value of an
  *                     error identifier provided by this library
  */
-int libgamma_vidmode_crtc_initialise(libgamma_crtc_state_t* restrict this,
-				     libgamma_partition_state_t* restrict partition, size_t crtc)
+int libgamma_x_vidmode_crtc_initialise(libgamma_crtc_state_t* restrict this,
+				       libgamma_partition_state_t* restrict partition, size_t crtc)
 {
 }
 
@@ -145,7 +145,7 @@ int libgamma_vidmode_crtc_initialise(libgamma_crtc_state_t* restrict this,
  * 
  * @param  this  The CRTC state
  */
-void libgamma_vidmode_crtc_destroy(libgamma_crtc_state_t* restrict this)
+void libgamma_x_vidmode_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
 }
 
@@ -156,7 +156,7 @@ void libgamma_vidmode_crtc_destroy(libgamma_crtc_state_t* restrict this)
  * 
  * @param  this  The CRTC state
  */
-void libgamma_vidmode_crtc_free(libgamma_crtc_state_t* restrict this)
+void libgamma_x_vidmode_crtc_free(libgamma_crtc_state_t* restrict this)
 {
 }
 
@@ -168,7 +168,7 @@ void libgamma_vidmode_crtc_free(libgamma_crtc_state_t* restrict this)
  * @return        Zero on success, otherwise (negative) the value of an
  *                error identifier provided by this library
  */
-int libgamma_vidmode_crtc_restore(libgamma_crtc_state_t* restrict this)
+int libgamma_x_vidmode_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
 }
 
@@ -182,8 +182,8 @@ int libgamma_vidmode_crtc_restore(libgamma_crtc_state_t* restrict this)
  * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
  * @return          Zero on success, -1 on error. On error refer to the error reports in `this`.
  */
-int libgamma_vidmode_get_crtc_information(libgamma_crtc_information_t* restrict this,
-					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
+int libgamma_x_vidmode_get_crtc_information(libgamma_crtc_information_t* restrict this,
+					    libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
 }
 
@@ -196,8 +196,8 @@ int libgamma_vidmode_get_crtc_information(libgamma_crtc_information_t* restrict 
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
-					  libgamma_gamma_ramps_t* restrict ramps)
+int libgamma_x_vidmode_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
+					    libgamma_gamma_ramps_t* restrict ramps)
 {
 }
 
@@ -210,8 +210,8 @@ int libgamma_vidmode_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
-					  libgamma_gamma_ramps_t ramps)
+int libgamma_x_vidmode_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
+					    libgamma_gamma_ramps_t ramps)
 {
 }
 
@@ -225,8 +225,8 @@ int libgamma_vidmode_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps32_t* restrict ramps)
+int libgamma_x_vidmode_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
+					      libgamma_gamma_ramps32_t* restrict ramps)
 {
 }
 
@@ -239,8 +239,8 @@ int libgamma_vidmode_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps32_t ramps)
+int libgamma_x_vidmode_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
+					      libgamma_gamma_ramps32_t ramps)
 {
 }
 
@@ -254,8 +254,8 @@ int libgamma_vidmode_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps64_t* restrict ramps)
+int libgamma_x_vidmode_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
+					      libgamma_gamma_ramps64_t* restrict ramps)
 {
 }
 
@@ -268,8 +268,8 @@ int libgamma_vidmode_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps64_t ramps)
+int libgamma_x_vidmode_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
+					      libgamma_gamma_ramps64_t ramps)
 {
 }
 
@@ -283,8 +283,8 @@ int libgamma_vidmode_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
-					   libgamma_gamma_rampsf_t* restrict ramps)
+int libgamma_x_vidmode_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
+					     libgamma_gamma_rampsf_t* restrict ramps)
 {
 }
 
@@ -297,8 +297,8 @@ int libgamma_vidmode_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
-					   libgamma_gamma_rampsf_t ramps)
+int libgamma_x_vidmode_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
+					     libgamma_gamma_rampsf_t ramps)
 {
 }
 
@@ -311,8 +311,8 @@ int libgamma_vidmode_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
-					   libgamma_gamma_rampsd_t* restrict ramps)
+int libgamma_x_vidmode_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
+					     libgamma_gamma_rampsd_t* restrict ramps)
 {
 }
 
@@ -325,8 +325,8 @@ int libgamma_vidmode_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_vidmode_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
-					   libgamma_gamma_rampsd_t ramps)
+int libgamma_x_vidmode_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
+					     libgamma_gamma_rampsd_t ramps)
 {
 }
 

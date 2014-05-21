@@ -18,6 +18,10 @@
 #ifndef LIBGAMMA_FACADE_H
 #define LIBGAMMA_FACADE_H
 
+#if !defined(LIBGAMMA_CONFIG_H) && !defined(DEBUG)
+# error libgamma-facade.h should not be included directly, include libgamma.h instead
+#endif
+
 
 #include "libgamma-method.h"
 

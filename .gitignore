@@ -13,4 +13,5 @@ obj/
 *.out
 *.o
 /config.mk
+/src/libgamma-config.h
 

@@ -26,13 +26,13 @@
 # endif
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
-# include "gamma-randr.h"
+# include "gamma-x-randr.h"
 # ifndef HAVE_GAMMA_METHODS
 #  define HAVE_GAMMA_METHODS
 # endif
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-# include "gamma-vidmode.h"
+# include "gamma-x-vidmode.h"
 # ifndef HAVE_GAMMA_METHODS
 #  define HAVE_GAMMA_METHODS
 # endif
@@ -176,13 +176,13 @@ size_t libgamma_list_methods(int* methods, int operation)
 #else
   size_t n = 0;
   
-#ifdef HAVE_GAMMA_METHOD_RANDR
-  if (libgamma_list_method_test(GAMMA_METHOD_RANDR, operation))
-    methods[n++] = GAMMA_METHOD_RANDR;
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+  if (libgamma_list_method_test(GAMMA_METHOD_X_RANDR, operation))
+    methods[n++] = GAMMA_METHOD_X_RANDR;
 #endif
-#ifdef HAVE_GAMMA_METHOD_VIDMODE
-  if (libgamma_list_method_test(GAMMA_METHOD_VIDMODE, operation))
-    methods[n++] = GAMMA_METHOD_VIDMODE;
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+  if (libgamma_list_method_test(GAMMA_METHOD_X_VIDMODE, operation))
+    methods[n++] = GAMMA_METHOD_X_VIDMODE;
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
   if (libgamma_list_method_test(GAMMA_METHOD_LINUX_DRM, operation))
@@ -225,12 +225,12 @@ void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      libgamma_randr_method_capabilities(this);
+      libgamma_x_randr_method_capabilities(this);
       break;
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      libgamma_vidmode_method_capabilities(this);
+      libgamma_x_vidmode_method_capabilities(this);
       break;
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
@@ -339,11 +339,11 @@ int libgamma_site_initialise(libgamma_site_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_site_initialise(this, site);
+      return libgamma_x_randr_site_initialise(this, site);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_site_initialise(this, site);
+      return libgamma_x_vidmode_site_initialise(this, site);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -380,12 +380,12 @@ void libgamma_site_destroy(libgamma_site_state_t* restrict this)
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      libgamma_randr_site_destroy(this);
+      libgamma_x_randr_site_destroy(this);
       break;
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      libgamma_vidmode_site_destroy(this);
+      libgamma_x_vidmode_site_destroy(this);
       break;
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
@@ -443,11 +443,11 @@ int libgamma_site_restore(libgamma_site_state_t* restrict this)
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_site_restore(this);
+      return libgamma_x_randr_site_restore(this);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_site_restore(this);
+      return libgamma_x_vidmode_site_restore(this);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -492,11 +492,11 @@ int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_partition_initialise(this, site, partition);
+      return libgamma_x_randr_partition_initialise(this, site, partition);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_partition_initialise(this, site, partition);
+      return libgamma_x_vidmode_partition_initialise(this, site, partition);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -533,12 +533,12 @@ void libgamma_partition_destroy(libgamma_partition_state_t* restrict this)
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      libgamma_randr_partition_destroy(this);
+      libgamma_x_randr_partition_destroy(this);
       break;
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      libgamma_vidmode_partition_destroy(this);
+      libgamma_x_vidmode_partition_destroy(this);
       break;
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
@@ -595,11 +595,11 @@ int libgamma_partition_restore(libgamma_partition_state_t* restrict this)
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_partition_restore(this);
+      return libgamma_x_randr_partition_restore(this);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_partition_restore(this);
+      return libgamma_x_vidmode_partition_restore(this);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -644,11 +644,11 @@ int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_initialise(this, partition, crtc);
+      return libgamma_x_randr_crtc_initialise(this, partition, crtc);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_initialise(this, partition, crtc);
+      return libgamma_x_vidmode_crtc_initialise(this, partition, crtc);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -685,12 +685,12 @@ void libgamma_crtc_destroy(libgamma_crtc_state_t* restrict this)
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      libgamma_randr_crtc_destroy(this);
+      libgamma_x_randr_crtc_destroy(this);
       break;
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      libgamma_vidmode_crtc_destroy(this);
+      libgamma_x_vidmode_crtc_destroy(this);
       break;
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
@@ -747,11 +747,11 @@ int libgamma_crtc_restore(libgamma_crtc_state_t* restrict this)
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_restore(this);
+      return libgamma_x_randr_crtc_restore(this);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_restore(this);
+      return libgamma_x_vidmode_crtc_restore(this);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -797,11 +797,11 @@ int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_get_crtc_information(this, crtc, fields);
+      return libgamma_x_randr_get_crtc_information(this, crtc, fields);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_get_crtc_information(this, crtc, fields);
+      return libgamma_x_vidmode_get_crtc_information(this, crtc, fields);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -973,11 +973,11 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_get_gamma_ramps(this, ramps);
+      return libgamma_x_randr_crtc_get_gamma_ramps(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_get_gamma_ramps(this, ramps);
+      return libgamma_x_vidmode_crtc_get_gamma_ramps(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1021,11 +1021,11 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_set_gamma_ramps(this, ramps);
+      return libgamma_x_randr_crtc_set_gamma_ramps(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_set_gamma_ramps(this, ramps);
+      return libgamma_x_vidmode_crtc_set_gamma_ramps(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1070,11 +1070,11 @@ int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_get_gamma_ramps32(this, ramps);
+      return libgamma_x_randr_crtc_get_gamma_ramps32(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_get_gamma_ramps32(this, ramps);
+      return libgamma_x_vidmode_crtc_get_gamma_ramps32(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1118,11 +1118,11 @@ int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_set_gamma_ramps32(this, ramps);
+      return libgamma_x_randr_crtc_set_gamma_ramps32(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_set_gamma_ramps32(this, ramps);
+      return libgamma_x_vidmode_crtc_set_gamma_ramps32(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1167,11 +1167,11 @@ int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_get_gamma_ramps64(this, ramps);
+      return libgamma_x_randr_crtc_get_gamma_ramps64(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_get_gamma_ramps64(this, ramps);
+      return libgamma_x_vidmode_crtc_get_gamma_ramps64(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1215,11 +1215,11 @@ int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_set_gamma_ramps64(this, ramps);
+      return libgamma_x_randr_crtc_set_gamma_ramps64(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_set_gamma_ramps64(this, ramps);
+      return libgamma_x_vidmode_crtc_set_gamma_ramps64(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1264,11 +1264,11 @@ int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_get_gamma_rampsf(this, ramps);
+      return libgamma_x_randr_crtc_get_gamma_rampsf(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_get_gamma_rampsf(this, ramps);
+      return libgamma_x_vidmode_crtc_get_gamma_rampsf(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1312,11 +1312,11 @@ int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_set_gamma_rampsf(this, ramps);
+      return libgamma_x_randr_crtc_set_gamma_rampsf(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_set_gamma_rampsf(this, ramps);
+      return libgamma_x_vidmode_crtc_set_gamma_rampsf(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1361,11 +1361,11 @@ int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_get_gamma_rampsd(this, ramps);
+      return libgamma_x_randr_crtc_get_gamma_rampsd(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_get_gamma_rampsd(this, ramps);
+      return libgamma_x_vidmode_crtc_get_gamma_rampsd(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:
@@ -1409,11 +1409,11 @@ int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
     case GAMMA_METHOD_X_RANDR:
-      return libgamma_randr_crtc_set_gamma_rampsd(this, ramps);
+      return libgamma_x_randr_crtc_set_gamma_rampsd(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
     case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_vidmode_crtc_set_gamma_rampsd(this, ramps);
+      return libgamma_x_vidmode_crtc_set_gamma_rampsd(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
     case GAMMA_METHOD_LINUX_DRM:

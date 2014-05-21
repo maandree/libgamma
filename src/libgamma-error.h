@@ -18,6 +18,10 @@
 #ifndef LIBGAMMA_ERROR_H
 #define LIBGAMMA_ERROR_H
 
+#if !defined(LIBGAMMA_CONFIG_H) && !defined(DEBUG)
+# error libgamma-error.h should not be included directly, include libgamma.h instead
+#endif
+
 
 /**
  * The selected adjustment method does not exist

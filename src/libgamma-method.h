@@ -18,6 +18,10 @@
 #ifndef LIBGAMMA_METHOD_H
 #define LIBGAMMA_METHOD_H
 
+#if !defined(LIBGAMMA_CONFIG_H) && !defined(DEBUG)
+# error libgamma-method.h should not be included directly, include libgamma.h instead
+#endif
+
 
 #include <stddef.h>
 #include <stdint.h>

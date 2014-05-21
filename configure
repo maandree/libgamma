@@ -79,7 +79,16 @@ done
 
 
 exec 3> "$(dirname "$0")/config.mk"
+exec 4> "$(dirname "$0")/src/libgamma-config.h"
 echo 'DEFINITIONS =' >&3
+
+echo '/**' >&4
+cat "$(dirname "$0")/COPYING" | sed -e 's:^: \* :' >&4
+echo ' */' >&4
+echo '#ifndef LIBGAMMA_CONFIG_H' >&4
+echo '#define LIBGAMMA_CONFIG_H' >&4
+echo >&4
+echo >&4
 
 if [ ${fake_w32gdi} = 1 ]; then
     enable_w32gdi=1
@@ -93,30 +102,37 @@ if [ ${enable_debug} = 1 ]; then
 fi
 if [ ${enable_dummy} = 1 ]; then
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_DUMMY' >&3
+    echo '#define HAVE_GAMMA_METHOD_DUMMY' >&4
     have_dummy='Yes'
 fi
 if [ ${enable_randr} = 1 ]; then
-    echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_RANDR' >&3
+    echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_X_RANDR' >&3
+    echo '#define HAVE_GAMMA_METHOD_X_RANDR' >&4
     have_randr='Yes'
 fi
 if [ ${enable_vidmode} = 1 ]; then
-    echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_VIDMODE' >&3
+    echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_X_VIDMODE' >&3
+    echo '#define HAVE_GAMMA_METHOD_X_VIDMODE' >&4
     have_vidmode='Yes'
 fi
 if [ ${enable_drm} = 1 ]; then
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_LINUX_DRM' >&3
+    echo '#define HAVE_GAMMA_METHOD_LINUX_DRM' >&4
     have_drm='Yes'
 fi
 if [ ${enable_w32gdi} = 1 ]; then
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_W32_GDI' >&3
+    echo '#define HAVE_GAMMA_METHOD_W32_GDI' >&4
     have_w32gdi='Yes'
 fi
 if [ ${enable_quartz} = 1 ]; then
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&3
+    echo '#define HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&4
     have_quartz='Yes'
 fi
 if [ ${fake_w32gdi} = 1 ]; then
     echo 'DEFINITIONS += -FAKE_GAMMA_METHOD_W32_GDI' >&3
+    echo '#define FAKE_GAMMA_METHOD_W32_GDI' >&4
     if [ ${enable_randr} = 1 ]; then
 	have_w32gdi='Yes, fake via the RandR protocol for X'
     else
@@ -125,6 +141,7 @@ if [ ${fake_w32gdi} = 1 ]; then
 fi
 if [ ${fake_quartz} = 1 ]; then
     echo 'DEFINITIONS += -FAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&3
+    echo '#define FAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&4
     if [ ${enable_randr} = 1 ]; then
 	have_quartz='Yes, fake via the RandR protocol for X'
     else
@@ -132,6 +149,12 @@ if [ ${fake_quartz} = 1 ]; then
     fi
 fi
 
+echo >&4
+echo >&4
+echo '#endif' >&4
+echo >&4
+
+exec 4<&-
 exec 3<&-
 
 
