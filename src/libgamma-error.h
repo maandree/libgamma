@@ -19,7 +19,11 @@
 #define LIBGAMMA_ERROR_H
 
 
-/* TODO: Fill with error values (they should be negative.) */
+/**
+ * The selected adjustment method does not exist
+ * or has been excluded at compile-time
+ */
+#define  LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD  -1
 
 
 #endif

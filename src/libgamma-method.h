@@ -281,7 +281,7 @@ typedef struct libgamma_crtc_state {
   /**
    * The partition this CRTC belongs to
    */
-  libgamma_partition_state_t* site;
+  libgamma_partition_state_t* partition;
   
   /**
    * The index of the CRTC within its partition.

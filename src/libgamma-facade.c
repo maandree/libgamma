@@ -17,13 +17,61 @@
  */
 #include "libgamma-facade.h"
 
+#include "libgamma-error.h"
 #include "libgamma-method.h"
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+# include "gamma-dummy.h"
+# ifndef HAVE_GAMMA_METHODS
+#  define HAVE_GAMMA_METHODS
+# endif
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+# include "gamma-randr.h"
+# ifndef HAVE_GAMMA_METHODS
+#  define HAVE_GAMMA_METHODS
+# endif
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+# include "gamma-vidmode.h"
+# ifndef HAVE_GAMMA_METHODS
+#  define HAVE_GAMMA_METHODS
+# endif
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+# include "gamma-drm.h"
+# ifndef HAVE_GAMMA_METHODS
+#  define HAVE_GAMMA_METHODS
+# endif
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+# include "gamma-w32gdi.h"
+# ifndef HAVE_GAMMA_METHODS
+#  define HAVE_GAMMA_METHODS
+# endif
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+# include "gamma-quartz-cg.h"
+# ifndef HAVE_GAMMA_METHODS
+#  define HAVE_GAMMA_METHODS
+# endif
+#endif
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+
+
+#ifndef HAVE_GAMMA_METHODS
+# define HAVE_NO_GAMMA_METHODS
+#endif
+
+
+#ifdef HAVE_NO_GAMMA_METHODS
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
+#endif
 
 
 /**
@@ -34,7 +82,46 @@
  */
 void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this, int method)
 {
-  /* TODO */
+  memset(this, 0, sizeof(libgamma_method_capabilities_t));
+  
+  switch (method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      libgamma_dummy_method_capabilities(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      libgamma_randr_method_capabilities(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      libgamma_vidmode_method_capabilities(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      libgamma_drm_method_capabilities(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      libgamma_w32gdi_method_capabilities(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      libgamma_quartz_cg_method_capabilities(this);
+      break;
+#endif
+      
+    default:
+      /* Method does not exists/excluded at compile-time.
+         We will assume that this is not done... */
+      break;
+    }
 }
 
 
@@ -73,7 +160,21 @@ char* libgamma_method_default_site(int method)
  */
 const char* libgamma_method_default_site_variable(int method)
 {
-  /* TODO */
+  switch (method)
+    {
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return "DISPLAY";
+#endif
+      
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return "DISPLAY";
+#endif
+      
+    default:
+      return NULL;
+    }
 }
 
 
@@ -87,14 +188,47 @@ const char* libgamma_method_default_site_variable(int method)
  *                  `free`:able. One the state is destroyed the library
  *                  will attempt to free it. There you should not free
  *                  it yourself, and it must not be a string constant
- *                  or allocate on the stack.
+ *                  or allocate on the stack. Note however that it will
+ *                  not be free:d if this function fails.
  * @return          Zero on success, otherwise (negative) the value of an
  *                  error identifier provided by this library
  */
 int libgamma_site_initialise(libgamma_site_state_t* restrict this,
 			     int method, char* restrict site)
 {
-  /* TODO */
+  this->method = method;
+  this->site = site;
+  
+  switch (method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_site_initialise(this, site);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_site_initialise(this, site);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_site_initialise(this, site);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_site_initialise(this, site);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_site_initialise(this, site);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_site_initialise(this, site);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -105,7 +239,45 @@ int libgamma_site_initialise(libgamma_site_state_t* restrict this,
  */
 void libgamma_site_destroy(libgamma_site_state_t* restrict this)
 {
-  /* TODO */
+  switch (this->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      libgamma_dummy_site_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      libgamma_randr_site_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      libgamma_vidmode_site_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      libgamma_drm_site_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      libgamma_w32gdi_site_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      libgamma_quartz_cg_site_destroy(this);
+      break;
+#endif
+      
+    default:
+      /* Method does not exists/excluded at compile-time.
+         We will assume that this is not done... */
+      break;
+    }
+  free(this->site);
 }
 
 
@@ -131,7 +303,36 @@ void libgamma_site_free(libgamma_site_state_t* restrict this)
  */
 int libgamma_site_restore(libgamma_site_state_t* restrict this)
 {
-  /* TODO */
+  switch (this->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_site_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_site_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_site_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_site_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_site_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_site_restore(this);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -148,7 +349,39 @@ int libgamma_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
 				  libgamma_site_state_t* restrict site, size_t partition)
 {
-  /* TODO */
+  this->site = site;
+  this->partition = partition;
+  
+  switch (site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_partition_initialise(this, site, partition);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_partition_initialise(this, site, partition);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_partition_initialise(this, site, partition);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_partition_initialise(this, site, partition);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_partition_initialise(this, site, partition);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_partition_initialise(this, site, partition);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -159,7 +392,44 @@ int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
  */
 void libgamma_partition_destroy(libgamma_partition_state_t* restrict this)
 {
-  /* TODO */
+  switch (this->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      libgamma_dummy_partition_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      libgamma_randr_partition_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      libgamma_vidmode_partition_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      libgamma_drm_partition_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      libgamma_w32gdi_partition_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      libgamma_quartz_cg_partition_destroy(this);
+      break;
+#endif
+      
+    default:
+      /* Method does not exists/excluded at compile-time.
+         We will assume that this is not done... */
+      break;
+    }
 }
 
 
@@ -183,9 +453,38 @@ void libgamma_partition_free(libgamma_partition_state_t* restrict this)
  * @return        Zero on success, otherwise (negative) the value of an
  *                error identifier provided by this library
  */
-int libgamma_partition_restore(libgamma_site_state_t* restrict this)
+int libgamma_partition_restore(libgamma_partition_state_t* restrict this)
 {
-  /* TODO */
+  switch (this->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_partition_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_partition_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_partition_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_partition_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_partition_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_partition_restore(this);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -202,7 +501,39 @@ int libgamma_partition_restore(libgamma_site_state_t* restrict this)
 int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
 			     libgamma_partition_state_t* restrict partition, size_t crtc)
 {
-  /* TODO */
+  this->partition = partition;
+  this->crtc = crtc;
+  
+  switch (partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_initialise(this, partition, crtc);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_initialise(this, partition, crtc);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_initialise(this, partition, crtc);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_initialise(this, partition, crtc);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_initialise(this, partition, crtc);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_initialise(this, partition, crtc);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -213,7 +544,44 @@ int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
  */
 void libgamma_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
-  /* TODO */
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      libgamma_dummy_crtc_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      libgamma_randr_crtc_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      libgamma_vidmode_crtc_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      libgamma_drm_crtc_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      libgamma_w32gdi_crtc_destroy(this);
+      break;
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      libgamma_quartz_cg_crtc_destroy(this);
+      break;
+#endif
+      
+    default:
+      /* Method does not exists/excluded at compile-time.
+         We will assume that this is not done... */
+      break;
+    }
 }
 
 
@@ -237,9 +605,38 @@ void libgamma_crtc_free(libgamma_crtc_state_t* restrict this)
  * @return        Zero on success, otherwise (negative) the value of an
  *                error identifier provided by this library
  */
-int libgamma_crtc_restore(libgamma_site_state_t* restrict this)
+int libgamma_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
-  /* TODO */
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_restore(this);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_restore(this);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -247,15 +644,49 @@ int libgamma_crtc_restore(libgamma_site_state_t* restrict this)
 /**
  * Read information about a CRTC
  * 
- * @param   this   Instance of a data structure to fill with the information about the CRTC
- * @param   crtc   The state of the CRTC whose information should be read
- * @param   field  OR:ed identifiers for the information about the CRTC that should be read
- * @return         Zero on success, -1 on error. On error refer to the error reports in `this`.
+ * @param   this    Instance of a data structure to fill with the information about the CRTC
+ * @param   crtc    The state of the CRTC whose information should be read
+ * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
+ * @return          Zero on success, -1 on error. On error refer to the error reports in `this`.
  */
 int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
-				  libgamma_crtc_state_t* restrict crtc, int32_t field)
+				  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
-  /* TODO */
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) this;
+  (void) fields;
+#endif
+  
+  switch (crtc->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_get_crtc_information(this, crtc, fields);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_get_crtc_information(this, crtc, fields);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_get_crtc_information(this, crtc, fields);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_get_crtc_information(this, crtc, fields);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_get_crtc_information(this, crtc, fields);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_get_crtc_information(this, crtc, fields);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -264,9 +695,10 @@ int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
  * 
  * @param  this  The CRTC information
  */
-int libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict this)
+void libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict this)
 {
-  /* TODO */
+  free(this->edid);
+  free(this->connector_name);
 }
 
 
@@ -276,7 +708,7 @@ int libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict this
  * 
  * @param  this  The CRTC information
  */
-int libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
+void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
 {
   libgamma_crtc_information_destroy(this);
   free(this);
@@ -397,7 +829,40 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid)
 int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 				  libgamma_gamma_ramps_t ramps)
 {
-  /* TODO */
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_set_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_set_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_set_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_set_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_set_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_set_gamma_ramps(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -412,7 +877,40 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 				  libgamma_gamma_ramps_t* restrict ramps)
 {
-  /* TODO */
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_get_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_get_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_get_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_get_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_get_gamma_ramps(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_get_gamma_ramps(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -428,7 +926,40 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps32_t ramps)
 {
-  /* TODO */
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_set_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_set_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_set_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_set_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_set_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_set_gamma_ramps32(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -443,7 +974,40 @@ int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps32_t* restrict ramps)
 {
-  /* TODO */
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_get_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_get_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_get_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_get_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_get_gamma_ramps32(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_get_gamma_ramps32(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -458,7 +1022,40 @@ int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps64_t ramps)
 {
-  /* TODO */
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_set_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_set_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_set_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_set_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_set_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_set_gamma_ramps64(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
 
 
@@ -473,6 +1070,44 @@ int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps64_t* restrict ramps)
 {
-  /* TODO */
+#ifdef HAVE_NO_GAMMA_METHODS
+  (void) ramps;
+#endif
+  
+  switch (this->partition->site->method)
+    {
+#ifdef HAVE_GAMMA_METHOD_DUMMY
+    case GAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_get_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_RANDR
+    case GAMMA_METHOD_X_RANDR:
+      return libgamma_randr_crtc_get_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
+    case GAMMA_METHOD_X_VIDMODE:
+      return libgamma_vidmode_crtc_get_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+    case GAMMA_METHOD_LINUX_DRM:
+      return libgamma_drm_crtc_get_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_W32_GDI
+    case GAMMA_METHOD_W32_GDI:
+      return libgamma_w32gdi_crtc_get_gamma_ramps64(this, ramps);
+#endif
+#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+      return libgamma_quartz_cg_crtc_get_gamma_ramps64(this, ramps);
+#endif
+      
+    default:
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+    }
 }
+
+
+#ifdef HAVE_NO_GAMMA_METHODS
+# pragma GCC diagnostic pop
+#endif
 

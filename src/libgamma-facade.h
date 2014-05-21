@@ -41,7 +41,7 @@ void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this,
  *                  if multiple sites are not supported by the adjustment
  *                  method. This value should not be free:d.
  */
-char* libgamma_method_default_site(int method) __attribute__((pure));
+char* libgamma_method_default_site(int method);
 
 /**
  * Return the capabilities of an adjustment method
@@ -64,7 +64,8 @@ const char* libgamma_method_default_site_variable(int method) __attribute__((con
  *                  `free`:able. One the state is destroyed the library
  *                  will attempt to free it. There you should not free
  *                  it yourself, and it must not be a string constant
- *                  or allocate on the stack.
+ *                  or allocate on the stack. Note however that it will
+ *                  not be free:d if this function fails.
  * @return          Zero on success, otherwise (negative) the value of an
  *                  error identifier provided by this library
  */
@@ -130,7 +131,7 @@ void libgamma_partition_free(libgamma_partition_state_t* restrict this);
  * @return        Zero on success, otherwise (negative) the value of an
  *                error identifier provided by this library
  */
-int libgamma_partition_restore(libgamma_site_state_t* restrict this);
+int libgamma_partition_restore(libgamma_partition_state_t* restrict this);
 
 
 /**
@@ -167,26 +168,26 @@ void libgamma_crtc_free(libgamma_crtc_state_t* restrict this);
  * @return        Zero on success, otherwise (negative) the value of an
  *                error identifier provided by this library
  */
-int libgamma_crtc_restore(libgamma_site_state_t* restrict this);
+int libgamma_crtc_restore(libgamma_crtc_state_t* restrict this);
 
 
 /**
  * Read information about a CRTC
  * 
- * @param   this   Instance of a data structure to fill with the information about the CRTC
- * @param   crtc   The state of the CRTC whose information should be read
- * @param   field  OR:ed identifiers for the information about the CRTC that should be read
- * @return         Zero on success, -1 on error. On error refer to the error reports in `this`.
+ * @param   this    Instance of a data structure to fill with the information about the CRTC
+ * @param   crtc    The state of the CRTC whose information should be read
+ * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
+ * @return          Zero on success, -1 on error. On error refer to the error reports in `this`.
  */
 int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
-				  libgamma_crtc_state_t* restrict crtc, int32_t field);
+				  libgamma_crtc_state_t* restrict crtc, int32_t fields);
 
 /**
  * Release all resources in an information data structure for a CRTC
  * 
  * @param  this  The CRTC information
  */
-int libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict this);
+void libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict this);
 
 /**
  * Release all resources in an information data structure for a CRTC
@@ -194,7 +195,7 @@ int libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict this
  * 
  * @param  this  The CRTC information
  */
-int libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this);
+void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this);
 
 /**
  * Convert a raw representation of an EDID to a lowercase hexadecimal representation
