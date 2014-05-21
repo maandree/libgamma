@@ -27,13 +27,58 @@
  * The selected adjustment method does not exist
  * or has been excluded at compile-time
  */
-#define LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD  -1
+#define LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD  (-1)
 
 /**
  * `errno` has be set with a standard error number
  * to indicate the what has gone wrong
  */
-#define LIBGAMMA_ERRNO_SET  -2
+#define LIBGAMMA_ERRNO_SET  (-2)
+
+/**
+ * The selected site does not exist
+ */
+#define LIBGAMMA_NO_SUCH_SITE  (-3)
+
+/**
+ * The selected partition does not exist
+ */
+#define LIBGAMMA_NO_SUCH_PARTITION  (-4)
+
+/**
+ * The selected CRTC does not exist
+ */
+#define LIBGAMMA_NO_SUCH_CRTC  (-5)
+
+/**
+ * Counter overflowed when counting the number of available items
+ */
+#define LIBGAMMA_IMPOSSIBLE_AMOUNT  (-6)
+
+/**
+ * The selected connector is disabled, it does not have a CRTC
+ */
+#define LIBGAMMA_CONNECTOR_DISABLED  (-7)
+
+/**
+ * The selected CRTC could not be opened, reason unknown
+ */
+#define LIBGAMMA_OPEN_CRTC_FAILED  (-8)
+
+/**
+ * The CRTC information field is not supported by the adjustment method
+ */
+#define LIBGAMMA_CRTC_INFO_NOT_SUPPORTED  (-9)
+
+/**
+ * Failed to read the current gamma ramps for the selected CRTC, reason unknown
+ */
+#define LIBGAMMA_GAMMA_RAMP_READ_FAILED  (-10)
+
+/**
+ * Failed to write the current gamma ramps for the selected CRTC, reason unknown
+ */
+#define LIBGAMMA_GAMMA_RAMP_WRITE_FAILED  (-11)
 
 
 #endif

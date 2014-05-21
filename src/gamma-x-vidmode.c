@@ -22,6 +22,9 @@
 #include "gamma-x-vidmode.h"
 
 #include "libgamma-error.h"
+#include "gamma-helper.h"
+
+#include <errno.h>
 
 
 /**
@@ -31,6 +34,22 @@
  */
 void libgamma_x_vidmode_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
+  char* display = getenv("DISPLAY");
+  this->crtc_information = CRTC_INFO_GAMMA_SIZE
+			 | CRTC_INFO_GAMMA_DEPTH;
+  this->default_site_known = (display && *display);
+  this->multiple_sites = 1;
+  this->multiple_partitions = 1;
+  this->multiple_crtcs = 1;
+  this->partitions_are_graphics_cards = 0;
+  this->site_restore = 0;
+  this->partition_restore = 0;
+  this->crtc_restore = 0;
+  this->identical_gamma_sizes = 1;
+  this->fixed_gamma_size = 0;
+  this->fixed_gamma_depth = 1;
+  this->real = 1;
+  this->fake = 0;
 }
 
 
@@ -72,6 +91,8 @@ void libgamma_x_vidmode_site_destroy(libgamma_site_state_t* restrict this)
  */
 int libgamma_x_vidmode_site_restore(libgamma_site_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -102,17 +123,6 @@ void libgamma_x_vidmode_partition_destroy(libgamma_partition_state_t* restrict t
 
 
 /**
- * Release all resources held by a partition state
- * and free the partition state pointer
- * 
- * @param  this  The partition state
- */
-void libgamma_x_vidmode_partition_free(libgamma_partition_state_t* restrict this)
-{
-}
-
-
-/**
  * Restore the gamma ramps all CRTCS with a partition to the system settings
  * 
  * @param   this  The partition state
@@ -121,6 +131,8 @@ void libgamma_x_vidmode_partition_free(libgamma_partition_state_t* restrict this
  */
 int libgamma_x_vidmode_partition_restore(libgamma_partition_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -151,17 +163,6 @@ void libgamma_x_vidmode_crtc_destroy(libgamma_crtc_state_t* restrict this)
 
 
 /**
- * Release all resources held by a CRTC state
- * and free the CRTC state pointer
- * 
- * @param  this  The CRTC state
- */
-void libgamma_x_vidmode_crtc_free(libgamma_crtc_state_t* restrict this)
-{
-}
-
-
-/**
  * Restore the gamma ramps for a CRTC to the system settings for that CRTC
  * 
  * @param   this  The CRTC state
@@ -170,6 +171,8 @@ void libgamma_x_vidmode_crtc_free(libgamma_crtc_state_t* restrict this)
  */
 int libgamma_x_vidmode_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -228,6 +231,8 @@ int libgamma_x_vidmode_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this
 int libgamma_x_vidmode_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 					      libgamma_gamma_ramps32_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, 32, 16,
+				      libgamma_x_vidmode_crtc_get_gamma_ramps);
 }
 
 
@@ -242,6 +247,8 @@ int libgamma_x_vidmode_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict th
 int libgamma_x_vidmode_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 					      libgamma_gamma_ramps32_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, 32, 16,
+				      libgamma_x_vidmode_crtc_set_gamma_ramps);
 }
 
 
@@ -257,6 +264,8 @@ int libgamma_x_vidmode_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict th
 int libgamma_x_vidmode_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 					      libgamma_gamma_ramps64_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, 64, 16,
+				      libgamma_x_vidmode_crtc_get_gamma_ramps);
 }
 
 
@@ -271,6 +280,8 @@ int libgamma_x_vidmode_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict th
 int libgamma_x_vidmode_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 					      libgamma_gamma_ramps64_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, 64, 16,
+				      libgamma_x_vidmode_crtc_set_gamma_ramps);
 }
 
 
@@ -286,6 +297,8 @@ int libgamma_x_vidmode_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict th
 int libgamma_x_vidmode_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					     libgamma_gamma_rampsf_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, -1, 16,
+				      libgamma_x_vidmode_crtc_get_gamma_ramps);
 }
 
 
@@ -300,7 +313,10 @@ int libgamma_x_vidmode_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict thi
 int libgamma_x_vidmode_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					     libgamma_gamma_rampsf_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, -1, 16,
+				      libgamma_x_vidmode_crtc_set_gamma_ramps);
 }
+
 
 
 /**
@@ -314,6 +330,8 @@ int libgamma_x_vidmode_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict thi
 int libgamma_x_vidmode_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 					     libgamma_gamma_rampsd_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, -2, 16,
+				      libgamma_x_vidmode_crtc_get_gamma_ramps);
 }
 
 
@@ -328,5 +346,7 @@ int libgamma_x_vidmode_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict thi
 int libgamma_x_vidmode_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 					     libgamma_gamma_rampsd_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, -2, 16,
+				      libgamma_x_vidmode_crtc_set_gamma_ramps);
 }
 

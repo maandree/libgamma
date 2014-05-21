@@ -62,7 +62,7 @@ C_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
 
 
 # Object files for the library.
-LIBOBJ = libgamma-facade
+LIBOBJ = libgamma-facade gamma-helper
 
 
 # Include configurations from `./configure`.

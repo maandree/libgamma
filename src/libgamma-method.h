@@ -125,75 +125,75 @@ typedef struct libgamma_method_capabilities {
    * Whether the default site is known, if true the site is integrated
    * to the system or can be determined using environment variables
    */
-  int default_site_known : 1;
+  unsigned default_site_known : 1;
   
   /**
    * Whether the adjustment method supports multiple sites rather
    * than just the default site
    */
-  int multiple_sites : 1;
+  unsigned multiple_sites : 1;
   
   /**
    * Whether the adjustment method supports multiple partitions
    * per site
    */
-  int multiple_partitions : 1;
+  unsigned multiple_partitions : 1;
   
   /**
    * Whether the adjustment method supports multiple CRTC:s
    * per partition per site
    */
-  int multiple_crtcs : 1;
+  unsigned multiple_crtcs : 1;
   
   /**
    * Whether the partition to graphics card is a bijection
    */
-  int partitions_are_graphics_cards : 1;
+  unsigned partitions_are_graphics_cards : 1;
   
   /**
    * Whether the adjustment method supports `libgamma_site_restore`
    */
-  int site_restore : 1;
+  unsigned site_restore : 1;
   
   /**
    * Whether the adjustment method supports `libgamma_partition_restore`
    */
-  int partition_restore : 1;
+  unsigned partition_restore : 1;
   
   /**
    * Whether the adjustment method supports `libgamma_crtc_restore`
    */
-  int crtc_restore : 1;
+  unsigned crtc_restore : 1;
     
   /**
    * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
    * fields in `libgamma_crtc_information_t` will always have the same
    * values as each other for the adjustment method
    */
-  int identical_gamma_sizes : 1;
+  unsigned identical_gamma_sizes : 1;
   
   /**
    * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
    * fields in `libgamma_crtc_information_t` will always be filled with the
    * same value for the adjustment method
    */
-  int fixed_gamma_size : 1;
+  unsigned fixed_gamma_size : 1;
   
   /**
    * Whether the `gamma_depth` field in `libgamma_crtc_information_t`
    * will always be filled with the same value for the adjustment method
    */
-  int fixed_gamma_depth : 1;
+  unsigned fixed_gamma_depth : 1;
   
   /**
    * Whether the adjustment method will actually perform adjustments
    */
-  int real : 1;
+  unsigned real : 1;
   
   /**
    * Whether the adjustment method is implement using a translation layer
    */
-  int fake : 1;
+  unsigned fake : 1;
   
 } libgamma_method_capabilities_t;
 

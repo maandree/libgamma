@@ -22,6 +22,25 @@
 #include "gamma-x-randr.h"
 
 #include "libgamma-error.h"
+#include "gamma-helper.h"
+
+#include <stdlib.h>
+#include <errno.h>
+
+#include <xcb/xcb.h>
+#include <xcb/randr.h>
+
+
+/**
+ * The major version of RandR the library expects
+ */
+#define RANDR_VERSION_MAJOR  1
+
+/**
+ * The minor version of RandR the library expects
+ */
+#define RANDR_VERSION_MINOR  3
+
 
 
 /**
@@ -31,6 +50,31 @@
  */
 void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
+  char* display = getenv("DISPLAY");
+  this->crtc_information = CRTC_INFO_EDID
+			 | CRTC_INFO_WIDTH_MM
+			 | CRTC_INFO_HEIGHT_MM
+			 | CRTC_INFO_WIDTH_MM_EDID
+			 | CRTC_INFO_HEIGHT_MM_EDID
+			 | CRTC_INFO_GAMMA_SIZE
+			 | CRTC_INFO_GAMMA_DEPTH
+			 | CRTC_INFO_SUBPIXEL_ORDER
+			 | CRTC_INFO_CONNECTOR_NAME
+			 | CRTC_INFO_CONNECTOR_TYPE
+			 | CRTC_INFO_GAMMA;
+  this->default_site_known = (display && *display) ? 1 : 0;
+  this->multiple_sites = 1;
+  this->multiple_partitions = 1;
+  this->multiple_crtcs = 1;
+  this->partitions_are_graphics_cards = 0;
+  this->site_restore = 0;
+  this->partition_restore = 0;
+  this->crtc_restore = 0;
+  this->identical_gamma_sizes = 1;
+  this->fixed_gamma_size = 0;
+  this->fixed_gamma_depth = 1;
+  this->real = 1;
+  this->fake = 0;
 }
 
 
@@ -50,6 +94,7 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
 int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
 				     char* restrict site)
 {
+  /* TODO */
 }
 
 
@@ -60,6 +105,7 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
  */
 void libgamma_x_randr_site_destroy(libgamma_site_state_t* restrict this)
 {
+  /* TODO */
 }
 
 
@@ -72,6 +118,8 @@ void libgamma_x_randr_site_destroy(libgamma_site_state_t* restrict this)
  */
 int libgamma_x_randr_site_restore(libgamma_site_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -88,6 +136,7 @@ int libgamma_x_randr_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict this,
 					  libgamma_site_state_t* restrict site, size_t partition)
 {
+  /* TODO */
 }
 
 
@@ -98,17 +147,7 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
  */
 void libgamma_x_randr_partition_destroy(libgamma_partition_state_t* restrict this)
 {
-}
-
-
-/**
- * Release all resources held by a partition state
- * and free the partition state pointer
- * 
- * @param  this  The partition state
- */
-void libgamma_x_randr_partition_free(libgamma_partition_state_t* restrict this)
-{
+  /* TODO */
 }
 
 
@@ -121,6 +160,8 @@ void libgamma_x_randr_partition_free(libgamma_partition_state_t* restrict this)
  */
 int libgamma_x_randr_partition_restore(libgamma_partition_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -137,6 +178,7 @@ int libgamma_x_randr_partition_restore(libgamma_partition_state_t* restrict this
 int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				     libgamma_partition_state_t* restrict partition, size_t crtc)
 {
+  /* TODO */
 }
 
 
@@ -147,17 +189,7 @@ int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
  */
 void libgamma_x_randr_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
-}
-
-
-/**
- * Release all resources held by a CRTC state
- * and free the CRTC state pointer
- * 
- * @param  this  The CRTC state
- */
-void libgamma_x_randr_crtc_free(libgamma_crtc_state_t* restrict this)
-{
+  /* TODO */
 }
 
 
@@ -170,6 +202,8 @@ void libgamma_x_randr_crtc_free(libgamma_crtc_state_t* restrict this)
  */
 int libgamma_x_randr_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -185,6 +219,7 @@ int libgamma_x_randr_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
+  /* TODO */
 }
 
 
@@ -199,6 +234,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t* restrict ramps)
 {
+  /* TODO */
 }
 
 
@@ -213,6 +249,7 @@ int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t ramps)
 {
+  /* TODO */
 }
 
 
@@ -228,6 +265,8 @@ int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_x_randr_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps32_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, 32, 16,
+				      libgamma_x_randr_crtc_get_gamma_ramps);
 }
 
 
@@ -242,6 +281,8 @@ int libgamma_x_randr_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this
 int libgamma_x_randr_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps32_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, 32, 16,
+				      libgamma_x_randr_crtc_set_gamma_ramps);
 }
 
 
@@ -257,6 +298,8 @@ int libgamma_x_randr_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this
 int libgamma_x_randr_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps64_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, 64, 16,
+				      libgamma_x_randr_crtc_get_gamma_ramps);
 }
 
 
@@ -271,6 +314,8 @@ int libgamma_x_randr_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this
 int libgamma_x_randr_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps64_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, 64, 16,
+				      libgamma_x_randr_crtc_set_gamma_ramps);
 }
 
 
@@ -286,6 +331,8 @@ int libgamma_x_randr_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this
 int libgamma_x_randr_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					   libgamma_gamma_rampsf_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, -1, 16,
+				      libgamma_x_randr_crtc_get_gamma_ramps);
 }
 
 
@@ -300,7 +347,10 @@ int libgamma_x_randr_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 int libgamma_x_randr_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					   libgamma_gamma_rampsf_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, -1, 16,
+				      libgamma_x_randr_crtc_set_gamma_ramps);
 }
+
 
 
 /**
@@ -314,6 +364,8 @@ int libgamma_x_randr_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 int libgamma_x_randr_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 					   libgamma_gamma_rampsd_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, -2, 16,
+				      libgamma_x_randr_crtc_get_gamma_ramps);
 }
 
 
@@ -328,5 +380,7 @@ int libgamma_x_randr_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 int libgamma_x_randr_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 					   libgamma_gamma_rampsd_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, -2, 16,
+				      libgamma_x_randr_crtc_set_gamma_ramps);
 }
 

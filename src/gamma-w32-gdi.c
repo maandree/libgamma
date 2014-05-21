@@ -1,4 +1,4 @@
-/**
+x/**
  * libgamma — Display server abstraction layer for gamma ramp adjustments
  * Copyright © 2014  Mattias Andrée (maandree@member.fsf.org)
  * 
@@ -22,6 +22,19 @@
 #include "gamma-w32-gdi.h"
 
 #include "libgamma-error.h"
+#include "gamma-helper.h"
+
+#ifndef WINVER
+# define WINVER  0x0500
+#endif
+#ifdef FAKE_GAMMA_METHOD_W32_GDI
+#  include "fake-w32-gdi.h"
+#else
+#  include <windows.h>
+#  include <wingdi.h>
+#endif
+
+#define GAMMA_RAMP_SIZE  256
 
 
 /**
@@ -31,6 +44,31 @@
  */
 void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
+  this->crtc_information = CRTC_INFO_GAMMA_SIZE
+			 | CRTC_INFO_GAMMA_DEPTH
+			 | CRTC_INFO_GAMMA_SUPPORT;
+  this->default_site_known = NULL;
+  this->multiple_sites = 0;
+  this->multiple_partitions = 0;
+  this->multiple_crtcs = 1;
+  this->partitions_are_graphics_cards = 0;
+  this->site_restore = 0;
+  this->partition_restore = 0;
+  this->crtc_restore = 0;
+  this->identical_gamma_sizes = 1;
+  this->fixed_gamma_size = 1;
+  this->fixed_gamma_depth = 1;
+#ifdef FAKE_GAMMA_METHOD_W32_GDI
+  this->fake = 1;
+# ifdef HAVE_GAMMA_METHOD_X_RANDR
+  this->real = 1;
+# else
+  this->real = 0;
+# endif
+#else
+  this->fake = 0;
+  this->real = 1;
+#endif
 }
 
 
@@ -50,6 +88,11 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restri
 int libgamma_w32_gdi_site_initialise(libgamma_site_state_t* restrict this,
 				     char* restrict site)
 {
+  if (site != NULL)
+    return LIBGAMMA_NO_SUCH_SITE;
+  
+  this->partitions_available = 1;
+  return 0;
 }
 
 
@@ -60,6 +103,7 @@ int libgamma_w32_gdi_site_initialise(libgamma_site_state_t* restrict this,
  */
 void libgamma_w32_gdi_site_destroy(libgamma_site_state_t* restrict this)
 {
+  (void) this;
 }
 
 
@@ -72,6 +116,8 @@ void libgamma_w32_gdi_site_destroy(libgamma_site_state_t* restrict this)
  */
 int libgamma_w32_gdi_site_restore(libgamma_site_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -88,6 +134,24 @@ int libgamma_w32_gdi_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t* restrict this,
 					  libgamma_site_state_t* restrict site, size_t partition)
 {
+  DISPLAY_DEVICE display;
+  
+  (void) site;
+  
+  if (partition != 0)
+    return LIBGAMMA_NO_SUCH_PARTITION;
+  
+  this->crtcs_available = 0;
+  display.cb = sizeof(DISPLAY_DEVICE);
+  for (;;)
+    {
+      if (!EnumDisplayDevices(NULL, this->crtcs_available, &display, 0))
+	break;
+      this->crtcs_available++;
+      if (this->crtcs_available == 0)
+	return LIBGAMMA_IMPOSSIBLE_AMOUNT;
+    }
+  return 0;
 }
 
 
@@ -98,17 +162,7 @@ int libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t* restrict t
  */
 void libgamma_w32_gdi_partition_destroy(libgamma_partition_state_t* restrict this)
 {
-}
-
-
-/**
- * Release all resources held by a partition state
- * and free the partition state pointer
- * 
- * @param  this  The partition state
- */
-void libgamma_w32_gdi_partition_free(libgamma_partition_state_t* restrict this)
-{
+  (void) this;
 }
 
 
@@ -121,6 +175,8 @@ void libgamma_w32_gdi_partition_free(libgamma_partition_state_t* restrict this)
  */
 int libgamma_w32_gdi_partition_restore(libgamma_partition_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -137,6 +193,22 @@ int libgamma_w32_gdi_partition_restore(libgamma_partition_state_t* restrict this
 int libgamma_w32_gdi_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				     libgamma_partition_state_t* restrict partition, size_t crtc)
 {
+  DISPLAY_DEVICE display;
+  HDC context;
+  
+  (void) partition;
+  
+  this->data = NULL;
+  display.cb = sizeof(DISPLAY_DEVICE);
+  if (!EnumDisplayDevices(NULL, crtc, &display, 0))
+    return LIBGAMMA_NO_SUCH_CRTC;
+  if (!(display.StateFlags & DISPLAY_DEVICE_ACTIVE))
+    return LIBGAMMA_CONNECTOR_DISABLED;
+  context = CreateDC(TEXT("DISPLAY"), display.DeviceName, NULL, NULL);
+  if (context == NULL)
+    return LIBGAMMA_OPEN_CRTC_FAILED;
+  this->data = context;
+  return 0;
 }
 
 
@@ -147,17 +219,8 @@ int libgamma_w32_gdi_crtc_initialise(libgamma_crtc_state_t* restrict this,
  */
 void libgamma_w32_gdi_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
-}
-
-
-/**
- * Release all resources held by a CRTC state
- * and free the CRTC state pointer
- * 
- * @param  this  The CRTC state
- */
-void libgamma_w32_gdi_crtc_free(libgamma_crtc_state_t* restrict this)
-{
+  if (this->data)
+    ReleaseDC(NULL, this->data);
 }
 
 
@@ -170,6 +233,8 @@ void libgamma_w32_gdi_crtc_free(libgamma_crtc_state_t* restrict this)
  */
 int libgamma_w32_gdi_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
+  (void) this;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -185,6 +250,31 @@ int libgamma_w32_gdi_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
+#define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
+  
+  this->edid_error = _E(CRTC_INFO_EDID);
+  this->width_mm_error = _E(CRTC_INFO_WIDTH_MM);
+  this->height_mm_error = _E(CRTC_INFO_HEIGHT_MM);
+  this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID);
+  this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID);
+  this->red_gamma_size = GAMMA_SIZE;
+  this->green_gamma_size = GAMMA_SIZE;
+  this->blue_gamma_size = GAMMA_SIZE;
+  this->gamma_size_error = 0;
+  this->gamma_depth = 16;
+  this->gamma_depth_error = 0;
+  if ((fields & CRTC_INFO_GAMMA_SUPPORT))
+    this->gamma_support = GetDeviceCaps(hDC, COLORMGMTCAPS) == CM_GAMMA_RAMP;
+  this->gamma_support_error = 0;
+  this->subpixel_order_error = _E(CRTC_INFO_SUBPIXEL_ORDER);
+  this->active_error = _E(CRTC_INFO_ACTIVE);
+  this->connector_name_error = _E(CRTC_INFO_CONNECTOR_NAME);
+  this->connector_type_error = _E(CRTC_INFO_CONNECTOR_TYPE);
+  this->gamma_error = _E(CRTC_INFO_GAMMA);
+  
+#undef _E
+  
+  return 0;
 }
 
 
@@ -199,6 +289,9 @@ int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict 
 int libgamma_w32_gdi_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t* restrict ramps)
 {
+  if (!GetDeviceGammaRamp(this->data, ramps->red))
+    return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
+  return 0;
 }
 
 
@@ -213,6 +306,9 @@ int libgamma_w32_gdi_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_w32_gdi_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t ramps)
 {
+  if (!SetDeviceGammaRamp(this->data, ramps.red))
+    return LIBGAMMA_GAMMA_RAMP_WRITE_FAILED;
+  return 0;
 }
 
 
@@ -228,6 +324,8 @@ int libgamma_w32_gdi_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_w32_gdi_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps32_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, 32, 16,
+				      libgamma_w32_gdi_crtc_get_gamma_ramps);
 }
 
 
@@ -242,6 +340,8 @@ int libgamma_w32_gdi_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this
 int libgamma_w32_gdi_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps32_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, 32, 16,
+				      libgamma_w32_gdi_crtc_set_gamma_ramps);
 }
 
 
@@ -257,6 +357,8 @@ int libgamma_w32_gdi_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this
 int libgamma_w32_gdi_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps64_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, 64, 16,
+				      libgamma_w32_gdi_crtc_get_gamma_ramps);
 }
 
 
@@ -271,6 +373,8 @@ int libgamma_w32_gdi_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this
 int libgamma_w32_gdi_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps64_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, 64, 16,
+				      libgamma_w32_gdi_crtc_set_gamma_ramps);
 }
 
 
@@ -286,6 +390,8 @@ int libgamma_w32_gdi_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this
 int libgamma_w32_gdi_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					   libgamma_gamma_rampsf_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, -1, 16,
+				      libgamma_w32_gdi_crtc_get_gamma_ramps);
 }
 
 
@@ -300,6 +406,8 @@ int libgamma_w32_gdi_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 int libgamma_w32_gdi_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					   libgamma_gamma_rampsf_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, -1, 16,
+				      libgamma_w32_gdi_crtc_set_gamma_ramps);
 }
 
 
@@ -314,6 +422,8 @@ int libgamma_w32_gdi_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 int libgamma_w32_gdi_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 					   libgamma_gamma_rampsd_t* restrict ramps)
 {
+  return libgamma_translated_ramp_get(this, ramps, -2, 16,
+				      libgamma_w32_gdi_crtc_get_gamma_ramps);
 }
 
 
@@ -328,5 +438,7 @@ int libgamma_w32_gdi_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 int libgamma_w32_gdi_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 					   libgamma_gamma_rampsd_t ramps)
 {
+  return libgamma_translated_ramp_set(this, ramps, -2, 16,
+				      libgamma_w32_gdi_crtc_set_gamma_ramps);
 }
 

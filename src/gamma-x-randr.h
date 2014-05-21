@@ -87,14 +87,6 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
 void libgamma_x_randr_partition_destroy(libgamma_partition_state_t* restrict this);
 
 /**
- * Release all resources held by a partition state
- * and free the partition state pointer
- * 
- * @param  this  The partition state
- */
-void libgamma_x_randr_partition_free(libgamma_partition_state_t* restrict this);
-
-/**
  * Restore the gamma ramps all CRTCS with a partition to the system settings
  * 
  * @param   this  The partition state
@@ -122,14 +114,6 @@ int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
  * @param  this  The CRTC state
  */
 void libgamma_x_randr_crtc_destroy(libgamma_crtc_state_t* restrict this);
-
-/**
- * Release all resources held by a CRTC state
- * and free the CRTC state pointer
- * 
- * @param  this  The CRTC state
- */
-void libgamma_x_randr_crtc_free(libgamma_crtc_state_t* restrict this);
 
 /**
  * Restore the gamma ramps for a CRTC to the system settings for that CRTC
