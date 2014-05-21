@@ -4,6 +4,10 @@
 # without any warranty.
 
 
+# Include configurations from `./configure`.
+include config.mk
+
+
 # The package path prefix, if you want to install to another root, set DESTDIR to that root.
 PREFIX ?= /usr
 # The library path excluding prefix.
@@ -58,7 +62,7 @@ endif
 C_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
           -ftree-vrp -fstrict-aliasing -fipa-pure-const -fstack-usage       \
           -fstrict-overflow -funsafe-loop-optimizations -fno-builtin        \
-	  $(DEBUG_FLAGS)
+	  $(DEBUG_FLAGS) $(DEFINITIONS)
 
 
 # Object files for the library.
