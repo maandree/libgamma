@@ -20,7 +20,7 @@
 
 
 #ifndef HAVE_GAMMA_METHOD_RANDR
-# error Compiling gamma-randr without HAVE_GAMMA_METHOD_RANDR
+# error Including gamma-randr.h without HAVE_GAMMA_METHOD_RANDR
 #endif
 
 

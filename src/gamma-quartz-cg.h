@@ -20,7 +20,7 @@
 
 
 #ifndef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-# error Compiling gamma-quartz-cg without HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+# error Including gamma-quartz-cg.h without HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
 #endif
 
 

@@ -20,7 +20,7 @@
 
 
 #ifndef HAVE_GAMMA_METHOD_DUMMY
-# error Compiling gamma-randr without HAVE_GAMMA_METHOD_DUMMY
+# error Including gamma-dummy.h without HAVE_GAMMA_METHOD_DUMMY
 #endif
 
 

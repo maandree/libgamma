@@ -20,7 +20,7 @@
 
 
 #ifndef HAVE_GAMMA_METHOD_W32_GDI
-# error Compiling gamma-w32-gdi without HAVE_GAMMA_METHOD_W32_GDI
+# error Including gamma-w32-gdi.h without HAVE_GAMMA_METHOD_W32_GDI
 #endif
 
 
