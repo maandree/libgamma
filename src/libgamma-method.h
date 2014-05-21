@@ -148,10 +148,18 @@ typedef struct libgamma_method_capabilities {
    * Whether the adjustment method supports `libgamma_crtc_restore`
    */
   int crtc_restore : 1;
+    
+  /**
+   * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
+   * fields in `libgamma_crtc_information_t` will always have the same
+   * values as each other for the adjustment method
+   */
+  int identical_gamma_sizes : 1;
   
   /**
-   * Whether the `gamma_size` field in `libgamma_crtc_information_t`
-   * will always be filled with the same value for the adjustment method
+   * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
+   * fields in `libgamma_crtc_information_t` will always be filled with the
+   * same value for the adjustment method
    */
   int fixed_gamma_size : 1;
   
@@ -324,7 +332,8 @@ typedef struct libgamma_crtc_state {
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `gamma_size` and report errors to `gamma_size_error`
+ * values for `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
+ * and report errors to `gamma_size_error`
  */
 #define CRTC_INFO_GAMMA_SIZE  (1 << 5)
 
@@ -477,9 +486,19 @@ typedef struct libgamma_crtc_information {
   
   
   /**
-   * The size of the encoding axes of gamma ramps
+   * The size of the encoding axis of the red gamma ramp
    */
-  size_t gamma_size;
+  size_t red_gamma_size;
+  
+  /**
+   * The size of the encoding axis of the green gamma ramp
+   */
+  size_t green_gamma_size;
+  
+  /**
+   * The size of the encoding axis of the blue gamma ramp
+   */
+  size_t blue_gamma_size;
   
   /**
    * Zero on success, positive it holds the value `errno` had
@@ -790,17 +809,17 @@ typedef struct libgamma_gamma_rampsd
   /**
    * The gamma ramp for the red channel
    */
-  float* red;
+  double* red;
   
   /**
    * The gamma ramp for the green channel
    */
-  float* green;
+  double* green;
   
   /**
    * The gamma ramp for the blue channel
    */
-  float* blue;
+  double* blue;
   
 } libgamma_gamma_rampsd_t;
 

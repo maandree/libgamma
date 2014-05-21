@@ -25,6 +25,50 @@
 #include <stdint.h>
 
 
+
+/**
+ * Mapping function from [0, 1] float encoding value to [0, 2¹⁶ − 1] integer output value
+ * 
+ * @param   encoding  [0, 1] float encoding value
+ * @return            [0, 2¹⁶ − 1] integer output value
+ */
+typedef uint16_t libgamma_gamma_ramps_fun(float encoding);
+
+/**
+ * Mapping function from [0, 1] float encoding value to [0, 2³² − 1] integer output value
+ * 
+ * @param   encoding  [0, 1] float encoding value
+ * @return            [0, 2³² − 1] integer output value
+ */
+typedef uint32_t libgamma_gamma_ramps32_fun(float encoding);
+
+/**
+ * Mapping function from [0, 1] float encoding value to [0, 2⁶⁴ − 1] integer output value
+ * 
+ * @param   encoding  [0, 1] float encoding value
+ * @return            [0, 2⁶⁴ − 1] integer output value
+ */
+typedef uint64_t libgamma_gamma_ramps64_fun(float encoding);
+
+/**
+ * Mapping function from [0, 1] float encoding value to [0, 1] float output value
+ * 
+ * @param   encoding  [0, 1] float encoding value
+ * @return            [0, 1] float output value
+ */
+typedef float libgamma_gamma_rampsf_fun(float encoding);
+
+/**
+ * Mapping function from [0, 1] double precision float encoding
+ * value to [0, 1] double precision float output value
+ * 
+ * @param   encoding  [0, 1] float encoding value
+ * @return            [0, 1] float output value
+ */
+typedef double libgamma_gamma_rampsd_fun(double encoding);
+
+
+
 /**
  * Return the capabilities of an adjustment method
  * 
@@ -352,6 +396,82 @@ int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
  */
 int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsd_t ramps);
+
+
+/**
+ * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
+				    libgamma_gamma_ramps_fun* red_function,
+				    libgamma_gamma_ramps_fun* green_function,
+				    libgamma_gamma_ramps_fun* blue_function);
+
+/**
+ * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
+				      libgamma_gamma_ramps32_fun* red_function,
+				      libgamma_gamma_ramps32_fun* green_function,
+				      libgamma_gamma_ramps32_fun* blue_function);
+
+/**
+ * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
+				      libgamma_gamma_ramps64_fun* red_function,
+				      libgamma_gamma_ramps64_fun* green_function,
+				      libgamma_gamma_ramps64_fun* blue_function);
+
+/**
+ * Set the gamma ramps for a CRTC, `float` function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
+				     libgamma_gamma_rampsf_fun* red_function,
+				     libgamma_gamma_rampsf_fun* green_function,
+				     libgamma_gamma_rampsf_fun* blue_function);
+
+/**
+ * Set the gamma ramps for a CRTC, `double` function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t* restrict this,
+				     libgamma_gamma_rampsd_fun* red_function,
+				     libgamma_gamma_rampsd_fun* green_function,
+				     libgamma_gamma_rampsd_fun* blue_function);
 
 
 #endif

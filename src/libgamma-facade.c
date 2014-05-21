@@ -1302,6 +1302,273 @@ int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 }
 
 
+
+/**
+ * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
+				    libgamma_gamma_ramps_fun* red_function,
+				    libgamma_gamma_ramps_fun* green_function,
+				    libgamma_gamma_ramps_fun* blue_function)
+{
+  libgamma_crtc_information_t info;
+  libgamma_gamma_ramps_t ramps;
+  size_t i, n;
+  int e;
+  
+  if (libgamma_get_crtc_information(&info, this, CRTC_INFO_GAMMA_SIZE))
+    {
+      e = info.gamma_size_error;
+      if (e < 0)
+	return e;
+      return errno = e, LIBGAMMA_ERRNO_SET;
+    }
+  
+  n  = ramps.  red_size = info.  red_gamma_size;
+  n += ramps.green_size = info.green_gamma_size;
+  n += ramps. blue_size = info. blue_gamma_size;
+  
+  ramps.  red = malloc(n * sizeof(uint16_t));
+  ramps.green = ramps.  red + ramps.  red_size;
+  ramps. blue = ramps.green + ramps.green_size;
+  if (ramps.red == NULL)
+    return LIBGAMMA_ERRNO_SET;
+  
+  for (i = 0, n = ramps.red_size; i < n; i++)
+    ramps.red[i] = red_function((float)i / (float)(n - 1));
+  
+  for (i = 0, n = ramps.green_size; i < n; i++)
+    ramps.green[i] = green_function((float)i / (float)(n - 1));
+  
+  for (i = 0, n = ramps.blue_size; i < n; i++)
+    ramps.blue[i] = blue_function((float)i / (float)(n - 1));
+  
+  e = libgamma_crtc_set_gamma_ramps(this, ramps);
+  free(ramps.red);
+  return e;
+}
+
+
+/**
+ * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
+				      libgamma_gamma_ramps32_fun* red_function,
+				      libgamma_gamma_ramps32_fun* green_function,
+				      libgamma_gamma_ramps32_fun* blue_function)
+{
+  libgamma_crtc_information_t info;
+  libgamma_gamma_ramps32_t ramps;
+  size_t i, n;
+  int e;
+  
+  if (libgamma_get_crtc_information(&info, this, CRTC_INFO_GAMMA_SIZE))
+    {
+      e = info.gamma_size_error;
+      if (e < 0)
+	return e;
+      return errno = e, LIBGAMMA_ERRNO_SET;
+    }
+  
+  n  = ramps.  red_size = info.  red_gamma_size;
+  n += ramps.green_size = info.green_gamma_size;
+  n += ramps. blue_size = info. blue_gamma_size;
+  
+  ramps.  red = malloc(n * sizeof(uint32_t));
+  ramps.green = ramps.  red + ramps.  red_size;
+  ramps. blue = ramps.green + ramps.green_size;
+  if (ramps.red == NULL)
+    return LIBGAMMA_ERRNO_SET;
+  
+  for (i = 0, n = ramps.red_size; i < n; i++)
+    ramps.red[i] = red_function((float)i / (float)(n - 1));
+  
+  for (i = 0, n = ramps.green_size; i < n; i++)
+    ramps.green[i] = green_function((float)i / (float)(n - 1));
+  
+  for (i = 0, n = ramps.blue_size; i < n; i++)
+    ramps.blue[i] = blue_function((float)i / (float)(n - 1));
+  
+  e = libgamma_crtc_set_gamma_ramps32(this, ramps);
+  free(ramps.red);
+  return e;
+}
+
+
+/**
+ * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
+				      libgamma_gamma_ramps64_fun* red_function,
+				      libgamma_gamma_ramps64_fun* green_function,
+				      libgamma_gamma_ramps64_fun* blue_function)
+{
+  libgamma_crtc_information_t info;
+  libgamma_gamma_ramps64_t ramps;
+  size_t i, n;
+  int e;
+  
+  if (libgamma_get_crtc_information(&info, this, CRTC_INFO_GAMMA_SIZE))
+    {
+      e = info.gamma_size_error;
+      if (e < 0)
+	return e;
+      return errno = e, LIBGAMMA_ERRNO_SET;
+    }
+  
+  n  = ramps.  red_size = info.  red_gamma_size;
+  n += ramps.green_size = info.green_gamma_size;
+  n += ramps. blue_size = info. blue_gamma_size;
+  
+  ramps.  red = malloc(n * sizeof(uint64_t));
+  ramps.green = ramps.  red + ramps.  red_size;
+  ramps. blue = ramps.green + ramps.green_size;
+  if (ramps.red == NULL)
+    return LIBGAMMA_ERRNO_SET;
+  
+  for (i = 0, n = ramps.red_size; i < n; i++)
+    ramps.red[i] = red_function((float)i / (float)(n - 1));
+  
+  for (i = 0, n = ramps.green_size; i < n; i++)
+    ramps.green[i] = green_function((float)i / (float)(n - 1));
+  
+  for (i = 0, n = ramps.blue_size; i < n; i++)
+    ramps.blue[i] = blue_function((float)i / (float)(n - 1));
+  
+  e = libgamma_crtc_set_gamma_ramps64(this, ramps);
+  free(ramps.red);
+  return e;
+}
+
+
+/**
+ * Set the gamma ramps for a CRTC, `float` function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
+				     libgamma_gamma_rampsf_fun* red_function,
+				     libgamma_gamma_rampsf_fun* green_function,
+				     libgamma_gamma_rampsf_fun* blue_function)
+{
+  libgamma_crtc_information_t info;
+  libgamma_gamma_rampsf_t ramps;
+  size_t i, n;
+  int e;
+  
+  if (libgamma_get_crtc_information(&info, this, CRTC_INFO_GAMMA_SIZE))
+    {
+      e = info.gamma_size_error;
+      if (e < 0)
+	return e;
+      return errno = e, LIBGAMMA_ERRNO_SET;
+    }
+  
+  n  = ramps.  red_size = info.  red_gamma_size;
+  n += ramps.green_size = info.green_gamma_size;
+  n += ramps. blue_size = info. blue_gamma_size;
+  
+  ramps.  red = malloc(n * sizeof(float));
+  ramps.green = ramps.  red + ramps.  red_size;
+  ramps. blue = ramps.green + ramps.green_size;
+  if (ramps.red == NULL)
+    return LIBGAMMA_ERRNO_SET;
+  
+  for (i = 0, n = ramps.red_size; i < n; i++)
+    ramps.red[i] = red_function((float)i / (float)(n - 1));
+  
+  for (i = 0, n = ramps.green_size; i < n; i++)
+    ramps.green[i] = green_function((float)i / (float)(n - 1));
+  
+  for (i = 0, n = ramps.blue_size; i < n; i++)
+    ramps.blue[i] = blue_function((float)i / (float)(n - 1));
+  
+  e = libgamma_crtc_set_gamma_rampsf(this, ramps);
+  free(ramps.red);
+  return e;
+}
+
+
+/**
+ * Set the gamma ramps for a CRTC, `double` function version
+ * 
+ * Note that this will probably involve the library allocating temporary data
+ * 
+ * @param   this   The CRTC state
+ * @parma   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t* restrict this,
+				     libgamma_gamma_rampsd_fun* red_function,
+				     libgamma_gamma_rampsd_fun* green_function,
+				     libgamma_gamma_rampsd_fun* blue_function)
+{
+  libgamma_crtc_information_t info;
+  libgamma_gamma_rampsd_t ramps;
+  size_t i, n;
+  int e;
+  
+  if (libgamma_get_crtc_information(&info, this, CRTC_INFO_GAMMA_SIZE))
+    {
+      e = info.gamma_size_error;
+      if (e < 0)
+	return e;
+      return errno = e, LIBGAMMA_ERRNO_SET;
+    }
+  
+  n  = ramps.  red_size = info.  red_gamma_size;
+  n += ramps.green_size = info.green_gamma_size;
+  n += ramps. blue_size = info. blue_gamma_size;
+  
+  ramps.  red = malloc(n * sizeof(double));
+  ramps.green = ramps.  red + ramps.  red_size;
+  ramps. blue = ramps.green + ramps.green_size;
+  if (ramps.red == NULL)
+    return LIBGAMMA_ERRNO_SET;
+  
+  for (i = 0, n = ramps.red_size; i < n; i++)
+    ramps.red[i] = red_function((double)i / (double)(n - 1));
+  
+  for (i = 0, n = ramps.green_size; i < n; i++)
+    ramps.green[i] = green_function((double)i / (double)(n - 1));
+  
+  for (i = 0, n = ramps.blue_size; i < n; i++)
+    ramps.blue[i] = blue_function((double)i / (double)(n - 1));
+  
+  e = libgamma_crtc_set_gamma_rampsd(this, ramps);
+  free(ramps.red);
+  return e;
+}
+
+
+
 #ifdef HAVE_NO_GAMMA_METHODS
 # pragma GCC diagnostic pop
 #endif
