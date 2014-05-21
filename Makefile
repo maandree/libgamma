@@ -89,5 +89,9 @@ obj/%.o: src/%.c src/*.h
 
 .PHONY: clean
 clean:
-	-rm -rf obj bin config.mk
+	-rm -rf obj bin
+
+.PHONY: distclean
+distclean: clean
+	-rm -f config.mk src/libgamma-config.h
 

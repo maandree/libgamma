@@ -139,7 +139,7 @@ if [ ${enable_quartz} = 1 ]; then
 fi
 if [ ${fake_w32gdi} = 1 ]; then
     echo 'LIBOBJ += fake-w32-gdi' >&3
-    echo 'DEFINITIONS += -FAKE_GAMMA_METHOD_W32_GDI' >&3
+    echo 'DEFINITIONS += -DFAKE_GAMMA_METHOD_W32_GDI' >&3
     echo '#define FAKE_GAMMA_METHOD_W32_GDI' >&4
     if [ ${enable_randr} = 1 ]; then
 	have_w32gdi='Yes, fake via the RandR protocol for X'
@@ -149,7 +149,7 @@ if [ ${fake_w32gdi} = 1 ]; then
 fi
 if [ ${fake_quartz} = 1 ]; then
     echo 'LIBOBJ += fake-quartz-cg' >&3
-    echo 'DEFINITIONS += -FAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&3
+    echo 'DEFINITIONS += -DFAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&3
     echo '#define FAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&4
     if [ ${enable_randr} = 1 ]; then
 	have_quartz='Yes, fake via the RandR protocol for X'

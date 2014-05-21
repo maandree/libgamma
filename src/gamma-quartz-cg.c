@@ -22,7 +22,6 @@
 #include "gamma-quartz-cg.h"
 
 #include "libgamma-error.h"
-#include "gamma-helper.h"
 
 
 /**
@@ -195,105 +194,6 @@ int libgamma_quartz_cg_get_crtc_information(libgamma_crtc_information_t* restric
 
 
 /**
- * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-int libgamma_quartz_cg_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps_t* restrict ramps)
-{
-  return libgamma_translated_ramp_get(this, ramps, 16, -1,
-				      libgamma_quartz_cg_crtc_get_gamma_ramps);
-}
-
-
-/**
- * Set the gamma ramps for a CRTC, 16-bit gamma-depth version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-int libgamma_quartz_cg_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps_t ramps)
-{
-  return libgamma_translated_ramp_set(this, ramps, 16, -1,
-				      libgamma_quartz_cg_crtc_set_gamma_ramps);
-}
-
-
-
-/**
- * Get current the gamma ramps for a CRTC, 32-bit gamma-depth version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-int libgamma_quartz_cg_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
-					      libgamma_gamma_ramps32_t* restrict ramps)
-{
-  return libgamma_translated_ramp_get(this, ramps, 32, -1,
-				      libgamma_quartz_cg_crtc_get_gamma_ramps);
-}
-
-
-/**
- * Set the gamma ramps for a CRTC, 32-bit gamma-depth version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-int libgamma_quartz_cg_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
-					      libgamma_gamma_ramps32_t ramps)
-{
-  return libgamma_translated_ramp_set(this, ramps, 32, -1,
-				      libgamma_quartz_cg_crtc_set_gamma_ramps);
-}
-
-
-
-/**
- * Get current the gamma ramps for a CRTC, 64-bit gamma-depth version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-int libgamma_quartz_cg_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
-					      libgamma_gamma_ramps64_t* restrict ramps)
-{
-  return libgamma_translated_ramp_get(this, ramps, 64, -1,
-				      libgamma_quartz_cg_crtc_get_gamma_ramps);
-}
-
-
-/**
- * Set the gamma ramps for a CRTC, 64-bit gamma-depth version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-int libgamma_quartz_cg_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
-					      libgamma_gamma_ramps64_t ramps)
-{
-  return libgamma_translated_ramp_set(this, ramps, 64, -1,
-				      libgamma_quartz_cg_crtc_set_gamma_ramps);
-}
-
-
-
-/**
  * Get current the gamma ramps for a CRTC, `float` version
  * 
  * @param   this   The CRTC state
@@ -318,37 +218,5 @@ int libgamma_quartz_cg_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict thi
 int libgamma_quartz_cg_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					     libgamma_gamma_rampsf_t ramps)
 {
-}
-
-
-/**
- * Get current the gamma ramps for a CRTC, `double` version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-int libgamma_quartz_cg_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
-					     libgamma_gamma_rampsd_t* restrict ramps)
-{
-  return libgamma_translated_ramp_get(this, ramps, -2, -1,
-				      libgamma_quartz_cg_crtc_get_gamma_ramps);
-}
-
-
-/**
- * Set the gamma ramps for a CRTC, `double` version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-int libgamma_quartz_cg_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
-					     libgamma_gamma_rampsd_t ramps)
-{
-  return libgamma_translated_ramp_set(this, ramps, -2, -1,
-				      libgamma_quartz_cg_crtc_set_gamma_ramps);
 }
 

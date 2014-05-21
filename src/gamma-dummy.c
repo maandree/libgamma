@@ -22,7 +22,6 @@
 #include "gamma-dummy.h"
 
 #include "libgamma-error.h"
-#include "gamma-helper.h"
 
 
 /**

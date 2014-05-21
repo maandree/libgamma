@@ -19,6 +19,7 @@
 
 #include "libgamma-error.h"
 #include "libgamma-method.h"
+#include "gamma-helper.h"
 #ifdef HAVE_GAMMA_METHOD_DUMMY
 # include "gamma-dummy.h"
 # ifndef HAVE_GAMMA_METHODS
@@ -989,7 +990,12 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_get_gamma_ramps(this, ramps);
+      {
+	libgamma_gamma_ramps_any_t ramps_;
+	ramps_.bits16 = *ramps;
+	return libgamma_translated_ramp_get(this, &ramps_, 16, -1,
+					    libgamma_crtc_get_gamma_ramps);
+      }
 #endif
       
     default:
@@ -1037,7 +1043,12 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 #endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_set_gamma_ramps(this, ramps);
+      {
+	libgamma_gamma_ramps_any_t ramps_;
+	ramps_.bits16 = ramps;
+	return libgamma_translated_ramp_set(this, ramps_, 16, -1,
+					    libgamma_crtc_set_gamma_ramps);
+      }
 #endif
       
     default:
@@ -1058,39 +1069,24 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps32_t* restrict ramps)
 {
-#ifdef HAVE_NO_GAMMA_METHODS
-  (void) ramps;
-#endif
-  
+  libgamma_gamma_ramps_any_t ramps_;
   switch (this->partition->site->method)
     {
 #ifdef HAVE_GAMMA_METHOD_DUMMY
     case GAMMA_METHOD_DUMMY:
       return libgamma_dummy_crtc_get_gamma_ramps32(this, ramps);
 #endif
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-    case GAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_get_gamma_ramps32(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-    case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_get_gamma_ramps32(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-    case GAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_get_gamma_ramps32(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-    case GAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_get_gamma_ramps32(this, ramps);
-#endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_get_gamma_ramps32(this, ramps);
+      ramps_.bits32 = *ramps;
+      return libgamma_translated_ramp_get(this, &ramps_, 32, -1,
+					  libgamma_crtc_get_gamma_ramps);
 #endif
       
     default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+      ramps_.bits32 = *ramps;
+      return libgamma_translated_ramp_get(this, &ramps_, 32, 16,
+					  libgamma_crtc_get_gamma_ramps);
     }
 }
 
@@ -1106,39 +1102,24 @@ int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps32_t ramps)
 {
-#ifdef HAVE_NO_GAMMA_METHODS
-  (void) ramps;
-#endif
-  
+  libgamma_gamma_ramps_any_t ramps_;
   switch (this->partition->site->method)
     {
 #ifdef HAVE_GAMMA_METHOD_DUMMY
     case GAMMA_METHOD_DUMMY:
       return libgamma_dummy_crtc_set_gamma_ramps32(this, ramps);
 #endif
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-    case GAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_set_gamma_ramps32(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-    case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_set_gamma_ramps32(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-    case GAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_set_gamma_ramps32(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-    case GAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_set_gamma_ramps32(this, ramps);
-#endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_set_gamma_ramps32(this, ramps);
+      ramps_.bits32 = ramps;
+      return libgamma_translated_ramp_set(this, ramps_, 32, -1,
+					  libgamma_crtc_set_gamma_ramps);
 #endif
       
     default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+      ramps_.bits32 = ramps;
+      return libgamma_translated_ramp_set(this, ramps_, 32, 16,
+					  libgamma_crtc_set_gamma_ramps);
     }
 }
 
@@ -1155,39 +1136,24 @@ int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps64_t* restrict ramps)
 {
-#ifdef HAVE_NO_GAMMA_METHODS
-  (void) ramps;
-#endif
-  
+  libgamma_gamma_ramps_any_t ramps_;
   switch (this->partition->site->method)
     {
 #ifdef HAVE_GAMMA_METHOD_DUMMY
     case GAMMA_METHOD_DUMMY:
       return libgamma_dummy_crtc_get_gamma_ramps64(this, ramps);
 #endif
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-    case GAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_get_gamma_ramps64(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-    case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_get_gamma_ramps64(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-    case GAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_get_gamma_ramps64(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-    case GAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_get_gamma_ramps64(this, ramps);
-#endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_get_gamma_ramps64(this, ramps);
+      ramps_.bits64 = *ramps;
+      return libgamma_translated_ramp_get(this, &ramps_, 64, -1,
+					  libgamma_crtc_get_gamma_ramps);
 #endif
       
     default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+      ramps_.bits64 = *ramps;
+      return libgamma_translated_ramp_get(this, &ramps_, 64, 16,
+					  libgamma_crtc_get_gamma_ramps);
     }
 }
 
@@ -1203,39 +1169,24 @@ int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps64_t ramps)
 {
-#ifdef HAVE_NO_GAMMA_METHODS
-  (void) ramps;
-#endif
-  
+  libgamma_gamma_ramps_any_t ramps_;
   switch (this->partition->site->method)
     {
 #ifdef HAVE_GAMMA_METHOD_DUMMY
     case GAMMA_METHOD_DUMMY:
       return libgamma_dummy_crtc_set_gamma_ramps64(this, ramps);
 #endif
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-    case GAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_set_gamma_ramps64(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-    case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_set_gamma_ramps64(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-    case GAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_set_gamma_ramps64(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-    case GAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_set_gamma_ramps64(this, ramps);
-#endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_set_gamma_ramps64(this, ramps);
+      ramps_.bits64 = ramps;
+      return libgamma_translated_ramp_set(this, ramps_, 64, -1,
+					  libgamma_crtc_set_gamma_ramps);
 #endif
       
     default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+      ramps_.bits64 = ramps;
+      return libgamma_translated_ramp_set(this, ramps_, 64, 16,
+					  libgamma_crtc_set_gamma_ramps);
     }
 }
 
@@ -1252,31 +1203,12 @@ int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsf_t* restrict ramps)
 {
-#ifdef HAVE_NO_GAMMA_METHODS
-  (void) ramps;
-#endif
-  
+  libgamma_gamma_ramps_any_t ramps_;
   switch (this->partition->site->method)
     {
 #ifdef HAVE_GAMMA_METHOD_DUMMY
     case GAMMA_METHOD_DUMMY:
       return libgamma_dummy_crtc_get_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-    case GAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_get_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-    case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_get_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-    case GAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_get_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-    case GAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_get_gamma_rampsf(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
@@ -1284,7 +1216,9 @@ int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 #endif
       
     default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+      ramps_.float_single = *ramps;
+      return libgamma_translated_ramp_get(this, &ramps_, -1, 16,
+					  libgamma_crtc_get_gamma_ramps);
     }
 }
 
@@ -1300,31 +1234,11 @@ int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsf_t ramps)
 {
-#ifdef HAVE_NO_GAMMA_METHODS
-  (void) ramps;
-#endif
-  
   switch (this->partition->site->method)
     {
 #ifdef HAVE_GAMMA_METHOD_DUMMY
     case GAMMA_METHOD_DUMMY:
       return libgamma_dummy_crtc_set_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-    case GAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_set_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-    case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_set_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-    case GAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_set_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-    case GAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_set_gamma_rampsf(this, ramps);
 #endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
@@ -1332,7 +1246,12 @@ int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 #endif
       
     default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+      {
+	libgamma_gamma_ramps_any_t ramps_;
+	ramps_.float_single = ramps;
+	return libgamma_translated_ramp_set(this, ramps_, -1, 16,
+					    libgamma_crtc_set_gamma_ramps);
+      }
     }
 }
 
@@ -1349,39 +1268,24 @@ int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsd_t* restrict ramps)
 {
-#ifdef HAVE_NO_GAMMA_METHODS
-  (void) ramps;
-#endif
-  
+  libgamma_gamma_ramps_any_t ramps_;
   switch (this->partition->site->method)
     {
 #ifdef HAVE_GAMMA_METHOD_DUMMY
     case GAMMA_METHOD_DUMMY:
       return libgamma_dummy_crtc_get_gamma_rampsd(this, ramps);
 #endif
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-    case GAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_get_gamma_rampsd(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-    case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_get_gamma_rampsd(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-    case GAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_get_gamma_rampsd(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-    case GAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_get_gamma_rampsd(this, ramps);
-#endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_get_gamma_rampsd(this, ramps);
+      ramps_.float_double = *ramps;
+      return libgamma_translated_ramp_get(this, &ramps_, -2, -1,
+					  libgamma_crtc_get_gamma_ramps);
 #endif
       
     default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+      ramps_.float_double = *ramps;
+      return libgamma_translated_ramp_get(this, &ramps_, -2, 16,
+					  libgamma_crtc_get_gamma_ramps);
     }
 }
 
@@ -1397,39 +1301,24 @@ int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsd_t ramps)
 {
-#ifdef HAVE_NO_GAMMA_METHODS
-  (void) ramps;
-#endif
-  
+  libgamma_gamma_ramps_any_t ramps_;
   switch (this->partition->site->method)
     {
 #ifdef HAVE_GAMMA_METHOD_DUMMY
     case GAMMA_METHOD_DUMMY:
       return libgamma_dummy_crtc_set_gamma_rampsd(this, ramps);
 #endif
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-    case GAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_set_gamma_rampsd(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-    case GAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_set_gamma_rampsd(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-    case GAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_set_gamma_rampsd(this, ramps);
-#endif
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-    case GAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_set_gamma_rampsd(this, ramps);
-#endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_set_gamma_rampsd(this, ramps);
+      ramps_.float_double = ramps;
+      return libgamma_translated_ramp_set(this, ramps_, -2, -1,
+					  libgamma_crtc_set_gamma_ramps);
 #endif
       
     default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+      ramps_.float_double = ramps;
+      return libgamma_translated_ramp_set(this, ramps_, -2, 16,
+					  libgamma_crtc_set_gamma_ramps);
     }
 }
 

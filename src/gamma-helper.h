@@ -78,8 +78,8 @@ typedef int libgamma_set_ramps_any_fun(libgamma_crtc_state_t* restrict this,
  * @return                Zero on success, otherwise (negative) the value of an
  *                        error identifier provided by this library
  */
-#define libgamma_translated_ramp_get(this, ramps, depth_user, depth_system, fun)                     \
-  libgamma_translated_ramp_get_(this, (libgamma_gamma_ramps_any_t*)(ramps), depth_user, depth_system,  \
+#define libgamma_translated_ramp_get(this, ramps, depth_user, depth_system, fun)  \
+  libgamma_translated_ramp_get_(this, ramps, depth_user, depth_system,            \
 				(libgamma_get_ramps_any_fun*)(fun))
 
 
@@ -98,8 +98,8 @@ typedef int libgamma_set_ramps_any_fun(libgamma_crtc_state_t* restrict this,
  * @return                Zero on success, otherwise (negative) the value of an
  *                        error identifier provided by this library
  */
-#define libgamma_translated_ramp_set(this, ramps, depth_user, depth_system, fun)                    \
-  libgamma_translated_ramp_set_(this, (libgamma_gamma_ramps_any_t)(ramps), depth_user, depth_system,  \
+#define libgamma_translated_ramp_set(this, ramps, depth_user, depth_system, fun)  \
+  libgamma_translated_ramp_set_(this, ramps, depth_user, depth_system,            \
 				(libgamma_set_ramps_any_fun*)(fun))
 
 
