@@ -33,6 +33,7 @@
 #include <grp.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <xf86drm.h>
 #include <xf86drmMode.h>
@@ -83,6 +84,7 @@ void libgamma_linux_drm_method_capabilities(libgamma_method_capabilities_t* rest
 			 | CRTC_INFO_GAMMA_SIZE
 			 | CRTC_INFO_GAMMA_DEPTH
 			 | CRTC_INFO_SUBPIXEL_ORDER
+			 | CRTC_INFO_ACTIVE
 			 | CRTC_INFO_CONNECTOR_NAME
 			 | CRTC_INFO_CONNECTOR_TYPE
 			 | CRTC_INFO_GAMMA;
@@ -367,6 +369,68 @@ int libgamma_linux_drm_crtc_restore(libgamma_crtc_state_t* restrict this)
 }
 
 
+/**
+ * Get the size of the gamma ramps for a CRTC
+ * 
+ * @param   this  Instance of a data structure to fill with the information about the CRTC
+ * @param   crtc  The state of the CRTC whose information should be read
+ * @return        The value stored in `this->gamma_size_error`
+ */
+static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict this, libgamma_crtc_state_t* restrict crtc)
+{
+  libgamma_drm_card_data_t* card = crtc->partition->data;
+  uint32_t crtc_id = card->res->crtcs[crtc->crtc];
+  drmModeCrtc* crtc_info;
+  errno = 0;
+  crtc_info = drmModeGetCrtc(card->fd, crtc_id);
+  this->gamma_size_error = crtc_info == NULL ? errno : 0;
+  if (this->gamma_size_error == 0)
+    {
+      this->red_gamma_size = (size_t)(crtc_info->gamma_size);
+      this->green_gamma_size = (size_t)(crtc_info->gamma_size);
+      this->blue_gamma_size = (size_t)(crtc_info->gamma_size);
+      this->gamma_size_error = crtc_info->gamma_size < 2 ? LIBGAMMA_SINGLETON_GAMMA_RAMP : 0;
+      drmModeFreeCrtc(crtc_info);
+    }
+  return this->gamma_size_error;
+}
+
+
+static int read_connector_data(libgamma_crtc_information_t* restrict this,
+			       drmModeConnector* connector, int32_t fields)
+{
+  if (connector == NULL)
+    {
+      this->width_mm_error = this->height_mm_error = this->connector_type = this->active =
+	this->active_error = this->connector_name = LIBGAMMA_CONNECTOR_UNKNOWN;
+      return LIBGAMMA_CONNECTOR_UNKNOWN;
+    }
+  
+  
+  if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_CONNECTOR_TYPE | CRTC_INFO_ACTIVE)))
+    {
+      this->width_mm = connector->mmWidth;
+      this->height_mm = connector->mmHeight;
+      this->connector_type = (int)(connector->connector_type); /* TODO: needs abstraction */
+      this->active = connector->connection == DRM_MODE_CONNECTED;
+      this->active_error = connector->connection == DRM_MODE_UNKNOWNCONNECTION ? LIBGAMMA_STATE_UNKNOWN : 0;
+    }
+  
+  if ((fields & CRTC_INFO_CONNECTOR_NAME))
+    {
+      static const char* TYPE_NAMES[] = /* FIXME: What names does Linux itself use? */
+	{
+	  "Unknown", "VGA", "DVII", "DVID", "DVIA", "Composite", "SVIDEO", "LVDS", "Component",
+	  "9PinDIN", "DisplayPort", "HDMIA", "HDMIB", "TV", "eDP", "VIRTUAL", "DSI"
+	};
+      this->connector_name = (size_t)(this->connector_type) < sizeof(TYPE_NAMES) / sizeof(char*)
+	? TYPE_NAMES[(size_t)(this->connector_type)] : "Unrecognised" /*TODO:error*/;
+      /* FIXME : add index */
+    }
+  
+  return 0;
+}
+
 
 /**
  * Read information about a CRTC
@@ -379,6 +443,47 @@ int libgamma_linux_drm_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					    libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
+#define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
+  int e = 0;
+  int require_connector;
+  int free_edid;
+  drmModeConnector* connector;
+  
+  /* Wipe all error indicators. */
+  memset(this, 0, sizeof(libgamma_crtc_information_t));
+  
+  /* We need to free the EDID after us if it is not explicitly requested.  */
+  free_edid = (fields & CRTC_INFO_EDID) == 0;
+  
+  /* Figure out what fields we need to get the data for to get the data for other fields. */
+  if ((fields & (CRTC_INFO_WIDTH_MM_EDID | CRTC_INFO_HEIGHT_MM_EDID | CRTC_INFO_GAMMA)))
+    fields |= CRTC_INFO_EDID;
+  if ((fields & CRTC_INFO_CONNECTOR_NAME))
+    fields |= CRTC_INFO_CONNECTOR_TYPE;
+  
+  /* Figure out whether we require the connector to get all information we want. */
+  require_connector = fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM |
+				CRTC_INFO_SUBPIXEL_ORDER/*(?)*/ | CRTC_INFO_CONNECTOR_TYPE);
+  
+  e |= this->edid_error = _E(CRTC_INFO_EDID); /* TODO */
+  e |= this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID); /* TODO */
+  e |= this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID); /* TODO */
+  e |= this->gamma_error = _E(CRTC_INFO_GAMMA); /* TODO */
+  e |= require_connector ? read_connector_data(this, connector, fields) : 0;
+  e |= this->subpixel_order_error = _E(CRTC_INFO_SUBPIXEL_ORDER); /* TODO */
+  e |= (fields & CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
+  this->gamma_depth = 16;
+  e |= this->gamma_support_error = _E(CRTC_INFO_GAMMA_SUPPORT);
+  
+  /* Free the EDID after us. */
+  if (free_edid)
+    {
+      free(this->edid);
+      this->edid = NULL;
+    }
+  
+  return e ? -1 : 0;
+#undef _E
 }
 
 

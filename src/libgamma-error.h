@@ -113,7 +113,7 @@ extern const char* libgamma_group_name;
 #define LIBGAMMA_WRONG_GAMMA_RAMP_SIZE  (-14)
 
 /**
- * The adjustment method reported that the gamma ramps size is 1 or 0
+ * The adjustment method reported that the gamma ramps size is 1, or perhaps even zero or negative
  */
 #define LIBGAMMA_SINGLETON_GAMMA_RAMP  (-15)
 
@@ -158,6 +158,11 @@ extern const char* libgamma_group_name;
  * The graphics card appear to have been removed
  */
 #define LIBGAMMA_GRAPHICS_CARD_REMOVED  (-23)
+
+/**
+ * The state of the requested information is unknown
+ */
+#define LIBGAMMA_STATE_UNKNOWN  (-24)
 
 
 
