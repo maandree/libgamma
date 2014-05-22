@@ -110,18 +110,24 @@ fi
 if [ ${enable_randr} = 1 ]; then
     echo 'LIBOBJ += gamma-x-randr' >&3
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_X_RANDR' >&3
+    echo 'LIBS_LD += $$(pkg-config --cflags xcb xcb-randr)' >&3
+    echo 'LIBS_C += $$(pkg-config --cflags xcb xcb-randr)' >&3
     echo '#define HAVE_GAMMA_METHOD_X_RANDR' >&4
     have_randr='Yes'
 fi
 if [ ${enable_vidmode} = 1 ]; then
     echo 'LIBOBJ += gamma-x-vidmode' >&3
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_X_VIDMODE' >&3
+    echo 'LIBS_LD += $$(pkg-config --cflags x11 xxf86vm)' >&3
+    echo 'LIBS_C += $$(pkg-config --cflags x11 xxf86vm)' >&3
     echo '#define HAVE_GAMMA_METHOD_X_VIDMODE' >&4
     have_vidmode='Yes'
 fi
 if [ ${enable_drm} = 1 ]; then
     echo 'LIBOBJ += gamma-linux-drm' >&3
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_LINUX_DRM' >&3
+    echo 'LIBS_LD += $$(pkg-config --cflags libdrm)' >&3
+    echo 'LIBS_C += $$(pkg-config --cflags libdrm)' >&3
     echo '#define HAVE_GAMMA_METHOD_LINUX_DRM' >&4
     have_drm='Yes'
 fi
@@ -134,6 +140,11 @@ fi
 if [ ${enable_quartz} = 1 ]; then
     echo 'LIBOBJ += gamma-quartz-cg' >&3
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&3
+    if [ ${fake_w32gdi} = 0 ]; then
+	F_ApplicationServices="/System/Library/Frameworks/ApplicationServices.framework"
+	I_ApplicationServices="${F_ApplicationServices}/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Headers"
+	echo "LIBS_LD += -I${I_ApplicationServices} -F${F_ApplicationServices} -framework ApplicationServices" >&3
+    fi
     echo '#define HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS' >&4
     have_quartz='Yes'
 fi

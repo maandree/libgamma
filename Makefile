@@ -60,6 +60,10 @@ C_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
           -fstrict-overflow -funsafe-loop-optimizations -fno-builtin        \
 	  $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
 
+# Library linking flags for the linker.
+LIBS_LD =
+# Library linking flags for the C compiler.
+LIBS_C =
 
 # Object files for the library.
 LIBOBJ = libgamma-facade libgamma-method gamma-helper
@@ -78,11 +82,11 @@ all: bin/libgamma.so
 
 bin/libgamma.so: $(foreach O,$(LIBOBJ),obj/$(O).o)
 	mkdir -p $(shell dirname $@)
-	$(CC) $(C_FLAGS) -shared -o $@ $^
+	$(CC) $(C_FLAGS) $(LIBS_LD) -shared -o $@ $^
 
 obj/%.o: src/%.c src/*.h
 	mkdir -p $(shell dirname $@)
-	$(CC) $(C_FLAGS) -fPIC -c -o $@ $<
+	$(CC) $(C_FLAGS) $(LIBS_C) -fPIC -c -o $@ $<
 
 
 # Clean rules.

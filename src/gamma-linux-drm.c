@@ -24,6 +24,18 @@
 #include "libgamma-error.h"
 
 #include <errno.h>
+#include <limits.h>
+#include <sys/stat.h>
+
+#include <xf86drm.h>
+#include <xf86drmMode.h>
+
+#ifndef O_CLOEXEC
+# define O_CLOEXEC  02000000
+#endif
+#ifndef PATH_MAX
+# define PATH_MAX  4096
+#endif
 
 
 /**
@@ -76,6 +88,25 @@ void libgamma_linux_drm_method_capabilities(libgamma_method_capabilities_t* rest
 int libgamma_linux_drm_site_initialise(libgamma_site_state_t* restrict this,
 				       char* restrict site)
 {
+  char pathname[PATH_MAX];
+  struct stat _attr;
+  
+  if (site != NULL)
+    return LIBGAMMA_NO_SUCH_SITE;
+  
+  /* Count the number of available graphics cards by
+   * stat:ing there existence in an API filesystem. */
+  this->partitions_available = 0;
+  for (;;)
+    {
+      snprintf(pathname, sizeof(pathname) / sizeof(char),
+	       DRM_DEV_NAME, DRM_DIR_NAME, (int)(this->partitions_available));
+      if (stat(pathname, &_attr))
+	break;
+      if (this->partitions_available++ > INT_MAX)
+	return LIBGAMMA_IMPOSSIBLE_AMOUNT;
+    }
+  return 0;
 }
 
 
@@ -86,6 +117,7 @@ int libgamma_linux_drm_site_initialise(libgamma_site_state_t* restrict this,
  */
 void libgamma_linux_drm_site_destroy(libgamma_site_state_t* restrict this)
 {
+  (void) this;
 }
 
 
@@ -166,17 +198,7 @@ int libgamma_linux_drm_crtc_initialise(libgamma_crtc_state_t* restrict this,
  */
 void libgamma_linux_drm_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
-}
-
-
-/**
- * Release all resources held by a CRTC state
- * and free the CRTC state pointer
- * 
- * @param  this  The CRTC state
- */
-void libgamma_linux_drm_crtc_free(libgamma_crtc_state_t* restrict this)
-{
+  (void) this;
 }
 
 
