@@ -342,7 +342,8 @@ int libgamma_quartz_cg_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict thi
   CGDirectDisplayID crtc_id = crtcs[this->crtc];
   CGError r;
 #ifdef DEBUG
-  if ((ramps.red_size != ramps.green_size) || (ramps.red_size != ramps.blue_size))
+  if ((ramps.red_size != ramps.green_size) ||
+      (ramps.red_size != ramps.blue_size))
     return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
 #endif
   r = CGSetDisplayTransferByTable(crtc_id, (uint32_t)(ramps.red_size),

@@ -54,7 +54,7 @@ int libgamma_linux_drm_site_initialise(libgamma_site_state_t* restrict this,
  * 
  * @param  this  The site state
  */
-void libgamma_linux_drm_site_destroy(libgamma_site_state_t* restrict this);
+void libgamma_linux_drm_site_destroy(libgamma_site_state_t* restrict this) __attribute__((const));
 
 /**
  * Restore the gamma ramps all CRTCS with a site to the system settings
@@ -112,7 +112,7 @@ int libgamma_linux_drm_crtc_initialise(libgamma_crtc_state_t* restrict this,
  * 
  * @param  this  The CRTC state
  */
-void libgamma_linux_drm_crtc_destroy(libgamma_crtc_state_t* restrict this);
+void libgamma_linux_drm_crtc_destroy(libgamma_crtc_state_t* restrict this) __attribute__((const));
 
 /**
  * Restore the gamma ramps for a CRTC to the system settings for that CRTC

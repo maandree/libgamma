@@ -19,13 +19,20 @@
 # error Compiling gamma-linux-drm.c without HAVE_GAMMA_METHOD_LINUX_DRM
 #endif
 
+#define _GNU_SOURCE
+
 #include "gamma-linux-drm.h"
 
 #include "libgamma-error.h"
 
-#include <errno.h>
 #include <limits.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <unistd.h>
+#include <stdio.h>
 
 #include <xf86drm.h>
 #include <xf86drmMode.h>
@@ -33,9 +40,32 @@
 #ifndef O_CLOEXEC
 # define O_CLOEXEC  02000000
 #endif
+#ifndef NGROUPS_MAX
+# define NGROUPS_MAX  65536
+#endif
 #ifndef PATH_MAX
 # define PATH_MAX  4096
 #endif
+
+
+
+/**
+ * Graphics card data for the Direct Rendering Manager adjustment method
+ */
+typedef struct libgamma_drm_card_data
+{
+  /**
+   * File descriptor for the connection to the graphics card
+   */
+  int fd;
+  
+  /**
+   * The graphics card's mode resources
+   */
+  drmModeRes* res;
+  
+} libgamma_drm_card_data_t;
+
 
 
 /**
@@ -147,7 +177,110 @@ int libgamma_linux_drm_site_restore(libgamma_site_state_t* restrict this)
  */
 int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict this,
 					    libgamma_site_state_t* restrict site, size_t partition)
-{
+{ /* FIXME: This function is too large. */
+  int rc = 0;
+  libgamma_drm_card_data_t* data;
+  char pathname[PATH_MAX];
+  
+  /* Check for partition index overflow. */
+  if (partition > INT_MAX)
+    return LIBGAMMA_NO_SUCH_PARTITION;
+  
+  /* Allocate and initialise graphics card data.  */
+  this->data = NULL;
+  data = malloc(sizeof(libgamma_drm_card_data_t));
+  if (data == NULL)
+    return LIBGAMMA_ERRNO_SET;
+  data->fd = -1;
+  data->res = NULL;
+  
+  /* Get the pathname for the graphics card. */
+  snprintf(pathname, sizeof(pathname) / sizeof(char),
+	   DRM_DEV_NAME, DRM_DIR_NAME, (int)partition);
+  
+  /* Acquire access to the graphics card. */
+  data->fd = open(pathname, O_RDWR | O_CLOEXEC);
+  if (data->fd < 0)
+    {
+      if ((errno == ENXIO) || (errno == ENODEV))
+	rc = LIBGAMMA_NO_SUCH_PARTITION;
+      else if (errno == EACCES)
+	{
+	  struct stat attr;
+	  int r;
+	  
+	  r = stat(pathname, &attr);
+	  rc = LIBGAMMA_NO_SUCH_PARTITION;
+
+#define __test(R, W) ((attr.st_mode & (R | W)) == (R | W))
+	  if (r)
+	    rc = errno == EACCES ? LIBGAMMA_NO_SUCH_PARTITION : LIBGAMMA_ERRNO_SET;
+	  else if ((attr.st_uid == geteuid() && __test(S_IRUSR, S_IWUSR)) ||
+		   (attr.st_gid == getegid() && __test(S_IRGRP, S_IWGRP)) ||
+		   __test(S_IROTH, S_IWOTH))
+	    rc = LIBGAMMA_DEVICE_ACCESS_FAILED;
+	  else if (attr.st_gid == 0 /* root group */ || __test(S_IRGRP, S_IWGRP))
+	    rc = LIBGAMMA_DEVICE_RESTRICTED;
+	  else
+	    {
+	      gid_t supplemental_groups[NGROUPS_MAX];
+	      struct group* group;
+	      int i, n;
+	      
+	      n = getgroups(NGROUPS_MAX, supplemental_groups);
+	      if (n < 0)
+		{
+		  rc = LIBGAMMA_ERRNO_SET;
+		  goto fail_data;
+		}
+	      
+	      for (i = 0; i < n; i++)
+		if (supplemental_groups[i] == attr.st_gid)
+		  break;
+	      
+	      if (i != n)
+		{
+		  rc = LIBGAMMA_DEVICE_ACCESS_FAILED;
+		  goto fail_data;
+		}
+	      
+	      rc = LIBGAMMA_DEVICE_REQUIRE_GROUP;
+	      errno = 0;
+	      group = getgrgid(attr.st_gid); /* TODO: Not thread-safe. */
+	      libgamma_group_gid = attr.st_gid;
+	      libgamma_group_name = group != NULL ? group->gr_name : NULL;
+	    }
+#undef __test
+	}
+      else
+	rc = LIBGAMMA_ERRNO_SET;
+      goto fail_data;
+    }
+  
+  /* Acquire mode resources. */
+  data->res = drmModeGetResources(data->fd);
+  if (data->res == NULL)
+    {
+      rc = LIBGAMMA_ACQUIRING_MODE_RESOURCES_FAILED;
+      goto fail_fd;
+    }
+  
+  /* Get the number of CRTC:s that are available in the partition. */
+  if (data->res->count_crtcs < 0)
+    {
+      rc = LIBGAMMA_NEGATIVE_CRTC_COUNT;
+      goto fail_res;
+    }
+  this->crtcs_available = (size_t)(data->res->count_crtcs);
+  return 0;
+  
+ fail_res:
+  drmModeFreeResources(data->res);
+ fail_fd:
+  close(data->fd);
+ fail_data:
+  free(data);
+  return rc;
 }
 
 
@@ -158,6 +291,12 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
  */
 void libgamma_linux_drm_partition_destroy(libgamma_partition_state_t* restrict this)
 {
+  libgamma_drm_card_data_t* data = this->data;
+  if (data->res != NULL)
+    drmModeFreeResources(data->res);
+  if (data->fd >= 0)
+    close(data->fd);
+  free(data);
 }
 
 
@@ -188,6 +327,16 @@ int libgamma_linux_drm_partition_restore(libgamma_partition_state_t* restrict th
 int libgamma_linux_drm_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				       libgamma_partition_state_t* restrict partition, size_t crtc)
 {
+  libgamma_drm_card_data_t* card;
+  uint32_t crtc_id;
+  
+  if (crtc >= partition->crtcs_available)
+    return LIBGAMMA_NO_SUCH_CRTC;
+  
+  card = partition->data;
+  crtc_id = card->res->crtcs[crtc];
+  this->data = (void*)(size_t)crtc_id;
+  return 0;
 }
 
 
@@ -242,6 +391,18 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
 int libgamma_linux_drm_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps_t* restrict ramps)
 {
+  libgamma_drm_card_data_t* card = this->partition->data;
+  int r;
+#ifdef DEBUG
+  if ((ramps->red_size != ramps->green_size) ||
+      (ramps->red_size != ramps->blue_size))
+    return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+#endif
+  r = drmModeCrtcGetGamma(card->fd, (uint32_t)(this->crtc), (uint32_t)(ramps->red_size),
+			  ramps->red, ramps->green, ramps->blue);
+  if (r < 0)
+    return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
+  return 0;
 }
 
 

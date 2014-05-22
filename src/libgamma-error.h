@@ -22,6 +22,20 @@
 # error libgamma-error.h should not be included directly, include libgamma.h instead
 #endif
 
+#include <sys/types.h>
+
+
+/**
+ * Group that the user needs to be a member of if `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned
+ */
+extern gid_t libgamma_group_gid;
+
+/**
+ * Group that the user needs to be a member of if `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned,
+ * `NULL` if the name of the group `libgamma_group_gid` cannot be determined
+ */
+extern const char* libgamma_group_name;
+
 
 /**
  * The selected adjustment method does not exist
@@ -107,6 +121,38 @@
  * The adjustment method failed to list available CRTC:s, reason unknown
  */
 #define LIBGAMMA_LIST_CRTCS_FAILED  (-16)
+
+/**
+ * Failed to acquire mode resources from the adjustment method
+ */
+#define LIBGAMMA_ACQUIRING_MODE_RESOURCES_FAILED  (-17)
+
+/**
+ * The adjustment method reported that a negative number of partitions exists in the site
+ */
+#define LIBGAMMA_NEGATIVE_PARTITION_COUNT  (-18)
+
+/**
+ * The adjustment method reported that a negative number of CRTC:s exists in the partition
+ */
+#define LIBGAMMA_NEGATIVE_CRTC_COUNT  (-19)
+
+/**
+ * Device cannot be access becauses of insufficient permissions
+ */
+#define LIBGAMMA_DEVICE_RESTRICTED  (-20)
+
+/**
+ * Device cannot be access, reason unknown
+ */
+#define LIBGAMMA_DEVICE_ACCESS_FAILED  (-21)
+
+/**
+ * Device cannot be access, membership of the `libgamma_group_gid`
+ * (named by `libgamma_group_name` (can be `NULL`, if so `errno` may
+ * have been set to tell why)) is required
+ */
+#define LIBGAMMA_DEVICE_REQUIRE_GROUP  (-22)
 
 
 
