@@ -182,6 +182,8 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
   libgamma_drm_card_data_t* data;
   char pathname[PATH_MAX];
   
+  (void) site;
+  
   /* Check for partition index overflow. */
   if (partition > INT_MAX)
     return LIBGAMMA_NO_SUCH_PARTITION;
