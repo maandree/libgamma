@@ -18,7 +18,6 @@
 #ifndef LIBGAMMA_GAMMA_X_RANDR_H
 #define LIBGAMMA_GAMMA_X_RANDR_H
 
-
 #ifndef HAVE_GAMMA_METHOD_X_RANDR
 # error Including gamma-x-randr.h without HAVE_GAMMA_METHOD_X_RANDR
 #endif

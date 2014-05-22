@@ -23,6 +23,8 @@
 
 #include "libgamma-error.h"
 
+#include <errno.h>
+
 
 /**
  * Return the capabilities of the adjustment method
@@ -33,7 +35,7 @@ void libgamma_quartz_cg_method_capabilities(libgamma_method_capabilities_t* rest
 {
   this->crtc_information = CRTC_INFO_GAMMA_SIZE
 			 | CRTC_INFO_GAMMA_DEPTH;
-  this->default_site_known = NULL;
+  this->default_site_known = 1;
   this->multiple_sites = 0;
   this->multiple_partitions = 0;
   this->multiple_crtcs = 1;

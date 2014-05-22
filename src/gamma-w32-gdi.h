@@ -18,7 +18,6 @@
 #ifndef LIBGAMMA_GAMMA_W32_GDI_H
 #define LIBGAMMA_GAMMA_W32_GDI_H
 
-
 #ifndef HAVE_GAMMA_METHOD_W32_GDI
 # error Including gamma-w32-gdi.h without HAVE_GAMMA_METHOD_W32_GDI
 #endif

@@ -113,8 +113,8 @@
 /**
  * Capabilities of adjustment methods
  */
-typedef struct libgamma_method_capabilities {
-  
+typedef struct libgamma_method_capabilities
+{
   /**
    * OR of the CRTC information fields in `libgamma_crtc_information_t`
    * that may (but can fail) be read successfully
@@ -207,8 +207,8 @@ typedef struct libgamma_method_capabilities {
  * and the BSD:s, there can usually be any (feasible) number of
  * sites. In X.org parlance they are called displays.
  */
-typedef struct libgamma_site_state {
-  
+typedef struct libgamma_site_state
+{
   /**
    * Adjustment method implementation specific data.
    * You as a user of this library should not touch this.
@@ -259,8 +259,8 @@ typedef struct libgamma_site_state {
  * On hardware-level adjustment methods, such as Direct
  * Rendering Manager, a partition is a graphics card.
  */
-typedef struct libgamma_partition_state {
-  
+typedef struct libgamma_partition_state
+{
   /**
    * Adjustment method implementation specific data.
    * You as a user of this library should not touch this.
@@ -294,8 +294,8 @@ typedef struct libgamma_partition_state {
  * monitor that is plugged in to the connector
  * that the CRTC belongs to
  */
-typedef struct libgamma_crtc_state {
-  
+typedef struct libgamma_crtc_state
+{
   /**
    * Adjustment method implementation specific data.
    * You as a user of this library should not touch this.
@@ -400,8 +400,8 @@ typedef struct libgamma_crtc_state {
 /**
  * Cathode ray tube controller information data structure
  */
-typedef struct libgamma_crtc_information {
-  
+typedef struct libgamma_crtc_information
+{
   /**
    * The Extended Display Identification Data associated with
    * the attached monitor. This is raw byte array that is usually

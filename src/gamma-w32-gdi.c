@@ -1,4 +1,4 @@
-x/**
+/**
  * libgamma — Display server abstraction layer for gamma ramp adjustments
  * Copyright © 2014  Mattias Andrée (maandree@member.fsf.org)
  * 
@@ -27,11 +27,13 @@ x/**
 # define WINVER  0x0500
 #endif
 #ifdef FAKE_GAMMA_METHOD_W32_GDI
-#  include "fake-w32-gdi.h"
+# include "fake-w32-gdi.h"
 #else
-#  include <windows.h>
-#  include <wingdi.h>
+# include <windows.h>
+# include <wingdi.h>
 #endif
+
+#include <errno.h>
 
 #define GAMMA_RAMP_SIZE  256
 
@@ -46,7 +48,7 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restri
   this->crtc_information = CRTC_INFO_GAMMA_SIZE
 			 | CRTC_INFO_GAMMA_DEPTH
 			 | CRTC_INFO_GAMMA_SUPPORT;
-  this->default_site_known = NULL;
+  this->default_site_known = 1;
   this->multiple_sites = 0;
   this->multiple_partitions = 0;
   this->multiple_crtcs = 1;
@@ -133,6 +135,7 @@ int libgamma_w32_gdi_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t* restrict this,
 					  libgamma_site_state_t* restrict site, size_t partition)
 {
+  DWORD n = 0;
   DISPLAY_DEVICE display;
   
   (void) site;
@@ -140,16 +143,11 @@ int libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t* restrict t
   if (partition != 0)
     return LIBGAMMA_NO_SUCH_PARTITION;
   
-  this->crtcs_available = 0;
   display.cb = sizeof(DISPLAY_DEVICE);
-  for (;;)
-    {
-      if (!EnumDisplayDevices(NULL, this->crtcs_available, &display, 0))
-	break;
-      this->crtcs_available++;
-      if (this->crtcs_available == 0)
-	return LIBGAMMA_IMPOSSIBLE_AMOUNT;
-    }
+  while (EnumDisplayDevices(NULL, n, &display, 0))
+    if (n++, n == 0)
+      return LIBGAMMA_IMPOSSIBLE_AMOUNT;
+  this->crtcs_available = (size_t)n;
   return 0;
 }
 
@@ -199,7 +197,7 @@ int libgamma_w32_gdi_crtc_initialise(libgamma_crtc_state_t* restrict this,
   
   this->data = NULL;
   display.cb = sizeof(DISPLAY_DEVICE);
-  if (!EnumDisplayDevices(NULL, crtc, &display, 0))
+  if (!EnumDisplayDevices(NULL, (DWORD)crtc, &display, 0))
     return LIBGAMMA_NO_SUCH_CRTC;
   if (!(display.StateFlags & DISPLAY_DEVICE_ACTIVE))
     return LIBGAMMA_CONNECTOR_DISABLED;
@@ -256,14 +254,14 @@ int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict 
   this->height_mm_error = _E(CRTC_INFO_HEIGHT_MM);
   this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID);
   this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID);
-  this->red_gamma_size = GAMMA_SIZE;
-  this->green_gamma_size = GAMMA_SIZE;
-  this->blue_gamma_size = GAMMA_SIZE;
+  this->red_gamma_size = GAMMA_RAMP_SIZE;
+  this->green_gamma_size = GAMMA_RAMP_SIZE;
+  this->blue_gamma_size = GAMMA_RAMP_SIZE;
   this->gamma_size_error = 0;
   this->gamma_depth = 16;
   this->gamma_depth_error = 0;
   if ((fields & CRTC_INFO_GAMMA_SUPPORT))
-    this->gamma_support = GetDeviceCaps(hDC, COLORMGMTCAPS) == CM_GAMMA_RAMP;
+    this->gamma_support = GetDeviceCaps(crtc->data, COLORMGMTCAPS) == CM_GAMMA_RAMP;
   this->gamma_support_error = 0;
   this->subpixel_order_error = _E(CRTC_INFO_SUBPIXEL_ORDER);
   this->active_error = _E(CRTC_INFO_ACTIVE);

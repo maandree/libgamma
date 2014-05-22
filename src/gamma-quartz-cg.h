@@ -18,7 +18,6 @@
 #ifndef LIBGAMMA_GAMMA_QUARTZ_CG_H
 #define LIBGAMMA_GAMMA_QUARTZ_CG_H
 
-
 #ifndef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
 # error Including gamma-quartz-cg.h without HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
 #endif
