@@ -18,7 +18,7 @@
 #ifndef LIBGAMMA_FAKE_W32_GDI_H
 #define LIBGAMMA_FAKE_W32_GDI_H
 
-#ifndef HAVE_GAMMA_METHOD_W32_GDI
+#ifndef FAKE_GAMMA_METHOD_W32_GDI
 # error Including fake-w32-gdi.h without FAKE_GAMMA_METHOD_W32_GDI
 #endif
 

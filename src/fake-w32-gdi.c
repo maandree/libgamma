@@ -19,6 +19,12 @@
 # error Compiling fake-w32-gdi.c without FAKE_GAMMA_METHOD_W32_GDI
 #endif
 
+/* This file very sloppily translates Windows GDI calls to X RandR calls.
+ * It should by no means be used, without additional modification, as a
+ * part of a compatibility layer. The purpose of this file is only to make
+ * it possible to test for logical errors in Windows specific code on
+ * a GNU/Linux system under X. */
+
 
 #include "fake-w32-gdi.h"
 
