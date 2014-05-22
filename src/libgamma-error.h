@@ -164,6 +164,11 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_STATE_UNKNOWN  (-24)
 
+/**
+ * Failed to determine which connector the CRTC belongs to
+ */
+#define LIBGAMMA_CONNECTOR_UNKNOWN  (-25)
+
 
 
 #endif
