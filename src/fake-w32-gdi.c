@@ -156,6 +156,9 @@ int GetDeviceCaps(HDC hDC, int nIndex)
 }
 
 
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Waggregate-return"
+
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx */
 BOOL SetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
 {
@@ -243,6 +246,8 @@ HDC CreateDC(LPCTSTR lpszDriver, LPCTSTR lpszDevice, void *lpszOutput, void *lpI
   dc_count++;
   return crtcs + crtc_index;
 }
+
+# pragma GCC diagnostic pop
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx */
