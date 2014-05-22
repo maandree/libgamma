@@ -143,6 +143,8 @@ int libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t* restrict t
   if (partition != 0)
     return LIBGAMMA_NO_SUCH_PARTITION;
   
+  /* Count CRTC:s by iteration over all possible identifiers
+     until we reach on that does not exist. */
   display.cb = sizeof(DISPLAY_DEVICE);
   while (EnumDisplayDevices(NULL, n, &display, 0))
     if (n++, n == 0)
@@ -196,11 +198,16 @@ int libgamma_w32_gdi_crtc_initialise(libgamma_crtc_state_t* restrict this,
   (void) partition;
   
   this->data = NULL;
-  display.cb = sizeof(DISPLAY_DEVICE);
+  
+  display.cb = sizeof(DISPLAY_DEVICE); /* Windows's API mandates this... */
+  /* Get identifier for selected CRTC. */
   if (!EnumDisplayDevices(NULL, (DWORD)crtc, &display, 0))
     return LIBGAMMA_NO_SUCH_CRTC;
+  /* Check that the connector is enabled,
+   * newer versions of Windows will always pass. */
   if (!(display.StateFlags & DISPLAY_DEVICE_ACTIVE))
     return LIBGAMMA_CONNECTOR_DISABLED;
+  /* Acquire CRTC connection. */
   context = CreateDC(TEXT("DISPLAY"), display.DeviceName, NULL, NULL);
   if (context == NULL)
     return LIBGAMMA_OPEN_CRTC_FAILED;

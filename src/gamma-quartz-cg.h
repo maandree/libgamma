@@ -105,14 +105,14 @@ int libgamma_quartz_cg_partition_restore(libgamma_partition_state_t* restrict th
  *                     error identifier provided by this library
  */
 int libgamma_quartz_cg_crtc_initialise(libgamma_crtc_state_t* restrict this,
-				       libgamma_partition_state_t* restrict partition, size_t crtc);
+				       libgamma_partition_state_t* restrict partition, size_t crtc) __attribute__((pure));
 
 /**
  * Release all resources held by a CRTC state
  * 
  * @param  this  The CRTC state
  */
-void libgamma_quartz_cg_crtc_destroy(libgamma_crtc_state_t* restrict this);
+void libgamma_quartz_cg_crtc_destroy(libgamma_crtc_state_t* restrict this) __attribute__((const));
 
 /**
  * Restore the gamma ramps for a CRTC to the system settings for that CRTC

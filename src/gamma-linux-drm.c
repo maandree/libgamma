@@ -44,7 +44,7 @@ void libgamma_linux_drm_method_capabilities(libgamma_method_capabilities_t* rest
 			 | CRTC_INFO_CONNECTOR_NAME
 			 | CRTC_INFO_CONNECTOR_TYPE
 			 | CRTC_INFO_GAMMA;
-  this->default_site_known = NULL;
+  this->default_site_known = 1;
   this->multiple_sites = 0;
   this->multiple_partitions = 1;
   this->multiple_crtcs = 1;

@@ -54,7 +54,7 @@ int libgamma_w32_gdi_site_initialise(libgamma_site_state_t* restrict this,
  * 
  * @param  this  The site state
  */
-void libgamma_w32_gdi_site_destroy(libgamma_site_state_t* restrict this);
+void libgamma_w32_gdi_site_destroy(libgamma_site_state_t* restrict this) __attribute__((const));
 
 /**
  * Restore the gamma ramps all CRTCS with a site to the system settings
@@ -83,7 +83,7 @@ int libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t* restrict t
  * 
  * @param  this  The partition state
  */
-void libgamma_w32_gdi_partition_destroy(libgamma_partition_state_t* restrict this);
+void libgamma_w32_gdi_partition_destroy(libgamma_partition_state_t* restrict this) __attribute__((const));
 
 /**
  * Restore the gamma ramps all CRTCS with a partition to the system settings
