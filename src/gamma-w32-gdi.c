@@ -247,6 +247,8 @@ int libgamma_w32_gdi_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
+#define KNOWN_FIELDS  (CRTC_INFO_GAMMA_SIZE | CRTC_INFO_GAMMA_DEPTH | CRTC_INFO_GAMMA_SUPPORT)
+   
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   
   this->edid_error = _E(CRTC_INFO_EDID);
@@ -271,7 +273,9 @@ int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict 
   
 #undef _E
   
-  return 0;
+  return (fields & ~KNOWN_FIELDS) ? -1 : 0;
+  
+#undef  KNOWN_FIELDS
 }
 
 
@@ -286,6 +290,12 @@ int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict 
 int libgamma_w32_gdi_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t* restrict ramps)
 {
+#ifdef DEBUG
+  if ((ramps->  red_size != GAMMA_RAMP_SIZE) ||
+      (ramps->green_size != GAMMA_RAMP_SIZE) ||
+      (ramps-> blue_size != GAMMA_RAMP_SIZE))
+    return LIBGAMMA_WRONG_GAMMA_RAMP_SIZE;
+#endif
   if (!GetDeviceGammaRamp(this->data, ramps->red))
     return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
   return 0;
@@ -303,6 +313,12 @@ int libgamma_w32_gdi_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_w32_gdi_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t ramps)
 {
+#ifdef DEBUG
+  if ((ramps.  red_size != GAMMA_RAMP_SIZE) ||
+      (ramps.green_size != GAMMA_RAMP_SIZE) ||
+      (ramps. blue_size != GAMMA_RAMP_SIZE))
+    return LIBGAMMA_WRONG_GAMMA_RAMP_SIZE;
+#endif
   if (!SetDeviceGammaRamp(this->data, ramps.red))
     return LIBGAMMA_GAMMA_RAMP_WRITE_FAILED;
   return 0;

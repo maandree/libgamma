@@ -525,9 +525,11 @@ typedef struct libgamma_crtc_information
   
   
   /**
-   * The bit-depth of the value axes of gamma ramps
+   * The bit-depth of the value axes of gamma ramps,
+   * -1 for single precision floating point, and -2 for
+   * double precision floating point.
    */
-  size_t gamma_depth;
+  signed gamma_depth;
   
   /**
    * Zero on success, positive it holds the value `errno` had

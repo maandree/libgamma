@@ -80,6 +80,35 @@
  */
 #define LIBGAMMA_GAMMA_RAMP_WRITE_FAILED  (-11)
 
+/**
+ * The specified ramp sizes does not match the ramps sizes returned by the
+ * adjustment methods in response to the query/command
+ */
+#define LIBGAMMA_GAMMA_RAMP_SIZE_CHANGED  (-12)
+
+/**
+ * The specified ramp sizes are not identical which is required by the adjustment method
+ * (Only returned in debug mode)
+ */
+#define LIBGAMMA_MIXED_GAMMA_RAMP_SIZE  (-13)
+
+/**
+ * The specified ramp sizes are not supported by the adjustment method
+ * (Only returned in debug mode)
+ */
+#define LIBGAMMA_WRONG_GAMMA_RAMP_SIZE  (-14)
+
+/**
+ * The adjustment method reported that the gamma ramps size is 1 or 0
+ */
+#define LIBGAMMA_SINGLETON_GAMMA_RAMP  (-15)
+
+/**
+ * The adjustment method failed to list available CRTC:s, reason unknown
+ */
+#define LIBGAMMA_LIST_CRTCS_FAILED  (-16)
+
+
 
 #endif
 
