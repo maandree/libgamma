@@ -154,6 +154,11 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_DEVICE_REQUIRE_GROUP  (-22)
 
+/**
+ * The graphics card appear to have been removed
+ */
+#define LIBGAMMA_GRAPHICS_CARD_REMOVED  (-23)
+
 
 
 #endif

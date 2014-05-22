@@ -400,9 +400,7 @@ int libgamma_linux_drm_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this
 #endif
   r = drmModeCrtcGetGamma(card->fd, (uint32_t)(this->crtc), (uint32_t)(ramps->red_size),
 			  ramps->red, ramps->green, ramps->blue);
-  if (r < 0)
-    return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
-  return 0;
+  return r ? LIBGAMMA_GAMMA_RAMP_READ_FAILED : 0;
 }
 
 
@@ -417,5 +415,40 @@ int libgamma_linux_drm_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this
 int libgamma_linux_drm_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps_t ramps)
 {
+  libgamma_drm_card_data_t* card = this->partition->data;
+  int r;
+#ifdef DEBUG
+  if ((ramps.red_size != ramps.green_size) ||
+      (ramps.red_size != ramps.blue_size))
+    return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+#endif
+  r = drmModeCrtcSetGamma(card->fd, (uint32_t)(size_t)(this->data),
+			  (uint32_t)(ramps.red_size), ramps.red, ramps.green, ramps.blue);
+  if (r)
+    switch (errno)
+      {
+      case EACCES:
+      case EAGAIN:
+      case EIO:
+	/* Permission denied errors must be ignored, because we do not
+	 * have permission to do this while a display server is active.
+	 * We are also checking for some other error codes just in case. */
+      case EBUSY:
+      case EINPROGRESS:
+	/* It is hard to find documentation for DRM (in fact all of this is
+	 * just based on the functions names and some testing,) perhaps we
+	 * could get this if we are updating to fast. */
+	break;
+      case EBADF:
+      case ENODEV:
+      case ENXIO:
+	/* XXX: I have not actually tested removing my graphics card or,
+	 * monitor but I imagine either of these is what would happen. */
+	return LIBGAMMA_GRAPHICS_CARD_REMOVED;
+
+      default:
+	return LIBGAMMA_ERRNO_SET;
+      }
+  return 0;
 }
 
