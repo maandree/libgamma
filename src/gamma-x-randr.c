@@ -129,10 +129,10 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
 				     char* restrict site)
 {
   xcb_generic_error_t* error = NULL;
-  xcb_connection_t* restrict connection;
+  xcb_connection_t* connection;
   xcb_randr_query_version_cookie_t cookie;
-  xcb_randr_query_version_reply_t* restrict reply;
-  const xcb_setup_t* restrict setup;
+  xcb_randr_query_version_reply_t* reply;
+  const xcb_setup_t* setup;
   xcb_screen_iterator_t iter;
   
   this->data = connection = xcb_connect(site, NULL);
@@ -220,8 +220,8 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
   xcb_generic_error_t* error = NULL;
   xcb_screen_iterator_t iter;
   xcb_randr_get_screen_resources_current_cookie_t cookie;
-  xcb_randr_get_screen_resources_current_reply_t* restrict reply;
-  xcb_randr_crtc_t* restrict crtcs;
+  xcb_randr_get_screen_resources_current_reply_t* reply;
+  xcb_randr_crtc_t* crtcs;
   size_t i;
   
   if (setup == NULL)
