@@ -237,6 +237,16 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_PROTOCOL_VERSION_NOT_SUPPORTED  (-38)
 
+/**
+ * The adjustment method failed to list available partitions, reason unknown
+ */
+#define LIBGAMMA_LIST_PARTITIONS_FAILED  (-39)
+
+/**
+ * Partition exists by index, but the partition at that index does not exist
+ */
+#define LIBGAMMA_NULL_PARTITION  (-40)
+
 
 
 /**
@@ -244,7 +254,7 @@ extern const char* libgamma_group_name;
  * If this is lower than the number your program thinks it
  * should be sould update your program for new errors.
  */
-#define LIBGAMMA_ERROR_MIN  (-38)
+#define LIBGAMMA_ERROR_MIN  (-40)
 
 
 

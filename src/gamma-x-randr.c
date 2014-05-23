@@ -159,16 +159,20 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
 #endif
       free(reply);
       xcb_disconnect(connection);
-      return LIBGAMMA_PROTOCOL_VERSION_NOT_SUPPORTED;;
+      return LIBGAMMA_PROTOCOL_VERSION_NOT_SUPPORTED;
     }
   
   free(reply);
   
-  setup = xcb_get_setup(connection);
+  if ((setup = xcb_get_setup(connection)) == NULL)
+    {
+      xcb_disconnect(connection);
+      return LIBGAMMA_LIST_PARTITIONS_FAILED;
+    }
   iter = xcb_setup_roots_iterator(setup);
   this->partitions_available = (size_t)(iter.rem);
   
-  return 0;
+  return iter.rem < 0 ? LIBGAMMA_NEGATIVE_PARTITION_COUNT : 0;
 }
 
 
@@ -210,7 +214,48 @@ int libgamma_x_randr_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict this,
 					  libgamma_site_state_t* restrict site, size_t partition)
 {
-  /* TODO */
+  xcb_connection_t* restrict connection = site->data;
+  const xcb_setup_t* setup = xcb_get_setup(connection);
+  xcb_screen_t* screen = NULL;
+  xcb_generic_error_t* error = NULL;
+  xcb_screen_iterator_t iter;
+  xcb_randr_get_screen_resources_current_cookie_t cookie;
+  xcb_randr_get_screen_resources_current_reply_t* restrict reply;
+  xcb_randr_crtc_t* restrict crtcs;
+  size_t i;
+  
+  if (setup == NULL)
+    return LIBGAMMA_LIST_PARTITIONS_FAILED;
+  
+  for (i = 0; iter.rem > 0; i++, xcb_screen_next(&iter))
+    if (i == partition)
+      {
+	screen = iter.data;
+	break;
+      }
+  if (iter.rem == 0)
+    return LIBGAMMA_NO_SUCH_PARTITION;
+  
+  if (screen == NULL)
+    return LIBGAMMA_NULL_PARTITION;
+  
+  cookie = xcb_randr_get_screen_resources_current(connection, screen->root);
+  reply = xcb_randr_get_screen_resources_current_reply(connection, cookie, &error);
+  if (error != NULL)
+    return translate_error(error->error_code, LIBGAMMA_LIST_CRTCS_FAILED);
+  
+  this->crtcs_available = reply->num_crtcs;
+  crtcs = xcb_randr_get_screen_resources_current_crtcs(reply);
+  /* Copy the CRTC:s, just so we do not have to keep the reply in memory. */
+  this->data = malloc(reply->num_crtcs * sizeof(xcb_randr_crtc_t));
+  if (this->data == NULL)
+    {
+      free(reply);
+      return LIBGAMMA_ERRNO_SET;
+    }
+  memcpy(this->data, crtcs, reply->num_crtcs * sizeof(xcb_randr_crtc_t));
+  free(reply);
+  return 0;
 }
 
 
