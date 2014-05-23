@@ -374,6 +374,56 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, libgam
 
 
 /**
+ * Read information from the CRTC's output
+ * 
+ * @param   out     Instance of a data structure to fill with the information about the CRTC
+ * @param   output  The CRTC's output information
+ * @return          Non-zero if at least on error occured
+ */
+static int read_output_data(libgamma_crtc_information_t* restrict out, xcb_randr_get_output_info_reply_t* restrict output)
+{
+  switch (output->connection)
+    {
+    case XCB_RANDR_CONNECTION_CONNECTED:
+      out->active = 1;
+      out->width_mm = output->mm_width;
+      out->height_mm = output->mm_height;
+#define __select(value)  \
+  case XCB_RENDER_SUB_PIXEL_##value:  out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_##value;  break
+      switch (output->subpixel_order)
+	{
+	__select (UNKNOWN);
+	__select (HORIZONTAL_RGB);
+	__select (HORIZONTAL_BGR);
+	__select (VERTICAL_RGB);
+	__select (VERTICAL_BGR);
+	__select (NONE);
+	default:
+	  out->subpixel_order_error = LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED;
+	  break;
+	}
+#undef __select
+      return 0;
+      
+    case XCB_RANDR_CONNECTION_DISCONNECTED:
+      out->active = 0;
+      out->width_mm_error = LIBGAMMA_NOT_CONNECTED;
+      out->height_mm_error = LIBGAMMA_NOT_CONNECTED;
+      out->subpixel_order_error = LIBGAMMA_NOT_CONNECTED;
+      return 0;
+      
+    default:
+      out->active = 0;
+      out->active_error = LIBGAMMA_STATE_UNKNOWN;
+      out->width_mm_error = LIBGAMMA_NOT_CONNECTED;
+      out->height_mm_error = LIBGAMMA_NOT_CONNECTED;
+      out->subpixel_order_error = LIBGAMMA_NOT_CONNECTED;
+      return -1;
+    }
+}
+
+
+/**
  * Read information about a CRTC
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC
@@ -398,22 +448,29 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   /* Figure out what fields we need to get the data for to get the data for other fields. */
   if ((fields & (CRTC_INFO_WIDTH_MM_EDID | CRTC_INFO_HEIGHT_MM_EDID | CRTC_INFO_GAMMA)))
     fields |= CRTC_INFO_EDID;
+  if ((fields & CRTC_INFO_CONNECTOR_TYPE))
+    fields |= CRTC_INFO_CONNECTOR_NAME;
+  if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_SUBPIXEL_ORDER)))
+    fields |= CRTC_INFO_ACTIVE;
   
-  /* FIXME */
-  e |= this->width_mm_error = -1;
-  e |= this->height_mm_error = -1;
-  e |= this->connector_type = -1;
-  e |= this->subpixel_order_error = -1;
-  e |= this->active_error = -1;
-  e |= this->connector_name_error = -1;
-  e |= this->edid_error = -1;
-  e |= this->gamma_error = -1;
-  e |= this->width_mm_edid_error = -1;
-  e |= this->height_mm_edid_error = -1;
+  /* FIXME output */
+  
+  e |= this->connector_type = -1; /* FIXME */
+  e |= this->connector_name_error = -1; /* FIXME */
+  e |= read_output_data(this, output);
+  if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM)))
+    e |= this->width_mm_error | this->height_mm_error;
+  e |= (fields & CRTC_INFO_SUBPIXEL_ORDER) ? this->subpixel_order_error : 0;
   
   if ((fields & CRTC_INFO_EDID) == 0)
     goto cont;
-  e |= get_edid(crtc, this);
+  if (this->active == 0)
+    {
+      e |= this->edid_error = this->gamma_error = this->width_mm_edid_error
+	 = this->height_mm_edid_error = LIBGAMMA_NOT_CONNECTED;
+      goto cont;
+    }
+  e |= get_edid(crtc, this); /* FIXME */
   if (this->edid == NULL)
     {
       this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
@@ -434,6 +491,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
       this->edid = NULL;
     }
   
+  free(output);
   return e ? -1 : 0;
 #undef _E
 }
