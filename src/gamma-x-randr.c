@@ -297,7 +297,11 @@ int libgamma_x_randr_partition_restore(libgamma_partition_state_t* restrict this
 int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				     libgamma_partition_state_t* restrict partition, size_t crtc)
 {
-  /* TODO */
+  xcb_randr_crtc_t* crtc_ids = partition->data;
+  if (crtc >= partition->crtcs_available)
+    return LIBGAMMA_NO_SUCH_CRTC;
+  this->data = crtc_ids + crtc;
+  return 0;
 }
 
 
