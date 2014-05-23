@@ -247,6 +247,11 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_NULL_PARTITION  (-40)
 
+/**
+ * There is not monitor connected to the connector of the selected CRTC
+ */
+#define LIBGAMMA_NOT_CONNECTED  (-41)
+
 
 
 /**
@@ -254,7 +259,7 @@ extern const char* libgamma_group_name;
  * If this is lower than the number your program thinks it
  * should be sould update your program for new errors.
  */
-#define LIBGAMMA_ERROR_MIN  (-40)
+#define LIBGAMMA_ERROR_MIN  (-41)
 
 
 
