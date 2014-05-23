@@ -422,8 +422,8 @@ static int read_connector_data(libgamma_crtc_information_t* restrict out, const 
       out->height_mm = connector->mmHeight;
       
       /* Get connector type. */
-#define __select(incase, type, name)  \
-  case incase:  out->connector_type = LIBGAMMA_CONNECTOR_TYPE_ ## type, connector_name_base = name;  break
+#define __select(type, name)  \
+  case DRM_MODE_CONNECTOR_##type:  out->connector_type = LIBGAMMA_CONNECTOR_TYPE_##type, connector_name_base = name;  break
       switch (connector->connector_type)
 	{
 #ifndef DRM_MODE_CONNECTOR_VIRTUAL
@@ -432,23 +432,23 @@ static int read_connector_data(libgamma_crtc_information_t* restrict out, const 
 #ifndef DRM_MODE_CONNECTOR_DSI
 # define DRM_MODE_CONNECTOR_DSI  16
 #endif
-	__select (DRM_MODE_CONNECTOR_Unknown,       Unknown,      "Unknown"  );
-	__select (DRM_MODE_CONNECTOR_VGA,           VGA,          "VGA"      );
-	__select (DRM_MODE_CONNECTOR_DVII,          DVII,         "DVI-I"    );
-	__select (DRM_MODE_CONNECTOR_DVID,          DVID,         "DVI-D"    );
-	__select (DRM_MODE_CONNECTOR_DVIA,          DVIA,         "DVI-A"    );
-	__select (DRM_MODE_CONNECTOR_Composite,     Composite,    "Composite");
-	__select (DRM_MODE_CONNECTOR_SVIDEO,        SVIDEO,       "SVIDEO"   );
-	__select (DRM_MODE_CONNECTOR_LVDS,          LVDS,         "LVDS"     );
-	__select (DRM_MODE_CONNECTOR_Component,     Component,    "Component");
-	__select (DRM_MODE_CONNECTOR_9PinDIN,       9PinDIN,      "DIN"      );
-	__select (DRM_MODE_CONNECTOR_DisplayPort,   DisplayPort,  "DP"       );
-	__select (DRM_MODE_CONNECTOR_HDMIA,         HDMIA,        "HDMI-A"   );
-	__select (DRM_MODE_CONNECTOR_HDMIB,         HDMIB,        "HDMI-B"   );
-	__select (DRM_MODE_CONNECTOR_TV,            TV,           "TV"       );
-	__select (DRM_MODE_CONNECTOR_eDP,           eDP,          "eDP"      );
-	__select (DRM_MODE_CONNECTOR_VIRTUAL,       VIRTUAL,      "VIRTUAL"  );
-	__select (DRM_MODE_CONNECTOR_DSI,           DSI,          "DSI"      );
+	__select (Unknown,      "Unknown"  );
+	__select (VGA,          "VGA"      );
+	__select (DVII,         "DVI-I"    );
+	__select (DVID,         "DVI-D"    );
+	__select (DVIA,         "DVI-A"    );
+	__select (Composite,    "Composite");
+	__select (SVIDEO,       "SVIDEO"   );
+	__select (LVDS,         "LVDS"     );
+	__select (Component,    "Component");
+	__select (9PinDIN,      "DIN"      );
+	__select (DisplayPort,  "DP"       );
+	__select (HDMIA,        "HDMI-A"   );
+	__select (HDMIB,        "HDMI-B"   );
+	__select (TV,           "TV"       );
+	__select (eDP,          "eDP"      );
+	__select (VIRTUAL,      "VIRTUAL"  );
+	__select (DSI,          "DSI"      );
 	default:
 	  out->connector_type_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
 	  out->connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
@@ -458,7 +458,7 @@ static int read_connector_data(libgamma_crtc_information_t* restrict out, const 
       
       /* Get subpixel order. */
 #define __select(value)  \
-  case DRM_MODE_SUBPIXEL_ ## value:  out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_ ## value;  break
+  case DRM_MODE_SUBPIXEL_##value:  out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_##value;  break
       switch (connector->subpixel)
 	{
 	__select (UNKNOWN);
