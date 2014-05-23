@@ -179,7 +179,7 @@ int libgamma_linux_drm_site_restore(libgamma_site_state_t* restrict this)
  */
 int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict this,
 					    libgamma_site_state_t* restrict site, size_t partition)
-{ /* FIXME: This function is too large. */
+{
   int rc = 0;
   libgamma_drm_card_data_t* data;
   char pathname[PATH_MAX];
@@ -372,63 +372,127 @@ int libgamma_linux_drm_crtc_restore(libgamma_crtc_state_t* restrict this)
 /**
  * Get the size of the gamma ramps for a CRTC
  * 
- * @param   this  Instance of a data structure to fill with the information about the CRTC
+ * @param   out   Instance of a data structure to fill with the information about the CRTC
  * @param   crtc  The state of the CRTC whose information should be read
- * @return        The value stored in `this->gamma_size_error`
+ * @return        The value stored in `out->gamma_size_error`
  */
-static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict this, libgamma_crtc_state_t* restrict crtc)
+static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, const libgamma_crtc_state_t* restrict crtc)
 {
   libgamma_drm_card_data_t* card = crtc->partition->data;
   uint32_t crtc_id = card->res->crtcs[crtc->crtc];
   drmModeCrtc* crtc_info;
   errno = 0;
   crtc_info = drmModeGetCrtc(card->fd, crtc_id);
-  this->gamma_size_error = crtc_info == NULL ? errno : 0;
-  if (this->gamma_size_error == 0)
+  out->gamma_size_error = crtc_info == NULL ? errno : 0;
+  if (out->gamma_size_error == 0)
     {
-      this->red_gamma_size = (size_t)(crtc_info->gamma_size);
-      this->green_gamma_size = (size_t)(crtc_info->gamma_size);
-      this->blue_gamma_size = (size_t)(crtc_info->gamma_size);
-      this->gamma_size_error = crtc_info->gamma_size < 2 ? LIBGAMMA_SINGLETON_GAMMA_RAMP : 0;
+      out->red_gamma_size = (size_t)(crtc_info->gamma_size);
+      out->green_gamma_size = (size_t)(crtc_info->gamma_size);
+      out->blue_gamma_size = (size_t)(crtc_info->gamma_size);
+      out->gamma_size_error = crtc_info->gamma_size < 2 ? LIBGAMMA_SINGLETON_GAMMA_RAMP : 0;
       drmModeFreeCrtc(crtc_info);
     }
-  return this->gamma_size_error;
+  return out->gamma_size_error;
 }
 
 
-static int read_connector_data(libgamma_crtc_information_t* restrict this,
-			       drmModeConnector* connector, int32_t fields)
+/**
+ * Read information from the CRTC's conncetor
+ * 
+ * @param   out        Instance of a data structure to fill with the information about the CRTC
+ * @param   connector  The CRTC's connector
+ * @param   fields     OR:ed identifiers for the information about the CRTC that should be read
+ * @return             Non-zero if at least on error occured
+ */
+static int read_connector_data(libgamma_crtc_information_t* restrict out, const drmModeConnector* connector, int32_t fields)
 {
+  const char* connector_name_base = NULL;
+  
   if (connector == NULL)
-    {
-      this->width_mm_error = this->height_mm_error = this->connector_type = this->active =
-	this->active_error = this->connector_name = LIBGAMMA_CONNECTOR_UNKNOWN;
-      return LIBGAMMA_CONNECTOR_UNKNOWN;
-    }
+    return out->width_mm_error = out->height_mm_error = out->connector_type = out->subpixel_order_error =
+      out->active_error = out->connector_name_error = LIBGAMMA_CONNECTOR_UNKNOWN;
   
   
-  if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_CONNECTOR_TYPE | CRTC_INFO_ACTIVE)))
+  /* Get some information that does not require too much work. */
+  if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_CONNECTOR_TYPE |
+		 CRTC_INFO_ACTIVE | CRTC_INFO_SUBPIXEL_ORDER)))
     {
-      this->width_mm = connector->mmWidth;
-      this->height_mm = connector->mmHeight;
-      this->connector_type = (int)(connector->connector_type); /* TODO: needs abstraction */
-      this->active = connector->connection == DRM_MODE_CONNECTED;
-      this->active_error = connector->connection == DRM_MODE_UNKNOWNCONNECTION ? LIBGAMMA_STATE_UNKNOWN : 0;
-    }
-  
-  if ((fields & CRTC_INFO_CONNECTOR_NAME))
-    {
-      static const char* TYPE_NAMES[] = /* FIXME: What names does Linux itself use? */
+      /* Get viewport dimension. */
+      out->width_mm = connector->mmWidth;
+      out->height_mm = connector->mmHeight;
+      
+      /* Get connector type. */
+#define __select(incase, type, name)  \
+  case incase:  out->connector_type = LIBGAMMA_CONNECTOR_TYPE_ ## type, connector_name_base = name;  break
+      switch (connector->connector_type)
 	{
-	  "Unknown", "VGA", "DVII", "DVID", "DVIA", "Composite", "SVIDEO", "LVDS", "Component",
-	  "9PinDIN", "DisplayPort", "HDMIA", "HDMIB", "TV", "eDP", "VIRTUAL", "DSI"
-	};
-      this->connector_name = (size_t)(this->connector_type) < sizeof(TYPE_NAMES) / sizeof(char*)
-	? TYPE_NAMES[(size_t)(this->connector_type)] : "Unrecognised" /*TODO:error*/;
-      /* FIXME : add index */
+#ifndef DRM_MODE_CONNECTOR_VIRTUAL
+# define DRM_MODE_CONNECTOR_VIRTUAL  15
+#endif
+#ifndef DRM_MODE_CONNECTOR_DSI
+# define DRM_MODE_CONNECTOR_DSI  16
+#endif
+	__select (DRM_MODE_CONNECTOR_Unknown,       Unknown,      "Unknown"  );
+	__select (DRM_MODE_CONNECTOR_VGA,           VGA,          "VGA"      );
+	__select (DRM_MODE_CONNECTOR_DVII,          DVII,         "DVI-I"    );
+	__select (DRM_MODE_CONNECTOR_DVID,          DVID,         "DVI-D"    );
+	__select (DRM_MODE_CONNECTOR_DVIA,          DVIA,         "DVI-A"    );
+	__select (DRM_MODE_CONNECTOR_Composite,     Composite,    "Composite");
+	__select (DRM_MODE_CONNECTOR_SVIDEO,        SVIDEO,       "SVIDEO"   );
+	__select (DRM_MODE_CONNECTOR_LVDS,          LVDS,         "LVDS"     );
+	__select (DRM_MODE_CONNECTOR_Component,     Component,    "Component");
+	__select (DRM_MODE_CONNECTOR_9PinDIN,       9PinDIN,      "DIN"      );
+	__select (DRM_MODE_CONNECTOR_DisplayPort,   DisplayPort,  "DP"       );
+	__select (DRM_MODE_CONNECTOR_HDMIA,         HDMIA,        "HDMI-A"   );
+	__select (DRM_MODE_CONNECTOR_HDMIB,         HDMIB,        "HDMI-B"   );
+	__select (DRM_MODE_CONNECTOR_TV,            TV,           "TV"       );
+	__select (DRM_MODE_CONNECTOR_eDP,           eDP,          "eDP"      );
+	__select (DRM_MODE_CONNECTOR_VIRTUAL,       VIRTUAL,      "VIRTUAL"  );
+	__select (DRM_MODE_CONNECTOR_DSI,           DSI,          "DSI"      );
+	default:
+	  out->connector_type_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
+	  out->connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
+	  break;
+	}
+#undef __select
+      
+      /* Get subpixel order. */
+#define __select(value)  \
+  case DRM_MODE_SUBPIXEL_ ## value:  out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_ ## value;  break
+      switch (connector->subpixel)
+	{
+	__select (UNKNOWN);
+	__select (HORIZONTAL_RGB);
+	__select (HORIZONTAL_BGR);
+	__select (VERTICAL_RGB);
+	__select (VERTICAL_BGR);
+	__select (NONE);
+	default:
+	  out->subpixel_order_error = LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED;
+	  break;
+	}
+#undef __select
+      
+      /* Get whether or not a monitor is plugged in. */
+      out->active = connector->connection == DRM_MODE_CONNECTED;
+      out->active_error = connector->connection == DRM_MODE_UNKNOWNCONNECTION ? LIBGAMMA_STATE_UNKNOWN : 0;
     }
   
-  return 0;
+  /* Get the connector's name. */
+  if ((fields & CRTC_INFO_CONNECTOR_NAME) && (out->connector_name_error == 0))
+    {
+      out->connector_name = malloc((strlen(connector_name_base) + 12) * sizeof(char));
+      if (out->connector_name == NULL)
+	out->connector_name_error = errno;
+      else
+	{
+	  sprintf(out->connector_name, "%s", connector_name_base);
+	  /* FIXME : add index */
+	}
+    }
+  
+  /* Did something go wrong? */
+  return out->subpixel_order_error | out->active_error | out->connector_name_error;
 }
 
 
@@ -463,14 +527,13 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
   
   /* Figure out whether we require the connector to get all information we want. */
   require_connector = fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM |
-				CRTC_INFO_SUBPIXEL_ORDER/*(?)*/ | CRTC_INFO_CONNECTOR_TYPE);
+				CRTC_INFO_SUBPIXEL_ORDER | CRTC_INFO_CONNECTOR_TYPE);
   
   e |= this->edid_error = _E(CRTC_INFO_EDID); /* TODO */
   e |= this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID); /* TODO */
   e |= this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID); /* TODO */
   e |= this->gamma_error = _E(CRTC_INFO_GAMMA); /* TODO */
   e |= require_connector ? read_connector_data(this, connector, fields) : 0;
-  e |= this->subpixel_order_error = _E(CRTC_INFO_SUBPIXEL_ORDER); /* TODO */
   e |= (fields & CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
   this->gamma_depth = 16;
   e |= this->gamma_support_error = _E(CRTC_INFO_GAMMA_SUPPORT);
@@ -550,7 +613,7 @@ int libgamma_linux_drm_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this
       case ENODEV:
       case ENXIO:
 	/* XXX: I have not actually tested removing my graphics card or,
-	 * monitor but I imagine either of these is what would happen. */
+	 *      monitor but I imagine either of these is what would happen. */
 	return LIBGAMMA_GRAPHICS_CARD_REMOVED;
 
       default:

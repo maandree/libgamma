@@ -169,6 +169,16 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_CONNECTOR_UNKNOWN  (-25)
 
+/**
+ * The detected connector type is not listed in this library and has to be updated
+ */
+#define LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED  (-26)
+
+/**
+ * The detected subpixel order is not listed in this library and has to be updated
+ */
+#define LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED  (-27)
+
 
 
 #endif

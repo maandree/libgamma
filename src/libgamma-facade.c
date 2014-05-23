@@ -786,9 +786,11 @@ int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
 				  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
 #ifdef HAVE_NO_GAMMA_METHODS
-  (void) this;
   (void) fields;
 #endif
+  
+  this->edid = NULL;
+  this->connector_name = NULL;
   
   switch (crtc->partition->site->method)
     {

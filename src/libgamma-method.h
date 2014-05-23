@@ -315,6 +315,73 @@ typedef struct libgamma_crtc_state
 } libgamma_crtc_state_t;
 
 
+/**
+ * Types for connectors
+ */
+typedef enum libgamma_connector_type
+  {
+    /*
+     * The adjustment method does not know the connector's type
+     * (This could be considered an error)
+     */
+    LIBGAMMA_CONNECTOR_TYPE_Unknown,
+    LIBGAMMA_CONNECTOR_TYPE_VGA,
+    LIBGAMMA_CONNECTOR_TYPE_DVII,
+    LIBGAMMA_CONNECTOR_TYPE_DVID,
+    LIBGAMMA_CONNECTOR_TYPE_DVIA,
+    LIBGAMMA_CONNECTOR_TYPE_Composite,
+    LIBGAMMA_CONNECTOR_TYPE_SVIDEO,
+    LIBGAMMA_CONNECTOR_TYPE_LVDS,
+    LIBGAMMA_CONNECTOR_TYPE_Component,
+    LIBGAMMA_CONNECTOR_TYPE_9PinDIN,
+    LIBGAMMA_CONNECTOR_TYPE_DisplayPort,
+    LIBGAMMA_CONNECTOR_TYPE_HDMIA,
+    LIBGAMMA_CONNECTOR_TYPE_HDMIB,
+    LIBGAMMA_CONNECTOR_TYPE_TV,
+    LIBGAMMA_CONNECTOR_TYPE_eDP,
+    LIBGAMMA_CONNECTOR_TYPE_VIRTUAL,
+    LIBGAMMA_CONNECTOR_TYPE_DSI
+  } libgamma_connector_type_t;
+
+/**
+ * Orders for subpixels. Currently the possible values are
+ * very biased to LCD, Plasma and monochrome monitors.
+ */
+typedef enum libgamma_subpixel_order
+  {
+    /**
+     * The adjustment method does not know the order of the subpixels
+     * (This could be considered an error)
+     */
+    LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN,
+    
+    /**
+     * There are no subpixels in the monitor
+     */
+    LIBGAMMA_SUBPIXEL_ORDER_NONE,
+    
+    /**
+     * The subpixels are ordered red, green and then blue, from left to right
+     */
+    LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB,
+    
+    /**
+     * The subpixels are ordered blue, green and then red, from left to right
+     */
+    LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_BGR,
+    
+    /**
+     * The subpixels are ordered red, green and then blue, from the top down
+     */
+    LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_RGB,
+    
+    /**
+     * The subpixels are ordered blue, green and then red, from the top down
+     */
+    LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_BGR
+    
+  } libgamma_subpixel_order_t;
+
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
@@ -554,10 +621,10 @@ typedef struct libgamma_crtc_information
   
   /**
    * The layout of the subpixels.
-   * You cannot count on this value, but it is provided
-   * anyway as a means of distinguishing monitors.
+   * You cannot count on this value — especially for CRT:s —
+   * but it is provided anyway as a means of distinguishing monitors.
    */
-  int subpixel_order;
+  libgamma_subpixel_order_t subpixel_order;
   
   /**
    * Zero on success, positive it holds the value `errno` had
@@ -598,7 +665,7 @@ typedef struct libgamma_crtc_information
   /**
    * The type of the connector that is associated with the CRTC
    */
-  int connector_type;
+  libgamma_connector_type_t connector_type;
   
   /**
    * Zero on success, positive it holds the value `errno` had
