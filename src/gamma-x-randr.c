@@ -105,6 +105,10 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
 }
 
 
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Waggregate-return"
+
+
 /**
  * Initialise an allocated site state
  * 
@@ -318,4 +322,7 @@ int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
     return libgamma_x_randr_translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_WRITE_FAILED);
   return 0;
 }
+
+
+# pragma GCC diagnostic pop
 
