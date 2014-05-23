@@ -212,6 +212,35 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_GAMMA_NOT_SPECIFIED_AND_EDID_CHECKSUM_ERROR  (-33)
 
+/**
+ * Failed to query the gamma ramps size from the adjustment method, reason unknown
+ */
+#define LIBGAMMA_GAMMA_RAMPS_SIZE_QUERY_FAILED  (-34)
+
+/**
+ * The selected partition could not be opened, reason unknown
+ */
+#define LIBGAMMA_OPEN_PARTITION_FAILED  (-35)
+
+/**
+ * The selected site could not be opened, reason unknown
+ */
+#define LIBGAMMA_OPEN_SITE_FAILED  (-36)
+
+/**
+ * Failed to query the adjustment method for its protocol version, reason unknown
+ */
+#define LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED  (-37)
+
+
+
+/**
+ * The number of the libgamma error with the lowest number.
+ * If this is lower than the number your program thinks it
+ * should be sould update your program for new errors.
+ */
+#define LIBGAMMA_ERROR_MIN  (-37)
+
 
 
 #endif

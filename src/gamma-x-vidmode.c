@@ -23,6 +23,9 @@
 
 #include "libgamma-error.h"
 
+#include <X11/Xlib.h>
+#include <X11/extensions/xf86vmode.h>
+
 #include <stdlib.h>
 #include <errno.h>
 
@@ -69,6 +72,16 @@ void libgamma_x_vidmode_method_capabilities(libgamma_method_capabilities_t* rest
 int libgamma_x_vidmode_site_initialise(libgamma_site_state_t* restrict this,
 				       char* restrict site)
 {
+  Display* connection = XOpenDisplay(site);
+  int _major, _minor, screens;
+  if ((this->data = connection) == NULL)
+    return LIBGAMMA_OPEN_SITE_FAILED;
+  if (!XF86VidModeQueryVersion(connection, &_major, &_minor))
+    return LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED;
+  if ((screens = ScreenCount(connection)) < 0)
+    return LIBGAMMA_NEGATIVE_PARTITION_COUNT;
+  this->partitions_available = (size_t)screens;
+  return 0;
 }
 
 
@@ -79,6 +92,7 @@ int libgamma_x_vidmode_site_initialise(libgamma_site_state_t* restrict this,
  */
 void libgamma_x_vidmode_site_destroy(libgamma_site_state_t* restrict this)
 {
+  XCloseDisplay((Display*)(this->data));
 }
 
 
@@ -109,6 +123,10 @@ int libgamma_x_vidmode_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_x_vidmode_partition_initialise(libgamma_partition_state_t* restrict this,
 					    libgamma_site_state_t* restrict site, size_t partition)
 {
+  if (partition >= site->partitions_available)
+    return LIBGAMMA_NO_SUCH_PARTITION;
+  this->crtcs_available = 1;
+  return 0;
 }
 
 
@@ -119,6 +137,7 @@ int libgamma_x_vidmode_partition_initialise(libgamma_partition_state_t* restrict
  */
 void libgamma_x_vidmode_partition_destroy(libgamma_partition_state_t* restrict this)
 {
+  (void) this;
 }
 
 
@@ -149,6 +168,9 @@ int libgamma_x_vidmode_partition_restore(libgamma_partition_state_t* restrict th
 int libgamma_x_vidmode_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				       libgamma_partition_state_t* restrict partition, size_t crtc)
 {
+  (void) this;
+  (void) partition;
+  return crtc == 0 ? 0 : LIBGAMMA_NO_SUCH_CRTC;
 }
 
 
@@ -159,6 +181,7 @@ int libgamma_x_vidmode_crtc_initialise(libgamma_crtc_state_t* restrict this,
  */
 void libgamma_x_vidmode_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
+  (void) this;
 }
 
 
@@ -188,6 +211,37 @@ int libgamma_x_vidmode_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_x_vidmode_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					    libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
+#define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
+  
+  this->edid_error = _E(CRTC_INFO_EDID);
+  this->width_mm_error = _E(CRTC_INFO_WIDTH_MM);
+  this->height_mm_error = _E(CRTC_INFO_HEIGHT_MM);
+  this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID);
+  this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID);
+  this->gamma_size_error = 0;
+  if ((fields & CRTC_INFO_GAMMA_SUPPORT))
+    {
+      Display* connection = crtc->partition->site->data;
+      int stops;
+      if (!XF86VidModeGetGammaRampSize(connection, (int)(crtc->partition->partition), &stops))
+	this->gamma_size_error = LIBGAMMA_GAMMA_RAMPS_SIZE_QUERY_FAILED;
+      else if (stops < 2)
+	this->gamma_size_error = LIBGAMMA_SINGLETON_GAMMA_RAMP;
+      else
+	this->red_gamma_size = this->green_gamma_size = this->blue_gamma_size = (size_t)stops;
+    }
+  this->gamma_depth = 16;
+  this->gamma_depth_error = 0;
+  this->gamma_support_error = _E(CRTC_INFO_GAMMA_SUPPORT);
+  this->subpixel_order_error = _E(CRTC_INFO_SUBPIXEL_ORDER);
+  this->active_error = _E(CRTC_INFO_ACTIVE);
+  this->connector_name_error = _E(CRTC_INFO_CONNECTOR_NAME);
+  this->connector_type_error = _E(CRTC_INFO_CONNECTOR_TYPE);
+  this->gamma_error = _E(CRTC_INFO_GAMMA);
+  
+#undef _E
+  
+  return (fields & ~(CRTC_INFO_GAMMA_DEPTH | CRTC_INFO_GAMMA_SIZE)) ? -1 : this->gamma_size_error;
 }
 
 
@@ -202,6 +256,15 @@ int libgamma_x_vidmode_get_crtc_information(libgamma_crtc_information_t* restric
 int libgamma_x_vidmode_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps_t* restrict ramps)
 {
+#ifdef DEBUG
+  if ((ramps->red_size != ramps->green_size) ||
+      (ramps->red_size != ramps->blue_size))
+    return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+#endif
+  if (!XF86VidModeGetGammaRamp((Display*)(this->partition->site->data), (int)(this->partition->partition),
+			       (int)(ramps->red_size), ramps->red, ramps->green, ramps->blue))
+    return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
+  return 0;
 }
 
 
@@ -216,5 +279,14 @@ int libgamma_x_vidmode_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this
 int libgamma_x_vidmode_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps_t ramps)
 {
+#ifdef DEBUG
+  if ((ramps.red_size != ramps.green_size) ||
+      (ramps.red_size != ramps.blue_size))
+    return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+#endif
+  if (!XF86VidModeSetGammaRamp((Display*)(this->partition->site->data), (int)(this->partition->partition),
+			       (int)(ramps.red_size), ramps.red, ramps.green, ramps.blue))
+    return LIBGAMMA_GAMMA_RAMP_WRITE_FAILED;
+  return 0;
 }
 
