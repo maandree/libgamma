@@ -65,6 +65,16 @@ typedef struct libgamma_drm_card_data
    */
   drmModeRes* res;
   
+  /**
+   * Resources for open connectors
+   */
+  drmModeConnector** connectors;
+  
+  /**
+   * Resources for open encoders
+   */
+  drmModeEncoder** encoders;
+  
 } libgamma_drm_card_data_t;
 
 
@@ -289,13 +299,38 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
 
 
 /**
+ * Release all connectors and encoders
+ * 
+ * @param  this  The graphics card data
+ */
+static void release_connectors_and_encoders(libgamma_drm_card_data_t* restrict this)
+{
+  size_t i, n;
+  if (this->encoders != NULL)
+    for (i = 0, n = (size_t)(this->res->count_connectors); i < n; i++)
+      if (this->encoders[i] != NULL)
+	drmModeFreeEncoder(this->encoders[i]);
+  free(this->encoders);
+  this->encoders = NULL;
+  
+  if (this->connectors != NULL)
+    for (i = 0, n = (size_t)(this->res->count_connectors); i < n; i++)
+      if (this->connectors[i] != NULL)
+	drmModeFreeConnector(this->connectors[i]);
+  free(this->connectors);
+  this->connectors = NULL;
+}
+
+
+/**
  * Release all resources held by a partition state
  * 
  * @param  this  The partition state
  */
 void libgamma_linux_drm_partition_destroy(libgamma_partition_state_t* restrict this)
 {
-  libgamma_drm_card_data_t* data = this->data;
+  libgamma_drm_card_data_t* restrict data = this->data;
+  release_connectors_and_encoders(data);
   if (data->res != NULL)
     drmModeFreeResources(data->res);
   if (data->fd >= 0)
@@ -331,7 +366,7 @@ int libgamma_linux_drm_partition_restore(libgamma_partition_state_t* restrict th
 int libgamma_linux_drm_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				       libgamma_partition_state_t* restrict partition, size_t crtc)
 {
-  libgamma_drm_card_data_t* card;
+  libgamma_drm_card_data_t* restrict card;
   uint32_t crtc_id;
   
   if (crtc >= partition->crtcs_available)
@@ -370,6 +405,46 @@ int libgamma_linux_drm_crtc_restore(libgamma_crtc_state_t* restrict this)
 
 
 /**
+ * Find the connector that a CRTC belongs to
+ * 
+ * @param   this   The CRTC state
+ * @param   error  Output of the error value to store of error report fields for data that requires the connector
+'* @return         The CRTC's conncetor, `NULL` on error
+ */
+static drmModeConnector* find_connector(libgamma_crtc_state_t* restrict this, int* error)
+{
+  uint32_t crtc_id = (uint32_t)(size_t)(this->data);
+  libgamma_drm_card_data_t* restrict card = this->partition->data;
+  size_t i, n = (size_t)(card->res->count_connectors);
+  /* Open connectors and encoders if not already opened. */
+  if (card->connectors == NULL)
+    {
+      /* We use calloc so all non-loaded elements are `NULL` after an error. */
+      if ((card->connectors = calloc(n, sizeof(drmModeConnector*))) == NULL)
+	goto fail;
+      if ((card->encoders = calloc(n, sizeof(drmModeEncoder*))) == NULL)
+	goto fail;
+      for (i = 0; i < n; i++)
+	if (((card->connectors[i] = drmModeGetConnector(card->fd, card->res->connectors[i])) == NULL) ||
+	    ((card->encoders[i] = drmModeGetEncoder(card->fd, card->connectors[i]->encoder_id)) == NULL))
+	  goto fail;
+    }
+  /* Find connector. */
+  *error = 0;
+  for (i = 0; i < n; i++)
+    if (card->encoders[i]->crtc_id == crtc_id)
+      return card->connectors[i];
+  *error = LIBGAMMA_CONNECTOR_UNKNOWN;
+  return NULL;
+  
+ fail:
+  *error = errno;
+  release_connectors_and_encoders(card);
+  return NULL;
+}
+
+
+/**
  * Get the size of the gamma ramps for a CRTC
  * 
  * @param   out   Instance of a data structure to fill with the information about the CRTC
@@ -378,9 +453,9 @@ int libgamma_linux_drm_crtc_restore(libgamma_crtc_state_t* restrict this)
  */
 static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, const libgamma_crtc_state_t* restrict crtc)
 {
-  libgamma_drm_card_data_t* card = crtc->partition->data;
+  libgamma_drm_card_data_t* restrict card = crtc->partition->data;
   uint32_t crtc_id = card->res->crtcs[crtc->crtc];
-  drmModeCrtc* crtc_info;
+  drmModeCrtc* restrict crtc_info;
   errno = 0;
   crtc_info = drmModeGetCrtc(card->fd, crtc_id);
   out->gamma_size_error = crtc_info == NULL ? errno : 0;
@@ -407,11 +482,6 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, const 
 static int read_connector_data(libgamma_crtc_information_t* restrict out, const drmModeConnector* connector, int32_t fields)
 {
   const char* connector_name_base = NULL;
-  
-  if (connector == NULL)
-    return out->width_mm_error = out->height_mm_error = out->connector_type = out->subpixel_order_error =
-      out->active_error = out->connector_name_error = LIBGAMMA_CONNECTOR_UNKNOWN;
-  
   
   /* Get some information that does not require too much work. */
   if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_CONNECTOR_TYPE |
@@ -509,9 +579,11 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
 {
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   int e = 0;
+  drmModeConnector* connector;
   int require_connector;
   int free_edid;
-  drmModeConnector* connector;
+  int error;
+  
   
   /* Wipe all error indicators. */
   memset(this, 0, sizeof(libgamma_crtc_information_t));
@@ -529,11 +601,19 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
   require_connector = fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM |
 				CRTC_INFO_SUBPIXEL_ORDER | CRTC_INFO_CONNECTOR_TYPE);
   
+  
   e |= this->edid_error = _E(CRTC_INFO_EDID); /* TODO */
   e |= this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID); /* TODO */
   e |= this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID); /* TODO */
   e |= this->gamma_error = _E(CRTC_INFO_GAMMA); /* TODO */
-  e |= require_connector ? read_connector_data(this, connector, fields) : 0;
+  if (require_connector)
+    {
+      if ((connector = find_connector(crtc, &error)) == NULL)
+	e |= this->width_mm_error = this->height_mm_error = this->connector_type = this->subpixel_order_error =
+	  this->active_error = this->connector_name_error = error;
+      else
+	e |= read_connector_data(this, connector, fields);
+    }
   e |= (fields & CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
   this->gamma_depth = 16;
   e |= this->gamma_support_error = _E(CRTC_INFO_GAMMA_SUPPORT);
@@ -561,14 +641,14 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
 int libgamma_linux_drm_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps_t* restrict ramps)
 {
-  libgamma_drm_card_data_t* card = this->partition->data;
+  libgamma_drm_card_data_t* restrict card = this->partition->data;
   int r;
 #ifdef DEBUG
   if ((ramps->red_size != ramps->green_size) ||
       (ramps->red_size != ramps->blue_size))
     return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
 #endif
-  r = drmModeCrtcGetGamma(card->fd, (uint32_t)(this->crtc), (uint32_t)(ramps->red_size),
+  r = drmModeCrtcGetGamma(card->fd, (uint32_t)(size_t)(this->data), (uint32_t)(ramps->red_size),
 			  ramps->red, ramps->green, ramps->blue);
   return r ? LIBGAMMA_GAMMA_RAMP_READ_FAILED : 0;
 }
@@ -585,7 +665,7 @@ int libgamma_linux_drm_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this
 int libgamma_linux_drm_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps_t ramps)
 {
-  libgamma_drm_card_data_t* card = this->partition->data;
+  libgamma_drm_card_data_t* restrict card = this->partition->data;
   int r;
 #ifdef DEBUG
   if ((ramps.red_size != ramps.green_size) ||
