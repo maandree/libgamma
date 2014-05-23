@@ -66,7 +66,7 @@ LIBS_LD =
 LIBS_C =
 
 # Object files for the library.
-LIBOBJ = libgamma-facade libgamma-method libgamma-error gamma-helper
+LIBOBJ = libgamma-facade libgamma-method libgamma-error gamma-helper edid
 
 
 # Include configurations from `./configure`.

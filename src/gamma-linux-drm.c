@@ -24,6 +24,7 @@
 #include "gamma-linux-drm.h"
 
 #include "libgamma-error.h"
+#include "edid.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -660,10 +661,10 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
   if ((connector = find_connector(crtc, &error)) == NULL)
     {
       e |= this->width_mm_error      = this->height_mm_error
-	= this->connector_type      = this->subpixel_order_error
-	= this->active_error        = this->connector_name_error
-	= this->edid_error          = this->gamma_error
-	= this->width_mm_edid_error = this->height_mm_edid_error = error;
+	 = this->connector_type      = this->subpixel_order_error
+	 = this->active_error        = this->connector_name_error
+	 = this->edid_error          = this->gamma_error
+	 = this->width_mm_edid_error = this->height_mm_edid_error = error;
       goto cont;
     }
   if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_SUBPIXEL_ORDER | CRTC_INFO_CONNECTOR_TYPE)))
@@ -672,10 +673,12 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
     goto cont;
   e |= get_edid(crtc, this, connector);
   if (this->edid == NULL)
-    goto cont;
-  e |= this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID); /* TODO */
-  e |= this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID); /* TODO */
-  e |= this->gamma_error = _E(CRTC_INFO_GAMMA); /* TODO */
+    {
+      this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
+      goto cont;
+    }
+  if ((fields & (CRTC_INFO_WIDTH_MM_EDID | CRTC_INFO_HEIGHT_MM_EDID | CRTC_INFO_GAMMA)))
+    e |= libgamma_parse_edid(this, fields);
  cont:
   e |= (fields & CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
   this->gamma_depth = 16;

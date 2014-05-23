@@ -22,6 +22,7 @@
 #include "gamma-x-randr.h"
 
 #include "libgamma-error.h"
+#include "edid.h"
 
 #include <stdlib.h>
 #include <errno.h>

@@ -179,6 +179,39 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED  (-27)
 
+/**
+ * The length of the EDID does not match that of any supported EDID structure revision
+ */
+#define LIBGAMMA_EDID_LENGTH_UNSUPPORTED  (-28)
+
+/**
+ * The magic number in the EDID does not match that of any supported EDID structure revision
+ */
+#define LIBGAMMA_EDID_WRONG_MAGIC_NUMBER  (-29)
+
+/**
+ * The EDID structure revision used by the monitor is not supported
+ */
+#define LIBGAMMA_EDID_REVISION_UNSUPPORTED  (-30)
+
+/**
+ * The gamma characteristics field in the EDID is left unspecified
+ * (This could be considered a non-error)
+ */
+#define LIBGAMMA_GAMMA_NOT_SPECIFIED  (-31)
+
+/**
+ * The checksum in the EDID is incorrect, all request information has been provided
+ * by you cannot count on it.
+ */
+#define LIBGAMMA_EDID_CHECKSUM_ERROR  (-32)
+
+/**
+ * Both of the errors `LIBGAMMA_GAMMA_NOT_SPECIFIED` and
+ * `LIBGAMMA_EDID_CHECKSUM_ERROR` have occurred
+ */
+#define LIBGAMMA_GAMMA_NOT_SPECIFIED_AND_EDID_CHECKSUM_ERROR  (-33)
+
 
 
 #endif
