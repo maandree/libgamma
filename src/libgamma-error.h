@@ -232,6 +232,11 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED  (-37)
 
+/**
+ * The adjustment method's version of its protocol is not supported
+ */
+#define LIBGAMMA_PROTOCOL_VERSION_NOT_SUPPORTED  (-38)
+
 
 
 /**
@@ -239,7 +244,7 @@ extern const char* libgamma_group_name;
  * If this is lower than the number your program thinks it
  * should be sould update your program for new errors.
  */
-#define LIBGAMMA_ERROR_MIN  (-37)
+#define LIBGAMMA_ERROR_MIN  (-38)
 
 
 

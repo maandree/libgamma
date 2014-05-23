@@ -28,6 +28,9 @@
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
+#ifdef DEBUG
+# include <stdio.h>
+#endif
 
 #include <xcb/xcb.h>
 #include <xcb/randr.h>
@@ -52,7 +55,7 @@
  * @param   default_error  The libgamma error to use if the xcb error is not recognised
  * @return                 The libgamma error
  */
-static int libgamma_x_randr_translate_error(int error_code, int default_error)
+static int translate_error(int error_code, int default_error)
 {
   switch (error_code)
     {
@@ -125,7 +128,47 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
 int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
 				     char* restrict site)
 {
-  /* TODO */
+  xcb_generic_error_t* error = NULL;
+  xcb_connection_t* restrict connection;
+  xcb_randr_query_version_cookie_t cookie;
+  xcb_randr_query_version_reply_t* restrict reply;
+  const xcb_setup_t* restrict setup;
+  xcb_screen_iterator_t iter;
+  
+  this->data = connection = xcb_connect(site, NULL);
+  if (connection == NULL)
+    return LIBGAMMA_NO_SUCH_SITE;
+  
+  cookie = xcb_randr_query_version(connection, RANDR_VERSION_MAJOR, RANDR_VERSION_MINOR);
+  reply = xcb_randr_query_version_reply(connection, cookie, &error);
+  
+  if ((error != NULL) || (reply == NULL))
+    {
+      free(reply);
+      xcb_disconnect(connection);
+      if (error != NULL)
+	return translate_error(error->error_code, LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED);
+      return LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED;
+    }
+  
+  if ((reply->major_version != RANDR_VERSION_MAJOR) ||
+      (reply->minor_version < RANDR_VERSION_MINOR))
+    {
+#ifdef DEBUG
+      fprintf(stderr, "libgamma: RandR protocol version: %u.%u", reply->major_version, reply->minor_version);
+#endif
+      free(reply);
+      xcb_disconnect(connection);
+      return LIBGAMMA_PROTOCOL_VERSION_NOT_SUPPORTED;;
+    }
+  
+  free(reply);
+  
+  setup = xcb_get_setup(connection);
+  iter = xcb_setup_roots_iterator(setup);
+  this->partitions_available = (size_t)(iter.rem);
+  
+  return 0;
 }
 
 
@@ -283,7 +326,7 @@ int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
   reply = xcb_randr_get_crtc_gamma_reply(connection, cookie, &error);
   
   if (error != NULL)
-    return libgamma_x_randr_translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_READ_FAILED);
+    return translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_READ_FAILED);
   
   red   = xcb_randr_get_crtc_gamma_red(reply);
   green = xcb_randr_get_crtc_gamma_green(reply);
@@ -319,7 +362,7 @@ int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
   cookie = xcb_randr_set_crtc_gamma_checked(connection, *(xcb_randr_crtc_t*)(this->data),
 					    (uint16_t)(ramps.red_size), ramps.red, ramps.green, ramps.blue);
   if ((error = xcb_request_check(connection, cookie)) != NULL)
-    return libgamma_x_randr_translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_WRITE_FAILED);
+    return translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_WRITE_FAILED);
   return 0;
 }
 
