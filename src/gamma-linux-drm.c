@@ -574,6 +574,53 @@ static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_cr
 
 
 /**
+ * Get the extended display identification data for a monitor
+ * 
+ * @param   crtc       The CRTC state
+ * @param   out        Instance of a data structure to fill with the information about the CRTC
+ * @param   connector  The CRTC's connector
+ * @reutnr             Non-zero on error
+ */
+static int get_edid(libgamma_crtc_state_t* restrict crtc,
+		    libgamma_crtc_information_t* restrict out, drmModeConnector* connector)
+{
+  libgamma_drm_card_data_t* restrict card = crtc->partition->data;
+  int prop_n = connector->count_props;
+  int prop_i;
+  drmModePropertyRes* prop;
+  drmModePropertyBlobRes* blob;
+  
+  for (prop_i = 0; prop_i < prop_n; prop_i++)
+    {
+      prop = drmModeGetProperty(card->fd, connector->props[prop_i]);
+      if (prop == NULL)
+	continue;
+      if (!strcmp("EDID", prop->name))
+	{
+	  blob = drmModeGetPropertyBlob(card->fd, (uint32_t)(connector->prop_values[prop_i]));
+	  if (blob == NULL)
+	    goto fail_blob;
+	  if (blob->data != NULL)
+	    {
+	      out->edid_length = blob->length;
+	      out->edid = malloc(out->edid_length * sizeof(unsigned char));
+	      if (out->edid == NULL)
+		out->edid_error = errno;
+	      else
+		memcpy(out->edid, blob->data, (size_t)(out->edid_length) * sizeof(char));
+	      drmModeFreePropertyBlob(blob);
+	      return out->edid == NULL;
+	    }
+	  drmModeFreePropertyBlob(blob);
+	}
+    fail_blob:
+      drmModeFreeProperty(prop);
+    }
+  return -1;
+}
+
+
+/**
  * Read information about a CRTC
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC
@@ -605,22 +652,31 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
     fields |= CRTC_INFO_CONNECTOR_TYPE;
   
   /* Figure out whether we require the connector to get all information we want. */
-  require_connector = fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM |
+  require_connector = fields & (CRTC_INFO_EDID | CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM |
 				CRTC_INFO_SUBPIXEL_ORDER | CRTC_INFO_CONNECTOR_TYPE);
   
-  
-  e |= this->edid_error = _E(CRTC_INFO_EDID); /* TODO */
+  if (require_connector == 0)
+    goto cont;
+  if ((connector = find_connector(crtc, &error)) == NULL)
+    {
+      e |= this->width_mm_error      = this->height_mm_error
+	= this->connector_type      = this->subpixel_order_error
+	= this->active_error        = this->connector_name_error
+	= this->edid_error          = this->gamma_error
+	= this->width_mm_edid_error = this->height_mm_edid_error = error;
+      goto cont;
+    }
+  if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_SUBPIXEL_ORDER | CRTC_INFO_CONNECTOR_TYPE)))
+    e |= read_connector_data(crtc, this, connector, fields);
+  if ((fields & CRTC_INFO_EDID) == 0)
+    goto cont;
+  e |= get_edid(crtc, this, connector);
+  if (this->edid == NULL)
+    goto cont;
   e |= this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID); /* TODO */
   e |= this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID); /* TODO */
   e |= this->gamma_error = _E(CRTC_INFO_GAMMA); /* TODO */
-  if (require_connector)
-    {
-      if ((connector = find_connector(crtc, &error)) == NULL)
-	e |= this->width_mm_error = this->height_mm_error = this->connector_type = this->subpixel_order_error =
-	  this->active_error = this->connector_name_error = error;
-      else
-	e |= read_connector_data(crtc, this, connector, fields);
-    }
+ cont:
   e |= (fields & CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
   this->gamma_depth = 16;
   e |= this->gamma_support_error = _E(CRTC_INFO_GAMMA_SUPPORT);
