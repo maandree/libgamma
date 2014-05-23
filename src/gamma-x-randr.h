@@ -112,7 +112,7 @@ int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
  * 
  * @param  this  The CRTC state
  */
-void libgamma_x_randr_crtc_destroy(libgamma_crtc_state_t* restrict this);
+void libgamma_x_randr_crtc_destroy(libgamma_crtc_state_t* restrict this) __attribute__((const));
 
 /**
  * Restore the gamma ramps for a CRTC to the system settings for that CRTC

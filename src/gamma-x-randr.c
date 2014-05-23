@@ -26,6 +26,8 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
+#include <stdint.h>
 
 #include <xcb/xcb.h>
 #include <xcb/randr.h>
@@ -40,6 +42,31 @@
  * The minor version of RandR the library expects
  */
 #define RANDR_VERSION_MINOR  3
+
+
+
+/**
+ * Translate an xcb error into a libgamma error
+ * 
+ * @param   error_code     The xcb error
+ * @param   default_error  The libgamma error to use if the xcb error is not recognised
+ * @return                 The libgamma error
+ */
+static int libgamma_x_randr_translate_error(int error_code, int default_error)
+{
+  switch (error_code)
+    {
+    case XCB_CONN_ERROR:                    return errno = ECONNABORTED, LIBGAMMA_ERRNO_SET;
+    case XCB_CONN_CLOSED_EXT_NOTSUPPORTED:  return errno = ENOPROTOOPT, LIBGAMMA_ERRNO_SET;
+    case XCB_CONN_CLOSED_MEM_INSUFFICIENT:  return errno = ENOMEM, LIBGAMMA_ERRNO_SET;
+    case XCB_CONN_CLOSED_REQ_LEN_EXCEED:    return errno = EMSGSIZE, LIBGAMMA_ERRNO_SET;
+    case XCB_CONN_CLOSED_PARSE_ERR:         return LIBGAMMA_NO_SUCH_SITE;
+    case XCB_CONN_CLOSED_INVALID_SCREEN:    return LIBGAMMA_NO_SUCH_PARTITION;
+    case XCB_CONN_CLOSED_FDPASSING_FAILED:  return errno = EIO, LIBGAMMA_ERRNO_SET;
+    default:
+      return default_error;
+    }
+}
 
 
 
@@ -105,7 +132,7 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
  */
 void libgamma_x_randr_site_destroy(libgamma_site_state_t* restrict this)
 {
-  /* TODO */
+  xcb_disconnect((xcb_connection_t*)(this->data));
 }
 
 
@@ -147,7 +174,7 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
  */
 void libgamma_x_randr_partition_destroy(libgamma_partition_state_t* restrict this)
 {
-  /* TODO */
+  free(this->data);
 }
 
 
@@ -189,7 +216,7 @@ int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
  */
 void libgamma_x_randr_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
-  /* TODO */
+  (void) this;
 }
 
 
@@ -234,7 +261,35 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t* restrict ramps)
 {
-  /* TODO */
+  xcb_connection_t* restrict connection = this->partition->site->data;
+  xcb_randr_get_crtc_gamma_cookie_t cookie;
+  xcb_randr_get_crtc_gamma_reply_t* restrict reply;
+  xcb_generic_error_t* error;
+  uint16_t* restrict red;
+  uint16_t* restrict green;
+  uint16_t* restrict blue;
+  
+#ifdef DEBUG
+  if ((ramps->red_size != ramps->green_size) ||
+      (ramps->red_size != ramps->blue_size))
+    return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+#endif
+  
+  cookie = xcb_randr_get_crtc_gamma(connection, *(xcb_randr_crtc_t*)(this->data));
+  reply = xcb_randr_get_crtc_gamma_reply(connection, cookie, &error);
+  
+  if (error != NULL)
+    return libgamma_x_randr_translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_READ_FAILED);
+  
+  red   = xcb_randr_get_crtc_gamma_red(reply);
+  green = xcb_randr_get_crtc_gamma_green(reply);
+  blue  = xcb_randr_get_crtc_gamma_blue(reply);
+  memcpy(ramps->red,   red,   ramps->red_size   * sizeof(uint16_t));
+  memcpy(ramps->green, green, ramps->green_size * sizeof(uint16_t));
+  memcpy(ramps->blue,  blue,  ramps->blue_size  * sizeof(uint16_t));
+  
+  free(reply);
+  return 0;
 }
 
 
@@ -249,6 +304,18 @@ int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t ramps)
 {
-  /* TODO */
+  xcb_connection_t* restrict connection = this->partition->site->data;
+  xcb_void_cookie_t cookie;
+  xcb_generic_error_t* restrict error;
+#ifdef DEBUG
+  if ((ramps.red_size != ramps.green_size) ||
+      (ramps.red_size != ramps.blue_size))
+    return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+#endif
+  cookie = xcb_randr_set_crtc_gamma_checked(connection, *(xcb_randr_crtc_t*)(this->data),
+					    (uint16_t)(ramps.red_size), ramps.red, ramps.green, ramps.blue);
+  if ((error = xcb_request_check(connection, cookie)) != NULL)
+    return libgamma_x_randr_translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_WRITE_FAILED);
+  return 0;
 }
 
