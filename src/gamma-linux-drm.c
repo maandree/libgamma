@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <xf86drm.h>
 #include <xf86drmMode.h>
@@ -474,12 +475,14 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, const 
 /**
  * Read information from the CRTC's conncetor
  * 
+ * @param   crtc       The state of the CRTC whose information should be read
  * @param   out        Instance of a data structure to fill with the information about the CRTC
  * @param   connector  The CRTC's connector
  * @param   fields     OR:ed identifiers for the information about the CRTC that should be read
  * @return             Non-zero if at least on error occured
  */
-static int read_connector_data(libgamma_crtc_information_t* restrict out, const drmModeConnector* connector, int32_t fields)
+static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_crtc_information_t* restrict out,
+			       const drmModeConnector* connector, int32_t fields)
 {
   const char* connector_name_base = NULL;
   
@@ -551,14 +554,18 @@ static int read_connector_data(libgamma_crtc_information_t* restrict out, const 
   /* Get the connector's name. */
   if ((fields & CRTC_INFO_CONNECTOR_NAME) && (out->connector_name_error == 0))
     {
+      libgamma_drm_card_data_t* restrict card = crtc->partition->data;
+      uint32_t type = connector->connector_type;
+      size_t i, n = (size_t)(card->res->count_connectors), c = 0;
+      
       out->connector_name = malloc((strlen(connector_name_base) + 12) * sizeof(char));
       if (out->connector_name == NULL)
-	out->connector_name_error = errno;
-      else
-	{
-	  sprintf(out->connector_name, "%s", connector_name_base);
-	  /* FIXME : add index */
-	}
+	return (out->connector_name_error = errno);
+      
+      for (i = 0; (i < n) && (card->connectors[i] != connector); i++)
+	if (card->connectors[i]->connector_type == type)
+	  c++;
+      sprintf(out->connector_name, "%s-" PRIu32, connector_name_base, (uint32_t)(c + 1));
     }
   
   /* Did something go wrong? */
@@ -612,7 +619,7 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
 	e |= this->width_mm_error = this->height_mm_error = this->connector_type = this->subpixel_order_error =
 	  this->active_error = this->connector_name_error = error;
       else
-	e |= read_connector_data(this, connector, fields);
+	e |= read_connector_data(crtc, this, connector, fields);
     }
   e |= (fields & CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
   this->gamma_depth = 16;
