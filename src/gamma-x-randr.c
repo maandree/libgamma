@@ -55,7 +55,7 @@
  * @param   default_error  The libgamma error to use if the xcb error is not recognised
  * @return                 The libgamma error
  */
-static int translate_error(int error_code, int default_error)
+static int translate_error_(int error_code, int default_error)
 {
   switch (error_code)
     {
@@ -71,6 +71,20 @@ static int translate_error(int error_code, int default_error)
     }
 }
 
+
+/**
+ * Translate an xcb error into a libgamma error
+ * 
+ * @param   error_code     The xcb error
+ * @param   default_error  The libgamma error to use if the xcb error is not recognised
+ * @param   return_errno   Whether an `errno` value may be returned
+ * @return                 The libgamma error
+ */
+static int translate_error(int error_code, int default_error, int return_errno)
+{
+  int r = translate_error_(error_code, default_error);
+  return return_errno ? (r > 0 ? errno : r) : r;
+}
 
 
 /**
@@ -147,7 +161,7 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
       free(reply);
       xcb_disconnect(connection);
       if (error != NULL)
-	return translate_error(error->error_code, LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED);
+	return translate_error(error->error_code, LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED, 0);
       return LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED;
     }
   
@@ -242,7 +256,7 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
   cookie = xcb_randr_get_screen_resources_current(connection, screen->root);
   reply = xcb_randr_get_screen_resources_current_reply(connection, cookie, &error);
   if (error != NULL)
-    return translate_error(error->error_code, LIBGAMMA_LIST_CRTCS_FAILED);
+    return translate_error(error->error_code, LIBGAMMA_LIST_CRTCS_FAILED, 0);
   
   this->crtcs_available = reply->num_crtcs;
   crtcs = xcb_randr_get_screen_resources_current_crtcs(reply);
@@ -350,7 +364,7 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, libgam
   cookie = xcb_randr_get_crtc_gamma_size(connection, *crtc_id);
   reply = xcb_randr_get_crtc_gamma_size_reply(connection, cookie, &error);
   if (error != NULL)
-    return out->gamma_size_error = translate_error(error->error_code, LIBGAMMA_GAMMA_RAMPS_SIZE_QUERY_FAILED);
+    return out->gamma_size_error = translate_error(error->error_code, LIBGAMMA_GAMMA_RAMPS_SIZE_QUERY_FAILED, 1);
   if (reply->size < 2)
     out->gamma_size_error = LIBGAMMA_SINGLETON_GAMMA_RAMP;
   out->red_gamma_size = out->green_gamma_size = out->blue_gamma_size = reply->size;
@@ -454,7 +468,7 @@ int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
   reply = xcb_randr_get_crtc_gamma_reply(connection, cookie, &error);
   
   if (error != NULL)
-    return translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_READ_FAILED);
+    return translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_READ_FAILED, 0);
   
   red   = xcb_randr_get_crtc_gamma_red(reply);
   green = xcb_randr_get_crtc_gamma_green(reply);
@@ -490,7 +504,7 @@ int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
   cookie = xcb_randr_set_crtc_gamma_checked(connection, *(xcb_randr_crtc_t*)(this->data),
 					    (uint16_t)(ramps.red_size), ramps.red, ramps.green, ramps.blue);
   if ((error = xcb_request_check(connection, cookie)) != NULL)
-    return translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_WRITE_FAILED);
+    return translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_WRITE_FAILED, 0);
   return 0;
 }
 
