@@ -332,6 +332,34 @@ int libgamma_x_randr_crtc_restore(libgamma_crtc_state_t* restrict this)
 
 
 /**
+ * Get the gamma ramp size of a CRTC
+ * 
+ * @param   this  Instance of a data structure to fill with the information about the CRTC
+ * @param   crtc  The state of the CRTC whose information should be read
+ * @return        Non-zero on error
+ */
+static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, libgamma_crtc_state_t* restrict crtc)
+{
+  xcb_connection_t* restrict connection = crtc->partition->site->data;
+  xcb_randr_crtc_t* restrict crtc_id = crtc->data;
+  xcb_randr_get_crtc_gamma_size_cookie_t cookie;
+  xcb_randr_get_crtc_gamma_size_reply_t* reply;
+  xcb_generic_error_t* error;
+  
+  out->gamma_size_error = 0;
+  cookie = xcb_randr_get_crtc_gamma_size(connection, *crtc_id);
+  reply = xcb_randr_get_crtc_gamma_size_reply(connection, cookie, &error);
+  if (error != NULL)
+    return out->gamma_size_error = translate_error(error->error_code, LIBGAMMA_GAMMA_RAMPS_SIZE_QUERY_FAILED);
+  if (reply->size < 2)
+    out->gamma_size_error = LIBGAMMA_SINGLETON_GAMMA_RAMP;
+  out->red_gamma_size = out->green_gamma_size = out->blue_gamma_size = reply->size;
+  free(reply);
+  return out->gamma_size_error;
+}
+
+
+/**
  * Read information about a CRTC
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC
@@ -342,7 +370,58 @@ int libgamma_x_randr_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
-  /* TODO */
+#define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
+  int e = 0;
+  int free_edid;
+  
+  
+  /* Wipe all error indicators. */
+  memset(this, 0, sizeof(libgamma_crtc_information_t));
+  
+  /* We need to free the EDID after us if it is not explicitly requested.  */
+  free_edid = (fields & CRTC_INFO_EDID) == 0;
+  
+  /* Figure out what fields we need to get the data for to get the data for other fields. */
+  if ((fields & (CRTC_INFO_WIDTH_MM_EDID | CRTC_INFO_HEIGHT_MM_EDID | CRTC_INFO_GAMMA)))
+    fields |= CRTC_INFO_EDID;
+  
+  /* FIXME */
+  e |= this->width_mm_error = -1;
+  e |= this->height_mm_error = -1;
+  e |= this->connector_type = -1;
+  e |= this->subpixel_order_error = -1;
+  e |= this->active_error = -1;
+  e |= this->connector_name_error = -1;
+  e |= this->edid_error = -1;
+  e |= this->gamma_error = -1;
+  e |= this->width_mm_edid_error = -1;
+  e |= this->height_mm_edid_error = -1;
+  
+  if ((fields & CRTC_INFO_EDID) == 0)
+    goto cont;
+  e |= get_edid(crtc, this);
+  if (this->edid == NULL)
+    {
+      this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
+      goto cont;
+    }
+  if ((fields & (CRTC_INFO_WIDTH_MM_EDID | CRTC_INFO_HEIGHT_MM_EDID | CRTC_INFO_GAMMA)))
+    e |= libgamma_parse_edid(this, fields);
+  
+ cont:
+  e |= (fields & CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
+  this->gamma_depth = 16;
+  e |= this->gamma_support_error = _E(CRTC_INFO_GAMMA_SUPPORT);
+  
+  /* Free the EDID after us. */
+  if (free_edid)
+    {
+      free(this->edid);
+      this->edid = NULL;
+    }
+  
+  return e ? -1 : 0;
+#undef _E
 }
 
 
