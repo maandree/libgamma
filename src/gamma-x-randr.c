@@ -424,6 +424,41 @@ static int read_output_data(libgamma_crtc_information_t* restrict out, xcb_randr
 
 
 /**
+ * Determine the connector type from the connector name
+ * 
+ * @param  this  The CRTC information to use and extend
+ * @param        Non-zero on error
+ */
+static int get_connector_type(libgamma_crtc_information_t* restrict this)
+{
+  if ((this->connector_type_error = this->connector_name_error))
+    return -1;
+  
+#define __select(name, type)                                           \
+  if (strstr(this->connector_name, name "-") == this->connector_name)  \
+    return this->connector_type = LIBGAMMA_CONNECTOR_TYPE_##type, 0
+  
+  __select ("None",         Unknown);
+  __select ("VGA",          VGA);
+  __select ("DVI-I",        DVII);
+  __select ("DVI-D",        DVID);
+  __select ("DVI-A",        DVIA);
+  __select ("Composite",    Composite);
+  __select ("S-Video",      SVIDEO);
+  __select ("Component",    Component);
+  __select ("LFP",          LFP);
+  __select ("Proprietary",  Unknown);
+  __select ("HDMI",         HDMI);
+  __select ("DisplayPort",  DisplayPort);
+  
+#undef __select
+  
+  this->connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
+  return -1;
+}
+
+
+/**
  * Read information about a CRTC
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC
@@ -455,8 +490,9 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   
   /* FIXME output */
   
-  e |= this->connector_type = -1; /* FIXME */
   e |= this->connector_name_error = -1; /* FIXME */
+  if ((fields & CRTC_INFO_CONNECTOR_TYPE))
+    e |= get_connector_type(this);
   e |= read_output_data(this, output);
   if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM)))
     e |= this->width_mm_error | this->height_mm_error;
