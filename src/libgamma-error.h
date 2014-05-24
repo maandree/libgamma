@@ -252,6 +252,11 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_NOT_CONNECTED  (-41)
 
+/**
+ * Data extraction from a reply from the adjustment method failed, reason unknown
+ */
+#define LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED  (-42)
+
 
 
 /**
@@ -259,7 +264,7 @@ extern const char* libgamma_group_name;
  * If this is lower than the number your program thinks it
  * should be sould update your program for new errors.
  */
-#define LIBGAMMA_ERROR_MIN  (-41)
+#define LIBGAMMA_ERROR_MIN  (-42)
 
 
 

@@ -459,6 +459,45 @@ static int get_connector_type(libgamma_crtc_information_t* restrict this)
 
 
 /**
+ * Get the output name of a CRTC
+ * 
+ * @param   this    Instance of a data structure to fill with the information about the CRTC
+ * @param   output  The CRTC's output's information
+ * @return          Non-zero on error
+ */
+static int get_output_name(libgamma_crtc_information_t* restrict out, xcb_randr_get_output_info_reply_t* restrict output)
+{
+  char* store;
+  uint8_t* name;
+  uint16_t length;
+  size_t i;
+  
+  name = xcb_randr_get_output_info_name(output);
+  length = output->name_len; /* There is no NUL-termination. */
+  if (name == NULL)
+    {
+      out->connector_name_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
+      return -1;
+    }
+  
+  store = malloc(((size_t)length + 1) * sizeof(char));
+  if (store == NULL)
+    {
+      out->connector_name_error = errno;
+      return -1;
+    }
+  
+  /* char is guaranteed to be (u)int_least8_t, but it is only guaranteed to be (u)int8_t
+   * on POSIX, so to be truly portable we will not assume that char is (u)int8_t. */
+  for (i = 0; i < (size_t)length; i++)
+    store[i] = (char)(name[i]);
+  store[length] = '\0';
+  
+  return 0;
+}
+
+
+/**
  * Read information about a CRTC
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC
@@ -494,7 +533,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   
   /* FIXME output */
   
-  e |= this->connector_name_error = -1; /* FIXME */
+  e |= get_output_name(this, output);
   if ((fields & CRTC_INFO_CONNECTOR_TYPE))
     e |= get_connector_type(this);
   e |= read_output_data(this, output);
@@ -510,7 +549,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 	 = this->height_mm_edid_error = LIBGAMMA_NOT_CONNECTED;
       goto cont;
     }
-  e |= get_edid(output, this); /* FIXME */
+  e |= get_edid(this, output); /* FIXME */
   if (this->edid == NULL)
     {
       this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
