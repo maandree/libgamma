@@ -498,6 +498,122 @@ static int get_output_name(libgamma_crtc_information_t* restrict out, xcb_randr_
 
 
 /**
+ * Get the Extended Display Information Data of the monitor connected to the connector of a CRTC
+ * 
+ * @param   out     Instance of a data structure to fill with the information about the CRTC
+ * @param   crtc    The state of the CRTC whose information should be read
+ * @param   output  The CRTC's output
+ * @return          Non-zero on error
+ */
+static int get_edid(libgamma_crtc_information_t* restrict out,
+		    libgamma_crtc_state_t* restrict crtc, xcb_randr_output_t output)
+{
+  xcb_connection_t* connection = crtc->partition->site->data;
+  xcb_randr_list_output_properties_cookie_t prop_cookie;
+  xcb_randr_list_output_properties_reply_t* prop_reply;
+  xcb_atom_t* atoms;
+  xcb_atom_t* atoms_end;
+  xcb_generic_error_t* error;
+  
+  /* Acquire a list of all properties of the output. */
+  prop_cookie = xcb_randr_list_output_properties(connection, output);
+  prop_reply = xcb_randr_list_output_properties_reply(connection, prop_cookie, &error);
+  
+  if (error != NULL)
+    return out->edid_error = translate_error(error->error_code, LIBGAMMA_LIST_PROPERTIES_FAILED, 1);
+  
+  /* Extract the properties form the data structure that holds them, */
+  atoms = xcb_randr_list_output_properties_atoms(prop_reply);
+  /* and get the last one so that we can iterate over them nicely. */
+  atoms_end = atoms + xcb_randr_list_output_properties_atoms_length(prop_reply);
+  
+  if (atoms == NULL)
+    {
+      free(prop_reply);
+      return out->edid_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;;
+    }
+  
+  /* For each property */
+  for (; atoms != atoms_end; atoms++)
+    {
+      xcb_get_atom_name_cookie_t atom_name_cookie;
+      xcb_get_atom_name_reply_t* atom_name_reply;
+      char* atom_name;
+      int atom_name_len;
+      xcb_randr_get_output_property_cookie_t atom_cookie;
+      xcb_randr_get_output_property_reply_t* atom_reply;
+      unsigned char* atom_data;
+      int length;
+      
+      /* Acquire the atom name. */
+      atom_name_cookie = xcb_get_atom_name(connection, *atoms);
+      atom_name_reply = xcb_get_atom_name_reply(connection, atom_name_cookie, &error);
+      if (error)
+	continue;
+      
+      /* Extract the atom name from the data structure that holds it. */
+      atom_name = xcb_get_atom_name_name(atom_name_reply);
+      /* As well as the length of the name; it is not NUL-termianted.*/
+      atom_name_len = xcb_get_atom_name_name_length(atom_name_reply);
+      
+      if (/* Check for errors. */
+	  (atom_name == NULL) || /* (atom_name_len < 1) || */
+	  /* Check that the length is the expected length for the EDID property. */
+	  (atom_name_len != 4) ||
+	  /* Check that the property is the EDID property. */
+	  (atom_name[0] != 'E') || (atom_name[1] != 'D') || (atom_name[2] != 'I') || (atom_name[3] != 'D'))
+	{
+	  free(atom_name_reply);
+	  continue;
+	}
+      
+      /* Acquire the property's value, we know that it is either 128 or 256 byte long. */
+      atom_cookie = xcb_randr_get_output_property(connection, output, *atoms,
+						  XCB_GET_PROPERTY_TYPE_ANY, 0, 256, 0, 0);
+      atom_reply = xcb_randr_get_output_property_reply(connection, atom_cookie, &error);
+      /* (*) EDID version 1.0 through 1.4 define it as 128 bytes long,
+       * but version 2.0 define it as 256 bytes long. However,
+       * version 2.0 is rare(?) and has been deprecated and replaced
+       * by version 1.3 (I guess that is with a new version epoch,
+       * but I do not know.) */ 
+      if (error)
+	{
+	  free(atom_name_reply);
+	  free(prop_reply);
+	  return out->edid_error = LIBGAMMA_PROPERTY_VALUE_QUERY_FAILED;
+	}
+      
+      /* Extract the property's value, */
+      atom_data = xcb_randr_get_output_property_data(atom_reply);
+      /* and its actual length. */
+      length = xcb_randr_get_output_property_data_length(atom_reply);
+      if ((atom_data == NULL) || (length < 1))
+	{
+	  free(atom_reply);
+	  free(atom_name_reply);
+	  free(prop_reply);
+	  return out->edid_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
+	}
+      
+      /* Store the EDID. */
+      out->edid = malloc((size_t)length * sizeof(unsigned char));
+      if (out->edid == NULL)
+	out->edid_error = errno;
+      else
+	memcpy(out->edid, atom_data, (size_t)length * sizeof(unsigned char));
+      
+      free(atom_reply);
+      free(atom_name_reply);
+      free(prop_reply);
+      
+      return out->edid_error;
+    }
+  
+  return out->edid_error = LIBGAMMA_EDID_NOT_FOUND;
+}
+
+
+/**
  * Read information about a CRTC
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC
@@ -533,10 +649,10 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   
   /* FIXME output */
   
-  e |= get_output_name(this, output);
+  e |= get_output_name(this, output_info);
   if ((fields & CRTC_INFO_CONNECTOR_TYPE))
     e |= get_connector_type(this);
-  e |= read_output_data(this, output);
+  e |= read_output_data(this, output_info);
   if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM)))
     e |= this->width_mm_error | this->height_mm_error;
   e |= (fields & CRTC_INFO_SUBPIXEL_ORDER) ? this->subpixel_order_error : 0;
@@ -549,7 +665,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 	 = this->height_mm_edid_error = LIBGAMMA_NOT_CONNECTED;
       goto cont;
     }
-  e |= get_edid(this, output); /* FIXME */
+  e |= get_edid(this, crtc, output);
   if (this->edid == NULL)
     {
       this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;

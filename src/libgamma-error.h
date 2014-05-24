@@ -257,6 +257,21 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED  (-42)
 
+/**
+ * No EDID property was found on the output
+ */
+#define LIBGAMMA_EDID_NOT_FOUND  (-43)
+
+/**
+ * Failed to list properties on the output, reason unknown
+ */
+#define LIBGAMMA_LIST_PROPERTIES_FAILED  (-44)
+
+/**
+ * Failed to query a property's value from the output, reason unknown
+ */
+#define LIBGAMMA_PROPERTY_VALUE_QUERY_FAILED  (-45)
+
 
 
 /**
@@ -264,7 +279,7 @@ extern const char* libgamma_group_name;
  * If this is lower than the number your program thinks it
  * should be sould update your program for new errors.
  */
-#define LIBGAMMA_ERROR_MIN  (-42)
+#define LIBGAMMA_ERROR_MIN  (-45)
 
 
 

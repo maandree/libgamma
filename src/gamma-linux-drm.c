@@ -625,6 +625,7 @@ static int get_edid(libgamma_crtc_state_t* restrict crtc,
     fail_blob:
       drmModeFreeProperty(prop);
     }
+  out->edid_error = LIBGAMMA_EDID_NOT_FOUND;
   return -1;
 }
 
