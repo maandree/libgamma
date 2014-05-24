@@ -506,7 +506,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 	 = this->height_mm_edid_error = LIBGAMMA_NOT_CONNECTED;
       goto cont;
     }
-  e |= get_edid(crtc, this); /* FIXME */
+  e |= get_edid(output, this); /* FIXME */
   if (this->edid == NULL)
     {
       this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
