@@ -320,7 +320,7 @@ typedef struct libgamma_crtc_state
  */
 typedef enum libgamma_connector_type
   {
-    /*
+    /**
      * The adjustment method does not know the connector's type
      * (This could be considered an error)
      */
@@ -343,6 +343,7 @@ typedef enum libgamma_connector_type
     LIBGAMMA_CONNECTOR_TYPE_VIRTUAL,
     LIBGAMMA_CONNECTOR_TYPE_DSI,
     LIBGAMMA_CONNECTOR_TYPE_LFP
+    
   } libgamma_connector_type_t;
 
 /**

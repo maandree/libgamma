@@ -491,7 +491,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   /* Jump if the output information is not required. */
   if ((fields & (CRTC_INFO_ACTIVE | CRTC_INFO_CONNECTOR_NAME)) == 0)
     goto cont;
-    
+  
   /* FIXME output */
   
   e |= this->connector_name_error = -1; /* FIXME */
