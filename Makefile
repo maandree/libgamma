@@ -54,11 +54,13 @@ ifeq ($(DEBUG),y)
 DEBUG_FLAGS += -D'DEBUG'
 endif
 
-# Options for the C compiler.
-C_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
-          -ftree-vrp -fstrict-aliasing -fipa-pure-const -fstack-usage       \
-          -fstrict-overflow -funsafe-loop-optimizations -fno-builtin        \
-	  $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
+# Options for the C compiler for the test.
+TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
+             -ftree-vrp -fstrict-aliasing -fipa-pure-const -fstack-usage       \
+             -fstrict-overflow -funsafe-loop-optimizations -fno-builtin
+
+# Options for the C compiler for the library.
+LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
 
 # Library linking flags for the linker.
 LIBS_LD =
@@ -67,6 +69,14 @@ LIBS_C =
 
 # Object files for the library.
 LIBOBJ = libgamma-facade libgamma-method libgamma-error gamma-helper edid
+
+# Object files for the test.
+TESTOBJ = test
+
+# The version of the library.
+LIB_MAJOR = 1
+LIB_MINOR = 0
+LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
 
 
 # Include configurations from `./configure`.
@@ -77,16 +87,32 @@ include config.mk
 # Build rules.
 
 .PHONY: all
-all: bin/libgamma.so
+all: bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so.$(LIB_MAJOR) bin/libgamma.so bin/test
 
 
-bin/libgamma.so: $(foreach O,$(LIBOBJ),obj/$(O).o)
+bin/libgamma.so.$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/$(O).o)
 	mkdir -p $(shell dirname $@)
-	$(CC) $(C_FLAGS) $(LIBS_LD) -shared -o $@ $^
+	$(CC) $(LIB_FLAGS) $(LIBS_LD) -shared -Wl,-soname,libgamma.so.$(LIB_MAJOR) -o $@ $^
+
+bin/libgamma.so.$(LIB_MAJOR):
+	mkdir -p $(shell dirname $@)
+	ln -s libgamma.so.$(LIB_VERSION) $@
+
+bin/libgamma.so:
+	mkdir -p $(shell dirname $@)
+	ln -s libgamma.so.$(LIB_VERSION) $@
 
 obj/%.o: src/%.c src/*.h
 	mkdir -p $(shell dirname $@)
-	$(CC) $(C_FLAGS) $(LIBS_C) -fPIC -c -o $@ $<
+	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -c -o $@ $<
+
+bin/test: $(foreach O,$(TESTOBJ),obj/$(O).o) bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so
+	mkdir -p $(shell dirname $@)
+	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/$(O).o)
+
+obj/%.o: test/%.c
+	mkdir -p $(shell dirname $@)
+	$(CC) $(TEST_FLAGS) -Isrc -c -o $@ $<
 
 
 # Clean rules.

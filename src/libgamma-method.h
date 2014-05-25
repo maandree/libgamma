@@ -33,17 +33,13 @@
  * This method can be configured and is useful for
  * testing your program's ability to handle errors.
  */
-#ifdef HAVE_GAMMA_METHOD_DUMMY
-# define GAMMA_METHOD_DUMMY  0
-#endif
+#define GAMMA_METHOD_DUMMY  0
 
 /**
  * The identifier for the adjustment method with
  * uses the RandR protocol under the X display server.
  */
-#ifdef HAVE_GAMMA_METHOD_X_RANDR
-# define GAMMA_METHOD_X_RANDR  1
-#endif
+#define GAMMA_METHOD_X_RANDR  1
 
 /**
  * The identifier for the adjustment method with
@@ -53,9 +49,7 @@
  * supported by RandR, however it can only control the
  * primary CRTC per screen (partition).
  */
-#ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-# define GAMMA_METHOD_X_VIDMODE  2
-#endif
+#define GAMMA_METHOD_X_VIDMODE  2
 
 /**
  * The identifier for the Direct Rendering Manager
@@ -68,9 +62,7 @@
  * started while this is running, but it can be
  * started while a display server is running.
  */
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-# define GAMMA_METHOD_LINUX_DRM  3
-#endif
+#define GAMMA_METHOD_LINUX_DRM  3
 
 /**
  * The identifier for the Graphics Device Interface
@@ -78,9 +70,7 @@
  * This method is not well tested; it can be compiled
  * to be available under X.org using a translation layer.
  */
-#ifdef HAVE_GAMMA_METHOD_W32_GDI
-# define GAMMA_METHOD_W32_GDI  4
-#endif
+#define GAMMA_METHOD_W32_GDI  4
 
 /**
  * The identifier for the Core Graphics adjustment
@@ -89,9 +79,7 @@
  * This method is not well tested; it can be compiled
  * to be available under X.org using a translation layer.
  */
-#ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-# define GAMMA_METHOD_QUARTZ_CORE_GRAPHICS  5
-#endif
+#define GAMMA_METHOD_QUARTZ_CORE_GRAPHICS  5
 
 
 /**

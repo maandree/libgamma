@@ -110,7 +110,7 @@ fi
 if [ ${enable_randr} = 1 ]; then
     echo 'LIBOBJ += gamma-x-randr' >&3
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_X_RANDR' >&3
-    echo 'LIBS_LD += $$(pkg-config --cflags xcb xcb-randr)' >&3
+    echo 'LIBS_LD += $$(pkg-config --libs xcb xcb-randr)' >&3
     echo 'LIBS_C += $$(pkg-config --cflags xcb xcb-randr)' >&3
     echo '#define HAVE_GAMMA_METHOD_X_RANDR' >&4
     have_randr='Yes'
@@ -118,7 +118,7 @@ fi
 if [ ${enable_vidmode} = 1 ]; then
     echo 'LIBOBJ += gamma-x-vidmode' >&3
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_X_VIDMODE' >&3
-    echo 'LIBS_LD += $$(pkg-config --cflags x11 xxf86vm)' >&3
+    echo 'LIBS_LD += $$(pkg-config --libs x11 xxf86vm)' >&3
     echo 'LIBS_C += $$(pkg-config --cflags x11 xxf86vm)' >&3
     echo '#define HAVE_GAMMA_METHOD_X_VIDMODE' >&4
     have_vidmode='Yes'
@@ -126,7 +126,7 @@ fi
 if [ ${enable_drm} = 1 ]; then
     echo 'LIBOBJ += gamma-linux-drm' >&3
     echo 'DEFINITIONS += -DHAVE_GAMMA_METHOD_LINUX_DRM' >&3
-    echo 'LIBS_LD += $$(pkg-config --cflags libdrm)' >&3
+    echo 'LIBS_LD += $$(pkg-config --libs libdrm)' >&3
     echo 'LIBS_C += $$(pkg-config --cflags libdrm)' >&3
     echo '#define HAVE_GAMMA_METHOD_LINUX_DRM' >&4
     have_drm='Yes'
