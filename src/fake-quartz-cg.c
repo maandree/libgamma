@@ -35,8 +35,8 @@
 
 #ifndef HAVE_GAMMA_METHOD_X_RANDR
 
-CGError
-CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID* displays_out, uint32_t* count_out)
+CGError CGGetOnlineDisplayList(uint32_t max_size,
+			       CGDirectDisplayID* restrict displays_out, uint32_t* restrict count_out)
 {
   uint32_t i;
   for (i = 0; (i < max_size) && (i < 2); i++)
@@ -46,9 +46,9 @@ CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID* displays_out, uint3
   return kCGErrorSuccess;
 }
 
-CGError
-CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, const CGGammaValue* red,
-			    const CGGammaValue* green, const CGGammaValue* blue)
+
+CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, const CGGammaValue* red,
+				    const CGGammaValue* green, const CGGammaValue* blue)
 {
   (void) display;
   (void) red;
@@ -64,9 +64,10 @@ CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, cons
   return kCGErrorSuccess;
 }
 
-CGError
-CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, CGGammaValue* red,
-			    CGGammaValue* green, CGGammaValue* blue, uint32_t* gamma_size_out)
+
+CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size,
+				    CGGammaValue* restrict red, CGGammaValue* restrict green,
+				    CGGammaValue* restrict blue, uint32_t* restrict gamma_size_out)
 {
   long i;
   (void) display;
@@ -85,21 +86,18 @@ CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, CGGa
   return kCGErrorSuccess;
 }
 
-void
-CGDisplayRestoreColorSyncSettings(void)
+void CGDisplayRestoreColorSyncSettings(void)
 {
   /* Do nothing. */
 }
 
-uint32_t
-CGDisplayGammaTableCapacity(CGDirectDisplayID display)
+uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
 {
   (void) display;
   return 256;
 }
 
-void
-close_fake_quartz(void)
+void close_fake_quartz(void)
 {
   /* Do nothing. */
 }
@@ -112,18 +110,19 @@ close_fake_quartz(void)
 
 
 
-static xcb_connection_t* connection = NULL;
-static xcb_randr_get_screen_resources_current_reply_t* res_reply = NULL;
+static xcb_connection_t* restrict connection = NULL;
+static xcb_randr_get_screen_resources_current_reply_t* restrict res_reply = NULL;
 static uint32_t crtc_count = 0;
-static xcb_randr_crtc_t* crtcs = NULL;
-static uint16_t* original_ramps = NULL;
+static xcb_randr_crtc_t* restrict crtcs = NULL;
+static uint16_t* restrict original_ramps = NULL;
 
 
 
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Waggregate-return"
 
-CGError CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID* displays_out, uint32_t* count_out)
+CGError CGGetOnlineDisplayList(uint32_t max_size,
+			       CGDirectDisplayID* restrict displays_out, uint32_t* restrict count_out)
 {
   uint32_t i;
   
@@ -133,7 +132,7 @@ CGError CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID* displays_ou
       xcb_screen_iterator_t iter;
       xcb_randr_get_screen_resources_current_cookie_t res_cookie;
       xcb_randr_get_crtc_gamma_cookie_t gamma_cookie;
-      xcb_randr_get_crtc_gamma_reply_t* gamma_reply;
+      xcb_randr_get_crtc_gamma_reply_t* restrict gamma_reply;
       
       connection = xcb_connect(NULL, NULL);
       
@@ -228,15 +227,16 @@ CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
 }
 
 
-CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, CGGammaValue* red,
-				    CGGammaValue* green, CGGammaValue* blue, uint32_t* gamma_size_out)
+CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size,
+				    CGGammaValue* restrict red, CGGammaValue* restrict green,
+				    CGGammaValue* restrict blue, uint32_t* restrict gamma_size_out)
 {
   xcb_randr_get_crtc_gamma_cookie_t gamma_cookie;
-  xcb_randr_get_crtc_gamma_reply_t* gamma_reply;
+  xcb_randr_get_crtc_gamma_reply_t* restrict gamma_reply;
   xcb_generic_error_t* error;
-  uint16_t* r_int;
-  uint16_t* g_int;
-  uint16_t* b_int;
+  uint16_t* restrict r_int;
+  uint16_t* restrict g_int;
+  uint16_t* restrict b_int;
   long i;
   
   if (gamma_size != 256)

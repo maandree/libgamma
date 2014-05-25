@@ -185,7 +185,7 @@ int libgamma_translated_ramp_get_(libgamma_crtc_state_t* restrict this,
   size_t n;
   int r;
   libgamma_gamma_ramps_any_t ramps_sys;
-  uint64_t* ramps_full;
+  uint64_t* restrict ramps_full;
   
   if ((r = allocated_any_ramp(&ramps_sys, *ramps, depth_system, &n)))
     return r;
@@ -234,7 +234,7 @@ int libgamma_translated_ramp_set_(libgamma_crtc_state_t* restrict this,
   size_t n;
   int r;
   libgamma_gamma_ramps_any_t ramps_sys;
-  uint64_t* ramps_full;
+  uint64_t* restrict ramps_full;
   
   if ((r = allocated_any_ramp(&ramps_sys, ramps, depth_system, &n)))
     return r;

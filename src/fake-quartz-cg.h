@@ -45,13 +45,15 @@ typedef float CGGammaValue;
 typedef uint32_t CGDirectDisplayID;
 
 
-CGError CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID* displays_out, uint32_t* count_out);
+CGError CGGetOnlineDisplayList(uint32_t max_size,
+			       CGDirectDisplayID* restrict displays_out, uint32_t* restrict count_out);
 
 CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, const CGGammaValue* red,
 				    const CGGammaValue* green, const CGGammaValue* blue);
 
-CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, CGGammaValue* red,
-				    CGGammaValue* green, CGGammaValue* blue, uint32_t* gamma_size_out);
+CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size,
+				    CGGammaValue* restrict red, CGGammaValue* restrict green,
+				    CGGammaValue* restrict blue, uint32_t* restrict gamma_size_out);
 
 void CGDisplayRestoreColorSyncSettings(void);
 

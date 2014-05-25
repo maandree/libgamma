@@ -180,10 +180,10 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
 				     char* restrict site)
 {
   xcb_generic_error_t* error = NULL;
-  xcb_connection_t* connection;
+  xcb_connection_t* restrict connection;
   xcb_randr_query_version_cookie_t cookie;
-  xcb_randr_query_version_reply_t* reply;
-  const xcb_setup_t* setup;
+  xcb_randr_query_version_reply_t* restrict reply;
+  const xcb_setup_t* restrict setup;
   xcb_screen_iterator_t iter;
   
   this->data = connection = xcb_connect(site, NULL);
@@ -285,15 +285,15 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
 {
   int fail_rc = LIBGAMMA_ERRNO_SET;
   xcb_connection_t* restrict connection = site->data;
-  const xcb_setup_t* setup = xcb_get_setup(connection);
-  xcb_screen_t* screen = NULL;
+  const xcb_setup_t* restrict setup = xcb_get_setup(connection);
+  xcb_screen_t* restrict screen = NULL;
   xcb_generic_error_t* error = NULL;
   xcb_screen_iterator_t iter;
   xcb_randr_get_screen_resources_current_cookie_t cookie;
-  xcb_randr_get_screen_resources_current_reply_t* reply;
-  xcb_randr_crtc_t* crtcs;
-  xcb_randr_output_t* outputs;
-  libgamma_x_randr_partition_data_t* data;
+  xcb_randr_get_screen_resources_current_reply_t* restrict reply;
+  xcb_randr_crtc_t* restrict crtcs;
+  xcb_randr_output_t* restrict outputs;
+  libgamma_x_randr_partition_data_t* restrict data;
   size_t i;
   
   if (setup == NULL)
@@ -478,7 +478,7 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, libgam
   xcb_connection_t* restrict connection = crtc->partition->site->data;
   xcb_randr_crtc_t* restrict crtc_id = crtc->data;
   xcb_randr_get_crtc_gamma_size_cookie_t cookie;
-  xcb_randr_get_crtc_gamma_size_reply_t* reply;
+  xcb_randr_get_crtc_gamma_size_reply_t* restrict reply;
   xcb_generic_error_t* error;
   
   out->gamma_size_error = 0;
@@ -588,8 +588,8 @@ static int get_connector_type(libgamma_crtc_information_t* restrict this)
  */
 static int get_output_name(libgamma_crtc_information_t* restrict out, xcb_randr_get_output_info_reply_t* restrict output)
 {
-  char* store;
-  uint8_t* name;
+  char* restrict store;
+  uint8_t* restrict name;
   uint16_t length;
   size_t i;
   
@@ -629,9 +629,9 @@ static int get_output_name(libgamma_crtc_information_t* restrict out, xcb_randr_
 static int get_edid(libgamma_crtc_information_t* restrict out,
 		    libgamma_crtc_state_t* restrict crtc, xcb_randr_output_t output)
 {
-  xcb_connection_t* connection = crtc->partition->site->data;
+  xcb_connection_t* restrict connection = crtc->partition->site->data;
   xcb_randr_list_output_properties_cookie_t prop_cookie;
-  xcb_randr_list_output_properties_reply_t* prop_reply;
+  xcb_randr_list_output_properties_reply_t* restrict prop_reply;
   xcb_atom_t* atoms;
   xcb_atom_t* atoms_end;
   xcb_generic_error_t* error;
@@ -658,12 +658,12 @@ static int get_edid(libgamma_crtc_information_t* restrict out,
   for (; atoms != atoms_end; atoms++)
     {
       xcb_get_atom_name_cookie_t atom_name_cookie;
-      xcb_get_atom_name_reply_t* atom_name_reply;
-      char* atom_name;
+      xcb_get_atom_name_reply_t* restrict atom_name_reply;
+      char* restrict atom_name;
       int atom_name_len;
       xcb_randr_get_output_property_cookie_t atom_cookie;
-      xcb_randr_get_output_property_reply_t* atom_reply;
-      unsigned char* atom_data;
+      xcb_randr_get_output_property_reply_t* restrict atom_reply;
+      unsigned char* restrict atom_data;
       int length;
       
       /* Acquire the atom name. */
@@ -747,10 +747,10 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 {
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   int e = 0;
-  xcb_randr_get_output_info_reply_t* output_info = NULL;
+  xcb_randr_get_output_info_reply_t* restrict output_info = NULL;
   xcb_randr_output_t output;
   int free_edid;
-      
+  
   /* Wipe all error indicators. */
   memset(this, 0, sizeof(libgamma_crtc_information_t));
   

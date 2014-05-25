@@ -86,7 +86,7 @@ typedef double libgamma_gamma_rampsd_fun(double encoding);
  *                    Other values invoke undefined behaviour.
  * @return            The number of element that have been stored in `methods`
  */
-size_t libgamma_list_methods(int* methods, int operation);
+size_t libgamma_list_methods(int* restrict methods, int operation);
 
 /**
  * Return the capabilities of an adjustment method

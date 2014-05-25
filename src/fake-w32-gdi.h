@@ -52,14 +52,15 @@ int GetDeviceCaps(HDC hDC, int nIndex) __attribute__((const));
 #define CM_GAMMA_RAMP 1
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx */
-BOOL SetDeviceGammaRamp(HDC hDC, LPVOID lpRamp);
+BOOL SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp);
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd316946(v=vs.85).aspx */
-BOOL GetDeviceGammaRamp(HDC hDC, LPVOID lpRamp);
+BOOL GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp);
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183490(v=vs.85).aspx */
-HDC CreateDC(LPCTSTR lpszDriver, LPCTSTR lpszDevice, void* lpszOutput, void* lpInitData);
+HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
+	     void* restrict lpszOutput, void* restrict lpInitData);
 #define TEXT(X) ((LPCTSTR)(X))
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183569(v=vs.85).aspx */
@@ -73,7 +74,8 @@ typedef DISPLAY_DEVICE* PDISPLAY_DEVICE;
 #define DISPLAY_DEVICE_ACTIVE 1
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx */
-BOOL EnumDisplayDevices(LPCTSTR lpDevice, DWORD iDevNum, PDISPLAY_DEVICE lpDisplayDevice, DWORD dwFlags);
+BOOL EnumDisplayDevices(LPCTSTR restrict lpDevice, DWORD iDevNum,
+			PDISPLAY_DEVICE restrict lpDisplayDevice, DWORD dwFlags);
 
 
 #endif

@@ -59,7 +59,7 @@ int GetDeviceCaps(HDC hDC, int nIndex)
 }
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx */
-BOOL SetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
+BOOL SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
   (void) hDC;
   (void) lpRamp;
@@ -67,7 +67,7 @@ BOOL SetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
 }
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd316946(v=vs.85).aspx */
-BOOL GetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
+BOOL GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
   (void) hDC;
   (void) lpRamp;
@@ -76,7 +76,8 @@ BOOL GetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183490(v=vs.85).aspx */
-HDC CreateDC(LPCTSTR lpszDriver, LPCTSTR lpszDevice, void* lpszOutput, void* lpInitData)
+HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
+	     void* restrict lpszOutput, void* restrict lpInitData)
 {
   (void) lpszOutput;
   (void) lpInitData;
@@ -88,7 +89,8 @@ HDC CreateDC(LPCTSTR lpszDriver, LPCTSTR lpszDevice, void* lpszOutput, void* lpI
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx */
-BOOL EnumDisplayDevices(LPCTSTR lpDevice, DWORD iDevNum, PDISPLAY_DEVICE lpDisplayDevice, DWORD dwFlags)
+BOOL EnumDisplayDevices(LPCTSTR lpDevice, restrict DWORD iDevNum,
+			PDISPLAY_DEVICE restrict lpDisplayDevice, DWORD dwFlags)
 {
   (void) dwFlags;
   if (lpDevice != NULL)
@@ -121,11 +123,11 @@ BOOL EnumDisplayDevices(LPCTSTR lpDevice, DWORD iDevNum, PDISPLAY_DEVICE lpDispl
 #define GAMMA_RAMP_SIZE  256
 
 
-static xcb_connection_t* connection = NULL;
+static xcb_connection_t* restrict connection = NULL;
 static size_t dc_count = 0;
 static ssize_t crtc_count = -1;
-static xcb_randr_crtc_t* crtcs = NULL;
-static xcb_randr_get_screen_resources_current_reply_t* res_reply = NULL;
+static xcb_randr_crtc_t* restrict crtcs = NULL;
+static xcb_randr_get_screen_resources_current_reply_t* restrict res_reply = NULL;
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144871(v=vs.85).aspx */
@@ -166,7 +168,7 @@ int GetDeviceCaps(HDC hDC, int nIndex)
 # pragma GCC diagnostic ignored "-Waggregate-return"
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx */
-BOOL SetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
+BOOL SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
   xcb_void_cookie_t gamma_cookie =
     xcb_randr_set_crtc_gamma_checked(connection, *(xcb_randr_crtc_t*)hDC, GAMMA_RAMP_SIZE,
@@ -179,10 +181,10 @@ BOOL SetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd316946(v=vs.85).aspx */
-BOOL GetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
+BOOL GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
   xcb_randr_get_crtc_gamma_cookie_t gamma_cookie;
-  xcb_randr_get_crtc_gamma_reply_t* gamma_reply;
+  xcb_randr_get_crtc_gamma_reply_t* restrict gamma_reply;
   xcb_generic_error_t* error;
   
   gamma_cookie = xcb_randr_get_crtc_gamma(connection, *(xcb_randr_crtc_t*)hDC);
@@ -207,7 +209,8 @@ BOOL GetDeviceGammaRamp(HDC hDC, LPVOID lpRamp)
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183490(v=vs.85).aspx */
-HDC CreateDC(LPCTSTR lpszDriver, LPCTSTR lpszDevice, void *lpszOutput, void *lpInitData)
+HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
+	     void* restrict lpszOutput, void* restrict lpInitData)
 {
   int crtc_index = atoi(lpszDevice);
   
@@ -257,7 +260,8 @@ HDC CreateDC(LPCTSTR lpszDriver, LPCTSTR lpszDevice, void *lpszOutput, void *lpI
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx */
-BOOL EnumDisplayDevices(LPCTSTR lpDevice, DWORD iDevNum, PDISPLAY_DEVICE lpDisplayDevice, DWORD dwFlags)
+BOOL EnumDisplayDevices(LPCTSTR restrict lpDevice, DWORD iDevNum,
+			PDISPLAY_DEVICE restrict lpDisplayDevice, DWORD dwFlags)
 {
   size_t count = (size_t)crtc_count;
   (void) dwFlags;

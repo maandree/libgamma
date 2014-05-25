@@ -193,7 +193,7 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
 					    libgamma_site_state_t* restrict site, size_t partition)
 {
   int rc = 0;
-  libgamma_drm_card_data_t* data;
+  libgamma_drm_card_data_t* restrict data;
   char pathname[PATH_MAX];
   
   (void) site;
@@ -413,7 +413,7 @@ int libgamma_linux_drm_crtc_restore(libgamma_crtc_state_t* restrict this)
  * @param   error  Output of the error value to store of error report fields for data that requires the connector
 '* @return         The CRTC's conncetor, `NULL` on error
  */
-static drmModeConnector* find_connector(libgamma_crtc_state_t* restrict this, int* error)
+static drmModeConnector* find_connector(libgamma_crtc_state_t* restrict this, int* restrict error)
 {
   uint32_t crtc_id = (uint32_t)(size_t)(this->data);
   libgamma_drm_card_data_t* restrict card = this->partition->data;
@@ -483,9 +483,9 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, const 
  * @return             Non-zero if at least on error occured
  */
 static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_crtc_information_t* restrict out,
-			       const drmModeConnector* connector, int32_t fields)
+			       const drmModeConnector* restrict connector, int32_t fields)
 {
-  const char* connector_name_base = NULL;
+  const char* restrict connector_name_base = NULL;
   
   /* Get some information that does not require too much work. */
   if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_CONNECTOR_TYPE |
@@ -596,8 +596,8 @@ static int get_edid(libgamma_crtc_state_t* restrict crtc,
   libgamma_drm_card_data_t* restrict card = crtc->partition->data;
   int prop_n = connector->count_props;
   int prop_i;
-  drmModePropertyRes* prop;
-  drmModePropertyBlobRes* blob;
+  drmModePropertyRes* restrict prop;
+  drmModePropertyBlobRes* restrict blob;
   
   for (prop_i = 0; prop_i < prop_n; prop_i++)
     {
@@ -644,7 +644,7 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
 {
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   int e = 0;
-  drmModeConnector* connector;
+  drmModeConnector* restrict connector;
   int require_connector;
   int free_edid;
   int error;

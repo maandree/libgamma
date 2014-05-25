@@ -168,7 +168,7 @@ static int libgamma_list_method_test(int method, int operation)
  *                    Other values invoke undefined behaviour.
  * @return            The number of element that have been stored in `methods`
  */
-size_t libgamma_list_methods(int* methods, int operation)
+size_t libgamma_list_methods(int* restrict methods, int operation)
 {
 #ifdef HAVE_NO_GAMMA_METHODS
   (void) methods;
@@ -268,8 +268,8 @@ void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this,
  */
 char* libgamma_method_default_site(int method)
 {
-  const char* var = libgamma_method_default_site_variable(method);
-  char* env;
+  const char* restrict var = libgamma_method_default_site_variable(method);
+  char* restrict env;
   
   if (var == NULL)
     return NULL;
@@ -860,7 +860,7 @@ void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
  */
 char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t length)
 {
-  char* out = malloc((length * 2 + 1) * sizeof(char));
+  char* restrict out = malloc((length * 2 + 1) * sizeof(char));
   size_t i;
   
   if (out == NULL)
@@ -887,7 +887,7 @@ char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t l
  */
 char* libgamma_behex_edid_uppercase(const unsigned char* restrict edid, size_t length)
 {
-  char* out = malloc((length * 2 + 1) * sizeof(char));
+  char* restrict out = malloc((length * 2 + 1) * sizeof(char));
   size_t i;
   
   if (out == NULL)
@@ -917,7 +917,7 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid)
 #define not_range(lower, V, upper)  ((V < lower) || (upper < V))
 #define is_not_hex(V)  (not_range('0', V, '9') && not_range('a', V, 'f') && not_range('A', V, 'F'))
   
-  unsigned char* out = NULL;
+  unsigned char* restrict out = NULL;
   size_t n = strlen(edid);
   size_t i;
   

@@ -37,7 +37,7 @@
  */
 void libgamma_x_vidmode_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
-  char* display = getenv("DISPLAY");
+  char* restrict display = getenv("DISPLAY");
   this->crtc_information = CRTC_INFO_GAMMA_SIZE
 			 | CRTC_INFO_GAMMA_DEPTH;
   this->default_site_known = (display && *display);
@@ -72,7 +72,7 @@ void libgamma_x_vidmode_method_capabilities(libgamma_method_capabilities_t* rest
 int libgamma_x_vidmode_site_initialise(libgamma_site_state_t* restrict this,
 				       char* restrict site)
 {
-  Display* connection = XOpenDisplay(site);
+  Display* restrict connection = XOpenDisplay(site);
   int _major, _minor, screens;
   if ((this->data = connection) == NULL)
     return LIBGAMMA_OPEN_SITE_FAILED;
@@ -221,7 +221,7 @@ int libgamma_x_vidmode_get_crtc_information(libgamma_crtc_information_t* restric
   this->gamma_size_error = 0;
   if ((fields & CRTC_INFO_GAMMA_SUPPORT))
     {
-      Display* connection = crtc->partition->site->data;
+      Display* restrict connection = crtc->partition->site->data;
       int stops;
       if (!XF86VidModeGetGammaRampSize(connection, (int)(crtc->partition->partition), &stops))
 	this->gamma_size_error = LIBGAMMA_GAMMA_RAMPS_SIZE_QUERY_FAILED;

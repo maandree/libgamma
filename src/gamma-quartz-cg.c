@@ -308,7 +308,7 @@ int libgamma_quartz_cg_get_crtc_information(libgamma_crtc_information_t* restric
 int libgamma_quartz_cg_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					     libgamma_gamma_rampsf_t* restrict ramps)
 {
-  CGDirectDisplayID* crtcs = this->partition->data;
+  CGDirectDisplayID* restrict crtcs = this->partition->data;
   CGDirectDisplayID crtc_id = crtcs[this->crtc];
   uint32_t gamma_size_out;
   CGError r;
@@ -338,7 +338,7 @@ int libgamma_quartz_cg_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict thi
 int libgamma_quartz_cg_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 					     libgamma_gamma_rampsf_t ramps)
 {
-  CGDirectDisplayID* crtcs = this->partition->data;
+  CGDirectDisplayID* restrict crtcs = this->partition->data;
   CGDirectDisplayID crtc_id = crtcs[this->crtc];
   CGError r;
 #ifdef DEBUG
