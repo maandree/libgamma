@@ -49,6 +49,43 @@
 
 
 /**
+ * Data structure for partition data
+ */
+typedef struct libgamma_x_randr_partition_data
+{
+  /**
+   * Mapping from CRTC indices to CRTC identifiers
+   */
+  xcb_randr_crtc_t* crtcs;
+  
+  /**
+   * Mapping from output indices to output identifiers
+   */
+  xcb_randr_output_t* outputs;
+  
+  /**
+   * The number of outputs available
+   */
+  size_t outputs_count;
+  
+  /**
+   * Mapping from CRTC indices to output indices.
+   * CRTC's without an output (should be impossible)
+   * have the value `SIZE_MAX` which is impossible
+   * for an existing mapping.
+   */
+  size_t* crtc_to_output;
+  
+  /**
+   * Screen configuration timestamp
+   */
+  xcb_timestamp_t config_timestamp;
+  
+} libgamma_x_randr_partition_data_t;
+
+
+
+/**
  * Translate an xcb error into a libgamma error
  * 
  * @param   error_code     The xcb error
@@ -215,6 +252,24 @@ int libgamma_x_randr_site_restore(libgamma_site_state_t* restrict this)
 }
 
 
+/**
+ * Duplicate a memory area
+ * 
+ * @param   ptr    The memory aree
+ * @param   bytes  The size, in bytes, of the memory area
+ * @return         A duplication of the memory, `NULL` if zero-length or on error
+ */
+static inline void* memdup(void* restrict ptr, size_t bytes)
+{
+  char* restrict rc;
+  if (bytes == 0)
+    return NULL;
+  if ((rc = malloc(bytes)) == NULL)
+    return NULL;
+  memcpy(rc, ptr, bytes);
+  return rc;
+}
+
 
 /**
  * Initialise an allocated partition state
@@ -228,6 +283,7 @@ int libgamma_x_randr_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict this,
 					  libgamma_site_state_t* restrict site, size_t partition)
 {
+  int fail_rc = LIBGAMMA_ERRNO_SET;
   xcb_connection_t* restrict connection = site->data;
   const xcb_setup_t* setup = xcb_get_setup(connection);
   xcb_screen_t* screen = NULL;
@@ -236,6 +292,8 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
   xcb_randr_get_screen_resources_current_cookie_t cookie;
   xcb_randr_get_screen_resources_current_reply_t* reply;
   xcb_randr_crtc_t* crtcs;
+  xcb_randr_output_t* outputs;
+  libgamma_x_randr_partition_data_t* data;
   size_t i;
   
   if (setup == NULL)
@@ -260,16 +318,74 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
   
   this->crtcs_available = reply->num_crtcs;
   crtcs = xcb_randr_get_screen_resources_current_crtcs(reply);
-  /* Copy the CRTC:s, just so we do not have to keep the reply in memory. */
-  this->data = malloc(reply->num_crtcs * sizeof(xcb_randr_crtc_t));
-  if (this->data == NULL)
+  outputs = xcb_randr_get_screen_resources_current_outputs(reply);
+  if ((crtcs == NULL) || (outputs == NULL))
     {
       free(reply);
-      return LIBGAMMA_ERRNO_SET;
+      return LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
     }
-  memcpy(this->data, crtcs, reply->num_crtcs * sizeof(xcb_randr_crtc_t));
+  
+  /* We use `calloc` because we want `data`'s pointers to be `NULL` if not allocated at `fail`. */
+  data = calloc(1, sizeof(libgamma_x_randr_partition_data_t));
+  if (data == NULL)
+    goto fail;
+  
+  /* Copy the CRTC:s, just so we do not have to keep the reply in memory. */
+  data->crtcs = memdup(crtcs, (size_t)(reply->num_crtcs) * sizeof(xcb_randr_crtc_t));
+  if ((data->crtcs == NULL) && (reply->num_crtcs > 0))
+    goto fail;
+  
+  /* Copy the outputs as well. */
+  data->outputs = memdup(outputs, (size_t)(reply->num_outputs) * sizeof(xcb_randr_output_t));
+  if ((data->outputs == NULL) && (reply->num_outputs > 0))
+    goto fail;
+  
+  data->outputs_count = (size_t)(reply->num_outputs);
+  
+  data->crtc_to_output = malloc((size_t)(reply->num_crtcs) * sizeof(size_t));
+  if (data->crtc_to_output == NULL)
+    goto fail;
+  for (i = 0; i < (size_t)(reply->num_crtcs); i++)
+    data->crtc_to_output[i] = SIZE_MAX;
+  for (i = 0; i < (size_t)(reply->num_outputs); i++)
+    {
+      xcb_randr_get_output_info_cookie_t out_cookie;
+      xcb_randr_get_output_info_reply_t* out_reply;
+      uint16_t j;
+      
+      out_cookie = xcb_randr_get_output_info(connection, outputs[i], reply->config_timestamp);
+      out_reply = xcb_randr_get_output_info_reply(connection, out_cookie, &error);
+      if (error != NULL)
+	{
+	  fail_rc = translate_error(error->error_code, LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED, 0);
+	  goto fail;
+	}
+      
+      for (j = 0; j < reply->num_crtcs; j++)
+	if (crtcs[j] == out_reply->crtc)
+	  {
+	    data->crtc_to_output[j] = i;
+	    break;
+	  }
+      
+      free(out_reply);
+    }
+  
+  data->config_timestamp = reply->config_timestamp;
+  this->data = data;
   free(reply);
   return 0;
+  
+ fail:
+  if (data != NULL)
+    {
+      free(data->crtcs);
+      free(data->outputs);
+      free(data->crtc_to_output);
+      free(data);
+    }
+  free(reply);
+  return fail_rc;
 }
 
 
@@ -280,7 +396,11 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
  */
 void libgamma_x_randr_partition_destroy(libgamma_partition_state_t* restrict this)
 {
-  free(this->data);
+  libgamma_x_randr_partition_data_t* restrict data = this->data;
+  free(data->crtcs);
+  free(data->outputs);
+  free(data->crtc_to_output);
+  free(data);
 }
 
 
@@ -311,7 +431,8 @@ int libgamma_x_randr_partition_restore(libgamma_partition_state_t* restrict this
 int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				     libgamma_partition_state_t* restrict partition, size_t crtc)
 {
-  xcb_randr_crtc_t* crtc_ids = partition->data;
+  libgamma_x_randr_partition_data_t* restrict screen_data = partition->data;
+  xcb_randr_crtc_t* restrict crtc_ids = screen_data->crtcs;
   if (crtc >= partition->crtcs_available)
     return LIBGAMMA_NO_SUCH_CRTC;
   this->data = crtc_ids + crtc;
@@ -626,9 +747,10 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 {
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   int e = 0;
+  xcb_randr_get_output_info_reply_t* output_info = NULL;
+  xcb_randr_output_t output;
   int free_edid;
-  
-  
+      
   /* Wipe all error indicators. */
   memset(this, 0, sizeof(libgamma_crtc_information_t));
   
@@ -647,7 +769,35 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   if ((fields & (CRTC_INFO_ACTIVE | CRTC_INFO_CONNECTOR_NAME)) == 0)
     goto cont;
   
-  /* FIXME output */
+  /* Get connector and connector information. */
+  {
+    xcb_connection_t* restrict connection = crtc->partition->site->data;
+    libgamma_x_randr_partition_data_t* restrict screen_data = crtc->partition->data;
+    size_t output_index = screen_data->crtc_to_output[crtc->crtc];
+    xcb_randr_get_output_info_cookie_t cookie;
+    xcb_generic_error_t* error;
+    if (output_index == SIZE_MAX)
+      {
+	e |= this->edid_error = this->gamma_error = this->width_mm_edid_error
+	   = this->height_mm_edid_error = this->connector_type_error
+	   = this->connector_name_error = this->subpixel_order_error
+	   = this->width_mm_error = this->height_mm_error
+	   = this->active_error = LIBGAMMA_CONNECTOR_UNKNOWN;
+	goto cont;
+      }
+    output = screen_data->outputs[output_index];
+    cookie = xcb_randr_get_output_info(connection, output, screen_data->config_timestamp);
+    output_info = xcb_randr_get_output_info_reply(connection, cookie, &error);
+    if (error != NULL)
+      {
+	e |= this->edid_error = this->gamma_error = this->width_mm_edid_error
+	   = this->height_mm_edid_error = this->connector_type_error
+	   = this->connector_name_error = this->subpixel_order_error
+	   = this->width_mm_error = this->height_mm_error
+	   = this->active_error = LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED;
+	goto cont;
+      }
+  }
   
   e |= get_output_name(this, output_info);
   if ((fields & CRTC_INFO_CONNECTOR_TYPE))
@@ -686,7 +836,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
       this->edid = NULL;
     }
   
-  free(output);
+  free(output_info);
   return e ? -1 : 0;
 #undef _E
 }

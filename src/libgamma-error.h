@@ -272,6 +272,11 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_PROPERTY_VALUE_QUERY_FAILED  (-45)
 
+/**
+ * A request for information on an output failed, reason unknown
+ */
+#define LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED  (-46)
+
 
 
 /**
@@ -279,7 +284,7 @@ extern const char* libgamma_group_name;
  * If this is lower than the number your program thinks it
  * should be sould update your program for new errors.
  */
-#define LIBGAMMA_ERROR_MIN  (-45)
+#define LIBGAMMA_ERROR_MIN  (-46)
 
 
 

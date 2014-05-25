@@ -608,7 +608,10 @@ static int get_edid(libgamma_crtc_state_t* restrict crtc,
 	{
 	  blob = drmModeGetPropertyBlob(card->fd, (uint32_t)(connector->prop_values[prop_i]));
 	  if (blob == NULL)
-	    goto fail_blob;
+	    {
+	      drmModeFreeProperty(prop);
+	      return out->edid_error = LIBGAMMA_PROPERTY_VALUE_QUERY_FAILED;
+	    }
 	  if (blob->data != NULL)
 	    {
 	      out->edid_length = blob->length;
@@ -622,11 +625,9 @@ static int get_edid(libgamma_crtc_state_t* restrict crtc,
 	    }
 	  drmModeFreePropertyBlob(blob);
 	}
-    fail_blob:
       drmModeFreeProperty(prop);
     }
-  out->edid_error = LIBGAMMA_EDID_NOT_FOUND;
-  return -1;
+  return out->edid_error = LIBGAMMA_EDID_NOT_FOUND;
 }
 
 
