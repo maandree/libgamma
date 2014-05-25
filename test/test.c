@@ -18,35 +18,31 @@
 #include <libgamma.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 
 int main(void)
 {
-  int methods[GAMMA_METHOD_COUNT];
-  size_t n = libgamma_list_methods(methods, 0);
+  int* methods = malloc(GAMMA_METHOD_COUNT * sizeof(int));
+  size_t n = libgamma_list_methods(methods, GAMMA_METHOD_COUNT, 0);
   size_t i;
+  
+  if (n > GAMMA_METHOD_COUNT)
+    {
+      printf("Warning: you should to recompile the program, libgamma has been updated.\n");
+      methods = realloc(methods, n * sizeof(int));
+      libgamma_list_methods(methods, n, 0);
+    }
   
   for (i = 0; i < n; i++)
     switch (methods[i])
       {
-      case GAMMA_METHOD_DUMMY:
-	printf("dummy\n");
-	break;
-      case GAMMA_METHOD_X_RANDR:
-	printf("RandR X extension\n");
-	break;
-      case GAMMA_METHOD_X_VIDMODE:
-	printf("VidMode X extension\n");
-	break;
-      case GAMMA_METHOD_LINUX_DRM:
-	printf("Linux DRM\n");
-	break;
-      case GAMMA_METHOD_W32_GDI:
-	printf("Windows GDI\n");
-	break;
-      case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-	printf("Quartz using Core Graphics\n");
-	break;
+      case GAMMA_METHOD_DUMMY:                 printf("dummy\n");                       break;
+      case GAMMA_METHOD_X_RANDR:               printf("RandR X extension\n");           break;
+      case GAMMA_METHOD_X_VIDMODE:             printf("VidMode X extension\n");         break;
+      case GAMMA_METHOD_LINUX_DRM:             printf("Linux DRM\n");                   break;
+      case GAMMA_METHOD_W32_GDI:               printf("Windows GDI\n");                 break;
+      case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  printf("Quartz using Core Graphics\n");  break;
       default:
 #if GAMMA_METHOD_COUNT != 6
 # warning List of adjustment methods is out of date

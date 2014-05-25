@@ -77,6 +77,9 @@ typedef double libgamma_gamma_rampsd_fun(double encoding);
  * List available adjustment methods by their order of preference based on the environment
  * 
  * @param  methods    Output array of methods, should be able to hold `GAMMA_METHOD_COUNT` elements
+ * @þaram  buf_size   The number of elements that fits in `methods`, it should be `GAMMA_METHOD_COUNT`,
+ *                    This is used to avoid writing outside the output buffer if this library adds new
+ *                    adjustment methods without the users of the library recompiling
  * @param  operation  Allowed values:
  *                      0: Methods that the environment suggests will work, excluding fake.
  *                      1: Methods that the environment suggests will work, including fake.
@@ -84,9 +87,10 @@ typedef double libgamma_gamma_rampsd_fun(double encoding);
  *                      3: All real methods.
  *                      4: All methods.
  *                    Other values invoke undefined behaviour.
- * @return            The number of element that have been stored in `methods`
+ * @return            The number of element that have been stored in `methods`, or should
+ *                    have been stored if the buffer was large enought
  */
-size_t libgamma_list_methods(int* restrict methods, int operation);
+size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operation);
 
 /**
  * Return the capabilities of an adjustment method

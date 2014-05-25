@@ -159,6 +159,9 @@ static int libgamma_list_method_test(int method, int operation)
  * List available adjustment methods by their order of preference based on the environment
  * 
  * @param  methods    Output array of methods, should be able to hold `GAMMA_METHOD_COUNT` elements
+ * @þaram  buf_size   The number of elements that fits in `methods`, it should be `GAMMA_METHOD_COUNT`,
+ *                    This is used to avoid writing outside the output buffer if this library adds new
+ *                    adjustment methods without the users of the library recompiling
  * @param  operation  Allowed values:
  *                      0: Methods that the environment suggests will work, excluding fake.
  *                      1: Methods that the environment suggests will work, including fake.
@@ -166,9 +169,10 @@ static int libgamma_list_method_test(int method, int operation)
  *                      3: All real methods.
  *                      4: All methods.
  *                    Other values invoke undefined behaviour.
- * @return            The number of element that have been stored in `methods`
+ * @return            The number of element that have been stored in `methods`, or should
+ *                    have been stored if the buffer was large enought
  */
-size_t libgamma_list_methods(int* restrict methods, int operation)
+size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operation)
 {
 #ifdef HAVE_NO_GAMMA_METHODS
   (void) methods;
@@ -178,28 +182,28 @@ size_t libgamma_list_methods(int* restrict methods, int operation)
   size_t n = 0;
   
 #ifdef HAVE_GAMMA_METHOD_X_RANDR
-  if (libgamma_list_method_test(GAMMA_METHOD_X_RANDR, operation))
-    methods[n++] = GAMMA_METHOD_X_RANDR;
+  if (libgamma_list_method_test(GAMMA_METHOD_X_RANDR, operation) && (n++ < buf_size))
+    methods[n - 1] = GAMMA_METHOD_X_RANDR;
 #endif
 #ifdef HAVE_GAMMA_METHOD_X_VIDMODE
-  if (libgamma_list_method_test(GAMMA_METHOD_X_VIDMODE, operation))
-    methods[n++] = GAMMA_METHOD_X_VIDMODE;
+  if (libgamma_list_method_test(GAMMA_METHOD_X_VIDMODE, operation) && (n++ < buf_size))
+    methods[n - 1] = GAMMA_METHOD_X_VIDMODE;
 #endif
 #ifdef HAVE_GAMMA_METHOD_LINUX_DRM
-  if (libgamma_list_method_test(GAMMA_METHOD_LINUX_DRM, operation))
-    methods[n++] = GAMMA_METHOD_LINUX_DRM;
+  if (libgamma_list_method_test(GAMMA_METHOD_LINUX_DRM, operation) && (n++ < buf_size))
+    methods[n - 1] = GAMMA_METHOD_LINUX_DRM;
 #endif
 #ifdef HAVE_GAMMA_METHOD_W32_GDI
-  if (libgamma_list_method_test(GAMMA_METHOD_W32_GDI, operation))
-    methods[n++] = GAMMA_METHOD_W32_GDI;
+  if (libgamma_list_method_test(GAMMA_METHOD_W32_GDI, operation) && (n++ < buf_size))
+    methods[n - 1] = GAMMA_METHOD_W32_GDI;
 #endif
 #ifdef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-  if (libgamma_list_method_test(GAMMA_METHOD_QUARTZ_CORE_GRAPHICS, operation))
-    methods[n++] = GAMMA_METHOD_QUARTZ_CORE_GRAPHICS;
+  if (libgamma_list_method_test(GAMMA_METHOD_QUARTZ_CORE_GRAPHICS, operation) && (n++ < buf_size))
+    methods[n - 1] = GAMMA_METHOD_QUARTZ_CORE_GRAPHICS;
 #endif
 #ifdef HAVE_GAMMA_METHOD_DUMMY
-  if (libgamma_list_method_test(GAMMA_METHOD_DUMMY, operation))
-    methods[n++] = GAMMA_METHOD_DUMMY;
+  if (libgamma_list_method_test(GAMMA_METHOD_DUMMY, operation) && (n++ < buf_size))
+    methods[n - 1] = GAMMA_METHOD_DUMMY;
 #endif
   
   return n;
