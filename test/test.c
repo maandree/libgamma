@@ -21,6 +21,25 @@
 #include <stdlib.h>
 
 
+static const char* method_name(int method)
+{
+    switch (method)
+      {
+      case GAMMA_METHOD_DUMMY:                 return "dummy";
+      case GAMMA_METHOD_X_RANDR:               return "RandR X extension";
+      case GAMMA_METHOD_X_VIDMODE:             return "VidMode X extension";
+      case GAMMA_METHOD_LINUX_DRM:             return "Linux DRM";
+      case GAMMA_METHOD_W32_GDI:               return "Windows GDI";
+      case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  return "Quartz using Core Graphics";
+      default:
+#if GAMMA_METHOD_COUNT != 6
+# warning List of adjustment methods is out of date
+#endif
+	return "(unknown)";
+      }
+}
+
+
 int main(void)
 {
   int* methods = malloc(GAMMA_METHOD_COUNT * sizeof(int));
@@ -35,21 +54,7 @@ int main(void)
     }
   
   for (i = 0; i < n; i++)
-    switch (methods[i])
-      {
-      case GAMMA_METHOD_DUMMY:                 printf("dummy\n");                       break;
-      case GAMMA_METHOD_X_RANDR:               printf("RandR X extension\n");           break;
-      case GAMMA_METHOD_X_VIDMODE:             printf("VidMode X extension\n");         break;
-      case GAMMA_METHOD_LINUX_DRM:             printf("Linux DRM\n");                   break;
-      case GAMMA_METHOD_W32_GDI:               printf("Windows GDI\n");                 break;
-      case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  printf("Quartz using Core Graphics\n");  break;
-      default:
-#if GAMMA_METHOD_COUNT != 6
-# warning List of adjustment methods is out of date
-#endif
-	printf("(unknown)\n");
-        break;
-      }
+    printf("%s\n", method_name(methods[i]));
   
   return 0;
 }
