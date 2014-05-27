@@ -80,7 +80,7 @@ LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
 
 
 # Include configurations from `./configure`.
-include config.mk
+include .config.mk
 
 
 
@@ -161,5 +161,5 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	-rm -f config.mk src/libgamma-config.h
+	-rm -f .config.mk src/libgamma-config.h
 
