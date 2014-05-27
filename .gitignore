@@ -14,4 +14,12 @@ obj/
 *.o
 /config.mk
 /src/libgamma-config.h
+*.info
+*.pdf
+*.dvi
+*.ps
+*.tar
+*.gz
+*.bz2
+*.xz
 

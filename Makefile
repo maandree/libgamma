@@ -86,8 +86,20 @@ include config.mk
 
 # Build rules.
 
+.PHONY: default
+default: lib test info
+
 .PHONY: all
-all: bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so.$(LIB_MAJOR) bin/libgamma.so bin/test
+all: lib test doc
+
+.PHONY: lib
+lib: bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so.$(LIB_MAJOR) bin/libgamma.so
+
+.PHONY: test
+test: bin/test
+
+.PHONY: doc
+doc: info pdf dvi ps
 
 
 bin/libgamma.so.$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/$(O).o)
@@ -114,12 +126,38 @@ obj/%.o: test/%.c
 	mkdir -p $(shell dirname $@)
 	$(CC) $(TEST_FLAGS) -Isrc -c -o $@ $<
 
+.PHONY: info
+info: libgamma.info
+%.info: info/%.texinfo info/fdl.texinfo
+	makeinfo $<
+
+.PHONY: pdf
+pdf: libgamma.pdf
+%.pdf: info/%.texinfo info/fdl.texinfo
+	mkdir -p obj
+	cd obj ; yes X | texi2pdf ../$<
+	mv obj/$@ $@
+
+.PHONY: dvi
+dvi: libgamma.dvi
+%.dvi: info/%.texinfo info/fdl.texinfo
+	mkdir -p obj
+	cd obj ; yes X | $(TEXI2DVI) ../$<
+	mv obj/$@ $@
+
+.PHONY: ps
+ps: libgamma.ps
+%.ps: info/%.texinfo info/fdl.texinfo
+	mkdir -p obj
+	cd obj ; yes X | texi2pdf --ps ../$<
+	mv obj/$@ $@
+
 
 # Clean rules.
 
 .PHONY: clean
 clean:
-	-rm -rf obj bin
+	-rm -rf obj bin libgamma.{info,pdf,ps,dvi}
 
 .PHONY: distclean
 distclean: clean
