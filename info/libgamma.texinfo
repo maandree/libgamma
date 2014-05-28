@@ -60,7 +60,7 @@ Texts. A copy of the license is included in the section entitled
 @node Overview
 @chapter Overview
 
-@command{libgamma} is a library that aims to
+@command{libgamma} is a C library that aims to
 abstract away the display server when adjusting
 the colours curves for monitors via gamma ramps,
 and to be cross-platform.
