@@ -25,13 +25,6 @@ LICENSEDIR ?= $(DATADIR)/licenses
 PKGNAME ?= libgamma
 
 
-# Optimisation level (and debug flags.)
-ifeq ($(DEBUG),y)
-OPTIMISE = -Og -g
-else
-OPTIMISE = -Ofast
-endif
-
 # Enabled warnings.
 WARN = -Wall -Wextra -pedantic -Wdouble-promotion -Wformat=2 -Winit-self       \
        -Wmissing-include-dirs -Wtrampolines -Wfloat-equal -Wshadow             \
@@ -47,20 +40,6 @@ WARN = -Wall -Wextra -pedantic -Wdouble-promotion -Wformat=2 -Winit-self       \
 
 # The C standard used in the code.
 STD = c99
-
-# C compiler debug flags.
-DEBUG_FLAGS =
-ifeq ($(DEBUG),y)
-DEBUG_FLAGS += -D'DEBUG'
-endif
-
-# Options for the C compiler for the test.
-TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
-             -ftree-vrp -fstrict-aliasing -fipa-pure-const -fstack-usage       \
-             -fstrict-overflow -funsafe-loop-optimizations -fno-builtin
-
-# Options for the C compiler for the library.
-LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
 
 # Library linking flags for the linker.
 LIBS_LD =
@@ -78,9 +57,29 @@ LIB_MAJOR = 1
 LIB_MINOR = 0
 LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
 
-
 # Include configurations from `./configure`.
 include .config.mk
+
+# Optimisation level (and debug flags.)
+ifeq ($(DEBUG),y)
+OPTIMISE = -Og -g
+else
+OPTIMISE = -Ofast
+endif
+
+# C compiler debug flags.
+DEBUG_FLAGS =
+ifeq ($(DEBUG),y)
+DEBUG_FLAGS += -D'DEBUG'
+endif
+
+# Options for the C compiler for the test.
+TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
+             -ftree-vrp -fstrict-aliasing -fipa-pure-const -fstack-usage       \
+             -fstrict-overflow -funsafe-loop-optimizations -fno-builtin
+
+# Options for the C compiler for the library.
+LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
 
 
 
