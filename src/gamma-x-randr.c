@@ -37,34 +37,34 @@
 
 
 /**
- * The major version of RandR the library expects
+ * The major version of RandR the library expects.
  */
 #define RANDR_VERSION_MAJOR  1
 
 /**
- * The minor version of RandR the library expects
+ * The minor version of RandR the library expects.
  */
 #define RANDR_VERSION_MINOR  3
 
 
 
 /**
- * Data structure for partition data
+ * Data structure for partition data.
  */
 typedef struct libgamma_x_randr_partition_data
 {
   /**
-   * Mapping from CRTC indices to CRTC identifiers
+   * Mapping from CRTC indices to CRTC identifiers.
    */
   xcb_randr_crtc_t* crtcs;
   
   /**
-   * Mapping from output indices to output identifiers
+   * Mapping from output indices to output identifiers.
    */
   xcb_randr_output_t* outputs;
   
   /**
-   * The number of outputs available
+   * The number of outputs available.
    */
   size_t outputs_count;
   
@@ -77,7 +77,7 @@ typedef struct libgamma_x_randr_partition_data
   size_t* crtc_to_output;
   
   /**
-   * Screen configuration timestamp
+   * Screen configuration timestamp.
    */
   xcb_timestamp_t config_timestamp;
   
@@ -86,11 +86,11 @@ typedef struct libgamma_x_randr_partition_data
 
 
 /**
- * Translate an xcb error into a libgamma error
+ * Translate an xcb error into a libgamma error.
  * 
- * @param   error_code     The xcb error
- * @param   default_error  The libgamma error to use if the xcb error is not recognised
- * @return                 The libgamma error
+ * @param   error_code     The xcb error.
+ * @param   default_error  The libgamma error to use if the xcb error is not recognised.
+ * @return                 The libgamma error.
  */
 static int translate_error_(int error_code, int default_error)
 {
@@ -110,12 +110,12 @@ static int translate_error_(int error_code, int default_error)
 
 
 /**
- * Translate an xcb error into a libgamma error
+ * Translate an xcb error into a libgamma error.
  * 
- * @param   error_code     The xcb error
- * @param   default_error  The libgamma error to use if the xcb error is not recognised
- * @param   return_errno   Whether an `errno` value may be returned
- * @return                 The libgamma error
+ * @param   error_code     The xcb error.
+ * @param   default_error  The libgamma error to use if the xcb error is not recognised.
+ * @param   return_errno   Whether an `errno` value may be returned.
+ * @return                 The libgamma error.
  */
 static int translate_error(int error_code, int default_error, int return_errno)
 {
@@ -125,9 +125,9 @@ static int translate_error(int error_code, int default_error, int return_errno)
 
 
 /**
- * Return the capabilities of the adjustment method
+ * Return the capabilities of the adjustment method.
  * 
- * @param  this  The data structure to fill with the method's capabilities
+ * @param  this  The data structure to fill with the method's capabilities.
  */
 void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
@@ -164,9 +164,9 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
 
 
 /**
- * Initialise an allocated site state
+ * Initialise an allocated site state.
  * 
- * @param   this    The site state to initialise
+ * @param   this    The site state to initialise.
  * @param   site    The site identifier, unless it is `NULL` it must a
  *                  `free`:able. One the state is destroyed the library
  *                  will attempt to free it. There you should not free
@@ -174,7 +174,7 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
  *                  or allocate on the stack. Note however that it will
  *                  not be free:d if this function fails.
  * @return          Zero on success, otherwise (negative) the value of an
- *                  error identifier provided by this library
+ *                  error identifier provided by this library.
  */
 int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
 				     char* restrict site)
@@ -228,9 +228,9 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
 
 
 /**
- * Release all resources held by a site state
+ * Release all resources held by a site state.
  * 
- * @param  this  The site state
+ * @param  this  The site state.
  */
 void libgamma_x_randr_site_destroy(libgamma_site_state_t* restrict this)
 {
@@ -239,11 +239,11 @@ void libgamma_x_randr_site_destroy(libgamma_site_state_t* restrict this)
 
 
 /**
- * Restore the gamma ramps all CRTCS with a site to the system settings
+ * Restore the gamma ramps all CRTC:s with a site to the system settings.
  * 
- * @param   this  The site state
+ * @param   this  The site state.
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library
+ *                error identifier provided by this library.
  */
 int libgamma_x_randr_site_restore(libgamma_site_state_t* restrict this)
 {
@@ -253,11 +253,11 @@ int libgamma_x_randr_site_restore(libgamma_site_state_t* restrict this)
 
 
 /**
- * Duplicate a memory area
+ * Duplicate a memory area.
  * 
- * @param   ptr    The memory aree
- * @param   bytes  The size, in bytes, of the memory area
- * @return         A duplication of the memory, `NULL` if zero-length or on error
+ * @param   ptr    The memory aree.
+ * @param   bytes  The size, in bytes, of the memory area.
+ * @return         A duplication of the memory, `NULL` if zero-length or on error.
  */
 static inline void* memdup(void* restrict ptr, size_t bytes)
 {
@@ -272,13 +272,13 @@ static inline void* memdup(void* restrict ptr, size_t bytes)
 
 
 /**
- * Initialise an allocated partition state
+ * Initialise an allocated partition state.
  * 
- * @param   this       The partition state to initialise
- * @param   site       The site state for the site that the partition belongs to
- * @param   partition  The the index of the partition within the site
+ * @param   this       The partition state to initialise.
+ * @param   site       The site state for the site that the partition belongs to.
+ * @param   partition  The the index of the partition within the site.
  * @return             Zero on success, otherwise (negative) the value of an
- *                     error identifier provided by this library
+ *                     error identifier provided by this library.
  */
 int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict this,
 					  libgamma_site_state_t* restrict site, size_t partition)
@@ -390,9 +390,9 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
 
 
 /**
- * Release all resources held by a partition state
+ * Release all resources held by a partition state.
  * 
- * @param  this  The partition state
+ * @param  this  The partition state.
  */
 void libgamma_x_randr_partition_destroy(libgamma_partition_state_t* restrict this)
 {
@@ -405,11 +405,11 @@ void libgamma_x_randr_partition_destroy(libgamma_partition_state_t* restrict thi
 
 
 /**
- * Restore the gamma ramps all CRTCS with a partition to the system settings
+ * Restore the gamma ramps all CRTC:s with a partition to the system settings.
  * 
- * @param   this  The partition state
+ * @param   this  The partition state.
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library
+ *                error identifier provided by this library.
  */
 int libgamma_x_randr_partition_restore(libgamma_partition_state_t* restrict this)
 {
@@ -420,13 +420,13 @@ int libgamma_x_randr_partition_restore(libgamma_partition_state_t* restrict this
 
 
 /**
- * Initialise an allocated CRTC state
+ * Initialise an allocated CRTC state.
  * 
- * @param   this       The CRTC state to initialise
- * @param   partition  The partition state for the partition that the CRTC belongs to
- * @param   crtc       The the index of the CRTC within the site
+ * @param   this       The CRTC state to initialise.
+ * @param   partition  The partition state for the partition that the CRTC belongs to.
+ * @param   crtc       The the index of the CRTC within the site.
  * @return             Zero on success, otherwise (negative) the value of an
- *                     error identifier provided by this library
+ *                     error identifier provided by this library.
  */
 int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				     libgamma_partition_state_t* restrict partition, size_t crtc)
@@ -441,9 +441,9 @@ int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Release all resources held by a CRTC state
+ * Release all resources held by a CRTC state.
  * 
- * @param  this  The CRTC state
+ * @param  this  The CRTC state.
  */
 void libgamma_x_randr_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
@@ -452,11 +452,11 @@ void libgamma_x_randr_crtc_destroy(libgamma_crtc_state_t* restrict this)
 
 
 /**
- * Restore the gamma ramps for a CRTC to the system settings for that CRTC
+ * Restore the gamma ramps for a CRTC to the system settings for that CRTC.
  * 
- * @param   this  The CRTC state
+ * @param   this  The CRTC state.
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library
+ *                error identifier provided by this library.
  */
 int libgamma_x_randr_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
@@ -467,11 +467,11 @@ int libgamma_x_randr_crtc_restore(libgamma_crtc_state_t* restrict this)
 
 
 /**
- * Get the gamma ramp size of a CRTC
+ * Get the gamma ramp size of a CRTC.
  * 
- * @param   this  Instance of a data structure to fill with the information about the CRTC
- * @param   crtc  The state of the CRTC whose information should be read
- * @return        Non-zero on error
+ * @param   this  Instance of a data structure to fill with the information about the CRTC.
+ * @param   crtc  The state of the CRTC whose information should be read.
+ * @return        Non-zero on error.
  */
 static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, libgamma_crtc_state_t* restrict crtc)
 {
@@ -495,11 +495,11 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, libgam
 
 
 /**
- * Read information from the CRTC's output
+ * Read information from the CRTC's output.
  * 
- * @param   out     Instance of a data structure to fill with the information about the CRTC
- * @param   output  The CRTC's output information
- * @return          Non-zero if at least on error occured
+ * @param   out     Instance of a data structure to fill with the information about the CRTC.
+ * @param   output  The CRTC's output information.
+ * @return          Non-zero if at least on error occured.
  */
 static int read_output_data(libgamma_crtc_information_t* restrict out, xcb_randr_get_output_info_reply_t* restrict output)
 {
@@ -545,10 +545,10 @@ static int read_output_data(libgamma_crtc_information_t* restrict out, xcb_randr
 
 
 /**
- * Determine the connector type from the connector name
+ * Determine the connector type from the connector name.
  * 
- * @param  this  The CRTC information to use and extend
- * @param        Non-zero on error
+ * @param  this  The CRTC information to use and extend.
+ * @param        Non-zero on error.
  */
 static int get_connector_type(libgamma_crtc_information_t* restrict this)
 {
@@ -580,11 +580,11 @@ static int get_connector_type(libgamma_crtc_information_t* restrict this)
 
 
 /**
- * Get the output name of a CRTC
+ * Get the output name of a CRTC.
  * 
- * @param   this    Instance of a data structure to fill with the information about the CRTC
- * @param   output  The CRTC's output's information
- * @return          Non-zero on error
+ * @param   this    Instance of a data structure to fill with the information about the CRTC.
+ * @param   output  The CRTC's output's information.
+ * @return          Non-zero on error.
  */
 static int get_output_name(libgamma_crtc_information_t* restrict out, xcb_randr_get_output_info_reply_t* restrict output)
 {
@@ -619,12 +619,12 @@ static int get_output_name(libgamma_crtc_information_t* restrict out, xcb_randr_
 
 
 /**
- * Get the Extended Display Information Data of the monitor connected to the connector of a CRTC
+ * Get the Extended Display Information Data of the monitor connected to the connector of a CRTC.
  * 
- * @param   out     Instance of a data structure to fill with the information about the CRTC
- * @param   crtc    The state of the CRTC whose information should be read
- * @param   output  The CRTC's output
- * @return          Non-zero on error
+ * @param   out     Instance of a data structure to fill with the information about the CRTC.
+ * @param   crtc    The state of the CRTC whose information should be read.
+ * @param   output  The CRTC's output.
+ * @return          Non-zero on error.
  */
 static int get_edid(libgamma_crtc_information_t* restrict out,
 		    libgamma_crtc_state_t* restrict crtc, xcb_randr_output_t output)
@@ -735,12 +735,12 @@ static int get_edid(libgamma_crtc_information_t* restrict out,
 
 
 /**
- * Read information about a CRTC
+ * Read information about a CRTC.
  * 
- * @param   this    Instance of a data structure to fill with the information about the CRTC
- * @param   crtc    The state of the CRTC whose information should be read
- * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
- * @return          Zero on success, -1 on error. On error refer to the error reports in `this`.
+ * @param   this    Instance of a data structure to fill with the information about the CRTC.
+ * @param   crtc    The state of the CRTC whose information should be read.
+ * @param   fields  OR:ed identifiers for the information about the CRTC that should be read.
+ * @return          Zero on success, -1 on error. On error refer to the error reports in `this`..
  */
 int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
@@ -843,12 +843,12 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 
 
 /**
- * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version
+ * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to fill with the current values.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t* restrict ramps)
@@ -886,12 +886,12 @@ int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, 16-bit gamma-depth version
+ * Set the gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t ramps)

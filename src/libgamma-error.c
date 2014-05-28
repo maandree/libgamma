@@ -23,13 +23,13 @@
 
 
 /**
- * Group that the user needs to be a member of if `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned
+ * Group that the user needs to be a member of if `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned.
  */
 gid_t libgamma_group_gid = 0;
 
 /**
  * Group that the user needs to be a member of if `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned,
- * `NULL` if the name of the group `libgamma_group_gid` cannot be determined
+ * `NULL` if the name of the group `libgamma_group_gid` cannot be determined.
  */
 const char* libgamma_group_name = NULL;
 

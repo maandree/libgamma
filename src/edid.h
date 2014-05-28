@@ -24,13 +24,13 @@
 
 
 /**
- * Parse the EDID of a monitor
+ * Parse the EDID of a monitor.
  * 
  * @param   this    Instance of a data structure to fill with the information about the EDID.
  *                  It must contain the EDID and its length.
  * @param   feilds  OR:ed identifiers for the information about the EDID that should be parsed.
  *                  Fields that do not have to do with EDID are ignored.
- * @return          Non-zero on error
+ * @return          Non-zero on error.
  */
 int libgamma_parse_edid(libgamma_crtc_information_t* restrict out, int32_t fields);
 

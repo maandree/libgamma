@@ -29,12 +29,12 @@
 
 
 /**
- * Convert any set of gamma ramps into a 64-bit integer array with all channels
+ * Convert any set of gamma ramps into a 64-bit integer array with all channels.
  * 
- * @param  depth  The depth of the gamma ramp, `-1` for `float`, `-2` for `double`
- * @param  n      The grand size of gamma ramps (sum of all channels' sizes)
- * @param  out    Output array
- * @param  in     Input gamma ramps
+ * @param  depth  The depth of the gamma ramp, `-1` for `float`, `-2` for `double`.
+ * @param  n      The grand size of gamma ramps (sum of all channels' sizes.)
+ * @param  out    Output array.
+ * @param  in     Input gamma ramps.
  */
 static void translate_to_64(signed depth, size_t n, uint64_t* restrict out, libgamma_gamma_ramps_any_t in)
 {
@@ -74,12 +74,12 @@ static void translate_to_64(signed depth, size_t n, uint64_t* restrict out, libg
 
 
 /**
- * Undo the actions of `translate_to_64`
+ * Undo the actions of `translate_to_64`.
  * 
- * @param  depth  The depth of the gamma ramp, `-1` for `float`, `-2` for `double`
- * @param  n      The grand size of gamma ramps (sum of all channels' sizes)
- * @param  out    Output gamma ramps
- * @param  in     Input array, may be modified
+ * @param  depth  The depth of the gamma ramp, `-1` for `float`, `-2` for `double`.
+ * @param  n      The grand size of gamma ramps (sum of all channels' sizes.)
+ * @param  out    Output gamma ramps.
+ * @param  in     Input array, may be modified.
  */
 static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t out, uint64_t* restrict in)
 {
@@ -122,15 +122,15 @@ static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t
 
 
 /**
- * Allocate and initalise a gamma ramp with any depth
+ * Allocate and initalise a gamma ramp with any depth.
  * 
- * @param   ramps_sys  Output gamma ramps
- * @param   ramps      The gamma ramps whose sizes should be duplicated
+ * @param   ramps_sys  Output gamma ramps.
+ * @param   ramps      The gamma ramps whose sizes should be duplicated.
  * @param   depth      The depth of the gamma ramps to allocate,
- *                     `-1` for `float`, `-2` for `double`
- * @param   elements   Output reference for the grand size of the gamma ramps
+ *                     `-1` for `float`, `-2` for `double`.
+ * @param   elements   Output reference for the grand size of the gamma ramps.
  * @return             Zero on success, otherwise (negative) the value of an
- *                     error identifier provided by this library
+ *                     error identifier provided by this library.
  */
 static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
 			      libgamma_gamma_ramps_any_t ramps, signed depth, size_t* restrict elements)
@@ -163,19 +163,19 @@ static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
 
 
 /**
- * Get current the gamma ramps for a CRTC, re-encoding version
+ * Get current the gamma ramps for a CRTC, re-encoding version.
  * 
- * @param   this          The CRTC state
- * @param   ramps         The gamma ramps to fill with the current values
+ * @param   this          The CRTC state.
+ * @param   ramps         The gamma ramps to fill with the current values.
  * @param   depth_user    The depth of the gamma ramps that are provided by the user,
- *                        `-1` for `float`, `-2` for `double`
+ *                        `-1` for `float`, `-2` for `double`.
  * @param   depth_system  The depth of the gamma ramps as required by the adjustment method,
- *                        `-1` for `float`, `-2` for `double`
+ *                        `-1` for `float`, `-2` for `double`.
  * @param   fun           Function that is to be used read the ramps, its parameters have
  *                        the same function as those of this function with the same names,
- *                        and the return value too is identical
+ *                        and the return value too is identical.
  * @return                Zero on success, otherwise (negative) the value of an
- *                        error identifier provided by this library
+ *                        error identifier provided by this library.
  */
 int libgamma_translated_ramp_get_(libgamma_crtc_state_t* restrict this,
 				  libgamma_gamma_ramps_any_t* restrict ramps,
@@ -212,19 +212,19 @@ int libgamma_translated_ramp_get_(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, re-encoding version
+ * Set the gamma ramps for a CRTC, re-encoding version.
  * 
- * @param   this          The CRTC state
- * @param   ramps         The gamma ramps to apply
+ * @param   this          The CRTC state.
+ * @param   ramps         The gamma ramps to apply.
  * @param   depth_user    The depth of the gamma ramps that are provided by the user,
- *                        `-1` for `float`, `-2` for `double`
+ *                        `-1` for `float`, `-2` for `double`.
  * @param   depth_system  The depth of the gamma ramps as required by the adjustment method,
- *                        `-1` for `float`, `-2` for `double`
+ *                        `-1` for `float`, `-2` for `double`.
  * @param   fun           Function that is to be used write the ramps, its parameters have
  *                        the same function as those of this function with the same names,
- *                        and the return value too is identical
+ *                        and the return value too is identical.
  * @return                Zero on success, otherwise (negative) the value of an
- *                        error identifier provided by this library
+ *                        error identifier provided by this library.
  */
 int libgamma_translated_ramp_set_(libgamma_crtc_state_t* restrict this,
 				  libgamma_gamma_ramps_any_t ramps,

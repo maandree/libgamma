@@ -80,10 +80,10 @@
 #ifdef HAVE_GAMMA_METHODS
 # ifdef HAVE_GAMMA_METHOD_LINUX_DRM
 /**
- * Test whether a file descriptor refers to a VT
+ * Test whether a file descriptor refers to a VT.
  * 
- * @param   fd  The file descriptor
- * @return      Whether the file descriptor refers to a VT
+ * @param   fd  The file descriptor.
+ * @return      Whether the file descriptor refers to a VT.
  */
 static int libgamma_is_vt_proper(int fd)
 {
@@ -103,9 +103,9 @@ static int libgamma_is_vt_proper(int fd)
 
 
 /**
- * Test the availability of an adjustment method
+ * Test the availability of an adjustment method.
  * 
- * @param  method     The adjustment method
+ * @param  method     The adjustment method.
  * @param  operation  Allowed values:
  *                      0: Pass if the environment suggests it will work but is not fake.
  *                      1: Pass if the environment suggests it will work.
@@ -113,7 +113,7 @@ static int libgamma_is_vt_proper(int fd)
  *                      3: Pass if real.
  *                      4: Always pass.
  *                    Other values invoke undefined behaviour.
- * @return            Whether the test passed
+ * @return            Whether the test passed.
  */
 static int libgamma_list_method_test(int method, int operation)
 {
@@ -156,12 +156,12 @@ static int libgamma_list_method_test(int method, int operation)
 
 
 /**
- * List available adjustment methods by their order of preference based on the environment
+ * List available adjustment methods by their order of preference based on the environment.
  * 
  * @param  methods    Output array of methods, should be able to hold `GAMMA_METHOD_COUNT` elements
- * @þaram  buf_size   The number of elements that fits in `methods`, it should be `GAMMA_METHOD_COUNT`,
+ * @param  buf_size   The number of elements that fits in `methods`, it should be `GAMMA_METHOD_COUNT`,
  *                    This is used to avoid writing outside the output buffer if this library adds new
- *                    adjustment methods without the users of the library recompiling
+ *                    adjustment methods without the users of the library recompiling.
  * @param  operation  Allowed values:
  *                      0: Methods that the environment suggests will work, excluding fake.
  *                      1: Methods that the environment suggests will work, including fake.
@@ -170,7 +170,7 @@ static int libgamma_list_method_test(int method, int operation)
  *                      4: All methods.
  *                    Other values invoke undefined behaviour.
  * @return            The number of element that have been stored in `methods`, or should
- *                    have been stored if the buffer was large enought
+ *                    have been stored if the buffer was large enought.
  */
 size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operation)
 {
@@ -212,10 +212,10 @@ size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operati
 
 
 /**
- * Return the capabilities of an adjustment method
+ * Return the capabilities of an adjustment method.
  * 
- * @param  this    The data structure to fill with the method's capabilities
- * @param  method  The adjustment method (display server and protocol)
+ * @param  this    The data structure to fill with the method's capabilities.
+ * @param  method  The adjustment method (display server and protocol.)
  */
 void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this, int method)
 {
@@ -263,9 +263,9 @@ void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this,
 
 
 /**
- * Return the capabilities of an adjustment method
+ * Return the capabilities of an adjustment method.
  * 
- * @param   method  The adjustment method (display server and protocol)
+ * @param   method  The adjustment method (display server and protocol.)
  * @return          The default site, `NULL` if it cannot be determined or
  *                  if multiple sites are not supported by the adjustment
  *                  method. This value should not be free:d.
@@ -287,9 +287,9 @@ char* libgamma_method_default_site(int method)
 
 
 /**
- * Return the capabilities of an adjustment method
+ * Return the capabilities of an adjustment method.
  * 
- * @param   method  The adjustment method (display server and protocol)
+ * @param   method  The adjustment method (display server and protocol.)
  * @return          The environ variables that is used to determine the
  *                  default site. `NULL` if there is none, that is, if
  *                  the method does not support multiple sites.
@@ -317,10 +317,10 @@ const char* libgamma_method_default_site_variable(int method)
 
 
 /**
- * Initialise an allocated site state
+ * Initialise an allocated site state.
  * 
- * @param   this    The site state to initialise
- * @param   method  The adjustment method (display server and protocol)
+ * @param   this    The site state to initialise.
+ * @param   method  The adjustment method (display server and protocol.)
  * @param   site    The site identifier, unless it is `NULL` it must a
  *                  `free`:able. One the state is destroyed the library
  *                  will attempt to free it. There you should not free
@@ -328,7 +328,7 @@ const char* libgamma_method_default_site_variable(int method)
  *                  or allocate on the stack. Note however that it will
  *                  not be free:d if this function fails.
  * @return          Zero on success, otherwise (negative) the value of an
- *                  error identifier provided by this library
+ *                  error identifier provided by this library.
  */
 int libgamma_site_initialise(libgamma_site_state_t* restrict this,
 			     int method, char* restrict site)
@@ -370,9 +370,9 @@ int libgamma_site_initialise(libgamma_site_state_t* restrict this,
 
 
 /**
- * Release all resources held by a site state
+ * Release all resources held by a site state.
  * 
- * @param  this  The site state
+ * @param  this  The site state.
  */
 void libgamma_site_destroy(libgamma_site_state_t* restrict this)
 {
@@ -420,9 +420,9 @@ void libgamma_site_destroy(libgamma_site_state_t* restrict this)
 
 /**
  * Release all resources held by a site state
- * and free the site state pointer
+ * and free the site state pointer.
  * 
- * @param  this  The site state
+ * @param  this  The site state.
  */
 void libgamma_site_free(libgamma_site_state_t* restrict this)
 {
@@ -432,11 +432,11 @@ void libgamma_site_free(libgamma_site_state_t* restrict this)
 
 
 /**
- * Restore the gamma ramps all CRTCS with a site to the system settings
+ * Restore the gamma ramps all CRTC:s with a site to the system settings.
  * 
- * @param   this  The site state
+ * @param   this  The site state.
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library
+ *                error identifier provided by this library.
  */
 int libgamma_site_restore(libgamma_site_state_t* restrict this)
 {
@@ -475,13 +475,13 @@ int libgamma_site_restore(libgamma_site_state_t* restrict this)
 
 
 /**
- * Initialise an allocated partition state
+ * Initialise an allocated partition state.
  * 
- * @param   this       The partition state to initialise
- * @param   site       The site state for the site that the partition belongs to
- * @param   partition  The the index of the partition within the site
+ * @param   this       The partition state to initialise.
+ * @param   site       The site state for the site that the partition belongs to.
+ * @param   partition  The the index of the partition within the site.
  * @return             Zero on success, otherwise (negative) the value of an
- *                     error identifier provided by this library
+ *                     error identifier provided by this library.
  */
 int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
 				  libgamma_site_state_t* restrict site, size_t partition)
@@ -523,9 +523,9 @@ int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
 
 
 /**
- * Release all resources held by a partition state
+ * Release all resources held by a partition state.
  * 
- * @param  this  The partition state
+ * @param  this  The partition state.
  */
 void libgamma_partition_destroy(libgamma_partition_state_t* restrict this)
 {
@@ -572,9 +572,9 @@ void libgamma_partition_destroy(libgamma_partition_state_t* restrict this)
 
 /**
  * Release all resources held by a partition state
- * and free the partition state pointer
+ * and free the partition state pointer.
  * 
- * @param  this  The partition state
+ * @param  this  The partition state.
  */
 void libgamma_partition_free(libgamma_partition_state_t* restrict this)
 {
@@ -584,11 +584,11 @@ void libgamma_partition_free(libgamma_partition_state_t* restrict this)
 
 
 /**
- * Restore the gamma ramps all CRTCS with a partition to the system settings
+ * Restore the gamma ramps all CRTC:s with a partition to the system settings.
  * 
- * @param   this  The partition state
+ * @param   this  The partition state.
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library
+ *                error identifier provided by this library.
  */
 int libgamma_partition_restore(libgamma_partition_state_t* restrict this)
 {
@@ -627,13 +627,13 @@ int libgamma_partition_restore(libgamma_partition_state_t* restrict this)
 
 
 /**
- * Initialise an allocated CRTC state
+ * Initialise an allocated CRTC state.
  * 
- * @param   this       The CRTC state to initialise
- * @param   partition  The partition state for the partition that the CRTC belongs to
- * @param   crtc       The the index of the CRTC within the site
+ * @param   this       The CRTC state to initialise.
+ * @param   partition  The partition state for the partition that the CRTC belongs to.
+ * @param   crtc       The the index of the CRTC within the site.
  * @return             Zero on success, otherwise (negative) the value of an
- *                     error identifier provided by this library
+ *                     error identifier provided by this library.
  */
 int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
 			     libgamma_partition_state_t* restrict partition, size_t crtc)
@@ -675,9 +675,9 @@ int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Release all resources held by a CRTC state
+ * Release all resources held by a CRTC state.
  * 
- * @param  this  The CRTC state
+ * @param  this  The CRTC state.
  */
 void libgamma_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
@@ -724,9 +724,9 @@ void libgamma_crtc_destroy(libgamma_crtc_state_t* restrict this)
 
 /**
  * Release all resources held by a CRTC state
- * and free the CRTC state pointer
+ * and free the CRTC state pointer.
  * 
- * @param  this  The CRTC state
+ * @param  this  The CRTC state.
  */
 void libgamma_crtc_free(libgamma_crtc_state_t* restrict this)
 {
@@ -736,11 +736,11 @@ void libgamma_crtc_free(libgamma_crtc_state_t* restrict this)
 
 
 /**
- * Restore the gamma ramps for a CRTC to the system settings for that CRTC
+ * Restore the gamma ramps for a CRTC to the system settings for that CRTC.
  * 
- * @param   this  The CRTC state
+ * @param   this  The CRTC state.
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library
+ *                error identifier provided by this library.
  */
 int libgamma_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
@@ -779,11 +779,11 @@ int libgamma_crtc_restore(libgamma_crtc_state_t* restrict this)
 
 
 /**
- * Read information about a CRTC
+ * Read information about a CRTC.
  * 
- * @param   this    Instance of a data structure to fill with the information about the CRTC
- * @param   crtc    The state of the CRTC whose information should be read
- * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
+ * @param   this    Instance of a data structure to fill with the information about the CRTC.
+ * @param   crtc    The state of the CRTC whose information should be read.
+ * @param   fields  OR:ed identifiers for the information about the CRTC that should be read.
  * @return          Zero on success, -1 on error. On error refer to the error reports in `this`.
  */
 int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
@@ -830,9 +830,9 @@ int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
 
 
 /**
- * Release all resources in an information data structure for a CRTC
+ * Release all resources in an information data structure for a CRTC.
  * 
- * @param  this  The CRTC information
+ * @param  this  The CRTC information.
  */
 void libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict this)
 {
@@ -843,9 +843,9 @@ void libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict thi
 
 /**
  * Release all resources in an information data structure for a CRTC
- * and free the data structure pointer
+ * and free the data structure pointer.
  * 
- * @param  this  The CRTC information
+ * @param  this  The CRTC information.
  */
 void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
 {
@@ -855,12 +855,12 @@ void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
 
 
 /**
- * Convert a raw representation of an EDID to a lowercase hexadecimal representation
+ * Convert a raw representation of an EDID to a lowercase hexadecimal representation.
  * 
- * @param   edid    The EDID in raw representation
- * @param   length  The length of `edid`
+ * @param   edid    The EDID in raw representation.
+ * @param   length  The length of `edid`.
  * @retrun          The EDID in lowercase hexadecimal representation,
- *                  `NULL` on allocation error, `errno` will be set accordingly
+ *                  `NULL` on allocation error, `errno` will be set accordingly.
  */
 char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t length)
 {
@@ -882,12 +882,12 @@ char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t l
 
 
 /**
- * Convert a raw representation of an EDID to an uppercase hexadecimal representation
+ * Convert a raw representation of an EDID to an uppercase hexadecimal representation.
  * 
- * @param   edid    The EDID in raw representation
- * @param   length  The length of `edid`
+ * @param   edid    The EDID in raw representation.
+ * @param   length  The length of `edid`.
  * @retrun          The EDID in uppercase hexadecimal representation,
- *                  NULL` on allocation error, `errno` will be set accordingly
+ *                  NULL` on allocation error, `errno` will be set accordingly.
  */
 char* libgamma_behex_edid_uppercase(const unsigned char* restrict edid, size_t length)
 {
@@ -909,9 +909,9 @@ char* libgamma_behex_edid_uppercase(const unsigned char* restrict edid, size_t l
 
 
 /**
- * Convert an hexadecimal representation of an EDID to a raw representation
+ * Convert an hexadecimal representation of an EDID to a raw representation.
  * 
- * @param   edid  The EDID in hexadecimal representation
+ * @param   edid  The EDID in hexadecimal representation.
  * @retrun        The EDID in raw representation, it will be half the length
  *                of `edid` (the input value). `NULL` on allocation error or
  *                if the EDID is malformated, `errno` will be set accordingly.
@@ -958,12 +958,12 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid)
 
 
 /**
- * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version
+ * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to fill with the current values.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 				  libgamma_gamma_ramps_t* restrict ramps)
@@ -1011,12 +1011,12 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, 16-bit gamma-depth version
+ * Set the gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 				  libgamma_gamma_ramps_t ramps)
@@ -1065,12 +1065,12 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, 32-bit gamma-depth version
+ * Get current the gamma ramps for a CRTC, 32-bit gamma-depth version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to fill with the current values.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps32_t* restrict ramps)
@@ -1098,12 +1098,12 @@ int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, 32-bit gamma-depth version
+ * Set the gamma ramps for a CRTC, 32-bit gamma-depth version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps32_t ramps)
@@ -1132,12 +1132,12 @@ int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, 64-bit gamma-depth version
+ * Get current the gamma ramps for a CRTC, 64-bit gamma-depth version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to fill with the current values.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps64_t* restrict ramps)
@@ -1165,12 +1165,12 @@ int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, 64-bit gamma-depth version
+ * Set the gamma ramps for a CRTC, 64-bit gamma-depth version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps64_t ramps)
@@ -1199,12 +1199,12 @@ int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, `float` version
+ * Get current the gamma ramps for a CRTC, `float` version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to fill with the current values.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsf_t* restrict ramps)
@@ -1230,12 +1230,12 @@ int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, `float` version
+ * Set the gamma ramps for a CRTC, `float` version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsf_t ramps)
@@ -1264,12 +1264,12 @@ int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, `double` version
+ * Get current the gamma ramps for a CRTC, `double` version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to fill with the current values
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to fill with the current values.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsd_t* restrict ramps)
@@ -1297,12 +1297,12 @@ int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, `double` version
+ * Set the gamma ramps for a CRTC, `double` version.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsd_t ramps)
@@ -1331,14 +1331,14 @@ int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version
+ * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version.
  * 
- * Note that this will probably involve the library allocating temporary data
+ * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps_fun* red_function,
@@ -1384,14 +1384,14 @@ int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version
+ * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version.
  * 
- * Note that this will probably involve the library allocating temporary data
+ * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
 				      libgamma_gamma_ramps32_fun* red_function,
@@ -1437,14 +1437,14 @@ int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version
+ * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version.
  * 
- * Note that this will probably involve the library allocating temporary data
+ * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
 				      libgamma_gamma_ramps64_fun* red_function,
@@ -1490,14 +1490,14 @@ int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, `float` function version
+ * Set the gamma ramps for a CRTC, `float` function version.
  * 
- * Note that this will probably involve the library allocating temporary data
+ * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
 				     libgamma_gamma_rampsf_fun* red_function,
@@ -1543,14 +1543,14 @@ int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, `double` function version
+ * Set the gamma ramps for a CRTC, `double` function version.
  * 
- * Note that this will probably involve the library allocating temporary data
+ * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
+ *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t* restrict this,
 				     libgamma_gamma_rampsd_fun* red_function,

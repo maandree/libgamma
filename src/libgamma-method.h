@@ -105,81 +105,81 @@ typedef struct libgamma_method_capabilities
 {
   /**
    * OR of the CRTC information fields in `libgamma_crtc_information_t`
-   * that may (but can fail) be read successfully
+   * that may (but can fail) be read successfully.
    */
   int32_t crtc_information;
   
   /**
    * Whether the default site is known, if true the site is integrated
-   * to the system or can be determined using environment variables
+   * to the system or can be determined using environment variables.
    */
   unsigned default_site_known : 1;
   
   /**
    * Whether the adjustment method supports multiple sites rather
-   * than just the default site
+   * than just the default site.
    */
   unsigned multiple_sites : 1;
   
   /**
    * Whether the adjustment method supports multiple partitions
-   * per site
+   * per site.
    */
   unsigned multiple_partitions : 1;
   
   /**
    * Whether the adjustment method supports multiple CRTC:s
-   * per partition per site
+   * per partition per site.
    */
   unsigned multiple_crtcs : 1;
   
   /**
-   * Whether the partition to graphics card is a bijection
+   * Whether the partition to graphics card is a bijection.
    */
   unsigned partitions_are_graphics_cards : 1;
   
   /**
-   * Whether the adjustment method supports `libgamma_site_restore`
+   * Whether the adjustment method supports `libgamma_site_restore`.
    */
   unsigned site_restore : 1;
   
   /**
-   * Whether the adjustment method supports `libgamma_partition_restore`
+   * Whether the adjustment method supports `libgamma_partition_restore`.
    */
   unsigned partition_restore : 1;
   
   /**
-   * Whether the adjustment method supports `libgamma_crtc_restore`
+   * Whether the adjustment method supports `libgamma_crtc_restore`.
    */
   unsigned crtc_restore : 1;
     
   /**
    * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
    * fields in `libgamma_crtc_information_t` will always have the same
-   * values as each other for the adjustment method
+   * values as each other for the adjustment method.
    */
   unsigned identical_gamma_sizes : 1;
   
   /**
    * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
    * fields in `libgamma_crtc_information_t` will always be filled with the
-   * same value for the adjustment method
+   * same value for the adjustment method.
    */
   unsigned fixed_gamma_size : 1;
   
   /**
    * Whether the `gamma_depth` field in `libgamma_crtc_information_t`
-   * will always be filled with the same value for the adjustment method
+   * will always be filled with the same value for the adjustment method.
    */
   unsigned fixed_gamma_depth : 1;
   
   /**
-   * Whether the adjustment method will actually perform adjustments
+   * Whether the adjustment method will actually perform adjustments.
    */
   unsigned real : 1;
   
   /**
-   * Whether the adjustment method is implement using a translation layer
+   * Whether the adjustment method is implement using a translation layer.
    */
   unsigned fake : 1;
   
@@ -236,7 +236,7 @@ typedef struct libgamma_site_state
 
 
 /**
- * Partition state
+ * Partition state.
  * 
  * Probably the majority of display server only one partition
  * per site. However, X.org can, and traditional used to have
@@ -256,12 +256,12 @@ typedef struct libgamma_partition_state
   void* data;
   
   /**
-   * The site this partition belongs to
+   * The site this partition belongs to.
    */
   libgamma_site_state_t* site;
   
   /**
-   * The index of the partition
+   * The index of the partition.
    */
   size_t partition;
   
@@ -276,11 +276,11 @@ typedef struct libgamma_partition_state
 
 
 /**
- * Cathode ray tube controller state
+ * Cathode ray tube controller state.
  * 
  * The CRTC controls the gamma ramps for the
  * monitor that is plugged in to the connector
- * that the CRTC belongs to
+ * that the CRTC belongs to.
  */
 typedef struct libgamma_crtc_state
 {
@@ -291,7 +291,7 @@ typedef struct libgamma_crtc_state
   void* data;
   
   /**
-   * The partition this CRTC belongs to
+   * The partition this CRTC belongs to.
    */
   libgamma_partition_state_t* partition;
   
@@ -304,13 +304,13 @@ typedef struct libgamma_crtc_state
 
 
 /**
- * Types for connectors
+ * Types for connectors.
  */
 typedef enum libgamma_connector_type
   {
     /**
      * The adjustment method does not know the connector's type
-     * (This could be considered an error)
+     * (This could be considered an error).
      */
     LIBGAMMA_CONNECTOR_TYPE_Unknown,
     LIBGAMMA_CONNECTOR_TYPE_VGA,
@@ -341,33 +341,33 @@ typedef enum libgamma_connector_type
 typedef enum libgamma_subpixel_order
   {
     /**
-     * The adjustment method does not know the order of the subpixels
-     * (This could be considered an error)
+     * The adjustment method does not know the order of the subpixels.
+     * (This could be considered an error.)
      */
     LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN,
     
     /**
-     * There are no subpixels in the monitor
+     * There are no subpixels in the monitor.
      */
     LIBGAMMA_SUBPIXEL_ORDER_NONE,
     
     /**
-     * The subpixels are ordered red, green and then blue, from left to right
+     * The subpixels are ordered red, green and then blue, from left to right.
      */
     LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB,
     
     /**
-     * The subpixels are ordered blue, green and then red, from left to right
+     * The subpixels are ordered blue, green and then red, from left to right.
      */
     LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_BGR,
     
     /**
-     * The subpixels are ordered red, green and then blue, from the top down
+     * The subpixels are ordered red, green and then blue, from the top down.
      */
     LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_RGB,
     
     /**
-     * The subpixels are ordered blue, green and then red, from the top down
+     * The subpixels are ordered blue, green and then red, from the top down.
      */
     LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_BGR
     
@@ -376,87 +376,87 @@ typedef enum libgamma_subpixel_order
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * values for `edid` and `edid_length` and report errors to `edid_error`
+ * values for `edid` and `edid_length` and report errors to `edid_error`.
  */
 #define CRTC_INFO_EDID  (1 << 0)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `width_mm` and report errors to `width_mm_error`
+ * value for `width_mm` and report errors to `width_mm_error`.
  */
 #define CRTC_INFO_WIDTH_MM  (1 << 1)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `height_mm` and report errors to `height_mm_error`
+ * value for `height_mm` and report errors to `height_mm_error`.
  */
 #define CRTC_INFO_HEIGHT_MM  (1 << 2)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `width_mm_edid` and report errors to `width_mm_edid_error`
+ * value for `width_mm_edid` and report errors to `width_mm_edid_error`.
  */
 #define CRTC_INFO_WIDTH_MM_EDID  (1 << 3)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `height_mm_edid` and report errors to `height_mm_edid_error`
+ * value for `height_mm_edid` and report errors to `height_mm_edid_error`.
  */
 #define CRTC_INFO_HEIGHT_MM_EDID  (1 << 4)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * values for `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
+ * values for `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`.
  * and report errors to `gamma_size_error`
  */
 #define CRTC_INFO_GAMMA_SIZE  (1 << 5)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `gamma_depth` and report errors to `gamma_depth_error`
+ * value for `gamma_depth` and report errors to `gamma_depth_error`.
  */
 #define CRTC_INFO_GAMMA_DEPTH  (1 << 6)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `gamma_support` and report errors to `gamma_support_error`
+ * value for `gamma_support` and report errors to `gamma_support_error`.
  */
 #define CRTC_INFO_GAMMA_SUPPORT  (1 << 7)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `subpixel_order` and report errors to `subpixel_order_error`
+ * value for `subpixel_order` and report errors to `subpixel_order_error`.
  */
 #define CRTC_INFO_SUBPIXEL_ORDER  (1 << 8)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `active` and report errors to `active_error`
+ * value for `active` and report errors to `active_error`.
  */
 #define CRTC_INFO_ACTIVE  (1 << 9)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `connector_name` and report errors to `connector_name_error`
+ * value for `connector_name` and report errors to `connector_name_error`.
  */
 #define CRTC_INFO_CONNECTOR_NAME  (1 << 10)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
- * value for `connector_type` and report errors to `connector_type_error`
+ * value for `connector_type` and report errors to `connector_type_error`.
  */
 #define CRTC_INFO_CONNECTOR_TYPE  (1 << 11)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * values for `gamma_red`, `gamma_green` and `gamma_blue`
- * and report errors to `connector_type_error`
+ * and report errors to `connector_type_error`.
  */
 #define CRTC_INFO_GAMMA  (1 << 12)
 
 
 /**
- * Cathode ray tube controller information data structure
+ * Cathode ray tube controller information data structure.
  */
 typedef struct libgamma_crtc_information
 {
@@ -469,14 +469,14 @@ typedef struct libgamma_crtc_information
   unsigned char* edid;
   
   /**
-   * The length of `edid`
+   * The length of `edid`.
    */
   size_t edid_length;
   
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int edid_error;
   
@@ -495,7 +495,7 @@ typedef struct libgamma_crtc_information
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int width_mm_error;
   
@@ -514,7 +514,7 @@ typedef struct libgamma_crtc_information
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int height_mm_error;
   
@@ -534,7 +534,7 @@ typedef struct libgamma_crtc_information
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int width_mm_edid_error;
   
@@ -554,30 +554,30 @@ typedef struct libgamma_crtc_information
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int height_mm_edid_error;
   
   
   /**
-   * The size of the encoding axis of the red gamma ramp
+   * The size of the encoding axis of the red gamma ramp.
    */
   size_t red_gamma_size;
   
   /**
-   * The size of the encoding axis of the green gamma ramp
+   * The size of the encoding axis of the green gamma ramp.
    */
   size_t green_gamma_size;
   
   /**
-   * The size of the encoding axis of the blue gamma ramp
+   * The size of the encoding axis of the blue gamma ramp.
    */
   size_t blue_gamma_size;
   
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int gamma_size_error;
   
@@ -592,20 +592,20 @@ typedef struct libgamma_crtc_information
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int gamma_depth_error;
   
   
   /**
-   * Non-zero gamma ramp adjustments are supported
+   * Non-zero gamma ramp adjustments are supported.
    */
   int gamma_support;
   
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int gamma_support_error;
   
@@ -620,20 +620,20 @@ typedef struct libgamma_crtc_information
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int subpixel_order_error;
   
   
   /**
-   * Whether there is a monitors connected to the CRTC
+   * Whether there is a monitors connected to the CRTC.
    */
   int active;
   
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int active_error;
   
@@ -641,27 +641,27 @@ typedef struct libgamma_crtc_information
   /**
    * The name of the connector as designated by the display
    * server or as give by this library in case the display
-   * server lacks this feature
+   * server lacks this feature.
    */
   char* connector_name;
   
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int connector_name_error;
   
   
   /**
-   * The type of the connector that is associated with the CRTC
+   * The type of the connector that is associated with the CRTC.
    */
   libgamma_connector_type_t connector_type;
   
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int connector_type_error;
   
@@ -702,7 +702,7 @@ typedef struct libgamma_crtc_information
   /**
    * Zero on success, positive it holds the value `errno` had
    * when the reading failed, otherwise (negative) the value
-   * of an error identifier provided by this library
+   * of an error identifier provided by this library.
    */
   int gamma_error;
   
@@ -711,37 +711,37 @@ typedef struct libgamma_crtc_information
 
 
 /**
- * Gamma ramp structure for 16-bit gamma ramps
+ * Gamma ramp structure for 16-bit gamma ramps.
  */
 typedef struct libgamma_gamma_ramps
 {
   /**
-   * The size of `red`
+   * The size of `red`.
    */
   size_t red_size;
   
   /**
-   * The size of `green`
+   * The size of `green`.
    */
   size_t green_size;
   
   /**
-   * The size of `blue`
+   * The size of `blue`.
    */
   size_t blue_size;
   
   /**
-   * The gamma ramp for the red channel
+   * The gamma ramp for the red channel.
    */
   uint16_t* red;
   
   /**
-   * The gamma ramp for the green channel
+   * The gamma ramp for the green channel.
    */
   uint16_t* green;
   
   /**
-   * The gamma ramp for the blue channel
+   * The gamma ramp for the blue channel.
    */
   uint16_t* blue;
   
@@ -749,37 +749,37 @@ typedef struct libgamma_gamma_ramps
 
 
 /**
- * Gamma ramp structure for 32-bit gamma ramps
+ * Gamma ramp structure for 32-bit gamma ramps.
  */
 typedef struct libgamma_gamma_ramps32
 {
   /**
-   * The size of `red`
+   * The size of `red`.
    */
   size_t red_size;
   
   /**
-   * The size of `green`
+   * The size of `green`.
    */
   size_t green_size;
   
   /**
-   * The size of `blue`
+   * The size of `blue`.
    */
   size_t blue_size;
   
   /**
-   * The gamma ramp for the red channel
+   * The gamma ramp for the red channel.
    */
   uint32_t* red;
   
   /**
-   * The gamma ramp for the green channel
+   * The gamma ramp for the green channel.
    */
   uint32_t* green;
   
   /**
-   * The gamma ramp for the blue channel
+   * The gamma ramp for the blue channel.
    */
   uint32_t* blue;
   
@@ -787,37 +787,37 @@ typedef struct libgamma_gamma_ramps32
 
 
 /**
- * Gamma ramp structure for 64-bit gamma ramps
+ * Gamma ramp structure for 64-bit gamma ramps.
  */
 typedef struct libgamma_gamma_ramps64
 {
   /**
-   * The size of `red`
+   * The size of `red`.
    */
   size_t red_size;
   
   /**
-   * The size of `green`
+   * The size of `green`.
    */
   size_t green_size;
   
   /**
-   * The size of `blue`
+   * The size of `blue`.
    */
   size_t blue_size;
   
   /**
-   * The gamma ramp for the red channel
+   * The gamma ramp for the red channel.
    */
   uint64_t* red;
   
   /**
-   * The gamma ramp for the green channel
+   * The gamma ramp for the green channel.
    */
   uint64_t* green;
   
   /**
-   * The gamma ramp for the blue channel
+   * The gamma ramp for the blue channel.
    */
   uint64_t* blue;
   
@@ -825,37 +825,37 @@ typedef struct libgamma_gamma_ramps64
 
 
 /**
- * Gamma ramp structure for `float` gamma ramps
+ * Gamma ramp structure for `float` gamma ramps.
  */
 typedef struct libgamma_gamma_rampsf
 {
   /**
-   * The size of `red`
+   * The size of `red`.
    */
   size_t red_size;
   
   /**
-   * The size of `green`
+   * The size of `green`.
    */
   size_t green_size;
   
   /**
-   * The size of `blue`
+   * The size of `blue`.
    */
   size_t blue_size;
   
   /**
-   * The gamma ramp for the red channel
+   * The gamma ramp for the red channel.
    */
   float* red;
   
   /**
-   * The gamma ramp for the green channel
+   * The gamma ramp for the green channel.
    */
   float* green;
   
   /**
-   * The gamma ramp for the blue channel
+   * The gamma ramp for the blue channel.
    */
   float* blue;
   
@@ -863,37 +863,37 @@ typedef struct libgamma_gamma_rampsf
 
 
 /**
- * Gamma ramp structure for `double` gamma ramps
+ * Gamma ramp structure for `double` gamma ramps.
  */
 typedef struct libgamma_gamma_rampsd
 {
   /**
-   * The size of `red`
+   * The size of `red`.
    */
   size_t red_size;
   
   /**
-   * The size of `green`
+   * The size of `green`.
    */
   size_t green_size;
   
   /**
-   * The size of `blue`
+   * The size of `blue`.
    */
   size_t blue_size;
   
   /**
-   * The gamma ramp for the red channel
+   * The gamma ramp for the red channel.
    */
   double* red;
   
   /**
-   * The gamma ramp for the green channel
+   * The gamma ramp for the green channel.
    */
   double* green;
   
   /**
-   * The gamma ramp for the blue channel
+   * The gamma ramp for the blue channel.
    */
   double* blue;
   
@@ -903,22 +903,22 @@ typedef struct libgamma_gamma_rampsd
 
 /**
  * Initialise a gamma ramp in the proper way that allows all adjustment
- * methods to read from and write to it without causing segmentation violation
+ * methods to read from and write to it without causing segmentation violation.
  * 
  * The input must have `red_size`, `green_size` and `blue_size` set to the
- * sizes of the gamma ramps that should be allocated
+ * sizes of the gamma ramps that should be allocated.
  * 
- * @param   this  The gamma ramps
- * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ * @param   this  The gamma ramps.
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
 int libgamma_gamma_ramps_initialise(libgamma_gamma_ramps_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps_initialise` or otherwise
- * initialises in the proper manner
+ * initialises in the proper manner.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_ramps_destroy(libgamma_gamma_ramps_t* restrict this);
 
@@ -926,31 +926,31 @@ void libgamma_gamma_ramps_destroy(libgamma_gamma_ramps_t* restrict this);
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps_initialise` or otherwise
  * initialises in the proper manner, as well as release the pointer
- * to the structure
+ * to the structure.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_ramps_free(libgamma_gamma_ramps_t* restrict this);
 
 
 /**
  * Initialise a gamma ramp in the proper way that allows all adjustment
- * methods to read from and write to it without causing segmentation violation
+ * methods to read from and write to it without causing segmentation violation.
  * 
  * The input must have `red_size`, `green_size` and `blue_size` set to the
- * sizes of the gamma ramps that should be allocated
+ * sizes of the gamma ramps that should be allocated.
  * 
- * @param   this  The gamma ramps
- * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ * @param   this  The gamma ramps.
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
 int libgamma_gamma_ramps32_initialise(libgamma_gamma_ramps32_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps32_initialise` or otherwise
- * initialises in the proper manner
+ * initialises in the proper manner.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_ramps32_destroy(libgamma_gamma_ramps32_t* restrict this);
 
@@ -958,31 +958,31 @@ void libgamma_gamma_ramps32_destroy(libgamma_gamma_ramps32_t* restrict this);
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps32_initialise` or otherwise
  * initialises in the proper manner, as well as release the pointer
- * to the structure
+ * to the structure.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_ramps32_free(libgamma_gamma_ramps32_t* restrict this);
 
 
 /**
  * Initialise a gamma ramp in the proper way that allows all adjustment
- * methods to read from and write to it without causing segmentation violation
+ * methods to read from and write to it without causing segmentation violation.
  * 
  * The input must have `red_size`, `green_size` and `blue_size` set to the
- * sizes of the gamma ramps that should be allocated
+ * sizes of the gamma ramps that should be allocated.
  * 
- * @param   this  The gamma ramps
- * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ * @param   this  The gamma ramps.
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
 int libgamma_gamma_ramps64_initialise(libgamma_gamma_ramps64_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps64_initialise` or otherwise
- * initialises in the proper manner
+ * initialises in the proper manner.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_ramps64_destroy(libgamma_gamma_ramps64_t* restrict this);
 
@@ -990,31 +990,31 @@ void libgamma_gamma_ramps64_destroy(libgamma_gamma_ramps64_t* restrict this);
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps64_initialise` or otherwise
  * initialises in the proper manner, as well as release the pointer
- * to the structure
+ * to the structure.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_ramps64_free(libgamma_gamma_ramps64_t* restrict this);
 
 
 /**
  * Initialise a gamma ramp in the proper way that allows all adjustment
- * methods to read from and write to it without causing segmentation violation
+ * methods to read from and write to it without causing segmentation violation.
  * 
  * The input must have `red_size`, `green_size` and `blue_size` set to the
- * sizes of the gamma ramps that should be allocated
+ * sizes of the gamma ramps that should be allocated.
  * 
- * @param   this  The gamma ramps
- * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ * @param   this  The gamma ramps.
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
 int libgamma_gamma_rampsf_initialise(libgamma_gamma_rampsf_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_rampsf_initialise` or otherwise
- * initialises in the proper manner
+ * initialises in the proper manner.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_rampsf_destroy(libgamma_gamma_rampsf_t* restrict this);
 
@@ -1022,31 +1022,31 @@ void libgamma_gamma_rampsf_destroy(libgamma_gamma_rampsf_t* restrict this);
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_rampsf_initialise` or otherwise
  * initialises in the proper manner, as well as release the pointer
- * to the structure
+ * to the structure.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_rampsf_free(libgamma_gamma_rampsf_t* restrict this);
 
 
 /**
  * Initialise a gamma ramp in the proper way that allows all adjustment
- * methods to read from and write to it without causing segmentation violation
+ * methods to read from and write to it without causing segmentation violation.
  * 
  * The input must have `red_size`, `green_size` and `blue_size` set to the
- * sizes of the gamma ramps that should be allocated
+ * sizes of the gamma ramps that should be allocated.
  * 
  * @param   this  The gamma ramps
- * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
 int libgamma_gamma_rampsd_initialise(libgamma_gamma_rampsd_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_rampsd_initialise` or otherwise
- * initialises in the proper manner
+ * initialises in the proper manner.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_rampsd_destroy(libgamma_gamma_rampsd_t* restrict this);
 
@@ -1054,9 +1054,9 @@ void libgamma_gamma_rampsd_destroy(libgamma_gamma_rampsd_t* restrict this);
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_rampsd_initialise` or otherwise
  * initialises in the proper manner, as well as release the pointer
- * to the structure
+ * to the structure.
  * 
- * @param  this  The gamma ramps
+ * @param  this  The gamma ramps.
  */
 void libgamma_gamma_rampsd_free(libgamma_gamma_rampsd_t* restrict this);
 
