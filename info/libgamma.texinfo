@@ -428,6 +428,17 @@ step was `-10', which it really was not. So if you
 use this in your program you should receive a warning
 until you update the value.
 
+In a similar manner, you should all a check to detect
+when the value of either @code{GAMMA_METHOD_MAX} or
+@code{GAMMA_METHOD_COUNT} (the latter will have value
+of one higher than the earlier) have increased. This
+will allow you to get a warning for when new adjustment
+method have been added so you can take appropriate
+actions if required. @command{libgamma} does not only
+provide display server abstract, it optionally lets you
+choose any available method you want despite of what
+display server you are used.
+
 
 
 @node GNU Free Documentation License
