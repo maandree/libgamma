@@ -18,8 +18,8 @@
 #ifndef LIBGAMMA_GAMMA_X_VIDMODE_H
 #define LIBGAMMA_GAMMA_X_VIDMODE_H
 
-#ifndef HAVE_GAMMA_METHOD_X_VIDMODE
-# error Including gamma-x-vidmode.h without HAVE_GAMMA_METHOD_X_VIDMODE
+#ifndef HAVE_LIBGAMMA_METHOD_X_VIDMODE
+# error Including gamma-x-vidmode.h without HAVE_LIBGAMMA_METHOD_X_VIDMODE
 #endif
 
 

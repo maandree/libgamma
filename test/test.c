@@ -25,14 +25,14 @@ static const char* method_name(int method)
 {
     switch (method)
       {
-      case GAMMA_METHOD_DUMMY:                 return "dummy";
-      case GAMMA_METHOD_X_RANDR:               return "RandR X extension";
-      case GAMMA_METHOD_X_VIDMODE:             return "VidMode X extension";
-      case GAMMA_METHOD_LINUX_DRM:             return "Linux DRM";
-      case GAMMA_METHOD_W32_GDI:               return "Windows GDI";
-      case GAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  return "Quartz using Core Graphics";
+      case LIBGAMMA_METHOD_DUMMY:                 return "dummy";
+      case LIBGAMMA_METHOD_X_RANDR:               return "RandR X extension";
+      case LIBGAMMA_METHOD_X_VIDMODE:             return "VidMode X extension";
+      case LIBGAMMA_METHOD_LINUX_DRM:             return "Linux DRM";
+      case LIBGAMMA_METHOD_W32_GDI:               return "Windows GDI";
+      case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  return "Quartz using Core Graphics";
       default:
-#if GAMMA_METHOD_COUNT != 6
+#if LIBGAMMA_METHOD_COUNT != 6
 # warning List of adjustment methods is out of date
 #endif
 	return "(unknown)";
@@ -42,11 +42,11 @@ static const char* method_name(int method)
 
 int main(void)
 {
-  int* methods = malloc(GAMMA_METHOD_COUNT * sizeof(int));
-  size_t n = libgamma_list_methods(methods, GAMMA_METHOD_COUNT, 0);
+  int* methods = malloc(LIBGAMMA_METHOD_COUNT * sizeof(int));
+  size_t n = libgamma_list_methods(methods, LIBGAMMA_METHOD_COUNT, 0);
   size_t i;
   
-  if (n > GAMMA_METHOD_COUNT)
+  if (n > LIBGAMMA_METHOD_COUNT)
     {
       printf("Warning: you should to recompile the program, libgamma has been updated.\n");
       methods = realloc(methods, n * sizeof(int));

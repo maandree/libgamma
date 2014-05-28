@@ -18,8 +18,8 @@
 #ifndef LIBGAMMA_GAMMA_LINUX_DRM_H
 #define LIBGAMMA_GAMMA_LINUX_DRM_H
 
-#ifndef HAVE_GAMMA_METHOD_LINUX_DRM
-# error Including gamma-linux-drm.h without HAVE_GAMMA_METHOD_LINUX_DRM
+#ifndef HAVE_LIBGAMMA_METHOD_LINUX_DRM
+# error Including gamma-linux-drm.h without HAVE_LIBGAMMA_METHOD_LINUX_DRM
 #endif
 
 

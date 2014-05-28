@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef HAVE_GAMMA_METHOD_W32_GDI
-# error Compiling fake-w32-gdi.c without FAKE_GAMMA_METHOD_W32_GDI
+#ifndef HAVE_LIBGAMMA_METHOD_W32_GDI
+# error Compiling fake-w32-gdi.c without FAKE_LIBGAMMA_METHOD_W32_GDI
 #endif
 
 /* This file very sloppily translates Windows GDI calls to X RandR calls.
@@ -33,7 +33,7 @@
 #include <string.h>
 
 
-#ifndef HAVE_GAMMA_METHOD_X_RANDR
+#ifndef HAVE_LIBGAMMA_METHOD_X_RANDR
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144871(v=vs.85).aspx */
 HDC GetDC(HWND hWnd)

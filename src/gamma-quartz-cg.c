@@ -15,15 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-# error Compiling gamma-quartz-cg.c without HAVE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+#ifndef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+# error Compiling gamma-quartz-cg.c without HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
 #endif
 
 #include "gamma-quartz-cg.h"
 
 #include "libgamma-error.h"
 
-#ifdef FAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+#ifdef FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
 # include "fake-quartz-cg.h"
 #else
 # include <CoreGraphics/CGDirectDisplay.h>
@@ -41,8 +41,8 @@
  */
 void libgamma_quartz_cg_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
-  this->crtc_information = CRTC_INFO_GAMMA_SIZE
-			 | CRTC_INFO_GAMMA_DEPTH;
+  this->crtc_information = LIBGAMMA_CRTC_INFO_GAMMA_SIZE
+			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH;
   this->default_site_known = 1;
   this->multiple_sites = 0;
   this->multiple_partitions = 0;
@@ -54,9 +54,9 @@ void libgamma_quartz_cg_method_capabilities(libgamma_method_capabilities_t* rest
   this->identical_gamma_sizes = 1;
   this->fixed_gamma_size = 0;
   this->fixed_gamma_depth = 1;
-#ifdef FAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+#ifdef FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
   this->fake = 1;
-# ifdef HAVE_GAMMA_METHOD_X_RANDR
+# ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
   this->real = 1;
 # else
   this->real = 0;
@@ -259,16 +259,16 @@ int libgamma_quartz_cg_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_quartz_cg_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					    libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
-#define SUPPORTED_FIELDS  (CRTC_INFO_GAMMA_SIZE | CRTC_INFO_GAMMA_DEPTH)
+#define SUPPORTED_FIELDS  (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH)
    
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   
-  this->edid_error = _E(CRTC_INFO_EDID);
-  this->width_mm_error = _E(CRTC_INFO_WIDTH_MM);
-  this->height_mm_error = _E(CRTC_INFO_HEIGHT_MM);
-  this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID);
-  this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID);
-  if ((fields & CRTC_INFO_GAMMA_SIZE))
+  this->edid_error = _E(LIBGAMMA_CRTC_INFO_EDID);
+  this->width_mm_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM);
+  this->height_mm_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM);
+  this->width_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID);
+  this->height_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID);
+  if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE))
     {
       CGDirectDisplayID* crtcs = crtc->partition->data;
       CGDirectDisplayID crtc_id = crtcs[crtc->crtc];
@@ -282,12 +282,12 @@ int libgamma_quartz_cg_get_crtc_information(libgamma_crtc_information_t* restric
     this->gamma_size_error = 0;
   this->gamma_depth = -1;
   this->gamma_depth_error = 0;
-  this->gamma_support_error = _E(CRTC_INFO_GAMMA_SUPPORT);
-  this->subpixel_order_error = _E(CRTC_INFO_SUBPIXEL_ORDER);
-  this->active_error = _E(CRTC_INFO_ACTIVE);
-  this->connector_name_error = _E(CRTC_INFO_CONNECTOR_NAME);
-  this->connector_type_error = _E(CRTC_INFO_CONNECTOR_TYPE);
-  this->gamma_error = _E(CRTC_INFO_GAMMA);
+  this->gamma_support_error = _E(LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT);
+  this->subpixel_order_error = _E(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER);
+  this->active_error = _E(LIBGAMMA_CRTC_INFO_ACTIVE);
+  this->connector_name_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_NAME);
+  this->connector_type_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE);
+  this->gamma_error = _E(LIBGAMMA_CRTC_INFO_GAMMA);
   
 #undef _E
   

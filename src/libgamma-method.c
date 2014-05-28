@@ -233,7 +233,7 @@ void libgamma_gamma_rampsf_free(libgamma_gamma_rampsf_t* restrict this)
 int libgamma_gamma_rampsd_initialise(libgamma_gamma_rampsd_t* restrict this)
 {
   size_t n = this->red_size + this->green_size + this->blue_size;
-#ifdef HAVE_GAMMA_METHOD_LINUX_DRM
+#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
   /* Valgrind complains about us reading uninitialize memory if we just use malloc. */
   this->red = calloc(n, sizeof(double));
 #else

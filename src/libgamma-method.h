@@ -33,13 +33,13 @@
  * This method can be configured and is useful for
  * testing your program's ability to handle errors.
  */
-#define GAMMA_METHOD_DUMMY  0
+#define LIBGAMMA_METHOD_DUMMY  0
 
 /**
  * The identifier for the adjustment method with
  * uses the RandR protocol under the X display server.
  */
-#define GAMMA_METHOD_X_RANDR  1
+#define LIBGAMMA_METHOD_X_RANDR  1
 
 /**
  * The identifier for the adjustment method with
@@ -49,7 +49,7 @@
  * supported by RandR, however it can only control the
  * primary CRTC per screen (partition).
  */
-#define GAMMA_METHOD_X_VIDMODE  2
+#define LIBGAMMA_METHOD_X_VIDMODE  2
 
 /**
  * The identifier for the Direct Rendering Manager
@@ -62,7 +62,7 @@
  * started while this is running, but it can be
  * started while a display server is running.
  */
-#define GAMMA_METHOD_LINUX_DRM  3
+#define LIBGAMMA_METHOD_LINUX_DRM  3
 
 /**
  * The identifier for the Graphics Device Interface
@@ -70,7 +70,7 @@
  * This method is not well tested; it can be compiled
  * to be available under X.org using a translation layer.
  */
-#define GAMMA_METHOD_W32_GDI  4
+#define LIBGAMMA_METHOD_W32_GDI  4
 
 /**
  * The identifier for the Core Graphics adjustment
@@ -79,7 +79,7 @@
  * This method is not well tested; it can be compiled
  * to be available under X.org using a translation layer.
  */
-#define GAMMA_METHOD_QUARTZ_CORE_GRAPHICS  5
+#define LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS  5
 
 
 /**
@@ -87,14 +87,14 @@
  * nor any index before it may actually be supported
  * as it could have been disabled at compile-time
  */
-#define GAMMA_METHOD_MAX  5
+#define LIBGAMMA_METHOD_MAX  5
 
 /**
  * The number adjustment methods provided by this library.
  * Note however that this includes adjstment methods that
  * have been removed at compile-time.
  */
-#define GAMMA_METHOD_COUNT  (GAMMA_METHOD_MAX + 1)
+#define LIBGAMMA_METHOD_COUNT  (LIBGAMMA_METHOD_MAX + 1)
 
 
 
@@ -388,84 +388,84 @@ typedef enum libgamma_subpixel_order
  * For a `libgamma_crtc_information_t` fill in the
  * values for `edid` and `edid_length` and report errors to `edid_error`.
  */
-#define CRTC_INFO_EDID  (1 << 0)
+#define LIBGAMMA_CRTC_INFO_EDID  (1 << 0)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `width_mm` and report errors to `width_mm_error`.
  */
-#define CRTC_INFO_WIDTH_MM  (1 << 1)
+#define LIBGAMMA_CRTC_INFO_WIDTH_MM  (1 << 1)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `height_mm` and report errors to `height_mm_error`.
  */
-#define CRTC_INFO_HEIGHT_MM  (1 << 2)
+#define LIBGAMMA_CRTC_INFO_HEIGHT_MM  (1 << 2)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `width_mm_edid` and report errors to `width_mm_edid_error`.
  */
-#define CRTC_INFO_WIDTH_MM_EDID  (1 << 3)
+#define LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID  (1 << 3)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `height_mm_edid` and report errors to `height_mm_edid_error`.
  */
-#define CRTC_INFO_HEIGHT_MM_EDID  (1 << 4)
+#define LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID  (1 << 4)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * values for `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`.
  * and report errors to `gamma_size_error`
  */
-#define CRTC_INFO_GAMMA_SIZE  (1 << 5)
+#define LIBGAMMA_CRTC_INFO_GAMMA_SIZE  (1 << 5)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `gamma_depth` and report errors to `gamma_depth_error`.
  */
-#define CRTC_INFO_GAMMA_DEPTH  (1 << 6)
+#define LIBGAMMA_CRTC_INFO_GAMMA_DEPTH  (1 << 6)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `gamma_support` and report errors to `gamma_support_error`.
  */
-#define CRTC_INFO_GAMMA_SUPPORT  (1 << 7)
+#define LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT  (1 << 7)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `subpixel_order` and report errors to `subpixel_order_error`.
  */
-#define CRTC_INFO_SUBPIXEL_ORDER  (1 << 8)
+#define LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER  (1 << 8)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `active` and report errors to `active_error`.
  */
-#define CRTC_INFO_ACTIVE  (1 << 9)
+#define LIBGAMMA_CRTC_INFO_ACTIVE  (1 << 9)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `connector_name` and report errors to `connector_name_error`.
  */
-#define CRTC_INFO_CONNECTOR_NAME  (1 << 10)
+#define LIBGAMMA_CRTC_INFO_CONNECTOR_NAME  (1 << 10)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * value for `connector_type` and report errors to `connector_type_error`.
  */
-#define CRTC_INFO_CONNECTOR_TYPE  (1 << 11)
+#define LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE  (1 << 11)
 
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * values for `gamma_red`, `gamma_green` and `gamma_blue`
  * and report errors to `connector_type_error`.
  */
-#define CRTC_INFO_GAMMA  (1 << 12)
+#define LIBGAMMA_CRTC_INFO_GAMMA  (1 << 12)
 
 /**
- * The number of `CRTC_INFO_*` values defined.
+ * The number of `LIBGAMMA_CRTC_INFO_*` values defined.
  */
 #define LIBGAMMA_CRTC_INFO_COUNT = 13
 

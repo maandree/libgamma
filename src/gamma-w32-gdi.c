@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef HAVE_GAMMA_METHOD_W32_GDI
-# error Compiling gamma-w32-gdi.c without HAVE_GAMMA_METHOD_W32_GDI
+#ifndef HAVE_LIBGAMMA_METHOD_W32_GDI
+# error Compiling gamma-w32-gdi.c without HAVE_LIBGAMMA_METHOD_W32_GDI
 #endif
 
 #include "gamma-w32-gdi.h"
@@ -26,7 +26,7 @@
 #ifndef WINVER
 # define WINVER  0x0500
 #endif
-#ifdef FAKE_GAMMA_METHOD_W32_GDI
+#ifdef FAKE_LIBGAMMA_METHOD_W32_GDI
 # include "fake-w32-gdi.h"
 #else
 # include <windows.h>
@@ -45,9 +45,9 @@
  */
 void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
-  this->crtc_information = CRTC_INFO_GAMMA_SIZE
-			 | CRTC_INFO_GAMMA_DEPTH
-			 | CRTC_INFO_GAMMA_SUPPORT;
+  this->crtc_information = LIBGAMMA_CRTC_INFO_GAMMA_SIZE
+			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH
+			 | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT;
   this->default_site_known = 1;
   this->multiple_sites = 0;
   this->multiple_partitions = 0;
@@ -59,9 +59,9 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restri
   this->identical_gamma_sizes = 1;
   this->fixed_gamma_size = 1;
   this->fixed_gamma_depth = 1;
-#ifdef FAKE_GAMMA_METHOD_W32_GDI
+#ifdef FAKE_LIBGAMMA_METHOD_W32_GDI
   this->fake = 1;
-# ifdef HAVE_GAMMA_METHOD_X_RANDR
+# ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
   this->real = 1;
 # else
   this->real = 0;
@@ -254,29 +254,29 @@ int libgamma_w32_gdi_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
-#define KNOWN_FIELDS  (CRTC_INFO_GAMMA_SIZE | CRTC_INFO_GAMMA_DEPTH | CRTC_INFO_GAMMA_SUPPORT)
+#define KNOWN_FIELDS  (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT)
    
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   
-  this->edid_error = _E(CRTC_INFO_EDID);
-  this->width_mm_error = _E(CRTC_INFO_WIDTH_MM);
-  this->height_mm_error = _E(CRTC_INFO_HEIGHT_MM);
-  this->width_mm_edid_error = _E(CRTC_INFO_WIDTH_MM_EDID);
-  this->height_mm_edid_error = _E(CRTC_INFO_HEIGHT_MM_EDID);
+  this->edid_error = _E(LIBGAMMA_CRTC_INFO_EDID);
+  this->width_mm_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM);
+  this->height_mm_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM);
+  this->width_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID);
+  this->height_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID);
   this->red_gamma_size = GAMMA_RAMP_SIZE;
   this->green_gamma_size = GAMMA_RAMP_SIZE;
   this->blue_gamma_size = GAMMA_RAMP_SIZE;
   this->gamma_size_error = 0;
   this->gamma_depth = 16;
   this->gamma_depth_error = 0;
-  if ((fields & CRTC_INFO_GAMMA_SUPPORT))
+  if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT))
     this->gamma_support = GetDeviceCaps(crtc->data, COLORMGMTCAPS) == CM_GAMMA_RAMP;
   this->gamma_support_error = 0;
-  this->subpixel_order_error = _E(CRTC_INFO_SUBPIXEL_ORDER);
-  this->active_error = _E(CRTC_INFO_ACTIVE);
-  this->connector_name_error = _E(CRTC_INFO_CONNECTOR_NAME);
-  this->connector_type_error = _E(CRTC_INFO_CONNECTOR_TYPE);
-  this->gamma_error = _E(CRTC_INFO_GAMMA);
+  this->subpixel_order_error = _E(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER);
+  this->active_error = _E(LIBGAMMA_CRTC_INFO_ACTIVE);
+  this->connector_name_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_NAME);
+  this->connector_type_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE);
+  this->gamma_error = _E(LIBGAMMA_CRTC_INFO_GAMMA);
   
 #undef _E
   

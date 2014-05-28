@@ -53,7 +53,7 @@ int libgamma_parse_edid(libgamma_crtc_information_t* restrict this, int32_t fiel
   this->width_mm_edid = (size_t)(this->edid[21]) * 10;
   this->height_mm_edid = (size_t)(this->edid[22]) * 10;
   
-  if ((fields & CRTC_INFO_GAMMA) && (error == 0))
+  if ((fields & LIBGAMMA_CRTC_INFO_GAMMA) && (error == 0))
     {
       if (this->edid[23] == 0xFF)
 	this->gamma_error = LIBGAMMA_GAMMA_NOT_SPECIFIED;

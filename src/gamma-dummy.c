@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef HAVE_GAMMA_METHOD_DUMMY
-# error Compiling gamma-dummy.c without HAVE_GAMMA_METHOD_DUMMY
+#ifndef HAVE_LIBGAMMA_METHOD_DUMMY
+# error Compiling gamma-dummy.c without HAVE_LIBGAMMA_METHOD_DUMMY
 #endif
 
 #include "gamma-dummy.h"

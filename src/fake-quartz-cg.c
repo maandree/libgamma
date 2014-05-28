@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef FAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-# error Compiling fake-quartz-cg.c without FAKE_GAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+#ifndef FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+# error Compiling fake-quartz-cg.c without FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
 #endif
 
 /* This file very sloppily translates Mac OS X Quartz calls to X RandR calls.
@@ -33,7 +33,7 @@
 #include <string.h>
 
 
-#ifndef HAVE_GAMMA_METHOD_X_RANDR
+#ifndef HAVE_LIBGAMMA_METHOD_X_RANDR
 
 CGError CGGetOnlineDisplayList(uint32_t max_size,
 			       CGDirectDisplayID* restrict displays_out, uint32_t* restrict count_out)

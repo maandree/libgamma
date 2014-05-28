@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef HAVE_GAMMA_METHOD_LINUX_DRM
-# error Compiling gamma-linux-drm.c without HAVE_GAMMA_METHOD_LINUX_DRM
+#ifndef HAVE_LIBGAMMA_METHOD_LINUX_DRM
+# error Compiling gamma-linux-drm.c without HAVE_LIBGAMMA_METHOD_LINUX_DRM
 #endif
 
 #define _GNU_SOURCE
@@ -88,18 +88,18 @@ typedef struct libgamma_drm_card_data
  */
 void libgamma_linux_drm_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
-  this->crtc_information = CRTC_INFO_EDID
-			 | CRTC_INFO_WIDTH_MM
-			 | CRTC_INFO_HEIGHT_MM
-			 | CRTC_INFO_WIDTH_MM_EDID
-			 | CRTC_INFO_HEIGHT_MM_EDID
-			 | CRTC_INFO_GAMMA_SIZE
-			 | CRTC_INFO_GAMMA_DEPTH
-			 | CRTC_INFO_SUBPIXEL_ORDER
-			 | CRTC_INFO_ACTIVE
-			 | CRTC_INFO_CONNECTOR_NAME
-			 | CRTC_INFO_CONNECTOR_TYPE
-			 | CRTC_INFO_GAMMA;
+  this->crtc_information = LIBGAMMA_CRTC_INFO_EDID
+			 | LIBGAMMA_CRTC_INFO_WIDTH_MM
+			 | LIBGAMMA_CRTC_INFO_HEIGHT_MM
+			 | LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID
+			 | LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID
+			 | LIBGAMMA_CRTC_INFO_GAMMA_SIZE
+			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH
+			 | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER
+			 | LIBGAMMA_CRTC_INFO_ACTIVE
+			 | LIBGAMMA_CRTC_INFO_CONNECTOR_NAME
+			 | LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE
+			 | LIBGAMMA_CRTC_INFO_GAMMA;
   this->default_site_known = 1;
   this->multiple_sites = 0;
   this->multiple_partitions = 1;
@@ -489,15 +489,15 @@ static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_cr
   const char* restrict connector_name_base = NULL;
   
   /* Get some information that does not require too much work. */
-  if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_CONNECTOR_TYPE |
-		 CRTC_INFO_ACTIVE | CRTC_INFO_SUBPIXEL_ORDER)))
+  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM | LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE |
+		 LIBGAMMA_CRTC_INFO_ACTIVE | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER)))
     {
       /* Get whether or not a monitor is plugged in. */
       out->active = connector->connection == DRM_MODE_CONNECTED;
       out->active_error = connector->connection == DRM_MODE_UNKNOWNCONNECTION ? LIBGAMMA_STATE_UNKNOWN : 0;
       if (out->active == 0)
 	{
-	  if ((fields & (CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_SUBPIXEL_ORDER)))
+	  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER)))
 	    out->width_mm_error = out->height_mm_error = out->subpixel_order_error = LIBGAMMA_NOT_CONNECTED;
 	  goto not_connected;
 	}
@@ -562,7 +562,7 @@ static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_cr
     }
   
   /* Get the connector's name. */
-  if ((fields & CRTC_INFO_CONNECTOR_NAME) && (out->connector_name_error == 0))
+  if ((fields & LIBGAMMA_CRTC_INFO_CONNECTOR_NAME) && (out->connector_name_error == 0))
     {
       libgamma_drm_card_data_t* restrict card = crtc->partition->data;
       uint32_t type = connector->connector_type;
@@ -655,18 +655,18 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
   memset(this, 0, sizeof(libgamma_crtc_information_t));
   
   /* We need to free the EDID after us if it is not explicitly requested.  */
-  free_edid = (fields & CRTC_INFO_EDID) == 0;
+  free_edid = (fields & LIBGAMMA_CRTC_INFO_EDID) == 0;
   
   /* Figure out what fields we need to get the data for to get the data for other fields. */
-  if ((fields & (CRTC_INFO_WIDTH_MM_EDID | CRTC_INFO_HEIGHT_MM_EDID | CRTC_INFO_GAMMA)))
-    fields |= CRTC_INFO_EDID;
-  if ((fields & CRTC_INFO_CONNECTOR_NAME))
-    fields |= CRTC_INFO_CONNECTOR_TYPE;
-  if (CRTC_INFO_EDID | CRTC_INFO_WIDTH_MM | CRTC_INFO_HEIGHT_MM | CRTC_INFO_SUBPIXEL_ORDER)
-    fields |= CRTC_INFO_ACTIVE;
+  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID | LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID | LIBGAMMA_CRTC_INFO_GAMMA)))
+    fields |= LIBGAMMA_CRTC_INFO_EDID;
+  if ((fields & LIBGAMMA_CRTC_INFO_CONNECTOR_NAME))
+    fields |= LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE;
+  if (LIBGAMMA_CRTC_INFO_EDID | LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER)
+    fields |= LIBGAMMA_CRTC_INFO_ACTIVE;
   
   /* Figure out whether we require the connector to get all information we want. */
-  require_connector = fields & (CRTC_INFO_ACTIVE | CRTC_INFO_CONNECTOR_TYPE);
+  require_connector = fields & (LIBGAMMA_CRTC_INFO_ACTIVE | LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE);
   
   if (require_connector == 0)
     goto cont;
@@ -680,7 +680,7 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
       goto cont;
     }
   e |= read_connector_data(crtc, this, connector, fields);
-  if ((fields & CRTC_INFO_EDID) == 0)
+  if ((fields & LIBGAMMA_CRTC_INFO_EDID) == 0)
     goto cont;
   if (this->active_error || (this->active == 0))
     {
@@ -695,12 +695,12 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
       this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
       goto cont;
     }
-  if ((fields & (CRTC_INFO_WIDTH_MM_EDID | CRTC_INFO_HEIGHT_MM_EDID | CRTC_INFO_GAMMA)))
+  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID | LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID | LIBGAMMA_CRTC_INFO_GAMMA)))
     e |= libgamma_parse_edid(this, fields);
  cont:
-  e |= (fields & CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
+  e |= (fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
   this->gamma_depth = 16;
-  e |= this->gamma_support_error = _E(CRTC_INFO_GAMMA_SUPPORT);
+  e |= this->gamma_support_error = _E(LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT);
   
   /* Free the EDID after us. */
   if (free_edid)
