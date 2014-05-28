@@ -439,6 +439,11 @@ provide display server abstract, it optionally lets you
 choose any available method you want despite of what
 display server you are used.
 
+You may also want to add checks for update to
+@code{LIBGAMMA_CONNECTOR_TYPE_COUNT},
+@code{LIBGAMMA_SUBPIXEL_ORDER_COUNT} and
+@code{LIBGAMMA_CRTC_INFO_COUNT}.
+
 
 
 @node GNU Free Documentation License

@@ -335,6 +335,11 @@ typedef enum libgamma_connector_type
   } libgamma_connector_type_t;
 
 /**
+ * The number of values defined in `libgamma_connector_type_t`.
+ */
+#define LIBGAMMA_CONNECTOR_TYPE_COUNT = 19
+
+/**
  * Orders for subpixels. Currently the possible values are
  * very biased to LCD, Plasma and monochrome monitors.
  */
@@ -372,6 +377,11 @@ typedef enum libgamma_subpixel_order
     LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_BGR
     
   } libgamma_subpixel_order_t;
+
+/**
+ * The number of values defined in `libgamma_subpixel_order_t`.
+ */
+#define LIBGAMMA_SUBPIXEL_ORDER_COUNT = 6
 
 
 /**
@@ -453,6 +463,11 @@ typedef enum libgamma_subpixel_order
  * and report errors to `connector_type_error`.
  */
 #define CRTC_INFO_GAMMA  (1 << 12)
+
+/**
+ * The number of `CRTC_INFO_*` values defined.
+ */
+#define LIBGAMMA_CRTC_INFO_COUNT = 13
 
 
 /**
