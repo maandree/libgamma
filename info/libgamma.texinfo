@@ -141,7 +141,7 @@ Umbrella term for `screen' and
 
 @item page [libgamma]
 The desktop workspace or virtual
-terminal that is display on a CRTC.
+terminal that is displayed on a CRTC.
 (This jargon is not currently used,
 but is reserved for future features.)
 
