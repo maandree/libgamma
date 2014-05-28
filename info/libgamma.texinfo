@@ -155,6 +155,8 @@ Developers of @command{libgamma} and developers
 who use @command{libgamma} for their software may
 also want to use @option{--debug} which enables
 extra checks to produce better error reports.
+Additionally @option{--debug} adds the @option{-Og -g}
+flags to the C compiler rather than @option{-Ofast}.
 Developers can also use the developer options
 instead of @option{--debug}, the adjustment and
 operating systems:
