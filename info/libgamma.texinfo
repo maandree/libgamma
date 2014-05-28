@@ -53,6 +53,7 @@ Texts. A copy of the license is included in the section entitled
 @menu
 * Overview::                        Brief overview of @command{libgamma}.
 * Compiling::                       Configuring, compiling and installing @command{libgamma}.
+* Linking::                         Linking your software to @command{libgamma}.
 * GNU Free Documentation License::  Copying and sharing this manual.
 @end menu
 
@@ -358,6 +359,22 @@ Installs the PostScript manual.
 @item install-dvi
 Installs the DVI manual.
 @end table
+
+
+
+@node Linking
+@chapter Linking
+
+When compiling your program use @command{libgamma},
+you will not need to do anything for the compiling
+phase. But for the linking phase, will need to add
+the option @option{-lgamma}.
+Currently @command{libgamma}, does not provide
+an pkgconfig file.
+
+Keep in mind that @command{libgamma} is GNU General
+Public License version 3 software for your freedom
+and for the freedom of all.
 
 
 
