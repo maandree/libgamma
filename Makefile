@@ -28,6 +28,9 @@ LICENSEDIR ?= $(DATADIR)/licenses
 # The name of the package as it should be installed.
 PKGNAME ?= libgamma
 
+# General-preprocess command. (https://github.com/maandree/gpp)
+GPP ?= gpp
+
 
 # Enabled warnings.
 WARN = -Wall -Wextra -pedantic -Wdouble-promotion -Wformat=2 -Winit-self       \
@@ -53,8 +56,11 @@ LIBS_C =
 # Object files for the library.
 LIBOBJ = libgamma-facade libgamma-method libgamma-error gamma-helper edid
 
+# Header files for the library are parsed for the info manual.
+HEADERS_INFO = libgamma-error libgamma-facade libgamma-method
+
 # Header files for the library, as installed.
-HEADERS = libgamma libgamma-config libgamma-error libgamma-facade libgamma-method
+HEADERS = libgamma libgamma-config $(HEADERS_INFO)
 
 # Object files for the test.
 TESTOBJ = test
@@ -134,29 +140,34 @@ obj/%.o: test/%.c
 .PHONY: doc
 doc: info pdf dvi ps
 
+obj/libgamma.texinfo: info/libgamma.texinfo $(foreach H,$(HEADERS_INFO),src/$(H).h)
+	mkdir -p obj
+	$(GPP) --symbol '£' --input $< --output $@
+
+obj/%.texinfo: info/%.texinfo
+	mkdir -p obj
+	cp $< $@
+
 .PHONY: info
 info: libgamma.info
-%.info: info/%.texinfo info/fdl.texinfo
+%.info: obj/%.texinfo obj/fdl.texinfo
 	makeinfo $<
 
 .PHONY: pdf
 pdf: libgamma.pdf
-%.pdf: info/%.texinfo info/fdl.texinfo
-	mkdir -p obj
+%.pdf: obj/%.texinfo obj/fdl.texinfo
 	cd obj ; yes X | texi2pdf ../$<
 	mv obj/$@ $@
 
 .PHONY: dvi
 dvi: libgamma.dvi
-%.dvi: info/%.texinfo info/fdl.texinfo
-	mkdir -p obj
+%.dvi: obj/%.texinfo obj/fdl.texinfo
 	cd obj ; yes X | $(TEXI2DVI) ../$<
 	mv obj/$@ $@
 
 .PHONY: ps
 ps: libgamma.ps
-%.ps: info/%.texinfo info/fdl.texinfo
-	mkdir -p obj
+%.ps: obj/%.texinfo obj/fdl.texinfo
 	cd obj ; yes X | texi2pdf --ps ../$<
 	mv obj/$@ $@
 

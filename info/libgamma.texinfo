@@ -29,6 +29,9 @@ Texts. A copy of the license is included in the section entitled
 @end quotation
 @end copying
 
+£>set -u
+£>cd info
+
 @ifnottex
 @node Top
 @top libgamma -- Display server abstraction layer for gamma ramp adjustments
@@ -382,6 +385,10 @@ and for the freedom of all.
 @node API
 @chapter API
 
+@menu
+* Errors::                          Error codes and how to handle errors.
+@end menu
+
 To use @command{libgamma} add ``@code{#include <libgamma.h>}''
 to and C file or C header file that requires anything
 from @command{libgamma}. @file{libgamma.h} is the only
@@ -443,6 +450,47 @@ You may also want to add checks for update to
 @code{LIBGAMMA_CONNECTOR_TYPE_COUNT},
 @code{LIBGAMMA_SUBPIXEL_ORDER_COUNT} and
 @code{LIBGAMMA_CRTC_INFO_COUNT}.
+
+
+
+@node Errors
+@section Errors
+
+Many @command{libgamma} functions will return
+@command{libgamma} specific error codes rather
+than setting @code{errno} and return @code{-1}.
+However @code{errno} may have been set, but
+should in such case be ignored unless
+@code{LIBGAMMA_ERRNO_SET} has been returned.
+Other functions do set @code{errno} and return
+@code{-1}. Other functions may store the error
+code. In this case @code{LIBGAMMA_ERRNO_SET}
+cannot be stored but the value that @code{errno}
+had when an error occured can be stored instead
+of a @command{libgamma} specific error codes.
+@code{errno} values are allows positive whereas
+@command{libgamma} specific error codes are
+allows negative. On success zero is returned
+or stored.
+
+If @code{LIBGAMMA_DEVICE_REQUIRE_GROUP} is returned
+the ID of the required group is stored in
+@code{libgamma_group_gid} and the name of that
+group is stored in @code{libgamma_group_name}.
+@code{NULL} is stored if the name of the group
+cannto be determined. @file{libgamma.h} give
+you access to these variables, they are defined
+as @code{gid_t} and @code{const char*} types
+respectively.
+
+@command{libgamma} defines the following error codes
+that its functions may return:
+@table @code
+£>for err in $(libgamma-error-extract --list); do
+@item £{err}
+£>libgamma-error-extract $err | texise
+£>done
+@end table
 
 
 
