@@ -54,6 +54,7 @@ Texts. A copy of the license is included in the section entitled
 * Overview::                        Brief overview of @command{libgamma}.
 * Compiling::                       Configuring, compiling and installing @command{libgamma}.
 * Linking::                         Linking your software to @command{libgamma}.
+* API::                             @command{libgamma}'s advanced programming interface.
 * GNU Free Documentation License::  Copying and sharing this manual.
 @end menu
 
@@ -375,6 +376,57 @@ an pkgconfig file.
 Keep in mind that @command{libgamma} is GNU General
 Public License version 3 software for your freedom
 and for the freedom of all.
+
+
+
+@node API
+@chapter API
+
+To use @command{libgamma} add ``@code{#include <libgamma.h>}''
+to and C file or C header file that requires anything
+from @command{libgamma}. @file{libgamma.h} is the only
+header file from @command{libgamma} which should be
+included directly.
+
+Once @file{libgamma.h} is included your program will
+have access the @command{libgamma}'s API which includes
+functions, data structures, error codes, and adjustment
+method identifers.
+
+It is highly recommened to add a check for new error
+codes if your program will be using error codes from
+@command{libgamma}. This allows you to get a notification
+if you program is not up to date with new error codes
+in @command{libgamma}. To do this, @file{libgamma.h}
+provides the C preprocessor definition @code{LIBGAMMA_ERROR_MIN};
+this is the lowest value of that any error code has,
+all error codes are negative, a new error code is added
+it will have a lower value that the ones added before it.
+The first step in adding this check is to figure out
+what the value of @code{LIBGAMMA_ERROR_MIN} is on your
+system. To do this, use the @command{cpp} program, it
+should be included with your C compiler.
+
+@example
+cpp <<EOF | tail --lines 1
+#include <libgamma.h>
+LIBGAMMA_ERROR_MIN
+EOF
+@end example
+
+The next step is to add some C preprocessor directives
+to one of your C files that includes @file{libgamma.h}.
+
+@example
+#if LIBGAMMA_ERROR_MIN < -10
+# warning New error codes have been added to libgamma.
+#endif
+@end example
+
+In this example, we assume that output of the first
+step was `-10', which it really was not. So if you
+use this in your program you should receive a warning
+until you update the value.
 
 
 
