@@ -31,6 +31,7 @@ Texts. A copy of the license is included in the section entitled
 
 £>set -u
 £>cd info
+£>export PATH=".:${PATH}"
 
 @ifnottex
 @node Top
