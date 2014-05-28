@@ -337,7 +337,7 @@ typedef enum libgamma_connector_type
 /**
  * The number of values defined in `libgamma_connector_type_t`.
  */
-#define LIBGAMMA_CONNECTOR_TYPE_COUNT = 19
+#define LIBGAMMA_CONNECTOR_TYPE_COUNT  19
 
 /**
  * Orders for subpixels. Currently the possible values are
@@ -381,7 +381,7 @@ typedef enum libgamma_subpixel_order
 /**
  * The number of values defined in `libgamma_subpixel_order_t`.
  */
-#define LIBGAMMA_SUBPIXEL_ORDER_COUNT = 6
+#define LIBGAMMA_SUBPIXEL_ORDER_COUNT  6
 
 
 /**
@@ -467,7 +467,7 @@ typedef enum libgamma_subpixel_order
 /**
  * The number of `LIBGAMMA_CRTC_INFO_*` values defined.
  */
-#define LIBGAMMA_CRTC_INFO_COUNT = 13
+#define LIBGAMMA_CRTC_INFO_COUNT  13
 
 
 /**
