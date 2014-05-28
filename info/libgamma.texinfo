@@ -56,6 +56,7 @@ Texts. A copy of the license is included in the section entitled
 
 @menu
 * Overview::                        Brief overview of @command{libgamma}.
+* Jargon::                          The jargon of @command{libgamma}.
 * Compiling::                       Configuring, compiling and installing @command{libgamma}.
 * Linking::                         Linking your software to @command{libgamma}.
 * API::                             @command{libgamma}'s advanced programming interface.
@@ -84,9 +85,9 @@ However Windows GDI and Quartz/CoreGraphics do
 not receive first-party testing on their target
 platforms but do receive first-party testing
 using a compatibility layer that translates
-the calls to RandR calls. Neither does libgamma,
-currently, receive testing on any of the BSD:s,
-it is only tested on GNU/Linux.
+the calls to RandR calls. Neither does
+@command{libgamma}, currently, receive testing
+on any of the BSD:s, it is only tested on GNU/Linux.
 
 Furthermore @command{libgamma} provides a dummy
 method that can be used to ignore adjustments
@@ -95,6 +96,80 @@ pretend like the environment has changed. This
 can be used test how well your software handles
 such events. It can also be configured at runtime
 to use another adjustment method such as RandR.
+
+
+
+@node Jargon
+@chapter Jargon
+
+@command{libgamma} uses a small jargon,
+parts of which is loaned from X.org,
+and some is commonly used jargon.
+
+@table @asis
+@item adjustment method [libgamma]
+A combination of the display server
+and a protocol used to tell to the
+display server.
+
+@item display server [X.org]
+The program used to display graphical
+elements to the monitors. In @command{libgamma}
+we also call the non-graphical environment
+a display server.
+
+@item display [X.org]
+@itemx site [libgamma]
+An instance of a display server.
+Non-graphical environment are only
+covered by `site'.
+
+@item screen [X.org]
+A group of CRTC:s within a display.
+
+@item CRTC
+@itemx cathode ray tube controller
+TODO
+
+@item monitor
+The physical medium used to display
+text and graphics.
+
+@item partition [libgamma]
+Umbrella term for `screen' and
+`graphics card'.
+
+@item page [libgamma]
+The desktop workspace or virtual
+terminal that is display on a CRTC.
+(This jargon is not currently used,
+but is reserved for future features.)
+
+@item output [X.org]
+TODO
+
+@item connector
+TODO
+
+@item encoder
+TODO
+
+@item gamma ramp
+@itemx colour curve
+A lookup table that translates an encoded
+value for a subpixel into its output value.
+
+@item subpixel
+@itemx colour channel
+One of the three colours that makes up a pixel:
+red, green or blue.
+
+@item gamma ramp size
+@itemx gamma stops
+The number of possible values on the encoding
+axis of a gamma ramp.
+
+@end table
 
 
 
