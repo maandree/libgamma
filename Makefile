@@ -8,10 +8,14 @@
 PREFIX ?= /usr
 # The library path excluding prefix.
 LIB ?= /lib
+# The library header path excluding prefix.
+INCLUDE ?= /include
 # The resource path excluding prefix.
 DATA ?= /share
 # The library path including prefix.
 LIBDIR ?= $(PREFIX)$(LIB)
+# The library header including prefix.
+INCLUDEDIR ?= $(PREFIX)$(INCLUDE)
 # The resource path including prefix.
 DATADIR ?= $(PREFIX)$(DATA)
 # The generic documentation path including prefix.
@@ -48,6 +52,9 @@ LIBS_C =
 
 # Object files for the library.
 LIBOBJ = libgamma-facade libgamma-method libgamma-error gamma-helper edid
+
+# Header files for the library, as installed.
+HEADERS = libgamma libgamma-config libgamma-error libgamma-facade libgamma-method
 
 # Object files for the test.
 TESTOBJ = test
@@ -91,15 +98,9 @@ default: lib test info
 .PHONY: all
 all: lib test doc
 
+
 .PHONY: lib
 lib: bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so.$(LIB_MAJOR) bin/libgamma.so
-
-.PHONY: test
-test: bin/test
-
-.PHONY: doc
-doc: info pdf dvi ps
-
 
 bin/libgamma.so.$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/$(O).o)
 	mkdir -p $(shell dirname $@)
@@ -117,6 +118,10 @@ obj/%.o: src/%.c src/*.h
 	mkdir -p $(shell dirname $@)
 	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -c -o $@ $<
 
+
+.PHONY: test
+test: bin/test
+
 bin/test: $(foreach O,$(TESTOBJ),obj/$(O).o) bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so
 	mkdir -p $(shell dirname $@)
 	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/$(O).o)
@@ -124,6 +129,10 @@ bin/test: $(foreach O,$(TESTOBJ),obj/$(O).o) bin/libgamma.so.$(LIB_VERSION) bin/
 obj/%.o: test/%.c
 	mkdir -p $(shell dirname $@)
 	$(CC) $(TEST_FLAGS) -Isrc -c -o $@ $<
+
+
+.PHONY: doc
+doc: info pdf dvi ps
 
 .PHONY: info
 info: libgamma.info
@@ -150,6 +159,86 @@ ps: libgamma.ps
 	mkdir -p obj
 	cd obj ; yes X | texi2pdf --ps ../$<
 	mv obj/$@ $@
+
+
+# Install rules.
+
+.PHONY: install
+install: install-base install-info
+
+.PHONY: install
+install-all: install-base install-doc
+
+.PHONY: install-base
+install-base: install-lib install-include install-copyright
+
+
+.PHONY: install-lib
+install-lib: bin/libgamma.so.$(LIB_VERSION)
+	install -dm755 -- "$(DESTDIR)$(LIBDIR)"
+	install -m755 $< -- "$(DESTDIR)$(LIBDIR)/libgamma.so.$(LIB_VERSION)"
+	ln -sf libgamma.so.$(LIB_VERSION) -- "$(DESTDIR)$(LIBDIR)/libgamma.so.$(LIB_MAJOR)"
+	ln -sf libgamma.so.$(LIB_VERSION) -- "$(DESTDIR)$(LIBDIR)/libgamma.so"
+
+.PHONY: install-include
+install-include:
+	install -dm755 -- "$(DESTDIR)$(INCLUDEDIR)"
+	install -m644 $(foreach H,$(HEADERS),src/$(H).h) -- "$(DESTDIR)$(INCLUDEDIR)"
+
+
+.PHONY: install-copyright
+install-copyright: install-copying install-license
+
+.PHONY: install-copying
+install-copying:
+	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
+	install -m644 COPYING -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
+
+.PHONY: install-license
+install-license:
+	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
+	install -m644 LICENSE -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
+
+
+.PHONY: install-doc
+install-doc: install-info install-pdf install-ps install-dvi
+
+.PHONY: install-info
+install-info: libgamma.info
+	install -dm755 -- "$(DESTDIR)$(INFODIR)"
+	install -m644 $< -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
+
+.PHONY: install-pdf
+install-pdf: libgamma.pdf
+	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
+	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
+
+.PHONY: install-ps
+install-ps: libgamma.ps
+	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
+	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).ps"
+
+.PHONY: install-dvi
+install-dvi: libgamma.dvi
+	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
+	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
+
+
+# Uninstall rules.
+
+.PHONY: uninstall
+uninstall:
+	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.so.$(LIB_VERSION)"
+	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.so.$(LIB_MAJOR)"
+	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.so"
+	-rm -- $(foreach H,$(HEADERS),"$(DESTDIR)$(INCLUDEDIR)/$(H).h")
+	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
+	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
+	-rmdir -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
+	-rm -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
+	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
+	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).ps"
+	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
 
 
 # Clean rules.
