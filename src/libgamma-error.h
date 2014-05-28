@@ -101,14 +101,14 @@ extern const char* libgamma_group_name;
 #define LIBGAMMA_GAMMA_RAMP_SIZE_CHANGED  (-12)
 
 /**
- * The specified ramp sizes are not identical which is required by the adjustment method
- * (Only returned in debug mode).
+ * The specified ramp sizes are not identical which is required by the adjustment method.
+ * (Only returned in debug mode.)
  */
 #define LIBGAMMA_MIXED_GAMMA_RAMP_SIZE  (-13)
 
 /**
- * The specified ramp sizes are not supported by the adjustment method
- * (Only returned in debug mode).
+ * The specified ramp sizes are not supported by the adjustment method.
+ * (Only returned in debug mode.)
  */
 #define LIBGAMMA_WRONG_GAMMA_RAMP_SIZE  (-14)
 
