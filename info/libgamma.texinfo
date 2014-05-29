@@ -129,7 +129,8 @@ A group of CRTC:s within a display.
 
 @item CRTC
 @itemx cathode ray tube controller
-TODO
+Controller for the output on monitor.
+Mapping from CRTC:s to encoders is an injection.
 
 @item monitor
 The physical medium used to display
@@ -146,13 +147,16 @@ terminal that is displayed on a CRTC.
 but is reserved for future features.)
 
 @item output [X.org]
-TODO
+A connector and its encoder.
 
 @item connector
-TODO
+Physical port on the graphics card where
+a monitor can be plugged in. If and only
+if the connector is disabled it does not
+have a port and does not have a CRTC.
 
 @item encoder
-TODO
+Translation layer between CRTC:s and connectors.
 
 @item gamma ramp
 @itemx colour curve
