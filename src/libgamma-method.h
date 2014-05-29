@@ -45,9 +45,9 @@
  * The identifier for the adjustment method with
  * uses the VidMode protocol under the X display server.
  * This is an older alternative to RandR that can
- * [not verified] work on some drivers that are not
- * supported by RandR, however it can only control the
- * primary CRTC per screen (partition).
+ * work on some drivers that are not supported by RandR,
+ * however it can only control the primary CRTC per
+ * screen (partition).
  */
 #define LIBGAMMA_METHOD_X_VIDMODE  2
 
