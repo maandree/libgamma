@@ -606,6 +606,19 @@ error. @code{libgamma_value_of_error} will return zero
 if the input is @code{NULL} or string that is not the
 name of a @command{libgamma} error.
 
+The function @code{libgamma_perror} can be used to
+print an error to stderr in a @code{perror} fashion.
+However @code{libgamma_perror} will not translate the
+@command{libgamma} errors into human-readable strings,
+it will simply print the name of the error.
+@code{libgamma_perror} takes two arguments:
+a @code{const char*} that work like the parameter for
+@code{perror}, and an @code{int} with the error code.
+If the error code is the value of @code{LIBGAMMA_ERRNO_SET}
+@code{perror} will be used to print the current error
+stored in @code{errno}. If the error code is non-negative
+(an @code{errno} value`), that value will be stored in
+@code{errno} and @code{perror} will be used to print it.
 
 
 @node GNU Free Documentation License
