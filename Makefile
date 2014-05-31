@@ -108,7 +108,7 @@ all: lib test doc
 .PHONY: lib
 lib: bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so.$(LIB_MAJOR) bin/libgamma.so
 
-bin/libgamma.so.$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/$(O).o)
+bin/libgamma.so.$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/lib/$(O).o)
 	mkdir -p $(shell dirname $@)
 	$(CC) $(LIB_FLAGS) $(LIBS_LD) -shared -Wl,-soname,libgamma.so.$(LIB_MAJOR) -o $@ $^
 
@@ -120,12 +120,12 @@ bin/libgamma.so:
 	mkdir -p $(shell dirname $@)
 	ln -s libgamma.so.$(LIB_VERSION) $@
 
-obj/%.o: src/%.c src/*.h
+obj/lib/%.o: src/lib/%.c src/lib/*.h
 	mkdir -p $(shell dirname $@)
 	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -c -o $@ $<
 
-obj/%.o: obj/%.c src/*.h
-	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -iquote"src" -c -o $@ $<
+obj/lib/%.o: obj/lib/%.c src/lib/*.h
+	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -iquote"$$(dirname "$<" | sed -e 's:^obj:src:')" -c -o $@ $<
 
 obj/%: src/%.gpp
 	mkdir -p $(shell dirname $@)
@@ -135,19 +135,19 @@ obj/%: src/%.gpp
 .PHONY: test
 test: bin/test
 
-bin/test: $(foreach O,$(TESTOBJ),obj/$(O).o) bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so
+bin/test: $(foreach O,$(TESTOBJ),obj/test/$(O).o) bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so
 	mkdir -p $(shell dirname $@)
-	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/$(O).o)
+	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/test/$(O).o)
 
-obj/%.o: test/%.c
+obj/test/%.o: src/test/%.c
 	mkdir -p $(shell dirname $@)
-	$(CC) $(TEST_FLAGS) -Isrc -c -o $@ $<
+	$(CC) $(TEST_FLAGS) -Isrc/lib -c -o $@ $<
 
 
 .PHONY: doc
 doc: info pdf dvi ps
 
-obj/libgamma.texinfo: info/libgamma.texinfo $(foreach H,$(HEADERS_INFO),src/$(H).h)
+obj/libgamma.texinfo: info/libgamma.texinfo $(foreach H,$(HEADERS_INFO),src/lib/$(H).h)
 	mkdir -p obj
 	$(GPP) --symbol '£' --input $< --output $@
 
@@ -267,5 +267,5 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	-rm -f .config.mk src/libgamma-config.h
+	-rm -f .config.mk src/lib/libgamma-config.h
 

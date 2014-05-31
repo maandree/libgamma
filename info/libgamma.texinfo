@@ -30,8 +30,8 @@ Texts. A copy of the license is included in the section entitled
 @end copying
 
 £>set -u
-£>cd info
-£>export PATH=".:${PATH}"
+£>cd src/extract
+£>export PATH=".:../../info:${PATH}"
 
 @ifnottex
 @node Top

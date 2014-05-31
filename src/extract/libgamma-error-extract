@@ -20,7 +20,7 @@
 import sys
 import os
 
-with open(os.path.dirname(sys.argv[0]) + '/../src/libgamma-error.h', 'rb') as file:
+with open(os.path.dirname(sys.argv[0]) + '/../lib/libgamma-error.h', 'rb') as file:
     data = file.read()
 data = data.decode('utf-8', 'error')
 

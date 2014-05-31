@@ -28,7 +28,7 @@
 
 
 £>set -u
-£>cd info
+£>cd src/extract
 £>export PATH=".:${PATH}"
 
 

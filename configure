@@ -79,7 +79,7 @@ done
 
 
 exec 3> "$(dirname "$0")/.config.mk"
-exec 4> "$(dirname "$0")/src/libgamma-config.h"
+exec 4> "$(dirname "$0")/src/lib/libgamma-config.h"
 echo 'DEFINITIONS =' >&3
 
 echo '/**' >&4

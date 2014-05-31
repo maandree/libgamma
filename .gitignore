@@ -13,7 +13,7 @@ obj/
 *.out
 *.o
 /config.mk
-/src/libgamma-config.h
+/src/lib/libgamma-config.h
 *.info
 *.pdf
 *.dvi
