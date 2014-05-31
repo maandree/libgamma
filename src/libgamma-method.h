@@ -313,23 +313,96 @@ typedef enum libgamma_connector_type
      * (This could be considered an error).
      */
     LIBGAMMA_CONNECTOR_TYPE_Unknown,
+    
+    /**
+     * Video Graphics Array (VGA).
+     */
     LIBGAMMA_CONNECTOR_TYPE_VGA,
+    
+    /**
+     * Digital Visual Interface, integrated (DVI-I).
+     */
     LIBGAMMA_CONNECTOR_TYPE_DVII,
+    
+    /**
+     * Digital Visual Interface, digital only (DVI-D).
+     */
     LIBGAMMA_CONNECTOR_TYPE_DVID,
+    
+    /**
+     * Digital Visual Interface, analogue only (DVI-A).
+     */
     LIBGAMMA_CONNECTOR_TYPE_DVIA,
+    
+    /**
+     * Composite video.
+     */
     LIBGAMMA_CONNECTOR_TYPE_Composite,
+    
+    /**
+     * Separate Video (S-video).
+     */
     LIBGAMMA_CONNECTOR_TYPE_SVIDEO,
+    
+    /**
+     * Low-voltage differential signaling (LVDS).
+     */
     LIBGAMMA_CONNECTOR_TYPE_LVDS,
+    
+    /**
+     * Component video, usally separate cables for each channel.
+     */
     LIBGAMMA_CONNECTOR_TYPE_Component,
+    
+    /**
+     * 9 pin DIN (Deutsches Institut für Normung) connector.
+     */
     LIBGAMMA_CONNECTOR_TYPE_9PinDIN,
+    
+    /**
+     * DisplayPort.
+     */
     LIBGAMMA_CONNECTOR_TYPE_DisplayPort,
+    
+    /**
+     * High-Definition Multimedia Interface (HDMI), unknown type.
+     */
     LIBGAMMA_CONNECTOR_TYPE_HDMI,
+    
+    /**
+     * High-Definition Multimedia Interface, type A (HDMI-A).
+     */
     LIBGAMMA_CONNECTOR_TYPE_HDMIA,
+    
+    /**
+     * High-Definition Multimedia Interface, type B (HDMI-B).
+     */
     LIBGAMMA_CONNECTOR_TYPE_HDMIB,
+    
+    /**
+     * Television, unknown connector.
+     */
     LIBGAMMA_CONNECTOR_TYPE_TV,
+    
+    /**
+     * Embedded DisplayPort (eDP).
+     */
     LIBGAMMA_CONNECTOR_TYPE_eDP,
+    
+    /**
+     * A virtual connector.
+     */
     LIBGAMMA_CONNECTOR_TYPE_VIRTUAL,
+    
+    /**
+     * Display Serial Interface (DSI).
+     */
     LIBGAMMA_CONNECTOR_TYPE_DSI,
+    
+    /**
+     * LFP connector.
+     * (If you know what this is add it to Wikipedia.)
+     */
     LIBGAMMA_CONNECTOR_TYPE_LFP
     
   } libgamma_connector_type_t;
