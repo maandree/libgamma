@@ -593,6 +593,19 @@ that its functions may return:
 £>done
 @end table
 
+The function @code{libgamma_name_of_error} can
+be used to return the name of an libgamma error.
+For example @code{libgamma_name_of_error(LIBGAMMA_ERRNO_SET)}
+will return the string ``LIBGAMMA_ERRNO_SET''.
+Similarly @code{libgamma_value_of_error("LIBGAMMA_ERRNO_SET")}
+will return the value of @code{LIBGAMMA_ERRNO_SET}.
+The value returned from @code{libgamma_name_of_error}
+shall not be @code{free}:d. @code{NULL} is returned
+if the value does nto refer to a @command{libgamma}
+error. @code{libgamma_value_of_error} will return zero
+if the input is @code{NULL} or string that is not the
+name of a @command{libgamma} error.
+
 
 
 @node GNU Free Documentation License
