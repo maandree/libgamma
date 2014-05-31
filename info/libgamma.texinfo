@@ -565,6 +565,9 @@ Capabilities.
 £>for cap in $(libgamma-method-extract --list --cap-t); do
 @item £{cap} [£(libgamma-method-extract --type --cap-t $cap)]
 £>libgamma-method-extract --cap-t $cap | texise
+£>if [ $cap = crtc_information ]; then
+See @ref{CRTC information} for more information.
+£>fi
 £>done
 @end table
 
