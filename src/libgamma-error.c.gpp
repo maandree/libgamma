@@ -53,7 +53,7 @@ const char* libgamma_group_name = NULL;
  * print the name of the error. If the value `error_code`
  * is the value of `LIBGAMMA_ERRNO_SET`, `perror` will be
  * used to print the current error stored in `errno`.
- * If `value` is non-negative (a `errno` value`), that
+ * If `error_code` is non-negative (an `errno` value`), that
  * value will be stored in `errno` and `perror` will be
  * used to print it.
  * 
