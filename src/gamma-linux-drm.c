@@ -179,6 +179,63 @@ int libgamma_linux_drm_site_restore(libgamma_site_state_t* restrict this)
 }
 
 
+/**
+ * Figure out why `open` failed for a graphics card
+ * 
+ * @param   pathname  The pathname of the error card
+ * @return            The error code to report
+ */
+static int figure_out_card_open_error(const char* pathname)
+{
+  if ((errno == ENXIO) || (errno == ENODEV))
+    return LIBGAMMA_NO_SUCH_PARTITION;
+  
+  if (errno == EACCES)
+    {
+      gid_t supplemental_groups[NGROUPS_MAX];
+      struct group* group;
+      int i, n;
+      struct stat attr;
+      int r;
+      
+      
+      r = stat(pathname, &attr);
+      
+#define __test(R, W) ((attr.st_mode & (R | W)) == (R | W))
+      if (r)
+	return errno == EACCES ? LIBGAMMA_NO_SUCH_PARTITION : LIBGAMMA_ERRNO_SET;
+      
+      if ((attr.st_uid == geteuid() && __test(S_IRUSR, S_IWUSR)) ||
+	  (attr.st_gid == getegid() && __test(S_IRGRP, S_IWGRP)) ||
+	  __test(S_IROTH, S_IWOTH))
+	return LIBGAMMA_DEVICE_ACCESS_FAILED;
+      
+      if (attr.st_gid == 0 /* root group */ || __test(S_IRGRP, S_IWGRP))
+	return LIBGAMMA_DEVICE_RESTRICTED;
+      
+      
+      n = getgroups(NGROUPS_MAX, supplemental_groups);
+      if (n < 0)
+	return LIBGAMMA_ERRNO_SET;
+      
+      for (i = 0; i < n; i++)
+	if (supplemental_groups[i] == attr.st_gid)
+	  break;
+      
+      if (i != n)
+	return LIBGAMMA_DEVICE_ACCESS_FAILED;
+      
+      errno = 0;
+      group = getgrgid(attr.st_gid); /* TODO: Not thread-safe. */
+      libgamma_group_gid = attr.st_gid;
+      libgamma_group_name = group != NULL ? group->gr_name : NULL;
+      return LIBGAMMA_DEVICE_REQUIRE_GROUP;
+#undef __test
+    }
+  
+  return LIBGAMMA_ERRNO_SET;
+}
+
 
 /**
  * Initialise an allocated partition state.
@@ -218,58 +275,7 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
   data->fd = open(pathname, O_RDWR | O_CLOEXEC);
   if (data->fd < 0)
     {
-      if ((errno == ENXIO) || (errno == ENODEV))
-	rc = LIBGAMMA_NO_SUCH_PARTITION;
-      else if (errno == EACCES)
-	{
-	  struct stat attr;
-	  int r;
-	  
-	  r = stat(pathname, &attr);
-	  rc = LIBGAMMA_NO_SUCH_PARTITION;
-
-#define __test(R, W) ((attr.st_mode & (R | W)) == (R | W))
-	  if (r)
-	    rc = errno == EACCES ? LIBGAMMA_NO_SUCH_PARTITION : LIBGAMMA_ERRNO_SET;
-	  else if ((attr.st_uid == geteuid() && __test(S_IRUSR, S_IWUSR)) ||
-		   (attr.st_gid == getegid() && __test(S_IRGRP, S_IWGRP)) ||
-		   __test(S_IROTH, S_IWOTH))
-	    rc = LIBGAMMA_DEVICE_ACCESS_FAILED;
-	  else if (attr.st_gid == 0 /* root group */ || __test(S_IRGRP, S_IWGRP))
-	    rc = LIBGAMMA_DEVICE_RESTRICTED;
-	  else
-	    {
-	      gid_t supplemental_groups[NGROUPS_MAX];
-	      struct group* group;
-	      int i, n;
-	      
-	      n = getgroups(NGROUPS_MAX, supplemental_groups);
-	      if (n < 0)
-		{
-		  rc = LIBGAMMA_ERRNO_SET;
-		  goto fail_data;
-		}
-	      
-	      for (i = 0; i < n; i++)
-		if (supplemental_groups[i] == attr.st_gid)
-		  break;
-	      
-	      if (i != n)
-		{
-		  rc = LIBGAMMA_DEVICE_ACCESS_FAILED;
-		  goto fail_data;
-		}
-	      
-	      rc = LIBGAMMA_DEVICE_REQUIRE_GROUP;
-	      errno = 0;
-	      group = getgrgid(attr.st_gid); /* TODO: Not thread-safe. */
-	      libgamma_group_gid = attr.st_gid;
-	      libgamma_group_name = group != NULL ? group->gr_name : NULL;
-	    }
-#undef __test
-	}
-      else
-	rc = LIBGAMMA_ERRNO_SET;
+      rc = figure_out_card_open_error(pathname);
       goto fail_data;
     }
   
