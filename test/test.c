@@ -30,7 +30,7 @@ static const char* method_name(int method)
       case LIBGAMMA_METHOD_X_VIDMODE:             return "VidMode X extension";
       case LIBGAMMA_METHOD_LINUX_DRM:             return "Linux DRM";
       case LIBGAMMA_METHOD_W32_GDI:               return "Windows GDI";
-      case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  return "Quartz using Core Graphics";
+      case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  return "Quartz using CoreGraphics";
       default:
 #if LIBGAMMA_METHOD_COUNT != 6
 # warning List of adjustment methods is out of date

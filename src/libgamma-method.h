@@ -73,7 +73,7 @@
 #define LIBGAMMA_METHOD_W32_GDI  4
 
 /**
- * The identifier for the Core Graphics adjustment
+ * The identifier for the CoreGraphics adjustment
  * method that is available in Mac OS X that can
  * adjust gamma ramps under the Quartz display server.
  * This method is not well tested; it can be compiled
