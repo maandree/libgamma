@@ -112,19 +112,19 @@ def doc_struct(name):
     print('\n'.join(data))
 
 
+struct_map = {'--info-t' : 'libgamma_crtc_information',
+              '--cap-t'  : 'libgamma_method_capabilities'}
+
 if sys.argv[1] == '--list':
     if sys.argv[2] == '--method':       list_define('LIBGAMMA_METHOD_', 'MAX', 'COUNT')
     elif sys.argv[2] == '--info':       list_define('LIBGAMMA_CRTC_INFO_', 'COUNT')
     elif sys.argv[2] == '--connector':  list_enum('LIBGAMMA_CONNECTOR_TYPE_', 'COUNT')
     elif sys.argv[2] == '--subpixel':   list_enum('LIBGAMMA_SUBPIXEL_ORDER_', 'COUNT')
-    elif sys.argv[2] == '--info-t':     list_struct('libgamma_crtc_information')
-    elif sys.argv[2] == '--cap-t':      list_struct('libgamma_method_capabilities')
+    elif sys.argv[2] in struct_map:     list_struct(struct_map[sys.argv[2]])
 elif sys.argv[1] == '--type':
-    if sys.argv[2] == '--info-t':       type_struct('libgamma_crtc_information')
-    elif sys.argv[2] == '--cap-t':      type_struct('libgamma_method_capabilities')
+    if sys.argv[2] in struct_map:       type_struct(struct_map[sys.argv[2]])
 else:
     if sys.argv[1] in ('--method', '--info'):           doc_define()
     elif sys.argv[1] in ('--connector', '--subpixel'):  doc_enum()
-    elif sys.argv[1] == '--info-t':     doc_struct('libgamma_crtc_information')
-    elif sys.argv[1] == '--cap-t':      doc_struct('libgamma_method_capabilities')
+    elif sys.argv[1] in struct_map:     doc_struct(struct_map[sys.argv[1]])
 
