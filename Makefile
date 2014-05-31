@@ -124,6 +124,13 @@ obj/%.o: src/%.c src/*.h
 	mkdir -p $(shell dirname $@)
 	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -c -o $@ $<
 
+obj/%.o: obj/%.c src/*.h
+	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -iquote"src" -c -o $@ $<
+
+obj/%: src/%.gpp
+	mkdir -p $(shell dirname $@)
+	$(GPP) --symbol '£' --input $< --output $@
+
 
 .PHONY: test
 test: bin/test

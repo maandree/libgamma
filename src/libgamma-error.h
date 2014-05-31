@@ -288,5 +288,26 @@ extern const char* libgamma_group_name;
 
 
 
+/**
+ * Returns the name of the definition associated with a libgamma error code.
+ * 
+ * @param   value  The error code.
+ * @return         The name of the definition associated with the error code,
+ *                 `NULL` if the error code does not exist. The return string
+ *                 should not be `free`:d.
+ */
+const char* libgamma_name_of_error(int value) __attribute__((const));
+
+/**
+ * Return the value of a libgamma error definition refered to by name.
+ * 
+ * @param   name  The name of the definition associated with the error code.
+ * @return        The error code, zero if the name does is `NULL`
+ *                or does not refer to an libgamma error.
+ */
+int libgamma_value_of_error(const char* name) __attribute__((const));
+
+
+
 #endif
 

@@ -1,3 +1,4 @@
+/* -*- c -*- */
 /**
  * libgamma — Display server abstraction layer for gamma ramp adjustments
  * Copyright © 2014  Mattias Andrée (maandree@member.fsf.org)
@@ -20,6 +21,8 @@
 
 #include <stddef.h>
 #include <sys/types.h>
+#include <string.h>
+
 
 
 /**
@@ -32,4 +35,54 @@ gid_t libgamma_group_gid = 0;
  * `NULL` if the name of the group `libgamma_group_gid` cannot be determined.
  */
 const char* libgamma_group_name = NULL;
+
+
+
+£>set -u
+£>cd info
+£>export PATH=".:${PATH}"
+
+
+/**
+ * Returns the name of the definition associated with a libgamma error code.
+ * 
+ * @param   value  The error code.
+ * @return         The name of the definition associated with the error code,
+ *                 `NULL` if the error code does not exist. The return string
+ *                 should not be `free`:d.
+ */
+const char* libgamma_name_of_error(int value)
+{
+  static const char* error_names[] =
+    {
+£>for error in $(libgamma-error-extract --list); do
+      "£{error}",
+£>done
+    };
+  
+  if ((value < LIBGAMMA_ERROR_MIN) || (value >= 0))
+    return NULL;
+  
+  return error_names[-value - 1];
+}
+
+
+/**
+ * Return the value of a libgamma error definition refered to by name.
+ * 
+ * @param   name  The name of the definition associated with the error code.
+ * @return        The error code, zero if the name does is `NULL`
+ *                or does not refer to an libgamma error.
+ */
+int libgamma_value_of_error(const char* name)
+{
+  if (name == NULL)
+    return 0;
+  
+£>for error in $(libgamma-error-extract --list); do
+  if (!strcmp(name, "£{error}"))  return £{error};
+£>done
+  
+  return 0;
+}
 
