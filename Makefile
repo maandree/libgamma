@@ -147,7 +147,8 @@ obj/test/%.o: src/test/%.c
 .PHONY: doc
 doc: info pdf dvi ps
 
-obj/libgamma.texinfo: info/libgamma.texinfo $(foreach H,$(HEADERS_INFO),src/lib/$(H).h)
+obj/libgamma.texinfo: info/libgamma.texinfo $(foreach H,$(HEADERS_INFO),src/lib/$(H).h) \
+	              src/extract/libgamma-*-extract info/texise
 	mkdir -p obj
 	$(GPP) --symbol '£' --input $< --output $@
 
@@ -157,7 +158,7 @@ obj/%.texinfo: info/%.texinfo
 
 .PHONY: info
 info: libgamma.info
-%.info: obj/%.texinfo obj/fdl.texinfo src/extract/libgamma-*-extract info/texise
+%.info: obj/%.texinfo obj/fdl.texinfo
 	makeinfo $<
 
 .PHONY: pdf
