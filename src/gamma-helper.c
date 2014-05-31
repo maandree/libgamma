@@ -89,12 +89,12 @@ static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t
     {
     case 16:
       for (i = 0; i < n; i++)
-	out.bits16.red[i] = (uint64_t)(in[i] / 0x0001000100010001ULL);
+	out.bits16.red[i] = (uint16_t)(in[i] / 0x0001000100010001ULL);
       break;
       
     case 32:
       for (i = 0; i < n; i++)
-	out.bits32.red[i] = (uint64_t)(in[i] / 0x0000000100000001ULL);
+	out.bits32.red[i] = (uint32_t)(in[i] / 0x0000000100000001ULL);
       break;
       
     case 64:
