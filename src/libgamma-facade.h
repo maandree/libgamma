@@ -93,6 +93,15 @@ typedef double libgamma_gamma_rampsd_fun(double encoding);
 size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operation);
 
 /**
+ * Check whether an adjustment method is available, non-existing (invalid) methods will be
+ * identified as not available under the rationale that the library may be out of date.
+ * 
+ * @param   method  The adjustment method.
+ * @return          Whether the adjustment method is available.
+ */
+int libgamma_is_method_available(int method) __attribute__((const));
+
+/**
  * Return the capabilities of an adjustment method.
  * 
  * @param  this    The data structure to fill with the method's capabilities

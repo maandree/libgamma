@@ -212,6 +212,48 @@ size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operati
 
 
 /**
+ * Check whether an adjustment method is available, non-existing (invalid) methods will be
+ * identified as not available under the rationale that the library may be out of date.
+ * 
+ * @param   method  The adjustment method.
+ * @return          Whether the adjustment method is available.
+ */
+int libgamma_is_method_available(int method)
+{
+#ifdef HAVE_NO_LIBGAMMA_METHODS
+  (void) methods;
+  return 0;
+#else
+  switch (method)
+    {
+#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
+    case LIBGAMMA_METHOD_DUMMY:
+#endif
+#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
+    case LIBGAMMA_METHOD_X_RANDR:
+#endif
+#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
+    case LIBGAMMA_METHOD_X_VIDMODE:
+#endif
+#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
+    case LIBGAMMA_METHOD_LINUX_DRM:
+#endif
+#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
+    case LIBGAMMA_METHOD_W32_GDI:
+#endif
+#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+#endif
+      return 1;
+      
+    default:
+      return 0;
+    }
+#endif
+}
+
+
+/**
  * Return the capabilities of an adjustment method.
  * 
  * @param  this    The data structure to fill with the method's capabilities.
