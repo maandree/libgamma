@@ -467,6 +467,7 @@ and for the freedom of all.
 
 @menu
 * Adjustment methods::              Selecting adjustment method.
+* CRTC information::                Retrieving information about CRTC:s.
 * Errors::                          Error codes and how to handle errors.
 @end menu
 
@@ -549,6 +550,38 @@ values.
 £>for method in $(libgamma-method-extract --list --method); do
 @item £{method}
 £>libgamma-method-extract --method $method | texise
+£>done
+@end table
+
+
+
+@node CRTC information
+@section CRTC information
+
+CRTC information.
+
+@table @code
+£>for info in $(libgamma-method-extract --list --info); do
+@item £{info}
+£>libgamma-method-extract --info $info | texise
+£>done
+@end table
+
+Subpixel order.
+
+@table @code
+£>for order in $(libgamma-method-extract --list --subpixel); do
+@item £{order}
+£>libgamma-method-extract --subpixel $order | texise
+£>done
+@end table
+
+Connector type.
+
+@table @code
+£>for type in $(libgamma-method-extract --list --connector); do
+@item £{type}
+£>libgamma-method-extract --connector $type | texise
 £>done
 @end table
 
