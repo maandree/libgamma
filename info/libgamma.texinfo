@@ -619,6 +619,10 @@ If the error code is the value of @code{LIBGAMMA_ERRNO_SET}
 stored in @code{errno}. If the error code is non-negative
 (an @code{errno} value`), that value will be stored in
 @code{errno} and @code{perror} will be used to print it.
+Additionally, if the error code is the value of
+@code{LIBGAMMA_DEVICE_REQUIRE_GROUP} the required group
+will be printed with its numerical value and, if known,
+its name.
 
 
 @node GNU Free Documentation License

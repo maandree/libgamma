@@ -297,7 +297,10 @@ extern const char* libgamma_group_name;
  * used to print the current error stored in `errno`.
  * If `error_code` is non-negative (an `errno` value`), that
  * value will be stored in `errno` and `perror` will be
- * used to print it.
+ * used to print it. Additionally, if the `error_code` is
+ * the value of `LIBGAMMA_DEVICE_REQUIRE_GROUP` the
+ * required group will be printed with its numerical value
+ * and, if known, its name.
  * 
  * @param  name   The text to add at the beginning.
  * @param  value  The error code, may be an `errno` value.
