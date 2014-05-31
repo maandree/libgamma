@@ -475,40 +475,19 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, const 
 
 
 /**
- * Read information from the CRTC's conncetor.
+ * Get the a monitor's subpixel order
  * 
- * @param   crtc       The state of the CRTC whose information should be read.
- * @param   out        Instance of a data structure to fill with the information about the CRTC.
- * @param   connector  The CRTC's connector.
- * @param   fields     OR:ed identifiers for the information about the CRTC that should be read.
- * @return             Non-zero if at least on error occured.
+ * @param  out        Instance of a data structure to fill with the information about the CRTC.
+ * @param  connector  The connector.
  */
-static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_crtc_information_t* restrict out,
-			       const drmModeConnector* restrict connector, int32_t fields)
+static void get_subpixel_order(libgamma_crtc_information_t* restrict out,
+			       const drmModeConnector* restrict connector)
 {
-  const char* restrict connector_name_base = NULL;
+#define __select(value)					    \
+  case DRM_MODE_SUBPIXEL_##value:			    \
+    out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_##value;  \
+    break
   
-  /* Get some information that does not require too much work. */
-  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM | LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE |
-		 LIBGAMMA_CRTC_INFO_ACTIVE | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER)))
-    {
-      /* Get whether or not a monitor is plugged in. */
-      out->active = connector->connection == DRM_MODE_CONNECTED;
-      out->active_error = connector->connection == DRM_MODE_UNKNOWNCONNECTION ? LIBGAMMA_STATE_UNKNOWN : 0;
-      if (out->active == 0)
-	{
-	  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER)))
-	    out->width_mm_error = out->height_mm_error = out->subpixel_order_error = LIBGAMMA_NOT_CONNECTED;
-	  goto not_connected;
-	}
-      
-      /* Get viewport dimension. */
-      out->width_mm = connector->mmWidth;
-      out->height_mm = connector->mmHeight;
-      
-      /* Get subpixel order. */
-#define __select(value)  \
-  case DRM_MODE_SUBPIXEL_##value:  out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_##value;  break
       switch (connector->subpixel)
 	{
 	__select (UNKNOWN);
@@ -521,13 +500,28 @@ static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_cr
 	  out->subpixel_order_error = LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED;
 	  break;
 	}
+  
 #undef __select
-      
-    not_connected:
-      
-      /* Get connector type. */
-#define __select(type, name)  \
-  case DRM_MODE_CONNECTOR_##type:  out->connector_type = LIBGAMMA_CONNECTOR_TYPE_##type, connector_name_base = name;  break
+}
+
+
+/**
+ * Get a connector's type
+ * 
+ * @param  out                  Instance of a data structure to fill with the information about the CRTC.
+ * @param  connector            The connector.
+ * @param  connector_name_base  Output for the basename of the connector.
+ */
+static void get_connector_type(libgamma_crtc_information_t* restrict out,
+			       const drmModeConnector* restrict connector,
+			       const char** restrict connector_name_base)
+{
+#define __select(type, name)				   \
+  case DRM_MODE_CONNECTOR_##type:			   \
+    out->connector_type = LIBGAMMA_CONNECTOR_TYPE_##type;  \
+    *connector_name_base = name;			   \
+    break
+  
       switch (connector->connector_type)
 	{
 #ifndef DRM_MODE_CONNECTOR_VIRTUAL
@@ -558,7 +552,50 @@ static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_cr
 	  out->connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
 	  break;
 	}
+  
 #undef __select
+}
+
+
+/**
+ * Read information from the CRTC's conncetor.
+ * 
+ * @param   crtc       The state of the CRTC whose information should be read.
+ * @param   out        Instance of a data structure to fill with the information about the CRTC.
+ * @param   connector  The CRTC's connector.
+ * @param   fields     OR:ed identifiers for the information about the CRTC that should be read.
+ * @return             Non-zero if at least on error occured.
+ */
+static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_crtc_information_t* restrict out,
+			       const drmModeConnector* restrict connector, int32_t fields)
+{
+  const char* connector_name_base = NULL;
+  
+  /* Get some information that does not require too much work. */
+  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM | LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE |
+		 LIBGAMMA_CRTC_INFO_ACTIVE | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER)))
+    {
+      /* Get whether or not a monitor is plugged in. */
+      out->active = connector->connection == DRM_MODE_CONNECTED;
+      out->active_error = connector->connection == DRM_MODE_UNKNOWNCONNECTION ? LIBGAMMA_STATE_UNKNOWN : 0;
+      if (out->active == 0)
+	{
+	  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER)))
+	    out->width_mm_error = out->height_mm_error = out->subpixel_order_error = LIBGAMMA_NOT_CONNECTED;
+	  goto not_connected;
+	}
+      
+      /* Get viewport dimension. */
+      out->width_mm = connector->mmWidth;
+      out->height_mm = connector->mmHeight;
+      
+      /* Get subpixel order. */
+      get_subpixel_order(out, connector);
+      
+    not_connected:
+      
+      /* Get connector type. */
+      get_connector_type(out, connector, &connector_name_base);
     }
   
   /* Get the connector's name. */
