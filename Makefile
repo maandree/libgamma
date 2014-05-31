@@ -127,7 +127,7 @@ obj/lib/%.o: src/lib/%.c src/lib/*.h
 obj/lib/%.o: obj/lib/%.c src/lib/*.h
 	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -iquote"$$(dirname "$<" | sed -e 's:^obj:src:')" -c -o $@ $<
 
-obj/%: src/%.gpp
+obj/%: src/%.gpp src/extract/libgamma-*-extract
 	mkdir -p $(shell dirname $@)
 	$(GPP) --symbol '£' --input $< --output $@
 
@@ -157,7 +157,7 @@ obj/%.texinfo: info/%.texinfo
 
 .PHONY: info
 info: libgamma.info
-%.info: obj/%.texinfo obj/fdl.texinfo
+%.info: obj/%.texinfo obj/fdl.texinfo src/extract/libgamma-*-extract info/texise
 	makeinfo $<
 
 .PHONY: pdf
