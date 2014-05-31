@@ -696,7 +696,7 @@ static int get_edid(libgamma_crtc_information_t* restrict out,
        * but version 2.0 define it as 256 bytes long. However,
        * version 2.0 is rare(?) and has been deprecated and replaced
        * by version 1.3 (I guess that is with a new version epoch,
-       * but I do not know.) */ 
+       * but I do not know.) */
       if (error)
 	{
 	  free(atom_name_reply);

@@ -298,7 +298,7 @@ void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this,
       
     default:
       /* Method does not exists/excluded at compile-time.
-         We will assume that this is not done... */
+	 We will assume that this is not done... */
       break;
     }
 }
@@ -453,7 +453,7 @@ void libgamma_site_destroy(libgamma_site_state_t* restrict this)
       
     default:
       /* Method does not exists/excluded at compile-time.
-         We will assume that this is not done... */
+	 We will assume that this is not done... */
       break;
     }
   free(this->site);
@@ -606,7 +606,7 @@ void libgamma_partition_destroy(libgamma_partition_state_t* restrict this)
       
     default:
       /* Method does not exists/excluded at compile-time.
-         We will assume that this is not done... */
+	 We will assume that this is not done... */
       break;
     }
 }
@@ -758,7 +758,7 @@ void libgamma_crtc_destroy(libgamma_crtc_state_t* restrict this)
       
     default:
       /* Method does not exists/excluded at compile-time.
-         We will assume that this is not done... */
+	 We will assume that this is not done... */
       break;
     }
 }
