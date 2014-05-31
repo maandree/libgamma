@@ -648,7 +648,7 @@ respectively.
 @command{libgamma} defines the following error codes
 that its functions may return:
 @table @code
-£>for err in $(libgamma-error-extract --list); do
+£>for err in $(libgamma-error-extract --list | sort); do
 @item £{err}
 £>libgamma-error-extract $err | texise
 £>done
