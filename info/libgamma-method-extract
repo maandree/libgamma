@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+# -*- python -*-
+
+# libgamma — Display server abstraction layer for gamma ramp adjustments
+# Copyright © 2014  Mattias Andrée (maandree@member.fsf.org)
+# 
+# This library is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this library.  If not, see <http://www.gnu.org/licenses/>.
+
+import sys
+import os
+
+with open(os.path.dirname(sys.argv[0]) + '/../src/libgamma-method.h', 'rb') as file:
+    data = file.read()
+data = data.decode('utf-8', 'error')
+
+if sys.argv[1] == '--list':
+    if sys.argv[2] == '--method':
+        test1 = lambda line : line.startswith('#define LIBGAMMA_METHOD_')
+        test2 = lambda line : line.split(' ')[1] not in ('LIBGAMMA_METHOD_MAX', 'LIBGAMMA_METHOD_COUNT')
+        test3 = lambda line : not line.endswith('_H')
+        defs = [line for line in data.split('\n') if test1(line) and test2(line) and test3(line)]
+        print('\n'.join([d.split(' ')[1] for d in defs]))
+else:
+    if sys.argv[1] == '--method':
+        i = data.find('\n#define ' + sys.argv[2])
+        data = data[:i]
+        i = data.rfind('\n */')
+        data = data[:i]
+        i = data.rfind('/**\n')
+        data = data[i + len('/**\n'):]
+        data = [line[3:] for line in data.split('\n')]
+        print('\n'.join(data))
+

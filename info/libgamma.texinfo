@@ -466,6 +466,7 @@ and for the freedom of all.
 @chapter API
 
 @menu
+* Adjustment methods::              Selecting adjustment method.
 * Errors::                          Error codes and how to handle errors.
 @end menu
 
@@ -530,6 +531,26 @@ You may also want to add checks for update to
 @code{LIBGAMMA_CONNECTOR_TYPE_COUNT},
 @code{LIBGAMMA_SUBPIXEL_ORDER_COUNT} and
 @code{LIBGAMMA_CRTC_INFO_COUNT}.
+
+
+
+@node Adjustment methods
+@section Adjustment methods
+
+@command{libgamma} is an abstraction layer that
+lets you select which display server and protocol
+--- together called adjustment method --- it
+should use to work with the monitors' gamma
+ramps. Supported adjustment method, even if
+excluded at compile-time are identfier by numerical
+values.
+
+@table @code
+£>for method in $(libgamma-method-extract --list --method); do
+@item £{method}
+£>libgamma-method-extract --method $method | texise
+£>done
+@end table
 
 
 
