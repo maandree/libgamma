@@ -289,7 +289,23 @@ extern const char* libgamma_group_name;
 
 
 /**
- * Returns the name of the definition associated with a libgamma error code.
+ * Prints an error to stderr in a `perror` fashion,
+ * however this function will not translate the `libgamma`
+ * errors into human-readable strings, it will simply
+ * print the name of the error. If the value `error_code`
+ * is the value of `LIBGAMMA_ERRNO_SET`, `perror` will be
+ * used to print the current error stored in `errno`.
+ * If `value` is non-negative (a `errno` value`), that
+ * value will be stored in `errno` and `perror` will be
+ * used to print it.
+ * 
+ * @param  name   The text to add at the beginning.
+ * @param  value  The error code, may be an `errno` value.
+ */
+void libgamma_perror(const char* name, int error_code);
+
+/**
+ * Returns the name of the definition associated with a `libgamma` error code.
  * 
  * @param   value  The error code.
  * @return         The name of the definition associated with the error code,
@@ -299,11 +315,11 @@ extern const char* libgamma_group_name;
 const char* libgamma_name_of_error(int value) __attribute__((const));
 
 /**
- * Return the value of a libgamma error definition refered to by name.
+ * Return the value of a `libgamma` error definition refered to by name.
  * 
  * @param   name  The name of the definition associated with the error code.
  * @return        The error code, zero if the name does is `NULL`
- *                or does not refer to an libgamma error.
+ *                or does not refer to a `libgamma` error.
  */
 int libgamma_value_of_error(const char* name) __attribute__((const));
 
