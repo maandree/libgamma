@@ -467,6 +467,7 @@ and for the freedom of all.
 
 @menu
 * Adjustment methods::              Selecting adjustment method.
+* Adjustment method capabilities::  Identifying capabilities of adjustment methods.
 * CRTC information::                Retrieving information about CRTC:s.
 * Errors::                          Error codes and how to handle errors.
 @end menu
@@ -550,6 +551,20 @@ values.
 £>for method in $(libgamma-method-extract --list --method); do
 @item £{method}
 £>libgamma-method-extract --method $method | texise
+£>done
+@end table
+
+
+
+@node Adjustment method capabilities
+@section Adjustment method capabilities
+
+Capabilities.
+
+@table @code
+£>for cap in $(libgamma-method-extract --list --cap-t); do
+@item £{cap} [£(libgamma-method-extract --type --cap-t $cap)]
+£>libgamma-method-extract --cap-t $cap | texise
 £>done
 @end table
 

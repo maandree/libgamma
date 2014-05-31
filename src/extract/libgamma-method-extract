@@ -53,6 +53,13 @@ if sys.argv[1] == '--list':
         test2 = lambda line : ' * ' not in line
         defs = [line for line in data.split('\n') if test1(line) and test2(line)]
         print('\n'.join([d.strip().split(' ')[-1].rstrip(';') for d in defs]))
+    elif sys.argv[2] == '--cap-t':
+        data = data[data.find('\ntypedef struct libgamma_method_capabilities'):]
+        data = data[:data.find('\n}')]
+        test1 = lambda line : line.startswith('  ') and line.endswith(';')
+        test2 = lambda line : ' * ' not in line
+        defs = [line for line in data.split('\n') if test1(line) and test2(line)]
+        print('\n'.join([d.strip().split(' : ')[0].split(' ')[-1].rstrip(';') for d in defs]))
 elif sys.argv[1] == '--type':
     if sys.argv[2] == '--info-t':
         data = data[data.find('\ntypedef struct libgamma_crtc_information'):]
@@ -62,6 +69,20 @@ elif sys.argv[1] == '--type':
         test3 = lambda line : line.strip().split(' ')[-1] == sys.argv[3] + ';'
         defs = [line for line in data.split('\n') if test1(line) and test2(line) and test3(line)]
         print('\n'.join([' '.join(d.strip().split(' ')[:-1]) for d in defs]))
+    elif sys.argv[2] == '--cap-t':
+        data = data[data.find('\ntypedef struct libgamma_method_capabilities'):]
+        data = data[:data.find('\n}')]
+        test1 = lambda line : line.startswith('  ')
+        test2 = lambda line : ' * ' not in line
+        test3 = lambda line : line.strip().split(' : ')[0].split(' ')[-1].rstrip(';') == sys.argv[3]
+        defs = [line for line in data.split('\n') if test1(line) and test2(line) and test3(line)]
+        line = defs[0].strip().rstrip(';')
+        if ' : ' in line:
+            line = line.split(' : ')
+            line[0] = ' '.join(line[0].split(' ')[:-1])
+            print(':'.join(line))
+        else:
+            print(' '.join(line.split(' ')[:-1]))
 else:
     if sys.argv[1] in ('--method', '--info'):
         i = data.find('\n#define ' + sys.argv[2])
@@ -101,5 +122,22 @@ else:
         data = data[i + len('/**\n'):]
         data = [line[2:] for line in data.split('\n')]
         print('\n'.join(data))
-        
+    elif sys.argv[1] == '--cap-t':
+        data = data[data.find('\ntypedef struct libgamma_method_capabilities'):]
+        data = data[:data.find('\n}')]
+        test1 = lambda line : line.startswith('  ')
+        test2 = lambda line : ' * ' not in line
+        test3 = lambda line : line.strip().split(' : ')[0].split(' ')[-1].rstrip(';') == sys.argv[2]
+        defs = [line for line in data.split('\n') if test1(line) and test2(line) and test3(line)]
+        line = defs[0]
+        i = data.find('\n' + line)
+        data = data[:i]
+        while '\n ' in data:
+            data = data.replace('\n ', '\n')
+        i = data.rfind('\n*/')
+        data = data[:i]
+        i = data.rfind('/**\n')
+        data = data[i + len('/**\n'):]
+        data = [line[2:] for line in data.split('\n')]
+        print('\n'.join(data))
 
