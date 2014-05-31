@@ -585,6 +585,16 @@ Connector type.
 £>done
 @end table
 
+Fields.
+
+@table @code
+£>for info in $(libgamma-method-extract --list --info-t); do
+@item £{info} [£(libgamma-method-extract --type --info-t $info)]
+£>libgamma-method-extract --info-t $info | texise
+£>done
+@end table
+
+
 
 
 @node Errors
