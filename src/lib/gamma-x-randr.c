@@ -506,14 +506,18 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, libgam
   xcb_randr_get_crtc_gamma_size_reply_t* restrict reply;
   xcb_generic_error_t* error;
   
+  /* Query gamma ramp size. */
   out->gamma_size_error = 0;
   cookie = xcb_randr_get_crtc_gamma_size(connection, *crtc_id);
   reply = xcb_randr_get_crtc_gamma_size_reply(connection, cookie, &error);
   if (error != NULL)
     return out->gamma_size_error = translate_error(error->error_code, LIBGAMMA_GAMMA_RAMPS_SIZE_QUERY_FAILED, 1);
+  /* Sanity check gamma ramp size. */
   if (reply->size < 2)
     out->gamma_size_error = LIBGAMMA_SINGLETON_GAMMA_RAMP;
+  /* Store gamma ramp size. */
   out->red_gamma_size = out->green_gamma_size = out->blue_gamma_size = reply->size;
+  /* Release resources and return successfulnes. */
   free(reply);
   return out->gamma_size_error;
 }
@@ -528,14 +532,16 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, libgam
  */
 static int read_output_data(libgamma_crtc_information_t* restrict out, xcb_randr_get_output_info_reply_t* restrict output)
 {
+#define __select(value)  \
+  case XCB_RENDER_SUB_PIXEL_##value:  out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_##value;  break
+  
   switch (output->connection)
     {
     case XCB_RANDR_CONNECTION_CONNECTED:
+      /* We have a monitor connected, report that and store information that is provided to us. */
       out->active = 1;
       out->width_mm = output->mm_width;
       out->height_mm = output->mm_height;
-#define __select(value)  \
-  case XCB_RENDER_SUB_PIXEL_##value:  out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_##value;  break
       switch (output->subpixel_order)
 	{
 	__select (UNKNOWN);
@@ -548,24 +554,24 @@ static int read_output_data(libgamma_crtc_information_t* restrict out, xcb_randr
 	  out->subpixel_order_error = LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED;
 	  break;
 	}
-#undef __select
       return 0;
       
-    case XCB_RANDR_CONNECTION_DISCONNECTED:
-      out->active = 0;
-      out->width_mm_error = LIBGAMMA_NOT_CONNECTED;
-      out->height_mm_error = LIBGAMMA_NOT_CONNECTED;
-      out->subpixel_order_error = LIBGAMMA_NOT_CONNECTED;
-      return 0;
-      
-    default:
-      out->active = 0;
+    case XCB_RANDR_CONNECTION_UNKNOWN:
+      /* If we do know whether a monitor is connected report that and assume it is not. */
       out->active_error = LIBGAMMA_STATE_UNKNOWN;
-      out->width_mm_error = LIBGAMMA_NOT_CONNECTED;
-      out->height_mm_error = LIBGAMMA_NOT_CONNECTED;
+      /* Fall through. */
+    default:
+      /* If no monitor is connected, report that on fails that require it. */
+      out->width_mm_error       = LIBGAMMA_NOT_CONNECTED;
+      out->height_mm_error      = LIBGAMMA_NOT_CONNECTED;
       out->subpixel_order_error = LIBGAMMA_NOT_CONNECTED;
-      return -1;
+      /* And store that we are not connected. */
+      out->active = 0;
+      /* This fuction only failed if we could not figure out whether a monitor is connected. */
+      return (output->connection == XCB_RANDR_CONNECTION_UNKNOWN) ? -1 : 0;
     }
+  
+#undef __select
 }
 
 
@@ -577,6 +583,9 @@ static int read_output_data(libgamma_crtc_information_t* restrict out, xcb_randr
  */
 static int get_connector_type(libgamma_crtc_information_t* restrict this)
 {
+  /* Since we require the name of the output of get the type of the connected,
+     copy any reported error on the output's name to the connector's type,
+     and report failure if there was an error. */
   if ((this->connector_type_error = this->connector_name_error))
     return -1;
   
@@ -584,6 +593,7 @@ static int get_connector_type(libgamma_crtc_information_t* restrict this)
   if (strstr(this->connector_name, name "-") == this->connector_name)  \
     return this->connector_type = LIBGAMMA_CONNECTOR_TYPE_##type, 0
   
+  /* Check begin on the name of the output to find out what type the connector is of. */
   __select ("None",         Unknown);
   __select ("VGA",          VGA);
   __select ("DVI-I",        DVII);
@@ -599,6 +609,7 @@ static int get_connector_type(libgamma_crtc_information_t* restrict this)
   
 #undef __select
   
+  /* If there was no matching output name pattern report that and exit with an error. */
   this->connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
   return -1;
 }
@@ -618,20 +629,16 @@ static int get_output_name(libgamma_crtc_information_t* restrict out, xcb_randr_
   uint16_t length;
   size_t i;
   
+  /* Get the name of the output and the length of that name. */
   name = xcb_randr_get_output_info_name(output);
   length = output->name_len; /* There is no NUL-termination. */
   if (name == NULL)
-    {
-      out->connector_name_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
-      return -1;
-    }
+    return out->connector_name_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
   
+  /* Allocate a memory area for a NUL-terminated copy of the name. */
   store = malloc(((size_t)length + 1) * sizeof(char));
   if (store == NULL)
-    {
-      out->connector_name_error = errno;
-      return -1;
-    }
+    return out->connector_name_error = errno, -1;
   
   /* char is guaranteed to be (u)int_least8_t, but it is only guaranteed to be (u)int8_t
    * on POSIX, so to be truly portable we will not assume that char is (u)int8_t. */

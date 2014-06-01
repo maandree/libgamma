@@ -315,17 +315,21 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
 static void release_connectors_and_encoders(libgamma_drm_card_data_t* restrict this)
 {
   size_t i, n;
+  /* Release individual encoders. */
   if (this->encoders != NULL)
     for (i = 0, n = (size_t)(this->res->count_connectors); i < n; i++)
       if (this->encoders[i] != NULL)
 	drmModeFreeEncoder(this->encoders[i]);
+  /* Release encoder array. */
   free(this->encoders);
   this->encoders = NULL;
   
+  /* Release individual connectors. */
   if (this->connectors != NULL)
     for (i = 0, n = (size_t)(this->res->count_connectors); i < n; i++)
       if (this->connectors[i] != NULL)
 	drmModeFreeConnector(this->connectors[i]);
+  /* Release connector array. */
   free(this->connectors);
   this->connectors = NULL;
 }
@@ -340,10 +344,8 @@ void libgamma_linux_drm_partition_destroy(libgamma_partition_state_t* restrict t
 {
   libgamma_drm_card_data_t* restrict data = this->data;
   release_connectors_and_encoders(data);
-  if (data->res != NULL)
-    drmModeFreeResources(data->res);
-  if (data->fd >= 0)
-    close(data->fd);
+  if (data->res != NULL)  drmModeFreeResources(data->res);
+  if (data->fd >= 0)      close(data->fd);
   free(data);
 }
 
@@ -375,15 +377,12 @@ int libgamma_linux_drm_partition_restore(libgamma_partition_state_t* restrict th
 int libgamma_linux_drm_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				       libgamma_partition_state_t* restrict partition, size_t crtc)
 {
-  libgamma_drm_card_data_t* restrict card;
+  libgamma_drm_card_data_t* restrict card = partition->data;
   uint32_t crtc_id;
   
   if (crtc >= partition->crtcs_available)
     return LIBGAMMA_NO_SUCH_CRTC;
-  
-  card = partition->data;
-  crtc_id = card->res->crtcs[crtc];
-  this->data = (void*)(size_t)crtc_id;
+  this->data = (void*)(size_t)(card->res->crtcs[crtc]);
   return 0;
 }
 
@@ -429,25 +428,29 @@ static drmModeConnector* find_connector(libgamma_crtc_state_t* restrict this, in
   /* Open connectors and encoders if not already opened. */
   if (card->connectors == NULL)
     {
-      /* We use calloc so all non-loaded elements are `NULL` after an error. */
-      if ((card->connectors = calloc(n, sizeof(drmModeConnector*))) == NULL)
-	goto fail;
-      if ((card->encoders = calloc(n, sizeof(drmModeEncoder*))) == NULL)
-	goto fail;
+      /* Allocate connector and encoder arrays.
+	 We use `calloc` so all non-loaded elements are `NULL` after an error. */
+      if ((card->connectors = calloc(n, sizeof(drmModeConnector*))) == NULL)  goto fail;
+      if ((card->encoders   = calloc(n, sizeof(drmModeEncoder*)))   == NULL)  goto fail;
+      /* Fill connector and encoder arrays. */
       for (i = 0; i < n; i++)
 	if (((card->connectors[i] = drmModeGetConnector(card->fd, card->res->connectors[i])) == NULL) ||
 	    ((card->encoders[i] = drmModeGetEncoder(card->fd, card->connectors[i]->encoder_id)) == NULL))
 	  goto fail;
     }
-  /* Find connector. */
+  /* No error has occurred yet. */
   *error = 0;
+  /* Find connector. */
   for (i = 0; i < n; i++)
     if (card->encoders[i]->crtc_id == crtc_id)
       return card->connectors[i];
+  /* We did not find the connector. */
   *error = LIBGAMMA_CONNECTOR_UNKNOWN;
   return NULL;
   
  fail:
+  /* Report the error that got us here, release
+     resouces and exit with `NULL` for failure. */
   *error = errno;
   release_connectors_and_encoders(card);
   return NULL;
@@ -471,9 +474,7 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, const 
   out->gamma_size_error = crtc_info == NULL ? errno : 0;
   if (out->gamma_size_error == 0)
     {
-      out->red_gamma_size = (size_t)(crtc_info->gamma_size);
-      out->green_gamma_size = (size_t)(crtc_info->gamma_size);
-      out->blue_gamma_size = (size_t)(crtc_info->gamma_size);
+      out->red_gamma_size = out->green_gamma_size = out->blue_gamma_size = (size_t)(crtc_info->gamma_size);
       out->gamma_size_error = crtc_info->gamma_size < 2 ? LIBGAMMA_SINGLETON_GAMMA_RAMP : 0;
       drmModeFreeCrtc(crtc_info);
     }
@@ -495,18 +496,18 @@ static void get_subpixel_order(libgamma_crtc_information_t* restrict out,
     out->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_##value;  \
     break
   
-      switch (connector->subpixel)
-	{
-	__select (UNKNOWN);
-	__select (HORIZONTAL_RGB);
-	__select (HORIZONTAL_BGR);
-	__select (VERTICAL_RGB);
-	__select (VERTICAL_BGR);
-	__select (NONE);
-	default:
-	  out->subpixel_order_error = LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED;
-	  break;
-	}
+  switch (connector->subpixel)
+    {
+    __select (UNKNOWN);
+    __select (HORIZONTAL_RGB);
+    __select (HORIZONTAL_BGR);
+    __select (VERTICAL_RGB);
+    __select (VERTICAL_BGR);
+    __select (NONE);
+    default:
+      out->subpixel_order_error = LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED;
+      break;
+    }
   
 #undef __select
 }
@@ -529,36 +530,36 @@ static void get_connector_type(libgamma_crtc_information_t* restrict out,
     *connector_name_base = name;			   \
     break
   
-      switch (connector->connector_type)
-	{
+  switch (connector->connector_type)
+    {
 #ifndef DRM_MODE_CONNECTOR_VIRTUAL
 # define DRM_MODE_CONNECTOR_VIRTUAL  15
 #endif
 #ifndef DRM_MODE_CONNECTOR_DSI
 # define DRM_MODE_CONNECTOR_DSI  16
 #endif
-	__select (Unknown,      "Unknown"  );
-	__select (VGA,          "VGA"      );
-	__select (DVII,         "DVI-I"    );
-	__select (DVID,         "DVI-D"    );
-	__select (DVIA,         "DVI-A"    );
-	__select (Composite,    "Composite");
-	__select (SVIDEO,       "SVIDEO"   );
-	__select (LVDS,         "LVDS"     );
-	__select (Component,    "Component");
-	__select (9PinDIN,      "DIN"      );
-	__select (DisplayPort,  "DP"       );
-	__select (HDMIA,        "HDMI-A"   );
-	__select (HDMIB,        "HDMI-B"   );
-	__select (TV,           "TV"       );
-	__select (eDP,          "eDP"      );
-	__select (VIRTUAL,      "VIRTUAL"  );
-	__select (DSI,          "DSI"      );
-	default:
-	  out->connector_type_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
-	  out->connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
-	  break;
-	}
+    __select (Unknown,      "Unknown"  );
+    __select (VGA,          "VGA"      );
+    __select (DVII,         "DVI-I"    );
+    __select (DVID,         "DVI-D"    );
+    __select (DVIA,         "DVI-A"    );
+    __select (Composite,    "Composite");
+    __select (SVIDEO,       "SVIDEO"   );
+    __select (LVDS,         "LVDS"     );
+    __select (Component,    "Component");
+    __select (9PinDIN,      "DIN"      );
+    __select (DisplayPort,  "DP"       );
+    __select (HDMIA,        "HDMI-A"   );
+    __select (HDMIB,        "HDMI-B"   );
+    __select (TV,           "TV"       );
+    __select (eDP,          "eDP"      );
+    __select (VIRTUAL,      "VIRTUAL"  );
+    __select (DSI,          "DSI"      );
+    default:
+      out->connector_type_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
+      out->connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
+      break;
+    }
   
 #undef __select
 }
