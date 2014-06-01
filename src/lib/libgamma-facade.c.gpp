@@ -667,7 +667,6 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid)
 }
 
 
-
 /**
  * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
@@ -685,11 +684,14 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
   
   switch (this->partition->site->method)
     {
+      /* Methods other than Quartz/CoreGraphics uses 16-bit integers. */
 £>for method in $(get-methods | grep -v QUARTZ_CORE_GRAPHICS); do
 #ifdef HAVE_LIBGAMMA_METHOD_£{method}
     case LIBGAMMA_METHOD_£{method}:
       return libgamma_£(lowercase $method)_crtc_get_gamma_ramps(this, ramps);
 #endif
+     
+     /* The Quartz/CoreGraphics method uses single precision float. */
 £>done
 #ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
@@ -701,6 +703,7 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
       }
 #endif
       
+      /* The selected method does not exist. */
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
@@ -724,12 +727,15 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
   
   switch (this->partition->site->method)
     {
+      /* Methods other than Quartz/CoreGraphics uses 16-bit integers. */
 £>for method in $(get-methods | grep -v QUARTZ_CORE_GRAPHICS); do
 #ifdef HAVE_LIBGAMMA_METHOD_£{method}
     case LIBGAMMA_METHOD_£{method}:
       return libgamma_£(lowercase $method)_crtc_set_gamma_ramps(this, ramps);
 #endif
 £>done
+     
+     /* The Quartz/CoreGraphics method uses single precision float. */
 #ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
       {
@@ -740,10 +746,73 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
       }
 #endif
       
+      /* The selected method does not exist. */
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
 }
+
+
+
+/**
+ * Set or get the gamma ramps for a CRTC, non-16-bit gamma-depth version.
+ * 
+ * @param   1      Either `get` or `set`, for the action that the name of value implies.
+ * @param   2      The `ramp*` pattern for the ramp structure and function to call.
+ * @param   3      Either of `bit16`, `bit32`, `bit64`, `float_single`, `float_double`;
+ *                 rather self-explanatory.
+ * @param   4      The number of bits in the gamma depth, -1 for single precision float,
+ *                 (`float`) and -2 for double percition float (`double`).
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply, or
+ *                 the gamma ramps to fill with the current values.
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library.
+ */
+£>crtc_set_get_gamma_ramps ()
+£>{
+£<
+  action=$1
+  ramps=$2
+  type=$3
+  bits=$4
+  p=
+  [ $action = get ] && p='*'
+£>
+int libgamma_crtc_£{action}_gamma_£{ramps}(libgamma_crtc_state_t* restrict this,
+					   libgamma_gamma_£{ramps}_t£{p:+* restrict} ramps)
+{
+  libgamma_gamma_ramps_any_t ramps_;
+  switch (this->partition->site->method)
+    {
+      /* The dummy method supports all ramp depths. */
+#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
+    case LIBGAMMA_METHOD_DUMMY:
+      return libgamma_dummy_crtc_£{action}_gamma_£{ramps}(this, ramps);
+#endif
+      
+      /* The Quartz/CoreGraphics method uses single precision float. */
+#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+£>if [ $bits = -1 ]; then
+      /* Single precision float is used. */
+      return libgamma_quartz_cg_crtc_£{action}_gamma_£{ramps}(this, ramps);
+£>else
+      /* Something else is used and we convert to Single precision float. */
+      ramps_.£{type} = £{p}ramps;
+      return libgamma_translated_ramp_£{action}(this, £{p:+&}ramps_, £{bits}, -1,
+						libgamma_crtc_£{action}_gamma_ramps);
+£>fi
+#endif
+      
+      /* Other methods use 16-bit integers. */
+    default:
+      ramps_.£{type} = £{p}ramps;
+      return libgamma_translated_ramp_£{action}(this, £{p:+&}ramps_, £{bits}, 16,
+						libgamma_crtc_£{action}_gamma_ramps);
+    }
+}
+£>}
 
 
 
@@ -755,29 +824,7 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
-				    libgamma_gamma_ramps32_t* restrict ramps)
-{
-  libgamma_gamma_ramps_any_t ramps_;
-  switch (this->partition->site->method)
-    {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_get_gamma_ramps32(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      ramps_.bits32 = *ramps;
-      return libgamma_translated_ramp_get(this, &ramps_, 32, -1,
-					  libgamma_crtc_get_gamma_ramps);
-#endif
-      
-    default:
-      ramps_.bits32 = *ramps;
-      return libgamma_translated_ramp_get(this, &ramps_, 32, 16,
-					  libgamma_crtc_get_gamma_ramps);
-    }
-}
+£>crtc_set_get_gamma_ramps get ramps32 bits32 32
 
 
 /**
@@ -788,29 +835,7 @@ int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
-				    libgamma_gamma_ramps32_t ramps)
-{
-  libgamma_gamma_ramps_any_t ramps_;
-  switch (this->partition->site->method)
-    {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_set_gamma_ramps32(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      ramps_.bits32 = ramps;
-      return libgamma_translated_ramp_set(this, ramps_, 32, -1,
-					  libgamma_crtc_set_gamma_ramps);
-#endif
-      
-    default:
-      ramps_.bits32 = ramps;
-      return libgamma_translated_ramp_set(this, ramps_, 32, 16,
-					  libgamma_crtc_set_gamma_ramps);
-    }
-}
+£>crtc_set_get_gamma_ramps set ramps32 bits32 32
 
 
 
@@ -822,29 +847,7 @@ int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
-				    libgamma_gamma_ramps64_t* restrict ramps)
-{
-  libgamma_gamma_ramps_any_t ramps_;
-  switch (this->partition->site->method)
-    {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_get_gamma_ramps64(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      ramps_.bits64 = *ramps;
-      return libgamma_translated_ramp_get(this, &ramps_, 64, -1,
-					  libgamma_crtc_get_gamma_ramps);
-#endif
-      
-    default:
-      ramps_.bits64 = *ramps;
-      return libgamma_translated_ramp_get(this, &ramps_, 64, 16,
-					  libgamma_crtc_get_gamma_ramps);
-    }
-}
+£>crtc_set_get_gamma_ramps get ramps64 bits64 64
 
 
 /**
@@ -855,30 +858,7 @@ int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
-				    libgamma_gamma_ramps64_t ramps)
-{
-  libgamma_gamma_ramps_any_t ramps_;
-  switch (this->partition->site->method)
-    {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_set_gamma_ramps64(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      ramps_.bits64 = ramps;
-      return libgamma_translated_ramp_set(this, ramps_, 64, -1,
-					  libgamma_crtc_set_gamma_ramps);
-#endif
-      
-    default:
-      ramps_.bits64 = ramps;
-      return libgamma_translated_ramp_set(this, ramps_, 64, 16,
-					  libgamma_crtc_set_gamma_ramps);
-    }
-}
-
+£>crtc_set_get_gamma_ramps set ramps64 bits64 64
 
 
 /**
@@ -889,27 +869,7 @@ int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
-				   libgamma_gamma_rampsf_t* restrict ramps)
-{
-  libgamma_gamma_ramps_any_t ramps_;
-  switch (this->partition->site->method)
-    {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_get_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_get_gamma_rampsf(this, ramps);
-#endif
-      
-    default:
-      ramps_.float_single = *ramps;
-      return libgamma_translated_ramp_get(this, &ramps_, -1, 16,
-					  libgamma_crtc_get_gamma_ramps);
-    }
-}
+£>crtc_set_get_gamma_ramps get rampsf float_single -1
 
 
 /**
@@ -920,29 +880,7 @@ int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
-				   libgamma_gamma_rampsf_t ramps)
-{
-  switch (this->partition->site->method)
-    {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_set_gamma_rampsf(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_set_gamma_rampsf(this, ramps);
-#endif
-      
-    default:
-      {
-	libgamma_gamma_ramps_any_t ramps_;
-	ramps_.float_single = ramps;
-	return libgamma_translated_ramp_set(this, ramps_, -1, 16,
-					    libgamma_crtc_set_gamma_ramps);
-      }
-    }
-}
+£>crtc_set_get_gamma_ramps set rampsf float_single -1
 
 
 
@@ -954,29 +892,7 @@ int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
-				   libgamma_gamma_rampsd_t* restrict ramps)
-{
-  libgamma_gamma_ramps_any_t ramps_;
-  switch (this->partition->site->method)
-    {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_get_gamma_rampsd(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      ramps_.float_double = *ramps;
-      return libgamma_translated_ramp_get(this, &ramps_, -2, -1,
-					  libgamma_crtc_get_gamma_ramps);
-#endif
-      
-    default:
-      ramps_.float_double = *ramps;
-      return libgamma_translated_ramp_get(this, &ramps_, -2, 16,
-					  libgamma_crtc_get_gamma_ramps);
-    }
-}
+£>crtc_set_get_gamma_ramps get rampsd float_double -2
 
 
 /**
@@ -987,29 +903,7 @@ int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
-				   libgamma_gamma_rampsd_t ramps)
-{
-  libgamma_gamma_ramps_any_t ramps_;
-  switch (this->partition->site->method)
-    {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_set_gamma_rampsd(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      ramps_.float_double = ramps;
-      return libgamma_translated_ramp_set(this, ramps_, -2, -1,
-					  libgamma_crtc_set_gamma_ramps);
-#endif
-      
-    default:
-      ramps_.float_double = ramps;
-      return libgamma_translated_ramp_set(this, ramps_, -2, 16,
-					  libgamma_crtc_set_gamma_ramps);
-    }
-}
+£>crtc_set_get_gamma_ramps set rampsd float_double -2
 
 
 
