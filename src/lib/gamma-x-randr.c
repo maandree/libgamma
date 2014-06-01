@@ -132,7 +132,8 @@ static int translate_error(int error_code, int default_error, int return_errno)
 void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
   char* display = getenv("DISPLAY");
-  /* Support for all information except active status and gamma ramp support. */
+  /* Support for all information except active status and gamma ramp support.
+     Active status can be queried but it is not guaranteed produces an up to date result. */
   this->crtc_information = LIBGAMMA_CRTC_INFO_MACRO_EDID
 			 | LIBGAMMA_CRTC_INFO_MACRO_VIEWPORT
 			 | LIBGAMMA_CRTC_INFO_MACRO_RAMP
@@ -759,16 +760,8 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   /* We need to free the EDID after us if it is not explicitly requested.  */
   free_edid = (fields & LIBGAMMA_CRTC_INFO_EDID) == 0;
   
-  /* Figure out what fields we need to get the data for to get the data for other fields. */
-  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID | LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID | LIBGAMMA_CRTC_INFO_GAMMA)))
-    fields |= LIBGAMMA_CRTC_INFO_EDID;
-  if ((fields & LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE))
-    fields |= LIBGAMMA_CRTC_INFO_CONNECTOR_NAME;
-  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER)))
-    fields |= LIBGAMMA_CRTC_INFO_ACTIVE;
-  
   /* Jump if the output information is not required. */
-  if ((fields & (LIBGAMMA_CRTC_INFO_ACTIVE | LIBGAMMA_CRTC_INFO_CONNECTOR_NAME)) == 0)
+  if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_ACTIVE | LIBGAMMA_CRTC_INFO_MACRO_CONNECTOR)) == 0)
     goto cont;
   
   /* Get connector and connector information. */
@@ -805,11 +798,11 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   if ((fields & LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE))
     e |= get_connector_type(this);
   e |= read_output_data(this, output_info);
-  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM)))
+  if ((fields & LIBGAMMA_CRTC_INFO_MACRO_VIEWPORT))
     e |= this->width_mm_error | this->height_mm_error;
   e |= (fields & LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER) ? this->subpixel_order_error : 0;
   
-  if ((fields & LIBGAMMA_CRTC_INFO_EDID) == 0)
+  if ((fields & LIBGAMMA_CRTC_INFO_MACRO_EDID) == 0)
     goto cont;
   if (this->active == 0)
     {
@@ -823,7 +816,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
       this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
       goto cont;
     }
-  if ((fields & (LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID | LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID | LIBGAMMA_CRTC_INFO_GAMMA)))
+  if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_EDID ^ LIBGAMMA_CRTC_INFO_EDID)))
     e |= libgamma_parse_edid(this, fields);
   
  cont:

@@ -543,20 +543,28 @@ typedef enum libgamma_subpixel_order
 #define LIBGAMMA_CRTC_INFO_COUNT  13
 
 /**
+ * Macro for both `libgamma_crtc_information_t` fields
+ * that can specify the size of the monitor's viewport
+ * as specified in the monitor's Extended Display
+ * Information Data.
+ */
+#define LIBGAMMA_CRTC_INFO_MACRO_EDID_VIEWPORT  ( LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID   \
+						| LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID  )
+
+/**
  * Macro for all `libgamma_crtc_information_t` fields
  * that can be filled if the adjustment method have
  * support for reading the monitors' Extended Display
  * Information Data.
  */
-#define LIBGAMMA_CRTC_INFO_MACRO_EDID  ( LIBGAMMA_CRTC_INFO_EDID            \
-				       | LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID   \
-				       | LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID  \
-				       | LIBGAMMA_CRTC_INFO_GAMMA           )
+#define LIBGAMMA_CRTC_INFO_MACRO_EDID  ( LIBGAMMA_CRTC_INFO_EDID                 \
+				       | LIBGAMMA_CRTC_INFO_MACRO_EDID_VIEWPORT  \
+				       | LIBGAMMA_CRTC_INFO_GAMMA                )
 
 /**
  * Macro for both `libgamma_crtc_information_t` fields
- * that can specify the size of the monitors viewport
- * is provided by the adjustment method without this
+ * that can specify the size of the monitor's viewport
+ * as provided by the adjustment method without this
  * library having to parse the monitor's Extended Display
  * Information Data.
  */
@@ -576,6 +584,16 @@ typedef enum libgamma_subpixel_order
  */
 #define LIBGAMMA_CRTC_INFO_MACRO_CONNECTOR  ( LIBGAMMA_CRTC_INFO_CONNECTOR_NAME  \
 					    | LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE  )
+
+/**
+ * Macro for the `libgamma_crtc_information_t` fields
+ * that required there is a monitor attached to the connector,
+ * and that status itself.
+ */
+#define LIBGAMMA_CRTC_INFO_MACRO_ACTIVE  ( LIBGAMMA_CRTC_INFO_MACRO_EDID      \
+					 | LIBGAMMA_CRTC_INFO_MACRO_VIEWPORT  \
+					 | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER  \
+					 | LIBGAMMA_CRTC_INFO_ACTIVE          )
 
 
 
