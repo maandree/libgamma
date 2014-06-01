@@ -305,7 +305,7 @@ HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
 	{
 	  xcb_disconnect(connection);
 	  free(res_reply);
-	  res_reply = NULL
+	  res_reply = NULL;
 	  crtc_count = -1;
 	}
       return NULL;
