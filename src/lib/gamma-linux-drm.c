@@ -140,14 +140,17 @@ int libgamma_linux_drm_site_initialise(libgamma_site_state_t* restrict this,
     return LIBGAMMA_NO_SUCH_SITE;
   
   /* Count the number of available graphics cards by
-     stat:ing there existence in an API filesystem. */
+     `stat`:ing their existence in an API filesystem. */
   this->partitions_available = 0;
   for (;;)
     {
+      /* Construct pathname of graphics card device. */
       snprintf(pathname, sizeof(pathname) / sizeof(char),
 	       DRM_DEV_NAME, DRM_DIR_NAME, (int)(this->partitions_available));
+      /* `stat` the graphics card's existence. */
       if (stat(pathname, &_attr))
 	break;
+      /* Move on to next graphics card. */
       if (this->partitions_available++ > INT_MAX)
 	return LIBGAMMA_IMPOSSIBLE_AMOUNT;
     }
@@ -297,12 +300,9 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
   this->crtcs_available = (size_t)(data->res->count_crtcs);
   return 0;
   
- fail_res:
-  drmModeFreeResources(data->res);
- fail_fd:
-  close(data->fd);
- fail_data:
-  free(data);
+ fail_res:   drmModeFreeResources(data->res);
+ fail_fd:    close(data->fd);
+ fail_data:  free(data);
   return rc;
 }
 
@@ -763,10 +763,12 @@ int libgamma_linux_drm_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this
   libgamma_drm_card_data_t* restrict card = this->partition->data;
   int r;
 #ifdef DEBUG
+  /* Gamma ramp sizes are identical but not fixed. */
   if ((ramps->red_size != ramps->green_size) ||
       (ramps->red_size != ramps->blue_size))
     return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
 #endif
+  /* Read current gamma ramps. */
   r = drmModeCrtcGetGamma(card->fd, (uint32_t)(size_t)(this->data), (uint32_t)(ramps->red_size),
 			  ramps->red, ramps->green, ramps->blue);
   return r ? LIBGAMMA_GAMMA_RAMP_READ_FAILED : 0;
@@ -787,12 +789,16 @@ int libgamma_linux_drm_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this
   libgamma_drm_card_data_t* restrict card = this->partition->data;
   int r;
 #ifdef DEBUG
+  /* Gamma ramp sizes are identical but not fixed. */
   if ((ramps.red_size != ramps.green_size) ||
       (ramps.red_size != ramps.blue_size))
     return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
 #endif
+  
+  /* Apply gamma ramps. */
   r = drmModeCrtcSetGamma(card->fd, (uint32_t)(size_t)(this->data),
 			  (uint32_t)(ramps.red_size), ramps.red, ramps.green, ramps.blue);
+  /* Check for errors. */
   if (r)
     switch (errno)
       {

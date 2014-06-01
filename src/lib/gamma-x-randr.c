@@ -189,43 +189,54 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
   const xcb_setup_t* restrict setup;
   xcb_screen_iterator_t iter;
   
+  /* Connect to the display server. */
   this->data = connection = xcb_connect(site, NULL);
   if (connection == NULL)
     return LIBGAMMA_NO_SUCH_SITE;
   
+  /* Query the version of the X RandR extension protocol. */
   cookie = xcb_randr_query_version(connection, RANDR_VERSION_MAJOR, RANDR_VERSION_MINOR);
   reply = xcb_randr_query_version_reply(connection, cookie, &error);
   
+  /* Check for version query failure. */
   if ((error != NULL) || (reply == NULL))
     {
+      /* Release resources. */
       free(reply);
       xcb_disconnect(connection);
+      /* Translate and report error. */
       if (error != NULL)
 	return translate_error(error->error_code, LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED, 0);
       return LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED;
     }
   
+  /* Check protocol compatibility,
+     we require 1.3 but 2.x may not be backwards compatible. */
   if ((reply->major_version != RANDR_VERSION_MAJOR) ||
       (reply->minor_version < RANDR_VERSION_MINOR))
     {
 #ifdef DEBUG
+      /* Print used protocol. */
       fprintf(stderr, "libgamma: RandR protocol version: %u.%u", reply->major_version, reply->minor_version);
 #endif
+      /* Release resources. */
       free(reply);
       xcb_disconnect(connection);
+      /* Report error. */
       return LIBGAMMA_PROTOCOL_VERSION_NOT_SUPPORTED;
     }
   
+  /* We do not longer need to know the version of the protocol. */
   free(reply);
   
+  /* Get available screens. */
   if ((setup = xcb_get_setup(connection)) == NULL)
-    {
-      xcb_disconnect(connection);
-      return LIBGAMMA_LIST_PARTITIONS_FAILED;
-    }
+    return xcb_disconnect(connection), LIBGAMMA_LIST_PARTITIONS_FAILED;
   iter = xcb_setup_roots_iterator(setup);
+  /* Get the number of available screens. */
   this->partitions_available = (size_t)(iter.rem);
   
+  /* Sanity check the number of available screens. */
   return iter.rem < 0 ? LIBGAMMA_NEGATIVE_PARTITION_COUNT : 0;
 }
 
@@ -265,9 +276,7 @@ int libgamma_x_randr_site_restore(libgamma_site_state_t* restrict this)
 static inline void* memdup(void* restrict ptr, size_t bytes)
 {
   char* restrict rc;
-  if (bytes == 0)
-    return NULL;
-  if ((rc = malloc(bytes)) == NULL)
+  if ((bytes == 0) || ((rc = malloc(bytes)) == NULL))
     return NULL;
   memcpy(rc, ptr, bytes);
   return rc;
@@ -288,9 +297,9 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
 {
   int fail_rc = LIBGAMMA_ERRNO_SET;
   xcb_connection_t* restrict connection = site->data;
-  const xcb_setup_t* restrict setup = xcb_get_setup(connection);
   xcb_screen_t* restrict screen = NULL;
   xcb_generic_error_t* error = NULL;
+  const xcb_setup_t* restrict setup;
   xcb_screen_iterator_t iter;
   xcb_randr_get_screen_resources_current_cookie_t cookie;
   xcb_randr_get_screen_resources_current_reply_t* restrict reply;
@@ -299,38 +308,42 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
   libgamma_x_randr_partition_data_t* restrict data;
   size_t i;
   
-  if (setup == NULL)
+  /* Get screen list. */
+  if ((setup = xcb_get_setup(connection)) == NULL)
     return LIBGAMMA_LIST_PARTITIONS_FAILED;
   
+  /* Get the screen. */
   for (i = 0; iter.rem > 0; i++, xcb_screen_next(&iter))
     if (i == partition)
       {
 	screen = iter.data;
 	break;
       }
+  /* Report failure if we did not find the screen. */
   if (iter.rem == 0)
     return LIBGAMMA_NO_SUCH_PARTITION;
   
+  /* Check that the screen is not `NULL`. (Do not think this can happen, but why not.) */
   if (screen == NULL)
     return LIBGAMMA_NULL_PARTITION;
   
+  /* Get the current resources of the screen. */
   cookie = xcb_randr_get_screen_resources_current(connection, screen->root);
   reply = xcb_randr_get_screen_resources_current_reply(connection, cookie, &error);
   if (error != NULL)
     return translate_error(error->error_code, LIBGAMMA_LIST_CRTCS_FAILED, 0);
   
+  /* Get the number of available CRTC:s. */
   this->crtcs_available = reply->num_crtcs;
+  /* Get the CRTC and output lists. */
   crtcs = xcb_randr_get_screen_resources_current_crtcs(reply);
   outputs = xcb_randr_get_screen_resources_current_outputs(reply);
   if ((crtcs == NULL) || (outputs == NULL))
-    {
-      free(reply);
-      return LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
-    }
+    return free(reply), LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
   
-  /* We use `calloc` because we want `data`'s pointers to be `NULL` if not allocated at `fail`. */
-  data = calloc(1, sizeof(libgamma_x_randr_partition_data_t));
-  if (data == NULL)
+  /* Allocate adjustment method dependent data memory area.
+     We use `calloc` because we want `data`'s pointers to be `NULL` if not allocated at `fail`. */
+  if ((data = calloc(1, sizeof(libgamma_x_randr_partition_data_t))) == NULL)
     goto fail;
   
   /* Copy the CRTC:s, just so we do not have to keep the reply in memory. */
@@ -343,19 +356,24 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
   if ((data->outputs == NULL) && (reply->num_outputs > 0))
     goto fail;
   
+  /* Get the number of available outputs. */
   data->outputs_count = (size_t)(reply->num_outputs);
   
-  data->crtc_to_output = malloc((size_t)(reply->num_crtcs) * sizeof(size_t));
-  if (data->crtc_to_output == NULL)
+  /* Create mapping table from CRTC indices to output indicies. (injection) */
+  if ((data->crtc_to_output = malloc((size_t)(reply->num_crtcs) * sizeof(size_t))) == NULL)
     goto fail;
+  /* All CRTC:s should be mapped, but incase they are not, all unmapped CRTC:s should have
+     an invalid target, namely `SIZE_MAX`, which is 1 more than the theoretical limit. */
   for (i = 0; i < (size_t)(reply->num_crtcs); i++)
     data->crtc_to_output[i] = SIZE_MAX;
+  /* Fill the table. */
   for (i = 0; i < (size_t)(reply->num_outputs); i++)
     {
       xcb_randr_get_output_info_cookie_t out_cookie;
       xcb_randr_get_output_info_reply_t* out_reply;
       uint16_t j;
       
+      /* Query output (target) information. */
       out_cookie = xcb_randr_get_output_info(connection, outputs[i], reply->config_timestamp);
       out_reply = xcb_randr_get_output_info_reply(connection, out_cookie, &error);
       if (error != NULL)
@@ -364,6 +382,7 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
 	  goto fail;
 	}
       
+      /* Find CRTC (source). */
       for (j = 0; j < reply->num_crtcs; j++)
 	if (crtcs[j] == out_reply->crtc)
 	  {
@@ -371,15 +390,20 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
 	    break;
 	  }
       
+      /* Release output information. */
       free(out_reply);
     }
   
+  /* Store the configuration timestamp. */
   data->config_timestamp = reply->config_timestamp;
+  /* Store the adjustment method dependent data. */
   this->data = data;
+  /* Release resources and return successfully. */
   free(reply);
   return 0;
   
  fail:
+  /* Release resources and return with an error. */
   if (data != NULL)
     {
       free(data->crtcs);
@@ -436,10 +460,8 @@ int libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t* restrict this,
 {
   libgamma_x_randr_partition_data_t* restrict screen_data = partition->data;
   xcb_randr_crtc_t* restrict crtc_ids = screen_data->crtcs;
-  if (crtc >= partition->crtcs_available)
-    return LIBGAMMA_NO_SUCH_CRTC;
   this->data = crtc_ids + crtc;
-  return 0;
+  return crtc >= partition->crtcs_available ? LIBGAMMA_NO_SUCH_CRTC : 0;
 }
 
 
@@ -642,7 +664,6 @@ static int get_edid(libgamma_crtc_information_t* restrict out,
   /* Acquire a list of all properties of the output. */
   prop_cookie = xcb_randr_list_output_properties(connection, output);
   prop_reply = xcb_randr_list_output_properties_reply(connection, prop_cookie, &error);
-  
   if (error != NULL)
     return out->edid_error = translate_error(error->error_code, LIBGAMMA_LIST_PROPERTIES_FAILED, 1);
   
@@ -652,10 +673,7 @@ static int get_edid(libgamma_crtc_information_t* restrict out,
   atoms_end = atoms + xcb_randr_list_output_properties_atoms_length(prop_reply);
   
   if (atoms == NULL)
-    {
-      free(prop_reply);
-      return out->edid_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;;
-    }
+    return free(prop_reply), out->edid_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
   
   /* For each property */
   for (; atoms != atoms_end; atoms++)
@@ -726,6 +744,7 @@ static int get_edid(libgamma_crtc_information_t* restrict out,
       else
 	memcpy(out->edid, atom_data, (size_t)length * sizeof(unsigned char));
       
+      /* Release resouces. */
       free(atom_reply);
       free(atom_name_reply);
       free(prop_reply);
@@ -857,20 +876,25 @@ int libgamma_x_randr_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
   uint16_t* restrict blue;
   
 #ifdef DEBUG
+  /* Gamma ramp sizes are identical but not fixed. */
   if ((ramps->red_size != ramps->green_size) ||
       (ramps->red_size != ramps->blue_size))
     return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
 #endif
   
+  /* Read current gamma ramps. */
   cookie = xcb_randr_get_crtc_gamma(connection, *(xcb_randr_crtc_t*)(this->data));
   reply = xcb_randr_get_crtc_gamma_reply(connection, cookie, &error);
   
+  /* Check for errors. */
   if (error != NULL)
     return translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_READ_FAILED, 0);
   
+  /* Get current gamma ramps from response. */
   red   = xcb_randr_get_crtc_gamma_red(reply);
   green = xcb_randr_get_crtc_gamma_green(reply);
   blue  = xcb_randr_get_crtc_gamma_blue(reply);
+  /* Copy over the gamma ramps to our memory. */
   memcpy(ramps->red,   red,   ramps->red_size   * sizeof(uint16_t));
   memcpy(ramps->green, green, ramps->green_size * sizeof(uint16_t));
   memcpy(ramps->blue,  blue,  ramps->blue_size  * sizeof(uint16_t));
@@ -895,12 +919,16 @@ int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
   xcb_void_cookie_t cookie;
   xcb_generic_error_t* restrict error;
 #ifdef DEBUG
+  /* Gamma ramp sizes are identical but not fixed. */
   if ((ramps.red_size != ramps.green_size) ||
       (ramps.red_size != ramps.blue_size))
     return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
 #endif
+  
+  /* Apply gamma ramps. */
   cookie = xcb_randr_set_crtc_gamma_checked(connection, *(xcb_randr_crtc_t*)(this->data),
 					    (uint16_t)(ramps.red_size), ramps.red, ramps.green, ramps.blue);
+  /* Check for errors. */
   if ((error = xcb_request_check(connection, cookie)) != NULL)
     return translate_error(error->error_code, LIBGAMMA_GAMMA_RAMP_WRITE_FAILED, 0);
   return 0;
