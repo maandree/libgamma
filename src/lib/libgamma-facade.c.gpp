@@ -220,6 +220,55 @@ int libgamma_is_method_available(int method)
 
 
 /**
+ * Call the adjustment method's implementation of the called function.
+ * 
+ * @param  1  The adjustment method, you may use `.` instead of `->` when resolving it.
+ * @param  2  `return` if the function returns a value, `break` otherwise.
+ * @param  3  The base name of the function to call, that is, the name of the function
+ *            this is expended into without the libgamma namespace prefix.
+ * @param  *  The function's parameters.
+ */
+£<switch ()
+£>{
+  /* Read out macro's parameters. */
+£<method="${1//./->}"
+  ctrl=$2
+  fun=$3
+  shift 3
+  params="$*"
+£>params="${params// /, }"
+  
+  switch (£{method})
+    {
+£>for adjmethod in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{adjmethod}
+    case LIBGAMMA_METHOD_£{adjmethod}:
+      /* Call the adjustment method's implementation, either
+	 return or break after it depending on macro parameter's. */
+£>[ $ctrl = return ] &&
+      return
+      libgamma_£(lowercase $adjmethod)_£{fun}(£{params});
+£>[ ! $ctrl = return ] &&
+      break;
+#endif
+£>done
+    
+    default:
+      /* If the adjustment method does not exists, either return
+	 that error, or do nothing because the function this is
+	 expanded into does return errors. */
+£>if [ $ctrl = return ]; then
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+£>else
+      /* Method does not exists/excluded at compile-time.
+	 We will assume that this is not done... */
+      break;
+£>fi
+    }
+£>}
+
+
+/**
  * Return the capabilities of an adjustment method.
  * 
  * @param  this    The data structure to fill with the method's capabilities.
@@ -228,21 +277,7 @@ int libgamma_is_method_available(int method)
 void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this, int method)
 {
   memset(this, 0, sizeof(libgamma_method_capabilities_t));
-  
-  switch (method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      libgamma_£(lowercase $method)_method_capabilities(this);
-      break;
-#endif
-£>done
-    default:
-      /* Method does not exists/excluded at compile-time.
-	 We will assume that this is not done... */
-      break;
-    }
+£>switch method break method_capabilities this
 }
 
 
@@ -259,13 +294,17 @@ char* libgamma_method_default_site(int method)
   const char* restrict var = libgamma_method_default_site_variable(method);
   char* restrict env;
   
+  /* Return `NULL` there is not variable to read. */
   if (var == NULL)
     return NULL;
   
+  /* Read the variable. */
   env = getenv(var);
+  /* Return `NULL` if it does not exist (or is empty). */
   if ((env == NULL) || (*env == '\0'))
     return NULL;
   
+  /* Return the variable's value. */
   return env;
 }
 
@@ -295,39 +334,6 @@ const char* libgamma_method_default_site_variable(int method)
       return NULL;
     }
 }
-
-
-£<switch ()
-  {
-  method="${1//./->}"
-  ctrl=$2
-  fun=$3
-  shift 3
-  params="${*}"
-£>params="${params// /, }"
-  switch (£{method})
-    {
-£>for adjmethod in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{adjmethod}
-    case LIBGAMMA_METHOD_£{adjmethod}:
-£>[ $ctrl = return ] &&
-      return
-      libgamma_£(lowercase $adjmethod)_£{fun}(£{params});
-£>[ ! $ctrl = return ] &&
-      break;
-#endif
-£>done
-
-    default:
-£>if [ $ctrl = return ]; then
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-£>else
-      /* Method does not exists/excluded at compile-time.
-	 We will assume that this is not done... */
-      break;
-£>fi
-    }
-£>}
 
 
 /**
@@ -563,17 +569,20 @@ void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
 £>{
 char* libgamma_behex_edid_£{1}(const unsigned char* restrict edid, size_t length)
 {
-  char* restrict out = malloc((length * 2 + 1) * sizeof(char));
+  char* restrict out;
   size_t i;
   
-  if (out == NULL)
+  /* Allocate memory area for the output string. */
+  if ((out = malloc((length * 2 + 1) * sizeof(char))) == NULL)
     return NULL;
   
+  /* Translate from raw octets to hexadecimal. */
   for (i = 0; i < length; i++)
     {
       out[i * 2 + 0] = "£{2}"[(edid[i] >> 4) & 15];
       out[i * 2 + 1] = "£{2}"[(edid[i] >> 0) & 15];
     }
+  /* NUL-terminate the output string. */
   out[length * 2] = '\0';
   
   return out;
@@ -616,31 +625,38 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid)
 #define not_range(lower, V, upper)  ((V < lower) || (upper < V))
 #define is_not_hex(V)  (not_range('0', V, '9') && not_range('a', V, 'f') && not_range('A', V, 'F'))
   
-  unsigned char* restrict out = NULL;
+  unsigned char* restrict out;
   size_t n = strlen(edid);
   size_t i;
   
+  /* Check that the length of the strings is even,
+     otherwise it cannot represent bytes. */
   if ((n & 1))
     return errno = EINVAL, NULL;
   
-  out = malloc(n / 2 * sizeof(unsigned char));
-  if (out == NULL)
+  /* Allocate memory area for output octet array. */
+  if ((out = malloc(n / 2 * sizeof(unsigned char))) == NULL)
     return NULL;
   
+  /* Convert to raw octet array. */
   for (i = 0; i < n; i++)
     {
+      /* Get the next character pair that, it represents an octet.o */
       char a = edid[i * 2 + 0];
       char b = edid[i * 2 + 1];
       
+      /* Verify that the input is in hexadecimal. */
       if (is_not_hex(a) || is_not_hex(b))
 	{
 	  free(out);
 	  return errno = EINVAL, NULL;
 	}
       
+      /* Convert each chararacter to raw format. */
       a = (char)((a & 15) + (a > '9' ? 9 : 0));
       b = (char)((b & 15) + (b > '9' ? 9 : 0));
       
+      /* Combine the two characters into one octet. */
       out[i] = (unsigned char)((a << 4) | b);
     }
   
