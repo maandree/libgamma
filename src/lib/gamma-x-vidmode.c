@@ -38,11 +38,11 @@
 void libgamma_x_vidmode_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
   char* restrict display = getenv("DISPLAY");
-  /* Gamma ramps size anddepth can be queried. */
+  /* Gamma ramps size and depth can be queried. */
   this->crtc_information = LIBGAMMA_CRTC_INFO_GAMMA_SIZE
 			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH;
-  /* X VidMode supports multiple sits and partitions but not CRTC:s. */
-  this->default_site_known = (display && *display);
+  /* X VidMode supports multiple sites and partitions but not CRTC:s. */
+  this->default_site_known = (display && *display) ? 1 : 0;
   this->multiple_sites = 1;
   this->multiple_partitions = 1;
   this->multiple_crtcs = 0;

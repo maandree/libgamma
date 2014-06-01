@@ -542,6 +542,42 @@ typedef enum libgamma_subpixel_order
  */
 #define LIBGAMMA_CRTC_INFO_COUNT  13
 
+/**
+ * Macro for all `libgamma_crtc_information_t` fields
+ * that can be filled if the adjustment method have
+ * support for reading the monitors' Extended Display
+ * Information Data.
+ */
+#define LIBGAMMA_CRTC_INFO_MACRO_EDID  ( LIBGAMMA_CRTC_INFO_EDID            \
+				       | LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID   \
+				       | LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID  \
+				       | LIBGAMMA_CRTC_INFO_GAMMA           )
+
+/**
+ * Macro for both `libgamma_crtc_information_t` fields
+ * that can specify the size of the monitors viewport
+ * is provided by the adjustment method without this
+ * library having to parse the monitor's Extended Display
+ * Information Data.
+ */
+#define LIBGAMMA_CRTC_INFO_MACRO_VIEWPORT  (LIBGAMMA_CRTC_INFO_WIDTH_MM | LIBGAMMA_CRTC_INFO_HEIGHT_MM)
+
+/**
+ * Macro for the `libgamma_crtc_information_t` fields
+ * that specifies the CRTC's gamma ramp sizes and gamma
+ * ramp depth.
+ */
+#define LIBGAMMA_CRTC_INFO_MACRO_RAMP  (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH)
+
+/**
+ * Macro for the `libgamma_crtc_information_t` fields
+ * that specifies the CRTC's connector type and the
+ * partition unique name of the connector.
+ */
+#define LIBGAMMA_CRTC_INFO_MACRO_CONNECTOR  ( LIBGAMMA_CRTC_INFO_CONNECTOR_NAME  \
+					    | LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE  )
+
+
 
 /**
  * Cathode ray tube controller information data structure.

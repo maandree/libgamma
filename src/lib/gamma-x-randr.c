@@ -132,33 +132,35 @@ static int translate_error(int error_code, int default_error, int return_errno)
 void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
   char* display = getenv("DISPLAY");
-  this->crtc_information = LIBGAMMA_CRTC_INFO_EDID
-			 | LIBGAMMA_CRTC_INFO_WIDTH_MM
-			 | LIBGAMMA_CRTC_INFO_HEIGHT_MM
-			 | LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID
-			 | LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID
-			 | LIBGAMMA_CRTC_INFO_GAMMA_SIZE
-			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH
+  /* Support for all information except active status and gamma ramp support. */
+  this->crtc_information = LIBGAMMA_CRTC_INFO_MACRO_EDID
+			 | LIBGAMMA_CRTC_INFO_MACRO_VIEWPORT
+			 | LIBGAMMA_CRTC_INFO_MACRO_RAMP
 			 | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER
-			 | LIBGAMMA_CRTC_INFO_CONNECTOR_NAME
-			 | LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE
-			 | LIBGAMMA_CRTC_INFO_GAMMA;
+			 | LIBGAMMA_CRTC_INFO_MACRO_CONNECTOR;
+  /* X RandR supports multiple sites, partitions and CRTC:s. */
   this->default_site_known = (display && *display) ? 1 : 0;
   this->multiple_sites = 1;
   this->multiple_partitions = 1;
   this->multiple_crtcs = 1;
+  /* Partitions are screens and not graphics cards in X. */
   this->partitions_are_graphics_cards = 0;
+  /* X does not have system restore capabilities. */
   this->site_restore = 0;
   this->partition_restore = 0;
   this->crtc_restore = 0;
+  /* Gamma ramp sizes are identical but not fixed. */
   this->identical_gamma_sizes = 1;
   this->fixed_gamma_size = 0;
+  /* Gamma ramp depths are fixed. */
   this->fixed_gamma_depth = 1;
+  /* X RandR is a real non-faked adjustment method */
   this->real = 1;
   this->fake = 0;
 }
 
 
+/* xcb violates the rule to never return struct:s. */
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Waggregate-return"
 
