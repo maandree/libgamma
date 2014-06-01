@@ -262,42 +262,58 @@ HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
   (void) lpszOutput;
   (void) lpInitData;
   
+  /* Check correctness of input. */
   if (strcmp(lpszDriver, "DISPLAY"))
     return NULL;
   
-  if (dc_count == 0) {
-    xcb_generic_error_t* error;
-    xcb_screen_iterator_t iter;
-    xcb_randr_get_screen_resources_current_cookie_t res_cookie;
-    
-    connection = xcb_connect(NULL, NULL);
-    
-    iter = xcb_setup_roots_iterator(xcb_get_setup(connection));
-    res_cookie = xcb_randr_get_screen_resources_current(connection, iter.data->root);
-    res_reply = xcb_randr_get_screen_resources_current_reply(connection, res_cookie, &error);
-    
-    if (error)
-      {
-	xcb_disconnect(connection);
-	crtc_count = -1;
-	return NULL;
-      }
-    
-    crtc_count = res_reply->num_crtcs;
-    crtcs = xcb_randr_get_screen_resources_current_crtcs(res_reply);
-  }
+  /* Connect to the display and get screen data if not already done so. */
+  if (dc_count == 0)
+    {
+      xcb_generic_error_t* error;
+      xcb_screen_iterator_t iter;
+      xcb_randr_get_screen_resources_current_cookie_t res_cookie;
+      
+      /* Connect to the display. */
+      connection = xcb_connect(NULL, NULL);
+      /* Get the first screen. */
+      iter = xcb_setup_roots_iterator(xcb_get_setup(connection));
+      /* Get the resources of the screen. */
+      res_cookie = xcb_randr_get_screen_resources_current(connection, iter.data->root);
+      res_reply = xcb_randr_get_screen_resources_current_reply(connection, res_cookie, &error);
+      if (error)
+	{
+	  fprintf(stderr, "Failed to open X connection.\n");
+	  xcb_disconnect(connection);
+	  crtc_count = -1;
+	  return NULL;
+	}
+      
+      /* Get the number of CRTC:s. */
+      crtc_count = res_reply->num_crtcs;
+      /* Get the CRTC ID:s. */
+      crtcs = xcb_randr_get_screen_resources_current_crtcs(res_reply);
+    }
   
+  /* Was the index too high. */
   if (crtc_index >= crtc_count)
     {
+      /* Disconnect and release resouces and
+	 mark that we do not know the number of
+	 available CRTC:s if we have not opened
+	 any monitors yet. */
       if (dc_count == 0)
 	{
 	  xcb_disconnect(connection);
+	  free(res_reply);
+	  res_reply = NULL
 	  crtc_count = -1;
 	}
       return NULL;
     }
   
+  /* We have opened a new CRTC. */
   dc_count++;
+  /* Return the ID of the CRTC. */
   return crtcs + crtc_index;
 }
 
@@ -311,29 +327,36 @@ BOOL EnumDisplayDevices(LPCTSTR restrict lpDevice, DWORD iDevNum,
 {
   size_t count = (size_t)crtc_count;
   (void) dwFlags;
+  /* Check the correctness of the input. */
   if (lpDevice != NULL)
     {
       fprintf(stderr, "lpDevice (argument 1) for EnumDisplayDevices should be NULL\n");
       abort();
       return FALSE;
     }
+  /* Do we know how many CRTC:s are available? */
   if (crtc_count < 0)
     {
+      /* If not open the first CRTC so that will be figured out. */
       if (GetDC(NULL) == NULL)
 	return FALSE;
-      dc_count = 0;
       count = (size_t)crtc_count;
+      /* Close the primary monitor that we just closed. */
       ReleaseDC(NULL, NULL);
     }
+  /* Check that the request CRTC exists. */
   if (iDevNum >= count)
     return FALSE;
+  /* Check the correctness of the input. */
   if (lpDisplayDevice->cb != sizeof(DISPLAY_DEVICE))
     {
       fprintf(stderr, "lpDisplayDevice->cb for EnumDisplayDevices is not sizeof(DISPLAY_DEVICE)\n");
       abort();
       return FALSE;
     }
+  /* Store name for the CRTC. */
   sprintf(lpDisplayDevice->DeviceName, "%i", iDevNum);
+  /* The connector that the CRTC belongs to is enabled. */
   lpDisplayDevice->StateFlags = DISPLAY_DEVICE_ACTIVE;
   return TRUE;
 }

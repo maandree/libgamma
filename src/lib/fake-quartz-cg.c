@@ -156,6 +156,7 @@ CGError CGGetOnlineDisplayList(uint32_t max_size,
 {
   uint32_t i;
   
+  /* Connect to the display and get screen data if not already done so. */
   if (connection == NULL)
     {
       xcb_generic_error_t* error;
@@ -164,12 +165,13 @@ CGError CGGetOnlineDisplayList(uint32_t max_size,
       xcb_randr_get_crtc_gamma_cookie_t gamma_cookie;
       xcb_randr_get_crtc_gamma_reply_t* restrict gamma_reply;
       
+      /* Connect to the display. */
       connection = xcb_connect(NULL, NULL);
-      
+      /* Get the first screen. */
       iter = xcb_setup_roots_iterator(xcb_get_setup(connection));
+      /* Get the resources of the screen. */
       res_cookie = xcb_randr_get_screen_resources_current(connection, iter.data->root);
       res_reply = xcb_randr_get_screen_resources_current_reply(connection, res_cookie, &error);
-      
       if (error)
 	{
 	  fprintf(stderr, "Failed to open X connection.\n");
@@ -178,9 +180,19 @@ CGError CGGetOnlineDisplayList(uint32_t max_size,
 	  return ~kCGErrorSuccess;
 	}
       
+      /* Get the number of CRTC:s. */
       crtc_count = (uint32_t)(res_reply->num_crtcs);
+      /* Get the CRTC ID:s. */
       crtcs = xcb_randr_get_screen_resources_current_crtcs(res_reply);
       
+      /* Allocate memory where we store the
+	 gamma ramps as they looked when this
+	 adjustment method was first used.
+	 This is used to emulate the functionality
+	 of `CGDisplayRestoreColorSyncSettings`
+	 which restore the all gamma ramps on
+	 the system to the system settnigs.
+      */
       original_ramps = malloc(crtc_count * 3 * 256 * sizeof(uint16_t));
       if (original_ramps == NULL)
 	{
@@ -190,11 +202,12 @@ CGError CGGetOnlineDisplayList(uint32_t max_size,
 	  return ~kCGErrorSuccess;
 	}
       
+      /* Fill the gamma ramps we just allocated. */
       for (i = 0; i < crtc_count; i++)
 	{
+	  /* Read current gamma ramps. */
 	  gamma_cookie = xcb_randr_get_crtc_gamma(connection, crtcs[i]);
 	  gamma_reply = xcb_randr_get_crtc_gamma_reply(connection, gamma_cookie, &error);
-	  
 	  if (error)
 	    {
 	      fprintf(stderr, "Failed to read gamma ramps.\n");
@@ -203,6 +216,7 @@ CGError CGGetOnlineDisplayList(uint32_t max_size,
 	      return ~kCGErrorSuccess;
 	    }
 	  
+	  /* Copy over the gamma ramps to the memory area we have allocated. */
 #define __DEST(C)  original_ramps + (C + 3 * i) * 256
 #define __SRC(C)  xcb_randr_get_crtc_gamma_##C(gamma_reply)
 	  memcpy(__DEST(0), __SRC(red),   256 * sizeof(uint16_t));
@@ -211,13 +225,16 @@ CGError CGGetOnlineDisplayList(uint32_t max_size,
 #undef __SRC
 #undef __DEST
 	  
+	  /* Release resouces. */
 	  free(gamma_reply);
 	}
     }
   
+  /* Return CRTC ID:s. */
   for (i = 0; (i < max_size) && (i < crtc_count); i++)
     *(displays_out + i) = (CGDirectDisplayID)i;
   
+  /* Return the number of CRTC ID:s we returned. */
   *count_out = i;
   return kCGErrorSuccess;
 }
@@ -233,26 +250,33 @@ CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
   long i;
   int32_t v;
   
+  /* This is a sloppy compatibility layer that assumes the gamma ramp size is 256. */
   if (gamma_size != 256)
     {
       fprintf(stderr, "Gamma size should be 256.\n");
       abort();
     }
   
+  /* Translate the gamma ramps from float (CoreGraphics) to 16-bit unsigned integer (X RandR). */
   for (i = 0; i < 256; i++)
     {
+      /* Red channel. */
       v = (int32_t)(red[i] * UINT16_MAX);
       r_int[i] = (uint16_t)(v < 0 ? 0 : v > UINT16_MAX ? UINT16_MAX : v);
       
+      /* Green channel. */
       v = (int32_t)(green[i] * UINT16_MAX);
       g_int[i] = (uint16_t)(v < 0 ? 0 : v > UINT16_MAX ? UINT16_MAX : v);
       
+      /* Blue channel. */
       v = (int32_t)(blue[i] * UINT16_MAX);
       b_int[i] = (uint16_t)(v < 0 ? 0 : v > UINT16_MAX ? UINT16_MAX : v);
     }
   
+  /* Apply gamma ramps. */
   gamma_cookie = xcb_randr_set_crtc_gamma_checked(connection, crtcs[display],
 						  (uint16_t)gamma_size, r_int, g_int, b_int);
+  /* Check for errors. */
   return xcb_request_check(connection, gamma_cookie) == NULL ? kCGErrorSuccess : ~kCGErrorSuccess;
 }
 
@@ -269,27 +293,32 @@ CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
   uint16_t* restrict b_int;
   long i;
   
+  /* This is a sloppy compatibility layer that assumes the gamma ramp size is 256. */
   if (gamma_size != 256)
     {
       fprintf(stderr, "Gamma size should be 256.\n");
       abort();
     }
   
+  /* The gamma ramp size should be returned to the caller. */
   *gamma_size_out = 256;
   
+  /* Read current gamma ramps. */
   gamma_cookie = xcb_randr_get_crtc_gamma(connection, crtcs[display]);
   gamma_reply = xcb_randr_get_crtc_gamma_reply(connection, gamma_cookie, &error);
-  
   if (error)
     {
       fprintf(stderr, "Failed to write gamma ramps.\n");
       return ~kCGErrorSuccess;
     }
   
+  /* Get gamma ramp values. */
   r_int = xcb_randr_get_crtc_gamma_red(gamma_reply);
   g_int = xcb_randr_get_crtc_gamma_green(gamma_reply);
   b_int = xcb_randr_get_crtc_gamma_blue(gamma_reply);
   
+  /* Translate gamma ramps to float format,
+     that is what CoreGraphics uses. */
   for (i = 0; i < 256; i++)
     {
       red[i]   = (CGGammaValue)(r_int[i]) / UINT16_MAX;

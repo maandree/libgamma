@@ -122,12 +122,14 @@ static int libgamma_list_method_test(int method, int operation)
   
   switch (operation)
     {
-    case 0: /* Methods that the environment suggests will work, excluding fake. */
+    case 0:
+      /* Methods that the environment suggests will work, excluding fake. */
       if (caps.fake)
 	return 0;
       /* Fall through. */
       
-    case 1: /* Methods that the environment suggests will work, including fake. */
+    case 1:
+      /* Methods that the environment suggests will work, including fake. */
       if (caps.real == 0)
 	return 0;
 #ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
@@ -142,13 +144,16 @@ static int libgamma_list_method_test(int method, int operation)
 #endif
       return caps.default_site_known;
       
-    case 2: /* All real non-fake methods. */
+    case 2:
+      /* All real non-fake methods. */
       return caps.real && (caps.fake == 0);
       
-    case 3: /* All real methods. */
+    case 3:
+      /* All real methods. */
       return caps.real;
       
-    default: /* All methods. */
+    default:
+      /* All methods. */
       return 1;
     }
 }
