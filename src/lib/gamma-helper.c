@@ -106,8 +106,8 @@ static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t
 static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
 			      libgamma_gamma_ramps_any_t ramps, signed depth, size_t* restrict elements)
 {
+  /* Calculate the size of the allocation to do. */
   size_t d, n = ramps.ANY.red_size + ramps.ANY.green_size + ramps.ANY.blue_size;
-  
   switch (depth)
     {
     case 16:  d = sizeof(uint16_t);  break;
@@ -119,12 +119,16 @@ static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
       return errno = EINVAL, LIBGAMMA_ERRNO_SET;
     }
   
+  /* Copy the gamma ramp sizes. */
   ramps_sys->ANY = ramps.ANY;
+  /* Allocate the new ramps. */
   ramps_sys->ANY.red   = malloc(n * d);
   ramps_sys->ANY.green = (void*)(((char*)(ramps_sys->ANY.  red)) + ramps.ANY.  red_size * d / sizeof(char));
   ramps_sys->ANY.blue  = (void*)(((char*)(ramps_sys->ANY.green)) + ramps.ANY.green_size * d / sizeof(char));
   
+  /* Report the total gamma ramp size. */
   *elements = n;
+  /* Report successfulness. */
   return ramps_sys->ANY.red == NULL ? LIBGAMMA_ERRNO_SET : 0;
 }
 
@@ -154,18 +158,23 @@ int libgamma_translated_ramp_get_(libgamma_crtc_state_t* restrict this,
   libgamma_gamma_ramps_any_t ramps_sys;
   uint64_t* restrict ramps_full;
   
+  /* Allocate ramps with proper data type. */
   if ((r = allocated_any_ramp(&ramps_sys, *ramps, depth_system, &n)))
     return r;
   
+  /* Fill the ramps. */
   if ((r = fun(this, &ramps_sys)))
     return free(ramps_sys.ANY.red), r;
   
+  /* Allocate intermediary ramps. */
   if ((ramps_full = malloc(n * sizeof(uint64_t))) == NULL)
     return free(ramps_sys.ANY.red), LIBGAMMA_ERRNO_SET;
   
+  /* Translate ramps to 64-bit integers. */
   translate_to_64(depth_system, n, ramps_full, ramps_sys);
   free(ramps_sys.ANY.red);
   
+  /* Translate ramps to the user's format. */
   translate_from_64(depth_user, n, *ramps, ramps_full);
   free(ramps_full);
   return 0;
@@ -197,16 +206,21 @@ int libgamma_translated_ramp_set_(libgamma_crtc_state_t* restrict this,
   libgamma_gamma_ramps_any_t ramps_sys;
   uint64_t* restrict ramps_full;
   
+  /* Allocate ramps with proper data type. */
   if ((r = allocated_any_ramp(&ramps_sys, ramps, depth_system, &n)))
     return r;
   
+  /* Allocate intermediary ramps. */
   if ((ramps_full = malloc(n * sizeof(uint64_t))) == NULL)
     return free(ramps_sys.ANY.red), LIBGAMMA_ERRNO_SET;
   
+  /* Translate ramps to 64-bit integers. */
   translate_to_64(depth_user, n, ramps_full, ramps);
+  /* Translate ramps to the proper format. */
   translate_from_64(depth_system, n, ramps_sys, ramps_full);
   free(ramps_full);
   
+  /* Apply the ramps */
   r = fun(this, ramps_sys);
   
   free(ramps_sys.ANY.red);

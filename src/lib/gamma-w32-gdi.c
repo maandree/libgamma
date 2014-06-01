@@ -35,6 +35,11 @@
 
 #include <errno.h>
 
+
+/**
+ * The gamma ramp size that devices will
+ * always have in Windows GDI.
+ */
 #define GAMMA_RAMP_SIZE  256
 
 
@@ -45,21 +50,29 @@
  */
 void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
+  /* Gamma ramps size, depth and support can be queried. */
   this->crtc_information = LIBGAMMA_CRTC_INFO_GAMMA_SIZE
 			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH
 			 | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT;
+  /* Windows GDI does not support sites or partitions. */
   this->default_site_known = 1;
   this->multiple_sites = 0;
   this->multiple_partitions = 0;
+  /* Windows GDI does support CRTC:s. */
   this->multiple_crtcs = 1;
+  /* Partitions are not support... */
   this->partitions_are_graphics_cards = 0;
+  /* Windows GDI does not have system restore capabilities. */
   this->site_restore = 0;
   this->partition_restore = 0;
   this->crtc_restore = 0;
+  /* Ramps sizes are fixed and identical and ramp depth is too. */
   this->identical_gamma_sizes = 1;
   this->fixed_gamma_size = 1;
   this->fixed_gamma_depth = 1;
+  /* Windows GDI is a real adjustment method that can be faked. */
 #ifdef FAKE_LIBGAMMA_METHOD_W32_GDI
+  /* It is considered real but fake if it is translated to X RandR. */
   this->fake = 1;
 # ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
   this->real = 1;
@@ -67,6 +80,7 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restri
   this->real = 0;
 # endif
 #else
+  /* It is real and not fake if we are running on Windows. */
   this->fake = 0;
   this->real = 1;
 #endif
@@ -89,11 +103,8 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restri
 int libgamma_w32_gdi_site_initialise(libgamma_site_state_t* restrict this,
 				     char* restrict site)
 {
-  if (site != NULL)
-    return LIBGAMMA_NO_SUCH_SITE;
-  
   this->partitions_available = 1;
-  return 0;
+  return site != NULL ? LIBGAMMA_NO_SUCH_SITE : 0;
 }
 
 
@@ -199,7 +210,8 @@ int libgamma_w32_gdi_crtc_initialise(libgamma_crtc_state_t* restrict this,
   
   this->data = NULL;
   
-  display.cb = sizeof(DISPLAY_DEVICE); /* Windows's API mandates this... */
+  /* Windows's API mandates this... */
+  display.cb = sizeof(DISPLAY_DEVICE);
   /* Get identifier for selected CRTC. */
   if (!EnumDisplayDevices(NULL, (DWORD)crtc, &display, 0))
     return LIBGAMMA_NO_SUCH_CRTC;
@@ -255,33 +267,38 @@ int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict 
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
 #define KNOWN_FIELDS  (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT)
-   
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   
+  /* Windows GDI does not support EDID or monitor dimensions. */
   this->edid_error = _E(LIBGAMMA_CRTC_INFO_EDID);
   this->width_mm_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM);
   this->height_mm_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM);
   this->width_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID);
   this->height_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID);
+  /* Windows GDI have fixed gamma ramp sizes. */
   this->red_gamma_size = GAMMA_RAMP_SIZE;
   this->green_gamma_size = GAMMA_RAMP_SIZE;
   this->blue_gamma_size = GAMMA_RAMP_SIZE;
   this->gamma_size_error = 0;
+  /* Windows GDI have fixed gamma ramp depth. */
   this->gamma_depth = 16;
   this->gamma_depth_error = 0;
+  /* It is possible to query Windows GDI whether the device
+     have gamma ramp support. It cannot fail. */
   if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT))
     this->gamma_support = GetDeviceCaps(crtc->data, COLORMGMTCAPS) == CM_GAMMA_RAMP;
   this->gamma_support_error = 0;
+  /* Windows GDI does not support EDID or connector information. */
   this->subpixel_order_error = _E(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER);
   this->active_error = _E(LIBGAMMA_CRTC_INFO_ACTIVE);
   this->connector_name_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_NAME);
   this->connector_type_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE);
   this->gamma_error = _E(LIBGAMMA_CRTC_INFO_GAMMA);
   
-#undef _E
-  
+  /* There was a failure if and only if unsupport field was requested. */
   return (fields & ~KNOWN_FIELDS) ? -1 : 0;
   
+#undef _E
 #undef  KNOWN_FIELDS
 }
 
@@ -298,11 +315,13 @@ int libgamma_w32_gdi_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t* restrict ramps)
 {
 #ifdef DEBUG
+  /* Windows GDI have fixed gamma ramp sizes. */
   if ((ramps->  red_size != GAMMA_RAMP_SIZE) ||
       (ramps->green_size != GAMMA_RAMP_SIZE) ||
       (ramps-> blue_size != GAMMA_RAMP_SIZE))
     return LIBGAMMA_WRONG_GAMMA_RAMP_SIZE;
 #endif
+  /* Read current gamma ramps. */
   if (!GetDeviceGammaRamp(this->data, ramps->red))
     return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
   return 0;
@@ -321,11 +340,13 @@ int libgamma_w32_gdi_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 					  libgamma_gamma_ramps_t ramps)
 {
 #ifdef DEBUG
+  /* Windows GDI have fixed gamma ramp sizes. */
   if ((ramps.  red_size != GAMMA_RAMP_SIZE) ||
       (ramps.green_size != GAMMA_RAMP_SIZE) ||
       (ramps. blue_size != GAMMA_RAMP_SIZE))
     return LIBGAMMA_WRONG_GAMMA_RAMP_SIZE;
 #endif
+  /* Apply gamma ramps. */
   if (!SetDeviceGammaRamp(this->data, ramps.red))
     return LIBGAMMA_GAMMA_RAMP_WRITE_FAILED;
   return 0;
