@@ -378,7 +378,6 @@ int libgamma_linux_drm_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				       libgamma_partition_state_t* restrict partition, size_t crtc)
 {
   libgamma_drm_card_data_t* restrict card = partition->data;
-  uint32_t crtc_id;
   
   if (crtc >= partition->crtcs_available)
     return LIBGAMMA_NO_SUCH_CRTC;
@@ -469,13 +468,18 @@ static int get_gamma_ramp_size(libgamma_crtc_information_t* restrict out, const 
   libgamma_drm_card_data_t* restrict card = crtc->partition->data;
   uint32_t crtc_id = card->res->crtcs[crtc->crtc];
   drmModeCrtc* restrict crtc_info;
+  /* Get CRTC information. */
   errno = 0;
   crtc_info = drmModeGetCrtc(card->fd, crtc_id);
   out->gamma_size_error = crtc_info == NULL ? errno : 0;
+  /* Get gamma ramp size. */
   if (out->gamma_size_error == 0)
     {
+      /* Store gamma ramp size. */
       out->red_gamma_size = out->green_gamma_size = out->blue_gamma_size = (size_t)(crtc_info->gamma_size);
+      /* Sanity check gamma ramp size. */
       out->gamma_size_error = crtc_info->gamma_size < 2 ? LIBGAMMA_SINGLETON_GAMMA_RAMP : 0;
+      /* Release CRTC information. */
       drmModeFreeCrtc(crtc_info);
     }
   return out->gamma_size_error;
@@ -530,14 +534,20 @@ static void get_connector_type(libgamma_crtc_information_t* restrict out,
     *connector_name_base = name;			   \
     break
   
-  switch (connector->connector_type)
-    {
+  /* These may not have been included by <xf86drmMode.h>,
+     but they should be available. Becuase we define them
+     outself, it is best to test them last. */
 #ifndef DRM_MODE_CONNECTOR_VIRTUAL
 # define DRM_MODE_CONNECTOR_VIRTUAL  15
 #endif
 #ifndef DRM_MODE_CONNECTOR_DSI
 # define DRM_MODE_CONNECTOR_DSI  16
 #endif
+  
+  /* Translate connector type from DRM to libgamma
+     and store connector basename. */
+  switch (connector->connector_type)
+    {
     __select (Unknown,      "Unknown"  );
     __select (VGA,          "VGA"      );
     __select (DVII,         "DVI-I"    );
@@ -612,13 +622,17 @@ static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_cr
       uint32_t type = connector->connector_type;
       size_t i, n = (size_t)(card->res->count_connectors), c = 0;
       
+      /* Allocate memory for the name of the connector. */
       out->connector_name = malloc((strlen(connector_name_base) + 12) * sizeof(char));
       if (out->connector_name == NULL)
-	return (out->connector_name_error = errno);
+	return out->connector_name_error = errno;
       
+      /* Get the number of connectors with the same type on the same graphics card. */
       for (i = 0; (i < n) && (card->connectors[i] != connector); i++)
 	if (card->connectors[i]->connector_type == type)
 	  c++;
+      
+      /* Construct and store connect name that is unique to the graphics card. */
       sprintf(out->connector_name, "%s-" PRIu32, connector_name_base, (uint32_t)(c + 1));
     }
   
@@ -644,34 +658,41 @@ static int get_edid(libgamma_crtc_state_t* restrict crtc,
   drmModePropertyRes* restrict prop;
   drmModePropertyBlobRes* restrict blob;
   
+  /* Test all properies on the connector. */
   for (prop_i = 0; prop_i < prop_n; prop_i++)
     {
-      prop = drmModeGetProperty(card->fd, connector->props[prop_i]);
-      if (prop == NULL)
+      /* Get output property, */
+      if ((prop = drmModeGetProperty(card->fd, connector->props[prop_i])) == NULL)
 	continue;
-      if (!strcmp("EDID", prop->name))
+      /* Is this property the EDID? */
+      if (!strcmp(prop->name, "EDID"))
 	{
-	  blob = drmModeGetPropertyBlob(card->fd, (uint32_t)(connector->prop_values[prop_i]));
-	  if (blob == NULL)
-	    {
-	      drmModeFreeProperty(prop);
-	      return out->edid_error = LIBGAMMA_PROPERTY_VALUE_QUERY_FAILED;
-	    }
+	  /* Get the property value. */
+	  if ((blob = drmModeGetPropertyBlob(card->fd, (uint32_t)(connector->prop_values[prop_i]))) == NULL)
+	    return drmModeFreeProperty(prop), out->edid_error = LIBGAMMA_PROPERTY_VALUE_QUERY_FAILED;
 	  if (blob->data != NULL)
 	    {
+	      /* Get and store the length of the EDID. */
 	      out->edid_length = blob->length;
-	      out->edid = malloc(out->edid_length * sizeof(unsigned char));
-	      if (out->edid == NULL)
+	      /* Allocate memory for a copy of the EDID that is under our memory control. */
+	      if ((out->edid = malloc(out->edid_length * sizeof(unsigned char))) == NULL)
 		out->edid_error = errno;
 	      else
+		/* Copy the EDID so we can free resources that got us here. */
 		memcpy(out->edid, blob->data, (size_t)(out->edid_length) * sizeof(char));
+	      /* Free the propriety value and the propery. */
 	      drmModeFreePropertyBlob(blob);
+	      drmModeFreeProperty(prop);
+	      /* Were we successful? */
 	      return out->edid == NULL;
 	    }
+	  /* Free the propriety value. */
 	  drmModeFreePropertyBlob(blob);
 	}
+      /* Free the propriety. */
       drmModeFreeProperty(prop);
     }
+  /* If we get here, we did not find a EDID. */
   return out->edid_error = LIBGAMMA_EDID_NOT_FOUND;
 }
 
@@ -704,10 +725,13 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
   /* Figure out whether we require the connector to get all information we want. */
   require_connector = fields & (LIBGAMMA_CRTC_INFO_MACRO_ACTIVE | LIBGAMMA_CRTC_INFO_MACRO_CONNECTOR);
   
+  /* If we are not interested in the connector or monitor, jump. */
   if (require_connector == 0)
     goto cont;
+  /* Find connector. */
   if ((connector = find_connector(crtc, &error)) == NULL)
     {
+      /* Store reported error in affected fields. */
       e |= this->width_mm_error      = this->height_mm_error
 	 = this->connector_type      = this->subpixel_order_error
 	 = this->active_error        = this->connector_name_error
@@ -715,9 +739,14 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
 	 = this->width_mm_edid_error = this->height_mm_edid_error = error;
       goto cont;
     }
+  
+  /* Read connector data and monitor data, excluding EDID.. */
   e |= read_connector_data(crtc, this, connector, fields);
+  
+  /* If we do not want any EDID information, jump. */
   if ((fields & LIBGAMMA_CRTC_INFO_MACRO_EDID) == 0)
     goto cont;
+  /* If there is not monitor that report error in EDID related fields. */
   if (this->active_error || (this->active == 0))
     {
       e |= this->edid_error = this->gamma_error
@@ -725,17 +754,23 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
 	 = LIBGAMMA_NOT_CONNECTED;
       goto cont;
     }
+  /* Get EDID. */
   e |= get_edid(crtc, this, connector);
   if (this->edid == NULL)
     {
       this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
       goto cont;
     }
+  /* Parse EDID. */
   if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_EDID ^ LIBGAMMA_CRTC_INFO_EDID)))
     e |= libgamma_parse_edid(this, fields);
+  
  cont:
+  /* Get gamma ramp size. */
   e |= (fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
+  /* Store gamma ramp depth. */
   this->gamma_depth = 16;
+  /* X RandR does not support quering gamma ramp support. */
   e |= this->gamma_support_error = _E(LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT);
   
   /* Free the EDID after us. */

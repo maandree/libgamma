@@ -797,6 +797,8 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
     size_t output_index = screen_data->crtc_to_output[crtc->crtc];
     xcb_randr_get_output_info_cookie_t cookie;
     xcb_generic_error_t* error;
+    /* `SIZE_MAX` is used for CRTC:s that misses mapping to its output (should not happen),
+       because `SIZE_MAX - 1` is the highest theoretical possible value. */
     if (output_index == SIZE_MAX)
       {
 	e |= this->edid_error = this->gamma_error = this->width_mm_edid_error
@@ -806,7 +808,9 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 	   = this->active_error = LIBGAMMA_CONNECTOR_UNKNOWN;
 	goto cont;
       }
+    /* Get the output. */
     output = screen_data->outputs[output_index];
+    /* Query output information. */
     cookie = xcb_randr_get_output_info(connection, output, screen_data->config_timestamp);
     output_info = xcb_randr_get_output_info_reply(connection, cookie, &error);
     if (error != NULL)
@@ -820,34 +824,44 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
       }
   }
   
+  /* Get connector name. */
   e |= get_output_name(this, output_info);
+  /* Get connector type. */
   if ((fields & LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE))
     e |= get_connector_type(this);
+  /* Get additional output data, excluding EDID. */
   e |= read_output_data(this, output_info);
   if ((fields & LIBGAMMA_CRTC_INFO_MACRO_VIEWPORT))
     e |= this->width_mm_error | this->height_mm_error;
   e |= (fields & LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER) ? this->subpixel_order_error : 0;
   
+  /* If we do not want any EDID information, jump. */
   if ((fields & LIBGAMMA_CRTC_INFO_MACRO_EDID) == 0)
     goto cont;
+  /* If there is not monitor that report error in EDID related fields. */
   if (this->active == 0)
     {
       e |= this->edid_error = this->gamma_error = this->width_mm_edid_error
 	 = this->height_mm_edid_error = LIBGAMMA_NOT_CONNECTED;
       goto cont;
     }
+  /* Get EDID. */
   e |= get_edid(this, crtc, output);
   if (this->edid == NULL)
     {
       this->gamma_error = this->width_mm_edid_error = this->height_mm_edid_error = this->edid_error;
       goto cont;
     }
+  /* Parse EDID. */
   if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_EDID ^ LIBGAMMA_CRTC_INFO_EDID)))
     e |= libgamma_parse_edid(this, fields);
   
  cont:
+  /* Get gamma ramp size. */
   e |= (fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
+  /* Store gamma ramp depth. */
   this->gamma_depth = 16;
+  /* X RandR does not support quering gamma ramp support. */
   e |= this->gamma_support_error = _E(LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT);
   
   /* Free the EDID after us. */
