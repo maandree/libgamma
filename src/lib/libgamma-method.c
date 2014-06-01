@@ -40,7 +40,7 @@ int libgamma_gamma_ramps_initialise(libgamma_gamma_ramps_t* restrict this)
   this->red   = malloc(n * sizeof(uint16_t));
   this->green = this->  red + this->  red_size;
   this->blue  = this->green + this->green_size;
-  return this->red ? 0 : -1;
+  return this->red == NULL ? -1 : 0;
 }
 
 
@@ -89,7 +89,7 @@ int libgamma_gamma_ramps32_initialise(libgamma_gamma_ramps32_t* restrict this)
   this->red   = malloc(n * sizeof(uint32_t));
   this->green = this->  red + this->  red_size;
   this->blue  = this->green + this->green_size;
-  return this->red ? 0 : -1;
+  return this->red == NULL ? -1 : 0;
 }
 
 
@@ -138,7 +138,7 @@ int libgamma_gamma_ramps64_initialise(libgamma_gamma_ramps64_t* restrict this)
   this->red   = malloc(n * sizeof(uint64_t));
   this->green = this->  red + this->  red_size;
   this->blue  = this->green + this->green_size;
-  return this->red ? 0 : -1;
+  return this->red == NULL ? -1 : 0;
 }
 
 
@@ -187,7 +187,7 @@ int libgamma_gamma_rampsf_initialise(libgamma_gamma_rampsf_t* restrict this)
   this->red   = malloc(n * sizeof(float));
   this->green = this->  red + this->  red_size;
   this->blue  = this->green + this->green_size;
-  return this->red ? 0 : -1;
+  return this->red == NULL ? -1 : 0;
 }
 
 

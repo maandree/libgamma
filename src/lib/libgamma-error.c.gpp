@@ -34,13 +34,16 @@
 
 
 /**
- * Group that the user needs to be a member of if `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned.
+ * Group that the user needs to be a member of if
+ * `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned.
  */
 gid_t libgamma_group_gid = 0;
 
 /**
- * Group that the user needs to be a member of if `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned,
- * `NULL` if the name of the group `libgamma_group_gid` cannot be determined.
+ * Group that the user needs to be a member of if
+ * `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned,
+ * `NULL` if the name of the group `libgamma_group_gid`
+ * cannot be determined.
  */
 const char* libgamma_group_name = NULL;
 
@@ -67,23 +70,30 @@ void libgamma_perror(const char* name, int error_code)
 {
   if (error_code >= 0)
     {
+      /* Print the stored errno value. */
       errno = error_code;
       perror(name);
     }
   else if (error_code == LIBGAMMA_ERRNO_SET)
+    /* Print errno. */
     perror(name);
   else if (error_code == LIBGAMMA_DEVICE_REQUIRE_GROUP)
     {
+      /* Print the error name and the required group membership. */
       const char* error = libgamma_name_of_error(error_code);
       long int gid = (long int)libgamma_group_gid;
       if (libgamma_group_name == NULL)
+	/* Group name unknown. */
 	fprintf(stderr, "%s: %s: %ld\n", name, error, gid);
       else
-	fprintf(stderr, "%s: %s: %s (%lid)\n", name, error, libgamma_group_name, gid);
+	/* Group name known, ID is second class. */
+	fprintf(stderr, "%s: %s: %s (%ld)\n", name, error, libgamma_group_name, gid);
     }
   else if (error_code < LIBGAMMA_ERROR_MIN)
+    /* If the error code does not exist, print "(?)" */
     fprintf(stderr, "%s: (?)\n", name);
   else
+    /* Print the name of the error. */
     fprintf(stderr, "%s: %s\n", name, libgamma_name_of_error(error_code));
 }
 
@@ -98,6 +108,9 @@ void libgamma_perror(const char* name, int error_code)
  */
 const char* libgamma_name_of_error(int value)
 {
+  /* Map from error codes to error names.
+     The output of $(libgamma-error-extract --list)
+     is sorted by error code in decreasing order. */
   static const char* error_names[] =
     {
 £>for error in $(libgamma-error-extract --list); do
@@ -105,9 +118,12 @@ const char* libgamma_name_of_error(int value)
 £>done
     };
   
+  /* Return `NULL` if the error code is invalid. */
   if ((value < LIBGAMMA_ERROR_MIN) || (value >= 0))
     return NULL;
   
+  /* Convert error code from {-1, -2, -3, ...} to {0, 1, 2, ...}
+     and look up the error's name and return it. */
   return error_names[-value - 1];
 }
 
@@ -121,13 +137,16 @@ const char* libgamma_name_of_error(int value)
  */
 int libgamma_value_of_error(const char* name)
 {
+  /* Return 0 (not a valid error code) if the error name is `NULL`. */
   if (name == NULL)
     return 0;
   
+  /* Test error names against `name` and return the value of the match error. */
 £>for error in $(libgamma-error-extract --list); do
   if (!strcmp(name, "£{error}"))  return £{error};
 £>done
   
+  /* Return 0 (not a valid error code) if the error name is unknown. */
   return 0;
 }
 

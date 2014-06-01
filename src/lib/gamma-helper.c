@@ -25,7 +25,13 @@
 #include <stdint.h>
 
 
+/**
+ * Just an arbitrary version
+ */
 #define ANY  bits64
+
+
+#define __translate(instruction)  for (i = 0; i < n; i++)  instruction;  break
 
 
 /**
@@ -41,32 +47,16 @@ static void translate_to_64(signed depth, size_t n, uint64_t* restrict out, libg
   size_t i;
   switch (depth)
     {
-    case 16:
-      for (i = 0; i < n; i++)
-	out[i] = (uint64_t)(in.bits16.red[i]) * 0x0001000100010001ULL;
-      break;
-      
-    case 32:
-      for (i = 0; i < n; i++)
-	out[i] = (uint64_t)(in.bits32.red[i]) * 0x0000000100000001ULL;
-      break;
-      
-    case 64:
-      for (i = 0; i < n; i++)
-	out[i] = in.bits64.red[i];
-      break;
-      
-    case -1:
-      for (i = 0; i < n; i++)
-	out[i] = (uint64_t)(in.float_single.red[i] * (float)UINT64_MAX);
-      break;
-      
-    case -2:
-      for (i = 0; i < n; i++)
-	out[i] = (uint64_t)(in.float_double.red[i] * (double)UINT64_MAX);
-      break;
-      
-    default: /* This is not possible. */
+      /* Translate integer. */
+    case 16:  __translate(out[i] = (uint64_t)(in.bits16.red[i]) * 0x0001000100010001ULL);
+    case 32:  __translate(out[i] = (uint64_t)(in.bits32.red[i]) * 0x0000000100000001ULL);
+      /* Identity translation. */
+    case 64:  __translate(out[i] = in.bits64.red[i]);
+      /* Translate floating point. */
+    case -1:  __translate(out[i] = (uint64_t)(in.float_single.red[i] * (float)UINT64_MAX));
+    case -2:  __translate(out[i] = (uint64_t)(in.float_double.red[i] * (double)UINT64_MAX));
+    default:
+      /* This is not possible. */
       abort();
       break;
     }
@@ -84,35 +74,18 @@ static void translate_to_64(signed depth, size_t n, uint64_t* restrict out, libg
 static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t out, uint64_t* restrict in)
 {
   size_t i;
-  
   switch (depth)
     {
-    case 16:
-      for (i = 0; i < n; i++)
-	out.bits16.red[i] = (uint16_t)(in[i] / 0x0001000100010001ULL);
-      break;
-      
-    case 32:
-      for (i = 0; i < n; i++)
-	out.bits32.red[i] = (uint32_t)(in[i] / 0x0000000100000001ULL);
-      break;
-      
-    case 64:
-      for (i = 0; i < n; i++)
-	out.bits64.red[i] = in[i];
-      break;
-      
-    case -1:
-      for (i = 0; i < n; i++)
-	out.float_single.red[i] = (float)(in[i]) / (float)UINT64_MAX;
-      break;
-      
-    case -2:
-      for (i = 0; i < n; i++)
-	out.float_double.red[i] = (double)(in[i]) / (double)UINT64_MAX;
-      break;
-      
-    default: /* This is not possible. */
+      /* Translate integer. */
+    case 16:  __translate(out.bits16.red[i] = (uint16_t)(in[i] / 0x0001000100010001ULL));
+    case 32:  __translate(out.bits32.red[i] = (uint32_t)(in[i] / 0x0000000100000001ULL));
+      /* Identity translation. */
+    case 64:  __translate(out.bits64.red[i] = in[i]);
+      /* Translate floating point. */
+    case -1:  __translate(out.float_single.red[i] = (float)(in[i]) / (float)UINT64_MAX);
+    case -2:  __translate(out.float_double.red[i] = (double)(in[i]) / (double)UINT64_MAX);
+    default:
+      /* This is not possible. */
       abort();
       break;
     }
@@ -133,8 +106,7 @@ static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t
 static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
 			      libgamma_gamma_ramps_any_t ramps, signed depth, size_t* restrict elements)
 {
-  size_t n = 0;
-  size_t d;
+  size_t n = 0, d;
   
   switch (depth)
     {
@@ -156,7 +128,7 @@ static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
   ramps_sys->ANY.blue  = (void*)(((char*)(ramps_sys->ANY.green)) + ramps.ANY.green_size * d / sizeof(char));
   
   *elements = n;
-  return ramps_sys->ANY.red ? 0 : LIBGAMMA_ERRNO_SET;
+  return ramps_sys->ANY.red == NULL ? LIBGAMMA_ERRNO_SET : 0;
 }
 
 
@@ -189,16 +161,10 @@ int libgamma_translated_ramp_get_(libgamma_crtc_state_t* restrict this,
     return r;
   
   if ((r = fun(this, &ramps_sys)))
-    {
-      free(ramps_sys.ANY.red);
-      return r;
-    }
+    return free(ramps_sys.ANY.red), r;
   
   if ((ramps_full = malloc(n * sizeof(uint64_t))) == NULL)
-    {
-      free(ramps_sys.ANY.red);
-      return LIBGAMMA_ERRNO_SET;
-    }
+    return free(ramps_sys.ANY.red), LIBGAMMA_ERRNO_SET;
   
   translate_to_64(depth_system, n, ramps_full, ramps_sys);
   free(ramps_sys.ANY.red);
@@ -238,10 +204,7 @@ int libgamma_translated_ramp_set_(libgamma_crtc_state_t* restrict this,
     return r;
   
   if ((ramps_full = malloc(n * sizeof(uint64_t))) == NULL)
-    {
-      free(ramps_sys.ANY.red);
-      return LIBGAMMA_ERRNO_SET;
-    }
+    return free(ramps_sys.ANY.red), LIBGAMMA_ERRNO_SET;
   
   translate_to_64(depth_user, n, ramps_full, ramps);
   translate_from_64(depth_system, n, ramps_sys, ramps_full);
@@ -254,5 +217,6 @@ int libgamma_translated_ramp_set_(libgamma_crtc_state_t* restrict this,
 }
 
 
+#undef __translate
 #undef ANY
 

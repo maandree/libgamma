@@ -35,45 +35,72 @@
 int libgamma_parse_edid(libgamma_crtc_information_t* restrict this, int32_t fields)
 {
 #define __test_version(edid, major, minor)  (((edid)[18] == major) && ((edid)[19] == minor))
+#define __m(value)  (this->edid[index++] != value)
   
   int error = 0;
   int checksum = 0;
-  size_t i;
+  size_t i, index = 0;
   
+  /* If the length of the EDID is not 128 bytes, we know that it is not of
+     EDID structure revision 1.3, and thus we do not support it. Additionally
+     this make sure we do not do segmentation violation on the next test. */
   if (this->edid_length != 128)
     error = LIBGAMMA_EDID_LENGTH_UNSUPPORTED;
-  else if ((this->edid[0] != 0x00) || (this->edid[1] != 0xFF) || (this->edid[2] != 0xFF) || (this->edid[3] != 0xFF) ||
-	   (this->edid[4] != 0xFF) || (this->edid[5] != 0xFF) || (this->edid[6] != 0xFF) || (this->edid[7] != 0x00))
+  /* Check that the magic number of that of the EDID structure. */
+  else if (__m(0x00) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0x00))
     error = LIBGAMMA_EDID_WRONG_MAGIC_NUMBER;
+  /* Check that EDID structure revision 1.3 is used, it is the only version
+     we support. It is also by far the most commonly use revision and it is
+     currently the newest revision. */
   else if (__test_version(this->edid, 1, 3) == 0)
     error = LIBGAMMA_EDID_REVISION_UNSUPPORTED;
   
+  /* If we have encountered an error, report it for the fields that require
+     the EDID to be parsed. Note that it is not stored for the EDID field
+     itself because it is not considered an error just because we do not
+     support the used version. */
   this->width_mm_edid_error = this->height_mm_edid_error = this->gamma_error = error;
   
+  /* Retrieve the size of the viewport. This is done even if it is not
+     requested because it is not worth it branch. */
   this->width_mm_edid = (size_t)(this->edid[21]) * 10;
   this->height_mm_edid = (size_t)(this->edid[22]) * 10;
   
+  /* Retrieve the monitor's gamma characteristics. */
   if ((fields & LIBGAMMA_CRTC_INFO_GAMMA) && (error == 0))
     {
       if (this->edid[23] == 0xFF)
+	/* If the gamma charactistics is FFh (3,55) it should be interpreted as not specified. */
 	this->gamma_error = LIBGAMMA_GAMMA_NOT_SPECIFIED;
       else
 	this->gamma_red = this->gamma_green = this->gamma_blue = (float)((int)(this->edid[23]) + 100) / 100.f;
     }
   
+  /* If not error has occurred, calculate and test the checksum.
+     It is not considered an error that the gamma characteristics
+     is left unspecified in the EDID. */
   if (error == 0)
     for (i = 0; i < this->edid_length; i++)
       checksum += (int)(this->edid[i]);
+  /* The checksum should be zero. */
   if ((checksum & 255))
     {
+      /* Store the error in all fields that require the EDID to be parsed,
+         as well as the EDID field itself. */
       error = LIBGAMMA_EDID_CHECKSUM_ERROR;
       this->edid_error = this->width_mm_edid_error = this->height_mm_edid_error = error;
+      /* If the gamma characteristics is not specified, that is kept,
+         and the checksum error is augmented. */
       this->gamma_error = this->gamma_error == LIBGAMMA_GAMMA_NOT_SPECIFIED
-	? LIBGAMMA_GAMMA_NOT_SPECIFIED_AND_EDID_CHECKSUM_ERROR : 0;
+	? LIBGAMMA_GAMMA_NOT_SPECIFIED_AND_EDID_CHECKSUM_ERROR : error;
     }
   
+  /* Return whether or not we encountered an error or if
+     the gamma characteristics was requested but is not
+     specified in the monitor's EDID. */
   return error | this->gamma_error;
   
+#undef __m
 #undef __test_version
 }
 
