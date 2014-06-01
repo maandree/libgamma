@@ -435,10 +435,12 @@ int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
 				    libgamma_gamma_ramps_fun* red_function,
@@ -450,10 +452,12 @@ int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
 				      libgamma_gamma_ramps32_fun* red_function,
@@ -465,10 +469,12 @@ int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
 				      libgamma_gamma_ramps64_fun* red_function,
@@ -480,10 +486,12 @@ int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
 				     libgamma_gamma_rampsf_fun* red_function,
@@ -495,10 +503,12 @@ int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t* restrict this,
 				     libgamma_gamma_rampsd_fun* red_function,

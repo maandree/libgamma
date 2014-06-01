@@ -23,10 +23,11 @@
 #include "gamma-helper.h"
 
 
-£>set -u
+/* Initialise the general preprocessor. */
 £>cd src/extract
 £>export PATH=".:${PATH}"
 
+/* Some general preprocessor we will use frequently. */
 £<
 get-methods ()
 { ./libgamma-method-extract --list --method | cut -d _ -f 1,2 --complement
@@ -36,6 +37,8 @@ lowercase ()
 }
 £>
 
+/* Include all adjustment methods that
+   are enabled at compile-time. */
 £>for method in $(get-methods); do
 #ifdef HAVE_LIBGAMMA_METHOD_£{method}
 # include "gamma-£(lowercase $method | sed -e s:_:-:g).h"
@@ -53,12 +56,10 @@ lowercase ()
 #include <errno.h>
 
 
+/* Some things to reduce warnings when we do
+   not have any adjustment methods enabled. */
 #ifndef HAVE_LIBGAMMA_METHODS
 # define HAVE_NO_LIBGAMMA_METHODS
-#endif
-
-
-#ifdef HAVE_NO_LIBGAMMA_METHODS
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
 #endif
@@ -78,12 +79,15 @@ static int libgamma_is_vt_proper(int fd)
   char buf[32];
   char digit0;
   
+  /* Get TTY. */
   if (ttyname_r(fd, buf, sizeof(buf) / sizeof(char)))
     return 0;
   
+  /* Validate TTY path. */
   if (strstr(buf, "/dev/tty") != buf)
     return 0;
   
+  /* Validate TTY name. */
   digit0 = buf[strlen("/dev/tty")];
   return ('1' <= digit0) && (digit0 <= '9');
 }
@@ -293,6 +297,38 @@ const char* libgamma_method_default_site_variable(int method)
 }
 
 
+£<switch ()
+  {
+  method="${1//./->}"
+  ctrl=$2
+  fun=$3
+  shift 3
+  params="${*}"
+£>params="${params// /, }"
+  switch (£{method})
+    {
+£>for adjmethod in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{adjmethod}
+    case LIBGAMMA_METHOD_£{adjmethod}:
+£>[ $ctrl = return ] &&
+      return
+      libgamma_£(lowercase $adjmethod)_£{fun}(£{params});
+£>[ ! $ctrl = return ] &&
+      break;
+#endif
+£>done
+
+    default:
+£>if [ $ctrl = return ]; then
+      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+£>else
+      /* Method does not exists/excluded at compile-time.
+	 We will assume that this is not done... */
+      break;
+£>fi
+    }
+£>}
+
 
 /**
  * Initialise an allocated site state.
@@ -313,18 +349,7 @@ int libgamma_site_initialise(libgamma_site_state_t* restrict this,
 {
   this->method = method;
   this->site = site;
-  
-  switch (method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      return libgamma_£(lowercase $method)_site_initialise(this, site);
-#endif
-£>done
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+£>switch method return site_initialise this site
 }
 
 
@@ -335,20 +360,7 @@ int libgamma_site_initialise(libgamma_site_state_t* restrict this,
  */
 void libgamma_site_destroy(libgamma_site_state_t* restrict this)
 {
-  switch (this->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      libgamma_£(lowercase $method)_site_destroy(this);
-      break;
-#endif
-£>done
-    default:
-      /* Method does not exists/excluded at compile-time.
-	 We will assume that this is not done... */
-      break;
-    }
+£>switch this.method break site_destroy this
   free(this->site);
 }
 
@@ -375,17 +387,7 @@ void libgamma_site_free(libgamma_site_state_t* restrict this)
  */
 int libgamma_site_restore(libgamma_site_state_t* restrict this)
 {
-  switch (this->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      return libgamma_£(lowercase $method)_site_restore(this);
-#endif
-£>done
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+£>switch this.method return site_restore this
 }
 
 
@@ -404,18 +406,7 @@ int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
 {
   this->site = site;
   this->partition = partition;
-  
-  switch (site->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      return libgamma_£(lowercase $method)_partition_initialise(this, site, partition);
-#endif
-£>done
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+£>switch site.method return partition_initialise this site partition
 }
 
 
@@ -426,20 +417,7 @@ int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
  */
 void libgamma_partition_destroy(libgamma_partition_state_t* restrict this)
 {
-  switch (this->site->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      libgamma_£(lowercase $method)_partition_destroy(this);
-      break;
-#endif
-£>done
-    default:
-      /* Method does not exists/excluded at compile-time.
-	 We will assume that this is not done... */
-      break;
-    }
+£>switch this.site.method break partition_destroy this
 }
 
 
@@ -465,17 +443,7 @@ void libgamma_partition_free(libgamma_partition_state_t* restrict this)
  */
 int libgamma_partition_restore(libgamma_partition_state_t* restrict this)
 {
-  switch (this->site->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      return libgamma_£(lowercase $method)_partition_restore(this);
-#endif
-£>done
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+£>switch this.site.method return partition_restore this
 }
 
 
@@ -494,18 +462,7 @@ int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
 {
   this->partition = partition;
   this->crtc = crtc;
-  
-  switch (partition->site->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      return libgamma_£(lowercase $method)_crtc_initialise(this, partition, crtc);
-#endif
-£>done
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+£>switch partition.site.method return crtc_initialise this partition crtc
 }
 
 
@@ -516,20 +473,7 @@ int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
  */
 void libgamma_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
-  switch (this->partition->site->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      libgamma_£(lowercase $method)_crtc_destroy(this);
-      break;
-#endif
-£>done
-    default:
-      /* Method does not exists/excluded at compile-time.
-	 We will assume that this is not done... */
-      break;
-    }
+£>switch this.partition.site.method break crtc_destroy this
 }
 
 
@@ -555,17 +499,7 @@ void libgamma_crtc_free(libgamma_crtc_state_t* restrict this)
  */
 int libgamma_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
-  switch (this->partition->site->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      return libgamma_£(lowercase $method)_crtc_restore(this);
-#endif
-£>done
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+£>switch this.partition.site.method return crtc_restore this
 }
 
 
@@ -584,21 +518,9 @@ int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
 #ifdef HAVE_NO_LIBGAMMA_METHODS
   (void) fields;
 #endif
-  
   this->edid = NULL;
   this->connector_name = NULL;
-  
-  switch (crtc->partition->site->method)
-    {
-£>for method in $(get-methods); do
-#ifdef HAVE_LIBGAMMA_METHOD_£{method}
-    case LIBGAMMA_METHOD_£{method}:
-      return libgamma_£(lowercase $method)_get_crtc_information(this, crtc, fields);
-#endif
-£>done
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+£>switch crtc.partition.site.method return get_crtc_information this crtc fields
 }
 
 
@@ -628,14 +550,18 @@ void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
 
 
 /**
- * Convert a raw representation of an EDID to a lowercase hexadecimal representation.
+ * Convert a raw representation of an EDID to a hexadecimal representation.
  * 
+ * @param   1       Casing name.
+ * @param   2       The hexadecimal alphabet.
  * @param   edid    The EDID in raw representation.
  * @param   length  The length of `edid`.
- * @retrun          The EDID in lowercase hexadecimal representation,
+ * @retrun          The EDID in hexadecimal representation,
  *                  `NULL` on allocation error, `errno` will be set accordingly.
  */
-char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t length)
+£>behex_edid ()
+£>{
+char* libgamma_behex_edid_£{1}(const unsigned char* restrict edid, size_t length)
 {
   char* restrict out = malloc((length * 2 + 1) * sizeof(char));
   size_t i;
@@ -645,13 +571,25 @@ char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t l
   
   for (i = 0; i < length; i++)
     {
-      out[i * 2 + 0] = "0123456789abcdef"[(edid[i] >> 4) & 15];
-      out[i * 2 + 1] = "0123456789abcdef"[(edid[i] >> 0) & 15];
+      out[i * 2 + 0] = "£{2}"[(edid[i] >> 4) & 15];
+      out[i * 2 + 1] = "£{2}"[(edid[i] >> 0) & 15];
     }
   out[length * 2] = '\0';
   
   return out;
 }
+£>}
+
+
+/**
+ * Convert a raw representation of an EDID to a lowercase hexadecimal representation.
+ * 
+ * @param   edid    The EDID in raw representation.
+ * @param   length  The length of `edid`.
+ * @retrun          The EDID in lowercase hexadecimal representation,
+ *                  `NULL` on allocation error, `errno` will be set accordingly.
+ */
+£>behex_edid lowercase 0123456789abcdef
 
 
 /**
@@ -662,23 +600,7 @@ char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t l
  * @retrun          The EDID in uppercase hexadecimal representation,
  *                  NULL` on allocation error, `errno` will be set accordingly.
  */
-char* libgamma_behex_edid_uppercase(const unsigned char* restrict edid, size_t length)
-{
-  char* restrict out = malloc((length * 2 + 1) * sizeof(char));
-  size_t i;
-  
-  if (out == NULL)
-    return NULL;
-  
-  for (i = 0; i < length; i++)
-    {
-      out[i * 2 + 0] = "0123456789ABCDEF"[(edid[i] >> 4) & 15];
-      out[i * 2 + 1] = "0123456789ABCDEF"[(edid[i] >> 0) & 15];
-    }
-  out[length * 2] = '\0';
-  
-  return out;
-}
+£>behex_edid uppercase 0123456789ABCDEF
 
 
 /**
@@ -1076,56 +998,84 @@ int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version.
+ * Set the gamma ramps for a CRTC.
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   1               The data type for the ramp stop elements.
+ * @param   2               The `ramp*` pattern for the ramp structure and function to call.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
-				    libgamma_gamma_ramps_fun* red_function,
-				    libgamma_gamma_ramps_fun* green_function,
-				    libgamma_gamma_ramps_fun* blue_function)
+£>crtc_set_gamma_ramps_f ()
+£>{
+int libgamma_crtc_set_gamma_£{2}_f(libgamma_crtc_state_t* restrict this,
+				   libgamma_gamma_£{2}_fun* red_function,
+				   libgamma_gamma_£{2}_fun* green_function,
+				   libgamma_gamma_£{2}_fun* blue_function)
 {
   libgamma_crtc_information_t info;
-  libgamma_gamma_ramps_t ramps;
+  libgamma_gamma_£{2}_t ramps;
   size_t i, n;
   int e;
   
+  /* Get the size of the gamma ramps. */
   if (libgamma_get_crtc_information(&info, this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE))
     {
-      e = info.gamma_size_error;
-      if (e < 0)
+      if ((e = info.gamma_size_error) < 0)
 	return e;
       return errno = e, LIBGAMMA_ERRNO_SET;
     }
   
+  /* Copy the size of the gamma ramps and calculte the grand size. */
   n  = ramps.  red_size = info.  red_gamma_size;
   n += ramps.green_size = info.green_gamma_size;
   n += ramps. blue_size = info. blue_gamma_size;
   
-  ramps.  red = malloc(n * sizeof(uint16_t));
+  /* Allocate gamma ramps. */
+  ramps.  red = malloc(n * sizeof(£{1}));
   ramps.green = ramps.  red + ramps.  red_size;
   ramps. blue = ramps.green + ramps.green_size;
   if (ramps.red == NULL)
     return LIBGAMMA_ERRNO_SET;
   
+  /* Generate the gamma ramp for the red chennel. */
   for (i = 0, n = ramps.red_size; i < n; i++)
     ramps.red[i] = red_function((float)i / (float)(n - 1));
   
+  /* Generate the gamma ramp for the green chennel. */
   for (i = 0, n = ramps.green_size; i < n; i++)
     ramps.green[i] = green_function((float)i / (float)(n - 1));
   
+  /* Generate the gamma ramp for the blue chennel. */
   for (i = 0, n = ramps.blue_size; i < n; i++)
     ramps.blue[i] = blue_function((float)i / (float)(n - 1));
   
-  e = libgamma_crtc_set_gamma_ramps(this, ramps);
+  /* Apply the gamma ramps. */
+  e = libgamma_crtc_set_gamma_£{2}(this, ramps);
   free(ramps.red);
   return e;
 }
+£>}
+
+
+/**
+ * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version.
+ * 
+ * Note that this will probably involve the library allocating temporary data.
+ * 
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
+ */
+£>crtc_set_gamma_ramps_f uint16_t ramps
 
 
 /**
@@ -1133,52 +1083,14 @@ int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
-				      libgamma_gamma_ramps32_fun* red_function,
-				      libgamma_gamma_ramps32_fun* green_function,
-				      libgamma_gamma_ramps32_fun* blue_function)
-{
-  libgamma_crtc_information_t info;
-  libgamma_gamma_ramps32_t ramps;
-  size_t i, n;
-  int e;
-  
-  if (libgamma_get_crtc_information(&info, this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE))
-    {
-      e = info.gamma_size_error;
-      if (e < 0)
-	return e;
-      return errno = e, LIBGAMMA_ERRNO_SET;
-    }
-  
-  n  = ramps.  red_size = info.  red_gamma_size;
-  n += ramps.green_size = info.green_gamma_size;
-  n += ramps. blue_size = info. blue_gamma_size;
-  
-  ramps.  red = malloc(n * sizeof(uint32_t));
-  ramps.green = ramps.  red + ramps.  red_size;
-  ramps. blue = ramps.green + ramps.green_size;
-  if (ramps.red == NULL)
-    return LIBGAMMA_ERRNO_SET;
-  
-  for (i = 0, n = ramps.red_size; i < n; i++)
-    ramps.red[i] = red_function((float)i / (float)(n - 1));
-  
-  for (i = 0, n = ramps.green_size; i < n; i++)
-    ramps.green[i] = green_function((float)i / (float)(n - 1));
-  
-  for (i = 0, n = ramps.blue_size; i < n; i++)
-    ramps.blue[i] = blue_function((float)i / (float)(n - 1));
-  
-  e = libgamma_crtc_set_gamma_ramps32(this, ramps);
-  free(ramps.red);
-  return e;
-}
+£>crtc_set_gamma_ramps_f uint32_t ramps32
 
 
 /**
@@ -1186,52 +1098,14 @@ int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
-				      libgamma_gamma_ramps64_fun* red_function,
-				      libgamma_gamma_ramps64_fun* green_function,
-				      libgamma_gamma_ramps64_fun* blue_function)
-{
-  libgamma_crtc_information_t info;
-  libgamma_gamma_ramps64_t ramps;
-  size_t i, n;
-  int e;
-  
-  if (libgamma_get_crtc_information(&info, this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE))
-    {
-      e = info.gamma_size_error;
-      if (e < 0)
-	return e;
-      return errno = e, LIBGAMMA_ERRNO_SET;
-    }
-  
-  n  = ramps.  red_size = info.  red_gamma_size;
-  n += ramps.green_size = info.green_gamma_size;
-  n += ramps. blue_size = info. blue_gamma_size;
-  
-  ramps.  red = malloc(n * sizeof(uint64_t));
-  ramps.green = ramps.  red + ramps.  red_size;
-  ramps. blue = ramps.green + ramps.green_size;
-  if (ramps.red == NULL)
-    return LIBGAMMA_ERRNO_SET;
-  
-  for (i = 0, n = ramps.red_size; i < n; i++)
-    ramps.red[i] = red_function((float)i / (float)(n - 1));
-  
-  for (i = 0, n = ramps.green_size; i < n; i++)
-    ramps.green[i] = green_function((float)i / (float)(n - 1));
-  
-  for (i = 0, n = ramps.blue_size; i < n; i++)
-    ramps.blue[i] = blue_function((float)i / (float)(n - 1));
-  
-  e = libgamma_crtc_set_gamma_ramps64(this, ramps);
-  free(ramps.red);
-  return e;
-}
+£>crtc_set_gamma_ramps_f uint64_t ramps64
 
 
 /**
@@ -1239,52 +1113,14 @@ int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
-				     libgamma_gamma_rampsf_fun* red_function,
-				     libgamma_gamma_rampsf_fun* green_function,
-				     libgamma_gamma_rampsf_fun* blue_function)
-{
-  libgamma_crtc_information_t info;
-  libgamma_gamma_rampsf_t ramps;
-  size_t i, n;
-  int e;
-  
-  if (libgamma_get_crtc_information(&info, this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE))
-    {
-      e = info.gamma_size_error;
-      if (e < 0)
-	return e;
-      return errno = e, LIBGAMMA_ERRNO_SET;
-    }
-  
-  n  = ramps.  red_size = info.  red_gamma_size;
-  n += ramps.green_size = info.green_gamma_size;
-  n += ramps. blue_size = info. blue_gamma_size;
-  
-  ramps.  red = malloc(n * sizeof(float));
-  ramps.green = ramps.  red + ramps.  red_size;
-  ramps. blue = ramps.green + ramps.green_size;
-  if (ramps.red == NULL)
-    return LIBGAMMA_ERRNO_SET;
-  
-  for (i = 0, n = ramps.red_size; i < n; i++)
-    ramps.red[i] = red_function((float)i / (float)(n - 1));
-  
-  for (i = 0, n = ramps.green_size; i < n; i++)
-    ramps.green[i] = green_function((float)i / (float)(n - 1));
-  
-  for (i = 0, n = ramps.blue_size; i < n; i++)
-    ramps.blue[i] = blue_function((float)i / (float)(n - 1));
-  
-  e = libgamma_crtc_set_gamma_rampsf(this, ramps);
-  free(ramps.red);
-  return e;
-}
+£>crtc_set_gamma_ramps_f float rampsf
 
 
 /**
@@ -1292,52 +1128,14 @@ int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t* restrict this,
  * 
  * Note that this will probably involve the library allocating temporary data.
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t* restrict this,
-				     libgamma_gamma_rampsd_fun* red_function,
-				     libgamma_gamma_rampsd_fun* green_function,
-				     libgamma_gamma_rampsd_fun* blue_function)
-{
-  libgamma_crtc_information_t info;
-  libgamma_gamma_rampsd_t ramps;
-  size_t i, n;
-  int e;
-  
-  if (libgamma_get_crtc_information(&info, this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE))
-    {
-      e = info.gamma_size_error;
-      if (e < 0)
-	return e;
-      return errno = e, LIBGAMMA_ERRNO_SET;
-    }
-  
-  n  = ramps.  red_size = info.  red_gamma_size;
-  n += ramps.green_size = info.green_gamma_size;
-  n += ramps. blue_size = info. blue_gamma_size;
-  
-  ramps.  red = malloc(n * sizeof(double));
-  ramps.green = ramps.  red + ramps.  red_size;
-  ramps. blue = ramps.green + ramps.green_size;
-  if (ramps.red == NULL)
-    return LIBGAMMA_ERRNO_SET;
-  
-  for (i = 0, n = ramps.red_size; i < n; i++)
-    ramps.red[i] = red_function((double)i / (double)(n - 1));
-  
-  for (i = 0, n = ramps.green_size; i < n; i++)
-    ramps.green[i] = green_function((double)i / (double)(n - 1));
-  
-  for (i = 0, n = ramps.blue_size; i < n; i++)
-    ramps.blue[i] = blue_function((double)i / (double)(n - 1));
-  
-  e = libgamma_crtc_set_gamma_rampsd(this, ramps);
-  free(ramps.red);
-  return e;
-}
+£>crtc_set_gamma_ramps_f double rampsd
 
 
 
