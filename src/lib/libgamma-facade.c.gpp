@@ -1,3 +1,4 @@
+/* -*- c -*- */
 /**
  * libgamma — Display server abstraction layer for gamma ramp adjustments
  * Copyright © 2014  Mattias Andrée (maandree@member.fsf.org)
@@ -20,42 +21,29 @@
 #include "libgamma-error.h"
 #include "libgamma-method.h"
 #include "gamma-helper.h"
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-# include "gamma-dummy.h"
+
+
+£>set -u
+£>cd src/extract
+£>export PATH=".:${PATH}"
+
+£<
+get-methods ()
+{ ./libgamma-method-extract --list --method | cut -d _ -f 1,2 --complement
+}
+lowercase ()
+{ echo "$*" | sed -e y/QWERTYUIOPASDFGHJKLZXCVBNM/qwertyuiopasdfghjklzxcvbnm/ | sed -e s:core_graphics:cg:g
+}
+£>
+
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+# include "gamma-£(lowercase $method | sed -e s:_:-:g).h"
 # ifndef HAVE_LIBGAMMA_METHODS
 #  define HAVE_LIBGAMMA_METHODS
 # endif
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-# include "gamma-x-randr.h"
-# ifndef HAVE_LIBGAMMA_METHODS
-#  define HAVE_LIBGAMMA_METHODS
-# endif
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-# include "gamma-x-vidmode.h"
-# ifndef HAVE_LIBGAMMA_METHODS
-#  define HAVE_LIBGAMMA_METHODS
-# endif
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-# include "gamma-linux-drm.h"
-# ifndef HAVE_LIBGAMMA_METHODS
-#  define HAVE_LIBGAMMA_METHODS
-# endif
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-# include "gamma-w32-gdi.h"
-# ifndef HAVE_LIBGAMMA_METHODS
-#  define HAVE_LIBGAMMA_METHODS
-# endif
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-# include "gamma-quartz-cg.h"
-# ifndef HAVE_LIBGAMMA_METHODS
-#  define HAVE_LIBGAMMA_METHODS
-# endif
-#endif
+£>done
 
 #include <unistd.h>
 #include <stddef.h>
@@ -186,30 +174,12 @@ size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operati
 #else
   size_t n = 0;
   
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-  if (libgamma_list_method_test(LIBGAMMA_METHOD_X_RANDR, operation) && (n++ < buf_size))
-    methods[n - 1] = LIBGAMMA_METHOD_X_RANDR;
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+  if (libgamma_list_method_test(LIBGAMMA_METHOD_£{method}, operation) && (n++ < buf_size))
+    methods[n - 1] = LIBGAMMA_METHOD_£{method};
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-  if (libgamma_list_method_test(LIBGAMMA_METHOD_X_VIDMODE, operation) && (n++ < buf_size))
-    methods[n - 1] = LIBGAMMA_METHOD_X_VIDMODE;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-  if (libgamma_list_method_test(LIBGAMMA_METHOD_LINUX_DRM, operation) && (n++ < buf_size))
-    methods[n - 1] = LIBGAMMA_METHOD_LINUX_DRM;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-  if (libgamma_list_method_test(LIBGAMMA_METHOD_W32_GDI, operation) && (n++ < buf_size))
-    methods[n - 1] = LIBGAMMA_METHOD_W32_GDI;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-  if (libgamma_list_method_test(LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS, operation) && (n++ < buf_size))
-    methods[n - 1] = LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-  if (libgamma_list_method_test(LIBGAMMA_METHOD_DUMMY, operation) && (n++ < buf_size))
-    methods[n - 1] = LIBGAMMA_METHOD_DUMMY;
-#endif
+£>done
   
   return n;
 #endif
@@ -231,24 +201,11 @@ int libgamma_is_method_available(int method)
 #else
   switch (method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-#endif
+£>done
       return 1;
       
     default:
@@ -270,37 +227,13 @@ void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this,
   
   switch (method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      libgamma_dummy_method_capabilities(this);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      libgamma_£(lowercase $method)_method_capabilities(this);
       break;
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      libgamma_x_randr_method_capabilities(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      libgamma_x_vidmode_method_capabilities(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      libgamma_linux_drm_method_capabilities(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      libgamma_w32_gdi_method_capabilities(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      libgamma_quartz_cg_method_capabilities(this);
-      break;
-#endif
-      
+£>done
     default:
       /* Method does not exists/excluded at compile-time.
 	 We will assume that this is not done... */
@@ -350,12 +283,10 @@ const char* libgamma_method_default_site_variable(int method)
     case LIBGAMMA_METHOD_X_RANDR:
       return "DISPLAY";
 #endif
-      
 #ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
     case LIBGAMMA_METHOD_X_VIDMODE:
       return "DISPLAY";
 #endif
-      
     default:
       return NULL;
     }
@@ -385,31 +316,12 @@ int libgamma_site_initialise(libgamma_site_state_t* restrict this,
   
   switch (method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_site_initialise(this, site);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_site_initialise(this, site);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_site_initialise(this, site);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_site_initialise(this, site);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_site_initialise(this, site);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_site_initialise(this, site);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_site_initialise(this, site);
-#endif
-      
+£>done
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
@@ -425,37 +337,13 @@ void libgamma_site_destroy(libgamma_site_state_t* restrict this)
 {
   switch (this->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      libgamma_dummy_site_destroy(this);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      libgamma_£(lowercase $method)_site_destroy(this);
       break;
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      libgamma_x_randr_site_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      libgamma_x_vidmode_site_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      libgamma_linux_drm_site_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      libgamma_w32_gdi_site_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      libgamma_quartz_cg_site_destroy(this);
-      break;
-#endif
-      
+£>done
     default:
       /* Method does not exists/excluded at compile-time.
 	 We will assume that this is not done... */
@@ -489,31 +377,12 @@ int libgamma_site_restore(libgamma_site_state_t* restrict this)
 {
   switch (this->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_site_restore(this);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_site_restore(this);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_site_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_site_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_site_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_site_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_site_restore(this);
-#endif
-      
+£>done
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
@@ -538,31 +407,12 @@ int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
   
   switch (site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_partition_initialise(this, site, partition);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_partition_initialise(this, site, partition);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_partition_initialise(this, site, partition);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_partition_initialise(this, site, partition);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_partition_initialise(this, site, partition);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_partition_initialise(this, site, partition);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_partition_initialise(this, site, partition);
-#endif
-      
+£>done
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
@@ -578,37 +428,13 @@ void libgamma_partition_destroy(libgamma_partition_state_t* restrict this)
 {
   switch (this->site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      libgamma_dummy_partition_destroy(this);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      libgamma_£(lowercase $method)_partition_destroy(this);
       break;
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      libgamma_x_randr_partition_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      libgamma_x_vidmode_partition_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      libgamma_linux_drm_partition_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      libgamma_w32_gdi_partition_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      libgamma_quartz_cg_partition_destroy(this);
-      break;
-#endif
-      
+£>done
     default:
       /* Method does not exists/excluded at compile-time.
 	 We will assume that this is not done... */
@@ -641,31 +467,12 @@ int libgamma_partition_restore(libgamma_partition_state_t* restrict this)
 {
   switch (this->site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_partition_restore(this);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_partition_restore(this);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_partition_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_partition_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_partition_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_partition_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_partition_restore(this);
-#endif
-      
+£>done
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
@@ -690,31 +497,12 @@ int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
   
   switch (partition->site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_initialise(this, partition, crtc);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_crtc_initialise(this, partition, crtc);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_initialise(this, partition, crtc);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_initialise(this, partition, crtc);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_initialise(this, partition, crtc);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_initialise(this, partition, crtc);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_initialise(this, partition, crtc);
-#endif
-      
+£>done
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
@@ -730,37 +518,13 @@ void libgamma_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
   switch (this->partition->site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      libgamma_dummy_crtc_destroy(this);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      libgamma_£(lowercase $method)_crtc_destroy(this);
       break;
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      libgamma_x_randr_crtc_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      libgamma_x_vidmode_crtc_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      libgamma_linux_drm_crtc_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      libgamma_w32_gdi_crtc_destroy(this);
-      break;
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      libgamma_quartz_cg_crtc_destroy(this);
-      break;
-#endif
-      
+£>done
     default:
       /* Method does not exists/excluded at compile-time.
 	 We will assume that this is not done... */
@@ -793,31 +557,12 @@ int libgamma_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
   switch (this->partition->site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_restore(this);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_crtc_restore(this);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_restore(this);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_crtc_restore(this);
-#endif
-      
+£>done
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
@@ -845,31 +590,12 @@ int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
   
   switch (crtc->partition->site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_get_crtc_information(this, crtc, fields);
+£>for method in $(get-methods); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_get_crtc_information(this, crtc, fields);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_get_crtc_information(this, crtc, fields);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_get_crtc_information(this, crtc, fields);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_get_crtc_information(this, crtc, fields);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_get_crtc_information(this, crtc, fields);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      return libgamma_quartz_cg_get_crtc_information(this, crtc, fields);
-#endif
-      
+£>done
     default:
       return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
     }
@@ -1021,26 +747,12 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
   
   switch (this->partition->site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_get_gamma_ramps(this, ramps);
+£>for method in $(get-methods | grep -v QUARTZ_CORE_GRAPHICS); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_crtc_get_gamma_ramps(this, ramps);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_get_gamma_ramps(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_get_gamma_ramps(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_get_gamma_ramps(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_get_gamma_ramps(this, ramps);
-#endif
+£>done
 #ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
       {
@@ -1074,26 +786,12 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
   
   switch (this->partition->site->method)
     {
-#ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_set_gamma_ramps(this, ramps);
+£>for method in $(get-methods | grep -v QUARTZ_CORE_GRAPHICS); do
+#ifdef HAVE_LIBGAMMA_METHOD_£{method}
+    case LIBGAMMA_METHOD_£{method}:
+      return libgamma_£(lowercase $method)_crtc_set_gamma_ramps(this, ramps);
 #endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return libgamma_x_randr_crtc_set_gamma_ramps(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return libgamma_x_vidmode_crtc_set_gamma_ramps(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-    case LIBGAMMA_METHOD_LINUX_DRM:
-      return libgamma_linux_drm_crtc_set_gamma_ramps(this, ramps);
-#endif
-#ifdef HAVE_LIBGAMMA_METHOD_W32_GDI
-    case LIBGAMMA_METHOD_W32_GDI:
-      return libgamma_w32_gdi_crtc_set_gamma_ramps(this, ramps);
-#endif
+£>done
 #ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
     case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
       {
