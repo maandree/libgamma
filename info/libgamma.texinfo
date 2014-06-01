@@ -678,7 +678,7 @@ a @code{const char*} that work like the parameter for
 If the error code is the value of @code{LIBGAMMA_ERRNO_SET}
 @code{perror} will be used to print the current error
 stored in @code{errno}. If the error code is non-negative
-(an @code{errno} value`), that value will be stored in
+(an @code{errno} value), that value will be stored in
 @code{errno} and @code{perror} will be used to print it.
 Additionally, if the error code is the value of
 @code{LIBGAMMA_DEVICE_REQUIRE_GROUP} the required group
