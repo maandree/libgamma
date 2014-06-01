@@ -106,7 +106,7 @@ static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t
 static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
 			      libgamma_gamma_ramps_any_t ramps, signed depth, size_t* restrict elements)
 {
-  size_t n = 0, d;
+  size_t d, n = ramps.ANY.red_size + ramps.ANY.green_size + ramps.ANY.blue_size;
   
   switch (depth)
     {
@@ -119,10 +119,7 @@ static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
       return errno = EINVAL, LIBGAMMA_ERRNO_SET;
     }
   
-  n += ramps_sys->ANY.  red_size = ramps.ANY.  red_size;
-  n += ramps_sys->ANY.green_size = ramps.ANY.green_size;
-  n += ramps_sys->ANY. blue_size = ramps.ANY. blue_size;
-  
+  ramps_sys->ANY = ramps.ANY;
   ramps_sys->ANY.red   = malloc(n * d);
   ramps_sys->ANY.green = (void*)(((char*)(ramps_sys->ANY.  red)) + ramps.ANY.  red_size * d / sizeof(char));
   ramps_sys->ANY.blue  = (void*)(((char*)(ramps_sys->ANY.green)) + ramps.ANY.green_size * d / sizeof(char));
