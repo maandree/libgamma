@@ -34,15 +34,17 @@
 
 
 #ifndef HAVE_LIBGAMMA_METHOD_X_RANDR
+/* Use dummy translation. */
+
 
 CGError CGGetOnlineDisplayList(uint32_t max_size,
 			       CGDirectDisplayID* restrict displays_out, uint32_t* restrict count_out)
 {
+  /* Pretend that we have 2 CRTC:s */
   uint32_t i;
   for (i = 0; (i < max_size) && (i < 2); i++)
     displays_out[i] = (CGDirectDisplayID)i;
   *count_out = i;
-  
   return kCGErrorSuccess;
 }
 
@@ -55,12 +57,12 @@ CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
   (void) green;
   (void) blue;
   
+  /* We pretend that our gamma ramps are of size 256. */
   if (gamma_size != 256)
     {
       fprintf(stderr, "Gamma size should be 256.\n");
       abort();
     }
-  
   return kCGErrorSuccess;
 }
 
@@ -72,14 +74,17 @@ CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
   long i;
   (void) display;
   
+  /* We pretend that our gamma ramps are of size 256. */
   if (gamma_size != 256)
     {
       fprintf(stderr, "Gamma size should be 256.\n");
       abort();
     }
   
+  /* We pretend that our gamma ramps are of size 256. */
   *gamma_size_out = 256;
   
+  /* Pretend that our gamma ramps are identity mappings. */
   for (i = 0; i < 256; i++)
     red[i] = green[i] = blue[i] = (CGGammaValue)i / 255;
   
@@ -93,6 +98,7 @@ void CGDisplayRestoreColorSyncSettings(void)
 
 uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
 {
+  /* We pretend that our gamma ramps are of size 256. */
   (void) display;
   return 256;
 }
@@ -104,22 +110,46 @@ void close_fake_quartz(void)
 
 
 #else
+/* Use translation to X RandR. */
+
 
 #include <xcb/xcb.h>
 #include <xcb/randr.h>
 
 
 
+/**
+ * Connection to the X RandR display.
+ */
 static xcb_connection_t* restrict connection = NULL;
+
+/**
+ * Resouces for the screen.
+ * We only have one screen, again this is a very sloppy compatibility layer.
+ */
 static xcb_randr_get_screen_resources_current_reply_t* restrict res_reply = NULL;
+
+/**
+ * The number of available CRTC:s.
+ */
 static uint32_t crtc_count = 0;
+
+/**
+ * List of X RandR CRTC:s.
+ */
 static xcb_randr_crtc_t* restrict crtcs = NULL;
+
+/**
+ * The original gamma ramps, used to emulate gamma ramp restoration to system settings.
+ */
 static uint16_t* restrict original_ramps = NULL;
 
 
 
+/* xcb violates the rule to never return struct:s. */
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Waggregate-return"
+
 
 CGError CGGetOnlineDisplayList(uint32_t max_size,
 			       CGDirectDisplayID* restrict displays_out, uint32_t* restrict count_out)
@@ -278,8 +308,12 @@ void CGDisplayRestoreColorSyncSettings(void)
   xcb_void_cookie_t gamma_cookie;
   uint32_t i;
   
+  /* Restore the gamma ramps on each monitor to
+     the ramps that we used when we started. */
   for (i = 0; i < crtc_count; i++)
     {
+      /* We assume that our gamma ramps are of the size
+	 256 (this is a sloppy compatibility layer.) */
       gamma_cookie = xcb_randr_set_crtc_gamma_checked(connection, crtcs[i], 256,
 						      original_ramps + (0 + 3 * i) * 256,
 						      original_ramps + (1 + 3 * i) * 256,
@@ -292,9 +326,12 @@ void CGDisplayRestoreColorSyncSettings(void)
 
 uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
 {
+  /* We assume that our gamma ramps are of the size
+     256 (this is a sloppy compatibility layer.) */
   (void) display;
   return 256;
 }
+
 
 # pragma GCC diagnostic pop
 
