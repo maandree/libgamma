@@ -943,7 +943,70 @@ Its possible values are:
 £>done
 @end table
 
-Release resources that are held by a
+The variable @code{edid} is in raw format.
+To convert it to a human-readable format
+you should convert it to hexadecimal
+representation. To do this, you can call
+either of the functions
+
+@table @code
+@item libgamma_behex_edid
+@itemx libgamma_behex_edid_lowercase
+Converts to lowercase hexadecimal.
+
+@item libgamma_behex_edid_uppercase
+Converts to uppercase hexadecimal.
+@end table
+
+These functions return the EDID as
+a hexadecimal NUL-terminated
+non-@code{NULL} string of the data
+type @code{char*}, which you should
+free when you do not need it anymore.
+If enough memory cannot be allocated
+@code{NULL} is returned and
+@code{errno} is set accordingly.
+
+These functions take two arguments:
+
+@table @asis
+@item @code{edid} [@code{const unsigned char*}]
+The EDID in raw representation.
+
+@item @code{length} [@code{size_t}]
+The length of @code{edid}.
+@end table
+
+The values of these arguments should
+be the values of the variables
+@code{edid} and @code{edid_length},
+respectively.
+
+If you want to identify a monitor by
+it's EDID@footnote{EDID:s should be
+unique and even if the manufacture
+for the monitor has not made sure if
+this it is very unlikely that it is
+not.} it is more effective to convert
+the EDID you want to raw format and
+compare the raw format rather than
+converting all monitors EDID to
+hexadecimal representation. To do
+this use the function
+@code{libgamma_unhex_edid}. This
+function takes the EDID in NUL-terminated
+non-@code{NULL} hexadecimal
+representation as a @code{const char*}
+as its only argument. The function
+returns the EDID in raw format as an
+@code{unsigned char*}. The returned
+value will be @code{NULL} if enough
+memory for the output cannot be allocated
+or if the input is a hexadecimal
+representation of a byte array;
+@code{errno} will be set accordingly.
+
+To release resources that are held by a
 @code{libgamma_crtc_information_t*}
 whose variables have been set by
 @code{libgamma_get_crtc_information}
