@@ -1145,6 +1145,92 @@ as well as release the pointer to the
 structure.
 @end table
 
+To read the current gamma ramps for a
+CRTC, you can use the function
+@code{libgamma_crtc_get_gamma_ramps}.
+This function returns zero on success,
+and a negative @code{int} on failure.
+If the function fails, the return
+value will be one of the error codes
+listed in @ref{Errors}. The function
+takes two arguments: the
+@code{libgamma_crtc_state_t*}
+for the CRTC, and a
+@code{libgamma_gamma_rampsd_t*}
+that will be filled with the
+current gamma ramps, it must
+have been initialise by
+@code{libgamma_gamma_ramps_initialise}
+or in a compatible manner.
+
+Similarly you can use
+@code{libgamma_crtc_set_gamma_ramps}
+to apply gamma ramps to a CRTC.
+This function has the same return
+value and the same first argument
+as @code{libgamma_crtc_get_gamma_ramps},
+but its second argument is a
+@code{libgamma_gamma_rampsd_t}
+rather than a
+@code{libgamma_gamma_rampsd_t*}.
+Alternatively, but with some
+performance impact, you can use
+the function
+@code{libgamma_crtc_set_gamma_ramps_f}.
+The difference between
+@code{libgamma_crtc_set_gamma_ramps_f}
+and @code{libgamma_crtc_set_gamma_ramps}
+is that the second argument is
+substitute for three separate argument
+that are used to generate the gamma ramps:
+
+@table @asis
+@item @code{red_function} [@code{libgamma_gamma_ramps_fun*}]
+The function that generates the the
+gamma ramp for the red channel.
+
+@item @code{green_function} [@code{libgamma_gamma_ramps_fun*}]
+The function that generates the the
+gamma ramp for the green channel.
+
+@item @code{blue_function} [@code{libgamma_gamma_ramps_fun*}]
+The function that generates the the
+gamma ramp for the blue channel.
+@end table
+
+@code{libgamma_gamma_ramps_fun} is a
+@code{typedef} of @code{uint16_t (float encoding)}.
+As input, it takes a [0, 1] float of
+the encoding value and as output
+it should return the output value.
+
+These functions for reading and applying
+gamma ramps are for @code{uint16_t} element
+type gamma ramps. But it is possible
+to use other element types as well:
+
+@table @code
+@item uint32_t
+Substitute all @code{ramps} for @code{ramps32}
+in the the function names and date type
+definition names.
+
+@item uint64_t
+Substitute all @code{ramps} for @code{ramps64}
+in the the function names and date type
+definition names.
+
+@item float
+Substitute all @code{ramps} for @code{rampsf}
+in the the function names and date type
+definition names.
+
+@item double
+Substitute all @code{ramps} for @code{rampsd}
+in the the function names and date type
+definition names.
+@end table
+
 
 
 @node Errors
