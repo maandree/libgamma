@@ -187,7 +187,7 @@ typedef struct libgamma_method_capabilities
 
 
 /**
- * Site state
+ * Site state.
  * 
  * On operating systems that integrate a graphical environment
  * there is usally just one site. However, one systems with
