@@ -599,6 +599,33 @@ This structure contains the following variables:
 £>done
 @end table
 
+To select a site and initialise its state
+call the function @code{libgamma_site_initialise}.
+It returns zero on success, and and negative
+@code{int} on failure. If the return is negative,
+it is a @code{libgamma} error code; these are
+listed in @ref{Errors}. For input
+@code{libgamma_site_initialise} takes three
+arguments:
+
+@table @asis
+@item @code{this} [@code{libgamma_site_state_t*}]
+The site state to initialise.
+
+@item @code{method} [@code{int}]
+The adjustment method (display server and protocol),
+these are listed in @ref{Adjustment methods}.
+
+@item @code{site} [@code{char*}]
+The site identifier, unless it is @code{NULL}
+it must a @code{free}:able. One the state is
+destroyed the library will attempt to free it.
+There you should not free it yourself, and it
+must not be a string constant or allocated on
+the stack. Note however that it will not be
+@code{free}:d if this function fails.
+@end table
+
 To release all resources held by a site state,
 call the function @code{libgamma_site_destroy},
 whose only parameter is the site state to
@@ -627,6 +654,27 @@ This structure contains the following variables:
 £>done
 @end table
 
+To select a partition and initialise its state
+call the function @code{libgamma_partition_initialise}.
+It returns zero on success, and and negative
+@code{int} on failure. If the return is negative,
+it is a @code{libgamma} error code; these are
+listed in @ref{Errors}. For input
+@code{libgamma_partition_initialise} takes three
+arguments:
+
+@table @asis
+@item @code{this} [@code{libgamma_partition_state_t*}]
+The partition state to initialise.
+
+@item @code{site} [@code{libgamma_site_state_t*}]
+The site state for the site that the
+partition belongs to.
+
+@item @code{partition} [@code{size_t}]
+The the index of the partition within the site.
+@end table
+
 To release all resources held by a partition state,
 call the function @code{libgamma_partition_destroy},
 whose only parameter is the partition state to
@@ -653,6 +701,28 @@ This structure contains the following variables;
 @item £{crtc}
 £>libgamma-method-extract --crtc-t $crtc | texise
 £>done
+@end table
+
+To select a CRTC and initialise its state
+call the function @code{libgamma_crtc_initialise}.
+It returns zero on success, and and negative
+@code{int} on failure. If the return is negative,
+it is a @code{libgamma} error code; these are
+listed in @ref{Errors}. For input
+@code{libgamma_crtc_initialise} takes three
+arguments:
+
+@table @asis
+@item @code{this} [@code{libgamma_crtc_state_t*}]
+The CRTC state to initialise.
+
+@item @code{partition} [@code{libgamma_partition_state_t*}]
+The partition state for the
+partition that the CRTC belongs to.
+
+@item @code{crtc} [@code{size_t}]
+The the index of the CRTC within
+the partition.
 @end table
 
 To release all resources held by a CRTC state,
