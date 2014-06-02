@@ -469,6 +469,8 @@ and for the freedom of all.
 * Adjustment methods::              Selecting adjustment method.
 * Adjustment method capabilities::  Identifying capabilities of adjustment methods.
 * CRTC information::                Retrieving information about CRTC:s.
+* Monitors::                        Selecting monitors.
+* Gamma ramps::                     Fetch and manipulating gamma ramps.
 * Errors::                          Error codes and how to handle errors.
 @end menu
 
@@ -561,9 +563,9 @@ values.
 
 Capabilities.
 
-@table @code
+@table @asis
 £>for cap in $(libgamma-method-extract --list --cap-t); do
-@item £{cap} [£(libgamma-method-extract --type --cap-t $cap)]
+@item @code{£{cap}} [@code{£(libgamma-method-extract --type --cap-t $cap)}]
 £>libgamma-method-extract --cap-t $cap | texise
 £>if [ $cap = crtc_information ]; then
 See @ref{CRTC information} for more information.
@@ -585,7 +587,7 @@ CRTC information.
 £>done
 @end table
 
-Subpixel order.
+@code{libgamma_subpixel_order_t} (@code{enum libgamma_subpixel_order}).
 
 @table @code
 £>for order in $(libgamma-method-extract --list --subpixel); do
@@ -594,7 +596,7 @@ Subpixel order.
 £>done
 @end table
 
-Connector type.
+@code{libgamma_connector_type_t} (@code{enum libgamma_connector_type}).
 
 @table @code
 £>for type in $(libgamma-method-extract --list --connector); do
@@ -603,15 +605,148 @@ Connector type.
 £>done
 @end table
 
-Fields.
+@code{libgamma_crtc_information_t} (@code{struct libgamma_crtc_information}).
 
-@table @code
+@table @asis
 £>for info in $(libgamma-method-extract --list --info-t); do
-@item £{info} [£(libgamma-method-extract --type --info-t $info)]
+@item @code{£{info}} [@code{£(libgamma-method-extract --type --info-t $info)}]
 £>libgamma-method-extract --info-t $info | texise
 £>done
 @end table
 
+
+
+@node Monitors
+@section Monitors
+
+TODO
+
+
+
+@node Gamma ramps
+@section Gamma ramps
+
+@command{libgamma} has support for 5
+different gamma ramps structures:
+16-bit depth, 32-bit depth, 64-bit
+depth, single precision floating point,
+and double precision floating point.
+For best performance, you should
+select the one that the adjustment
+method uses. If you choose a type
+other than what the adjustment
+method uses, it will be converted.
+
+@table @asis
+@item @code{libgamma_gamma_ramps_t} (@code{struct libgamma_gamma_ramps})
+16-bit integer (@code{uint16_t}).
+This is by far the most common.
+
+@item @code{libgamma_gamma_ramps32_t} (@code{struct libgamma_gamma_ramps32})
+32-bit integer (@code{uint32_t}).
+Currently no adjustment method.
+
+@item @code{libgamma_gamma_ramps64_t} (@code{struct libgamma_gamma_ramps64})
+64-bit integer (@code{uint64_t}).
+Currently no adjustment method.
+
+@item @code{libgamma_gamma_rampsf_t} (@code{struct libgamma_gamma_rampsf})
+Single precision floating point (@code{float}).
+Currently this is only used by the
+Quartz/CoreGraphics adjustment method.
+
+@item @code{libgamma_gamma_rampsd_t} (@code{struct libgamma_gamma_rampsd})
+Double precision floating point (@code{double}).
+Currently no adjustment method.
+@end table
+
+These structures are very similar.
+They have three ramps, one per channels,
+each have an array that is a lookup
+table with one associated variable that
+describes the size of the table. They
+only differ in the element type of the
+arrays --- @code{red}, @code{green} and
+@code{blue} --- whose type is specified
+in the table above. @code{red}, @code{green}
+and @code{blue} is a pointer of that type.
+For example, for @code{libgamma_gamma_ramps_t}
+@code{red}, @code{green} and @code{blue}
+are of type @code{uint16_t*} since the
+element type is @code{uint16_t}.
+
+@table @asis
+@item @code{red_size} [@code{size_t}]
+The number of stops in @code{red}.
+
+@item @code{green_size} [@code{size_t}]
+The number of stops in @code{green}.
+
+@item @code{blue_size} [@code{size_t}]
+The number of stops in @code{blue}.
+
+@item @code{red}
+The lookup table for the red channel.
+
+@item @code{green}
+The lookup table for the green channel.
+
+@item @code{blue}
+The lookup table for the blue channel.
+@end table
+
+Because of how the adjustment method's
+own API's are designed @code{red},
+@code{green} and @code{blue} should
+actually one array. To make sure that
+this is done the right way and to reduce
+you own code @code{libgamma} provides
+functions to create and destroy gamma
+ramp structures.
+
+@table @asis
+@item @code{libgamma_gamma_ramps_initialise} [@code{int *(libgamma_gamma_ramps_t* restrict)}]
+@itemx @code{libgamma_gamma_ramps32_initialise} [@code{int *(libgamma_gamma_ramps32_t* restrict)}]
+@itemx @code{libgamma_gamma_ramps64_initialise} [@code{int *(libgamma_gamma_ramps64_t* restrict)}]
+@itemx @code{libgamma_gamma_rampsf_initialise} [@code{int *(libgamma_gamma_rampsf_t* restrict)}]
+@itemx @code{libgamma_gamma_rampsd_initialise} [@code{int *(libgamma_gamma_rampsd_t* restrict)}]
+Initialise a gamma ramp in the proper way
+that allows all adjustment methods to read
+from and write to it without causing
+segmentation violation.
+
+The input must have @code{red_size},
+@code{green_size} and @code{blue_size}
+set to the sizes of the gamma ramps
+that should be allocated.
+
+Zero is returned on success. On error
+@code{-1} is returned and @code{errno}
+is set accordingly. These functions can
+only fail on @code{malloc} error.
+
+@item @code{libgamma_gamma_ramps_destroy} [@code{void *(libgamma_gamma_ramps_t* restrict)}]
+@itemx @code{libgamma_gamma_ramps32_destroy} [@code{void *(libgamma_gamma_ramps32_t* restrict)}]
+@itemx @code{libgamma_gamma_ramps64_destroy} [@code{void *(libgamma_gamma_ramps64_t* restrict)}]
+@itemx @code{libgamma_gamma_rampsf_destroy} [@code{void *(libgamma_gamma_rampsf_t* restrict)}]
+@itemx @code{libgamma_gamma_rampsd_destroy} [@code{void *(libgamma_gamma_rampsd_t* restrict)}]
+Release resources that are held by a gamma
+ramp strcuture that has been allocated by
+@code{libgamma_gamma_ramps_initialise} or
+otherwise initialises in the proper manner.
+
+@item @code{libgamma_gamma_ramps_free} [@code{void *(libgamma_gamma_ramps_t* restrict)}]
+@itemx @code{libgamma_gamma_ramps32_free} [@code{void *(libgamma_gamma_ramps32_t* restrict)}]
+@itemx @code{libgamma_gamma_ramps64_free} [@code{void *(libgamma_gamma_ramps64_t* restrict)}]
+@itemx @code{libgamma_gamma_rampsf_free} [@code{void *(libgamma_gamma_rampsf_t* restrict)}]
+@itemx @code{libgamma_gamma_rampsd_free} [@code{void *(libgamma_gamma_rampsd_t* restrict)}]
+Release resources that are held by a gamma
+ramp strcuture that has been allocated by
+@code{libgamma_gamma_ramps*_initialise} or
+otherwise initialises in the proper manner,
+as well as release the pointer to the
+structure.
+@end table
 
 
 
