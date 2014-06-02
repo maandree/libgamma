@@ -556,6 +556,75 @@ values.
 £>done
 @end table
 
+You can test whether an adjustment method
+is available with the function
+@code{libgamma_is_method_available}. It
+takes the adjustment method's identifer
+as its only argument, and returns an
+@code{int}. The returned value is non-zero
+if and only if the adjustment exists and
+is available.
+
+A more flexible more but advanced function,
+that you probably want to use instead, is
+@code{libgamma_list_methods}. It lists all
+List available adjustment methods by their
+order of preference based on the environment,
+and can filter its output. This function
+takes three arguments:
+
+@table @asis
+@item @code{} [@code{int*}]
+Output array of adjustment method
+identifiers. It should be able to hold
+@code{LIBGAMMA_METHOD_COUNT} elements.
+
+@item @code{} [@code{size_t}]
+The number of elements that fits in
+@code{methods}, it should be
+@code{LIBGAMMA_METHOD_COUNT},
+This is used to avoid writing outside
+the output buffer if this library
+adds new adjustment methods without
+the users of the library recompiling.
+
+@item @code{} [@code{int}]
+Describes what adjustment methods to
+include. There are five valid values
+for this parameter, all other values
+invoke undefined behaviour.
+
+@table @code
+@item 0
+Adjustment methods that the environment
+suggests will work, excluding fake
+Adjustment methods.
+
+@item 1
+Adjustment methods that the environment
+suggests will work, including fake
+Adjustment methods.
+
+@item 2
+All real non-fake adjustment methods.
+
+@item 3
+All real adjustment methods.
+
+@item 4
+All adjustment methods.
+@end table
+@end table
+
+@code{libgamma_list_methods} returns an
+@code{size_t} with the value of how many
+adjustment method that should have been
+stored in the parameter @code{methods}
+if were @code{buf_size}. This value is
+how many value that have been stored
+in @code{methods} if @code{buf_size}
+is large enough.
+
 
 
 @node Monitors
@@ -592,9 +661,9 @@ the data structure @code{libgamma_site_state_t}
 @footnote{@code{struct libgamma_site_state}}.
 This structure contains the following variables:
 
-@table @code
+@table @asis
 £>for site in $(libgamma-method-extract --list --site-t); do
-@item £{site}
+@item @code{£{site}} [@code{£(libgamma-method-extract --type --site-t $site)}]
 £>libgamma-method-extract --site-t $site | texise | sed -e 's/"/``/1' | sed -e 's/"/'\'\''/'
 £>done
 @end table
@@ -624,6 +693,25 @@ There you should not free it yourself, and it
 must not be a string constant or allocated on
 the stack. Note however that it will not be
 @code{free}:d if this function fails.
+
+The name of the default site can be fetched
+with the function @code{libgamma_method_default_site}.
+It takes the value of @code{method} as its only
+argument and returns the default site's name.
+The returned value may be @code{NULL}, and
+the value should not be @code{free}:d. Because
+it should not be @code{free}:d you should
+duplicate it with @code{strdup} if it is not
+@code{NULL}. This value is @code{NULL} if
+the default site cannot be determined or if
+the adjustment method only supports one site.
+
+The function @code{libgamma_method_default_site_variable}
+works identically is @code{libgamma_method_default_site}
+except it returns the name of the environment
+variable that is read by @code{libgamma_method_default_site}
+to determine the default site for the adjustment
+method.
 @end table
 
 To release all resources held by a site state,
@@ -649,7 +737,7 @@ This structure contains the following variables:
 
 @table @code
 £>for part in $(libgamma-method-extract --list --part-t); do
-@item £{part}
+@item @code{£{part}} [@code{£(libgamma-method-extract --type --part-t $part)}]
 £>libgamma-method-extract --part-t $part | texise
 £>done
 @end table
@@ -694,11 +782,11 @@ performs a @code{free} call for the state.
 The state and identity of the partition is track
 by the data structure @code{libgamma_crtc_state_t}
 @footnote{@code{struct libgamma_crtc_state}}.
-This structure contains the following variables;
+This structure contains the following variables:
 
 @table @code
 £>for crtc in $(libgamma-method-extract --list --crtc-t); do
-@item £{crtc}
+@item @code{£{crtc}} [@code{£(libgamma-method-extract --type --crtc-t crtc)}]
 £>libgamma-method-extract --crtc-t $crtc | texise
 £>done
 @end table
@@ -722,7 +810,16 @@ partition that the CRTC belongs to.
 
 @item @code{crtc} [@code{size_t}]
 The the index of the CRTC within
-the partition.
+the partition. Be aware that adjustment
+methods do not necessarily order than
+CRTC:s in the same way. For example,
+display environment may order the
+CRTC:s so that the primary monitors
+has the CRTC with index 0; but cannot
+be done if there is no concept of
+primary monitors, such as the case
+of the Linux TTY and the Linux Direct
+Rendering Manager adjustment method.
 @end table
 
 To release all resources held by a CRTC state,
