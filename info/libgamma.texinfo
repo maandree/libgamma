@@ -574,12 +574,12 @@ and can filter its output. This function
 takes three arguments:
 
 @table @asis
-@item @code{} [@code{int*}]
+@item @code{methods} [@code{int*}]
 Output array of adjustment method
 identifiers. It should be able to hold
 @code{LIBGAMMA_METHOD_COUNT} elements.
 
-@item @code{} [@code{size_t}]
+@item @code{buf_size} [@code{size_t}]
 The number of elements that fits in
 @code{methods}, it should be
 @code{LIBGAMMA_METHOD_COUNT},
@@ -588,7 +588,7 @@ the output buffer if this library
 adds new adjustment methods without
 the users of the library recompiling.
 
-@item @code{} [@code{int}]
+@item @code{operation} [@code{int}]
 Describes what adjustment methods to
 include. There are five valid values
 for this parameter, all other values
@@ -735,7 +735,7 @@ the data structure @code{libgamma_partition_state_t}
 @footnote{@code{struct libgamma_partition_state}}.
 This structure contains the following variables:
 
-@table @code
+@table @asis
 £>for part in $(libgamma-method-extract --list --part-t); do
 @item @code{£{part}} [@code{£(libgamma-method-extract --type --part-t $part)}]
 £>libgamma-method-extract --part-t $part | texise
@@ -784,7 +784,7 @@ by the data structure @code{libgamma_crtc_state_t}
 @footnote{@code{struct libgamma_crtc_state}}.
 This structure contains the following variables:
 
-@table @code
+@table @asis
 £>for crtc in $(libgamma-method-extract --list --crtc-t); do
 @item @code{£{crtc}} [@code{£(libgamma-method-extract --type --crtc-t crtc)}]
 £>libgamma-method-extract --crtc-t $crtc | texise
