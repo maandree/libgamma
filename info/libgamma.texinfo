@@ -673,7 +673,6 @@ This structure contains the following variables;
 
 
 
-
 @node Gamma ramps
 @section Gamma ramps
 
