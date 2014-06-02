@@ -190,7 +190,7 @@ typedef struct libgamma_method_capabilities
  * Site state.
  * 
  * On operating systems that integrate a graphical environment
- * there is usally just one site. However, one systems with
+ * there is usually just one site. However, one systems with
  * pluggable graphics, like Unix-like systems such as GNU/Linux
  * and the BSD:s, there can usually be any (feasible) number of
  * sites. In X.org parlance they are called displays.
@@ -214,7 +214,7 @@ typedef struct libgamma_site_state
    * The site identifier. It can either be `NULL` or a string.
    * `NULL` indicates the default site. On systems like the
    * Unix-like systems, where the graphics are pluggable, this
-   * is usally resolved by an environment variable, such as
+   * is usually resolved by an environment variable, such as
    * "DISPLAY" for X.org.
    */
   char* site;
@@ -350,7 +350,7 @@ typedef enum libgamma_connector_type
     LIBGAMMA_CONNECTOR_TYPE_LVDS,
     
     /**
-     * Component video, usally separate cables for each channel.
+     * Component video, usually separate cables for each channel.
      */
     LIBGAMMA_CONNECTOR_TYPE_Component,
     
