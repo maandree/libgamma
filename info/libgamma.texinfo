@@ -839,7 +839,26 @@ performs a @code{free} call for the state.
 @node Adjustment method capabilities
 @section Adjustment method capabilities
 
-Capabilities.
+Adjustment methods have different
+capabilities. Because of this, you
+will probably want to know at least
+some this the capabilities of the
+adjustment method that you are using.
+This can be used to filter out
+unimportant information for the user.
+
+The function @code{libgamma_method_capabilities},
+which does not return anything, can be
+used to get an adjustment methods capabilities.
+This function takes two arguments. The first
+argument is a @code{libgamma_method_capabilities_t*}
+that will be filled with this information, and
+the second argument is an @code{int} whose
+value should be the adjument method's identifier.
+
+@code{libgamma_method_capabilities_t}
+@footnote{@code{struct libgamma_method_capabilities}} is
+a data structure with the following variables:
 
 @table @asis
 £>for cap in $(libgamma-method-extract --list --cap-t); do
@@ -856,7 +875,29 @@ See @ref{CRTC information} for more information.
 @node CRTC information
 @section CRTC information
 
-CRTC information.
+It is possible query information about a CRTC
+using the function @code{libgamma_get_crtc_information}.
+This function returns an @code{int} whose value
+is zero on success and @code{-1} if at least on
+of the requested informations about the CRTC
+could not successfully be read. This function
+takes three arguments:
+
+@table @asis
+@item @code{this} @code{libgamma_crtc_information_t*}
+Instance of a data structure to fill with the
+information about the CRTC.
+
+@item @code{crtc} @code{libgamma_crtc_state_t*}
+The state of the CRTC whose information should be read.
+
+@item @code{fields} @code{int32_t}
+OR:ed identifiers for the information about
+the CRTC that should be read.
+@end table
+
+The valid values that can be OR:ed for the
+@code{fields} parameters are:
 
 @table @code
 £>for info in $(libgamma-method-extract --list --info); do
@@ -865,7 +906,23 @@ CRTC information.
 £>done
 @end table
 
-@code{libgamma_subpixel_order_t} (@code{enum libgamma_subpixel_order}).
+@code{libgamma_crtc_information_t}
+@footnote{@code{struct libgamma_crtc_information}},
+which is the data structure that the read
+information is stored in, contains the following
+variables:
+
+@table @asis
+£>for info in $(libgamma-method-extract --list --info-t); do
+@item @code{£{info}} [@code{£(libgamma-method-extract --type --info-t $info)}]
+£>libgamma-method-extract --info-t $info | texise
+£>done
+@end table
+
+The data type for the variable @code{subpixel_order}
+is @code{libgamma_subpixel_order_t}
+@footnote{@code{enum libgamma_subpixel_order}}.
+Its possible values are:
 
 @table @code
 £>for order in $(libgamma-method-extract --list --subpixel); do
@@ -874,7 +931,10 @@ CRTC information.
 £>done
 @end table
 
-@code{libgamma_connector_type_t} (@code{enum libgamma_connector_type}).
+The data type for the variable @code{connector_type}
+is @code{libgamma_connector_type_t}
+@footnote{@code{enum libgamma_connector_type}}.
+Its possible values are:
 
 @table @code
 £>for type in $(libgamma-method-extract --list --connector); do
@@ -883,14 +943,17 @@ CRTC information.
 £>done
 @end table
 
-@code{libgamma_crtc_information_t} (@code{struct libgamma_crtc_information}).
-
-@table @asis
-£>for info in $(libgamma-method-extract --list --info-t); do
-@item @code{£{info}} [@code{£(libgamma-method-extract --type --info-t $info)}]
-£>libgamma-method-extract --info-t $info | texise
-£>done
-@end table
+Release resources that are held by a
+@code{libgamma_crtc_information_t*}
+whose variables have been set by
+@code{libgamma_get_crtc_information}
+call the function @code{libgamma_crtc_information_destroy}
+with that @code{libgamma_crtc_information_t}
+as its only argument. If you also
+want to release the allocation if the
+@code{libgamma_crtc_information_t*}
+itself call the function
+@code{libgamma_crtc_information_free} instead.
 
 
 
@@ -1002,7 +1065,7 @@ only fail on @code{malloc} error.
 @itemx @code{libgamma_gamma_rampsf_destroy} [@code{void *(libgamma_gamma_rampsf_t*)}]
 @itemx @code{libgamma_gamma_rampsd_destroy} [@code{void *(libgamma_gamma_rampsd_t*)}]
 Release resources that are held by a gamma
-ramp strcuture that has been allocated by
+ramp structure that has been allocated by
 @code{libgamma_gamma_ramps_initialise} or
 otherwise initialises in the proper manner.
 
@@ -1012,7 +1075,7 @@ otherwise initialises in the proper manner.
 @itemx @code{libgamma_gamma_rampsf_free} [@code{void *(libgamma_gamma_rampsf_t*)}]
 @itemx @code{libgamma_gamma_rampsd_free} [@code{void *(libgamma_gamma_rampsd_t*)}]
 Release resources that are held by a gamma
-ramp strcuture that has been allocated by
+ramp structure that has been allocated by
 @code{libgamma_gamma_ramps*_initialise} or
 otherwise initialises in the proper manner,
 as well as release the pointer to the
