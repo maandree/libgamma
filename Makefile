@@ -148,7 +148,7 @@ obj/test/%.o: src/test/%.c
 doc: info pdf dvi ps
 
 obj/libgamma.texinfo: info/libgamma.texinfo $(foreach H,$(HEADERS_INFO),src/lib/$(H).h) \
-	              src/extract/libgamma-*-extract info/texise
+	              src/extract/libgamma-*-extract info/texise info/behead
 	mkdir -p obj
 	$(GPP) --symbol '£' --input $< --output $@
 

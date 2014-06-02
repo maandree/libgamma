@@ -67,14 +67,20 @@ def type_struct(name):
         print(' '.join(line.split(' ')[:-1]))
 
 
+def doc_typedef(name):
+    global data
+    data = data[:data.find('\ntypedef ' + name):]
+    data = data[:data.rfind('\n */')]
+    data = data[data.rfind('/**\n') + len('/**\n'):]
+    data = [line[3:] for line in data.split('\n')]
+    print('\n'.join(data))
+
+
 def doc_define():
     global data
-    i = data.find('\n#define ' + sys.argv[2])
-    data = data[:i]
-    i = data.rfind('\n */')
-    data = data[:i]
-    i = data.rfind('/**\n')
-    data = data[i + len('/**\n'):]
+    data = data[:data.find('\n#define ' + sys.argv[2])]
+    data = data[:data.rfind('\n */')]
+    data = data[data.rfind('/**\n') + len('/**\n'):]
     data = [line[3:] for line in data.split('\n')]
     print('\n'.join(data))
 
@@ -82,12 +88,9 @@ def doc_enum():
     global data
     while '\n ' in data:
         data = data.replace('\n ', '\n')
-    i = data.find('\n' + sys.argv[2])
-    data = data[:i]
-    i = data.rfind('\n*/')
-    data = data[:i]
-    i = data.rfind('/**\n')
-    data = data[i + len('/**\n'):]
+    data = data[:data.find('\n' + sys.argv[2])]
+    data = data[:data.rfind('\n*/')]
+    data = data[data.rfind('/**\n') + len('/**\n'):]
     data = [line[2:] for line in data.split('\n')]
     print('\n'.join(data))
 
@@ -100,20 +103,20 @@ def doc_struct(name):
     test3 = lambda line : line.strip().split(' : ')[0].split(' ')[-1].rstrip(';') == sys.argv[2]
     defs = [line for line in data.split('\n') if test1(line) and test2(line) and test3(line)]
     line = defs[0]
-    i = data.find('\n' + line)
-    data = data[:i]
+    data = data[:data.find('\n' + line)]
     while '\n ' in data:
         data = data.replace('\n ', '\n')
-    i = data.rfind('\n*/')
-    data = data[:i]
-    i = data.rfind('/**\n')
-    data = data[i + len('/**\n'):]
+    data = data[:data.rfind('\n*/')]
+    data = data[data.rfind('/**\n') + len('/**\n'):]
     data = [line[2:] for line in data.split('\n')]
     print('\n'.join(data))
 
 
 struct_map = {'--info-t' : 'libgamma_crtc_information',
-              '--cap-t'  : 'libgamma_method_capabilities'}
+              '--cap-t'  : 'libgamma_method_capabilities',
+              '--site-t' : 'libgamma_site_state',
+              '--part-t' : 'libgamma_partition_state',
+              '--crtc-t' : 'libgamma_crtc_state'}
 
 if sys.argv[1] == '--list':
     if sys.argv[2] == '--method':       list_define('LIBGAMMA_METHOD_', 'MAX', 'COUNT')
@@ -123,6 +126,8 @@ if sys.argv[1] == '--list':
     elif sys.argv[2] in struct_map:     list_struct(struct_map[sys.argv[2]])
 elif sys.argv[1] == '--type':
     if sys.argv[2] in struct_map:       type_struct(struct_map[sys.argv[2]])
+elif sys.argv[1] == '--doc':
+    if sys.argv[2] in struct_map:       doc_typedef('struct ' + struct_map[sys.argv[2]])
 else:
     if sys.argv[1] in ('--method', '--info'):           doc_define()
     elif sys.argv[1] in ('--connector', '--subpixel'):  doc_enum()

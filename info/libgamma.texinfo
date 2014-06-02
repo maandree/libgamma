@@ -619,7 +619,58 @@ CRTC information.
 @node Monitors
 @section Monitors
 
-TODO
+@command{libgamma} have a three level hierarchy for addressing
+monitors. These levels are:
+
+@table @asis
+@item Sites
+£>libgamma-method-extract --doc --site-t | behead 2 | texise
+@item Partitions
+£>libgamma-method-extract --doc --part-t | behead 2 | texise
+@item CRTC:s (cathode ray tube controllers) @footnote{Do not be fooled by the legacy name, they are general video controllers.}
+£>libgamma-method-extract --doc --crtc-t | behead 2 | texise
+@end table
+
+@command{libgamma} keeps tracks of these layers states,
+because of this there are one state data structure per
+layer that also identifies the instance of the layer.
+
+The state and identity of the site is track by
+the data structure @code{libgamma_site_state_t}
+@footnote{@code{struct libgamma_site_state}}.
+This structure contains the following variables:
+
+@table @code
+£>for site in $(libgamma-method-extract --list --site-t); do
+@item £{site}
+£>libgamma-method-extract --site-t $site | texise | sed -e 's/"/``/1' | sed -e 's/"/'\'\''/'
+£>done
+@end table
+
+The state and identity of the partition is track by
+the data structure @code{libgamma_partition_state_t}
+@footnote{@code{struct libgamma_partition_state}}.
+This structure contains the following variables:
+
+@table @code
+£>for part in $(libgamma-method-extract --list --part-t); do
+@item £{part}
+£>libgamma-method-extract --part-t $part | texise
+£>done
+@end table
+
+The state and identity of the partition is track
+by the data structure @code{libgamma_crtc_state_t}
+@footnote{@code{struct libgamma_crtc_state}}.
+This structure contains the following variables;
+
+@table @code
+£>for crtc in $(libgamma-method-extract --list --crtc-t); do
+@item £{crtc}
+£>libgamma-method-extract --crtc-t $crtc | texise
+£>done
+@end table
+
 
 
 
