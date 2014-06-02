@@ -467,9 +467,9 @@ and for the freedom of all.
 
 @menu
 * Adjustment methods::              Selecting adjustment method.
+* Monitors::                        Selecting monitors.
 * Adjustment method capabilities::  Identifying capabilities of adjustment methods.
 * CRTC information::                Retrieving information about CRTC:s.
-* Monitors::                        Selecting monitors.
 * Gamma ramps::                     Fetch and manipulating gamma ramps.
 * Errors::                          Error codes and how to handle errors.
 @end menu
@@ -558,6 +558,117 @@ values.
 
 
 
+@node Monitors
+@section Monitors
+
+@menu
+* Site::                            Display sites.
+* Partition::                       Display partitions.
+* CRTC::                            Display outputs.
+@end menu
+
+@command{libgamma} have a three level hierarchy for addressing
+monitors. These levels are:
+
+@table @asis
+@item Sites
+£>libgamma-method-extract --doc --site-t | behead 2 | texise
+@item Partitions
+£>libgamma-method-extract --doc --part-t | behead 2 | texise
+@item CRTC:s (cathode ray tube controllers) @footnote{Do not be fooled by the legacy name, they are general video controllers.}
+£>libgamma-method-extract --doc --crtc-t | behead 2 | texise
+@end table
+
+@command{libgamma} keeps tracks of these layers' states,
+because of this there are one state data structure per
+layer that also identifies the instance of the layer.
+
+
+@node Site
+@subsection Site
+
+The state and identity of the site is track by
+the data structure @code{libgamma_site_state_t}
+@footnote{@code{struct libgamma_site_state}}.
+This structure contains the following variables:
+
+@table @code
+£>for site in $(libgamma-method-extract --list --site-t); do
+@item £{site}
+£>libgamma-method-extract --site-t $site | texise | sed -e 's/"/``/1' | sed -e 's/"/'\'\''/'
+£>done
+@end table
+
+To release all resources held by a site state,
+call the function @code{libgamma_site_destroy},
+whose only parameter is the site state to
+destroy. It does not return any value, and is
+always successful assuming that the site is
+valid and properly initialised. If you also
+want to free the allocation for the site state
+itself call the function @code{libgamma_site_free}
+instead. These two functions are identical
+with the exception that the latter also
+performs a @code{free} call for the state.
+
+
+@node Partition
+@subsection Partition
+
+The state and identity of the partition is track by
+the data structure @code{libgamma_partition_state_t}
+@footnote{@code{struct libgamma_partition_state}}.
+This structure contains the following variables:
+
+@table @code
+£>for part in $(libgamma-method-extract --list --part-t); do
+@item £{part}
+£>libgamma-method-extract --part-t $part | texise
+£>done
+@end table
+
+To release all resources held by a partition state,
+call the function @code{libgamma_partition_destroy},
+whose only parameter is the partition state to
+destroy. It does not return any value, and is
+always successful assuming that the partition is
+valid and properly initialised. If you also
+want to free the allocation for the partition state
+itself call the function @code{libgamma_partition_free}
+instead. These two functions are identical
+with the exception that the latter also
+performs a @code{free} call for the state.
+
+
+@node CRTC
+@subsection CRTC
+
+The state and identity of the partition is track
+by the data structure @code{libgamma_crtc_state_t}
+@footnote{@code{struct libgamma_crtc_state}}.
+This structure contains the following variables;
+
+@table @code
+£>for crtc in $(libgamma-method-extract --list --crtc-t); do
+@item £{crtc}
+£>libgamma-method-extract --crtc-t $crtc | texise
+£>done
+@end table
+
+To release all resources held by a CRTC state,
+call the function @code{libgamma_crtc_destroy},
+whose only parameter is the CRTC state to
+destroy. It does not return any value, and is
+always successful assuming that the CRTC is
+valid and properly initialised. If you also
+want to free the allocation for the CRTC state
+itself call the function @code{libgamma_crtc_free}
+instead. These two functions are identical
+with the exception that the latter also
+performs a @code{free} call for the state.
+
+
+
 @node Adjustment method capabilities
 @section Adjustment method capabilities
 
@@ -611,63 +722,6 @@ CRTC information.
 £>for info in $(libgamma-method-extract --list --info-t); do
 @item @code{£{info}} [@code{£(libgamma-method-extract --type --info-t $info)}]
 £>libgamma-method-extract --info-t $info | texise
-£>done
-@end table
-
-
-
-@node Monitors
-@section Monitors
-
-@command{libgamma} have a three level hierarchy for addressing
-monitors. These levels are:
-
-@table @asis
-@item Sites
-£>libgamma-method-extract --doc --site-t | behead 2 | texise
-@item Partitions
-£>libgamma-method-extract --doc --part-t | behead 2 | texise
-@item CRTC:s (cathode ray tube controllers) @footnote{Do not be fooled by the legacy name, they are general video controllers.}
-£>libgamma-method-extract --doc --crtc-t | behead 2 | texise
-@end table
-
-@command{libgamma} keeps tracks of these layers states,
-because of this there are one state data structure per
-layer that also identifies the instance of the layer.
-
-The state and identity of the site is track by
-the data structure @code{libgamma_site_state_t}
-@footnote{@code{struct libgamma_site_state}}.
-This structure contains the following variables:
-
-@table @code
-£>for site in $(libgamma-method-extract --list --site-t); do
-@item £{site}
-£>libgamma-method-extract --site-t $site | texise | sed -e 's/"/``/1' | sed -e 's/"/'\'\''/'
-£>done
-@end table
-
-The state and identity of the partition is track by
-the data structure @code{libgamma_partition_state_t}
-@footnote{@code{struct libgamma_partition_state}}.
-This structure contains the following variables:
-
-@table @code
-£>for part in $(libgamma-method-extract --list --part-t); do
-@item £{part}
-£>libgamma-method-extract --part-t $part | texise
-£>done
-@end table
-
-The state and identity of the partition is track
-by the data structure @code{libgamma_crtc_state_t}
-@footnote{@code{struct libgamma_crtc_state}}.
-This structure contains the following variables;
-
-@table @code
-£>for crtc in $(libgamma-method-extract --list --crtc-t); do
-@item £{crtc}
-£>libgamma-method-extract --crtc-t $crtc | texise
 £>done
 @end table
 
@@ -755,11 +809,11 @@ functions to create and destroy gamma
 ramp structures.
 
 @table @asis
-@item @code{libgamma_gamma_ramps_initialise} [@code{int *(libgamma_gamma_ramps_t* restrict)}]
-@itemx @code{libgamma_gamma_ramps32_initialise} [@code{int *(libgamma_gamma_ramps32_t* restrict)}]
-@itemx @code{libgamma_gamma_ramps64_initialise} [@code{int *(libgamma_gamma_ramps64_t* restrict)}]
-@itemx @code{libgamma_gamma_rampsf_initialise} [@code{int *(libgamma_gamma_rampsf_t* restrict)}]
-@itemx @code{libgamma_gamma_rampsd_initialise} [@code{int *(libgamma_gamma_rampsd_t* restrict)}]
+@item @code{libgamma_gamma_ramps_initialise} [@code{int *(libgamma_gamma_ramps_t*)}]
+@itemx @code{libgamma_gamma_ramps32_initialise} [@code{int *(libgamma_gamma_ramps32_t*)}]
+@itemx @code{libgamma_gamma_ramps64_initialise} [@code{int *(libgamma_gamma_ramps64_t*)}]
+@itemx @code{libgamma_gamma_rampsf_initialise} [@code{int *(libgamma_gamma_rampsf_t*)}]
+@itemx @code{libgamma_gamma_rampsd_initialise} [@code{int *(libgamma_gamma_rampsd_t*)}]
 Initialise a gamma ramp in the proper way
 that allows all adjustment methods to read
 from and write to it without causing
@@ -775,21 +829,21 @@ Zero is returned on success. On error
 is set accordingly. These functions can
 only fail on @code{malloc} error.
 
-@item @code{libgamma_gamma_ramps_destroy} [@code{void *(libgamma_gamma_ramps_t* restrict)}]
-@itemx @code{libgamma_gamma_ramps32_destroy} [@code{void *(libgamma_gamma_ramps32_t* restrict)}]
-@itemx @code{libgamma_gamma_ramps64_destroy} [@code{void *(libgamma_gamma_ramps64_t* restrict)}]
-@itemx @code{libgamma_gamma_rampsf_destroy} [@code{void *(libgamma_gamma_rampsf_t* restrict)}]
-@itemx @code{libgamma_gamma_rampsd_destroy} [@code{void *(libgamma_gamma_rampsd_t* restrict)}]
+@item @code{libgamma_gamma_ramps_destroy} [@code{void *(libgamma_gamma_ramps_t*)}]
+@itemx @code{libgamma_gamma_ramps32_destroy} [@code{void *(libgamma_gamma_ramps32_t*)}]
+@itemx @code{libgamma_gamma_ramps64_destroy} [@code{void *(libgamma_gamma_ramps64_t*)}]
+@itemx @code{libgamma_gamma_rampsf_destroy} [@code{void *(libgamma_gamma_rampsf_t*)}]
+@itemx @code{libgamma_gamma_rampsd_destroy} [@code{void *(libgamma_gamma_rampsd_t*)}]
 Release resources that are held by a gamma
 ramp strcuture that has been allocated by
 @code{libgamma_gamma_ramps_initialise} or
 otherwise initialises in the proper manner.
 
-@item @code{libgamma_gamma_ramps_free} [@code{void *(libgamma_gamma_ramps_t* restrict)}]
-@itemx @code{libgamma_gamma_ramps32_free} [@code{void *(libgamma_gamma_ramps32_t* restrict)}]
-@itemx @code{libgamma_gamma_ramps64_free} [@code{void *(libgamma_gamma_ramps64_t* restrict)}]
-@itemx @code{libgamma_gamma_rampsf_free} [@code{void *(libgamma_gamma_rampsf_t* restrict)}]
-@itemx @code{libgamma_gamma_rampsd_free} [@code{void *(libgamma_gamma_rampsd_t* restrict)}]
+@item @code{libgamma_gamma_ramps_free} [@code{void *(libgamma_gamma_ramps_t*)}]
+@itemx @code{libgamma_gamma_ramps32_free} [@code{void *(libgamma_gamma_ramps32_t*)}]
+@itemx @code{libgamma_gamma_ramps64_free} [@code{void *(libgamma_gamma_ramps64_t*)}]
+@itemx @code{libgamma_gamma_rampsf_free} [@code{void *(libgamma_gamma_rampsf_t*)}]
+@itemx @code{libgamma_gamma_rampsd_free} [@code{void *(libgamma_gamma_rampsd_t*)}]
 Release resources that are held by a gamma
 ramp strcuture that has been allocated by
 @code{libgamma_gamma_ramps*_initialise} or
