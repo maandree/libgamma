@@ -115,7 +115,7 @@ void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this,
  * @param   method  The adjustment method (display server and protocol.)
  * @return          The default site, `NULL` if it cannot be determined or
  *                  if multiple sites are not supported by the adjustment
- *                  method. This value should not be free:d.
+ *                  method. This value should not be `free`:d.
  */
 char* libgamma_method_default_site(int method);
 
@@ -126,7 +126,7 @@ char* libgamma_method_default_site(int method);
  * @return          The environ variables that is used to determine the
  *                  default site. `NULL` if there is none, that is, if
  *                  the method does not support multiple sites.
- *                  This value should not be free:d.
+ *                  This value should not be `free`:d.
  */
 const char* libgamma_method_default_site_variable(int method) __attribute__((const));
 
@@ -141,7 +141,7 @@ const char* libgamma_method_default_site_variable(int method) __attribute__((con
  *                  will attempt to free it. There you should not free
  *                  it yourself, and it must not be a string constant
  *                  or allocate on the stack. Note however that it will
- *                  not be free:d if this function fails.
+ *                  not be `free`:d if this function fails.
  * @return          Zero on success, otherwise (negative) the value of an
  *                  error identifier provided by this library.
  */
