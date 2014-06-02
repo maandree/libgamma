@@ -215,7 +215,7 @@ int libgamma_partition_restore(libgamma_partition_state_t* restrict this);
  * 
  * @param   this       The CRTC state to initialise.
  * @param   partition  The partition state for the partition that the CRTC belongs to.
- * @param   crtc       The the index of the CRTC within the site.
+ * @param   crtc       The the index of the CRTC within the partition.
  * @return             Zero on success, otherwise (negative) the value of an
  *                     error identifier provided by this library.
  */
