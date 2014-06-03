@@ -230,7 +230,7 @@ int libgamma_x_vidmode_get_crtc_information(libgamma_crtc_information_t* restric
   this->gamma_size_error = 0;
   /* X VidMode does support gamma ramp size query. The gamma
      ramps are identical but not fixed, and the query can fail. */
-  if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT))
+  if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE))
     {
       Display* restrict connection = crtc->partition->site->data;
       int stops = 0;
