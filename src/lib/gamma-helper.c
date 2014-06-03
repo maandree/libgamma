@@ -26,12 +26,153 @@
 
 
 /**
- * Just an arbitrary version
+ * Just an arbitrary version.
  */
 #define ANY  bits64
 
+/**
+ * Concatenation of all ramps.
+ */
+#define ALL red
 
+
+/**
+ * Preform installation in an `for (i = 0; i < n; i++)`
+ * loop and do a `break` afterwords.
+ */
 #define __translate(instruction)  for (i = 0; i < n; i++)  instruction;  break
+
+
+/**
+ * Convert a [0, 1] `float` to a full range `uint64_t`
+ * and mark sure rounding errors does not cause the
+ * value be 0 instead of ~0 and vice versa.
+ * 
+ * @param   value  To `float` to convert.
+ * @return         The value as an `uint64_t`.
+ */
+static inline uint64_t float_to_64(float value)
+{
+  /* XXX Which is faster? */
+  
+#ifdef __GNUC__
+  /* `__int128` is a GNU C extension, which
+     (because it is not ISO C) emits a warning
+     under -pedantic. */
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpedantic"
+  
+  /* In GCC we can use `__int128`, this is
+     a signed 128-bit integer. It fits all
+     uint64_t values but also native values,
+     which is a nice because it eleminates
+     some overflow condition tests. It is
+     also more readable. */
+  
+  /* Convert to integer. */
+  __int128 product = (__int128)(value * (float)UINT64_MAX);
+  /* Negative overflow. */
+  if (product > UINT64_MAX)
+    return UINT64_MAX;
+  /* Positive overflow. */
+  if (product < 0)
+    return 0;
+  /* Did not overflow. */
+  return (uint64_t)product;
+  
+# pragma GCC diagnostic pop
+#else
+  
+  /* If we are not using GCC we cannot be
+     sure that we have `__int128` so we have
+     to use `uint64_t` and perform overflow
+     checkes based on the input value. */
+  
+  /* Convert to integer. */
+  uint64_t product = (uint64_t)(value * (float)UINT64_MAX);
+  /* Negative overflow,
+     if the input is less than 0,5 but
+     the output is greater then we got
+     -1 when we should have gotten 0. */
+  if ((value < 0.1f) && (product > 0xF000000000000000ULL))
+    return 0;
+  /* Positive overflow,
+     if the input is greater than 0,5
+     but the output is less then we got
+     0 when we should have gotten ~0. */
+  else if ((value > 0.9f) && (product < 0x1000000000000000ULL))
+    return (uint64_t)~0;
+  /* Did not overflow. */
+  return product;
+  
+#endif
+}
+
+
+/**
+ * Convert a [0, 1] `double` to a full range `uint64_t`
+ * and mark sure rounding errors does not cause the
+ * value be 0 instead of ~0 and vice versa.
+ * 
+ * @param   value  To `double` to convert.
+ * @return         The value as an `uint64_t`.
+ */
+static inline uint64_t double_to_64(double value)
+{
+  /* XXX Which is faster? */
+  
+#ifdef __GNUC__
+  /* `__int128` is a GNU C extension, which
+     (because it is not ISO C) emits a warning
+     under -pedantic. */
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpedantic"
+  
+  /* In GCC we can use `__int128`, this is
+     a signed 128-bit integer. It fits all
+     uint64_t values but also native values,
+     which is a nice because it eleminates
+     some overflow condition tests. It is
+     also more readable. */
+  
+  /* Convert to integer. */
+  __int128 product = (__int128)(value * (double)UINT64_MAX);
+  /* Negative overflow. */
+  if (product > UINT64_MAX)
+    return UINT64_MAX;
+  /* Positive overflow. */
+  if (product < 0)
+    return 0;
+  /* Did not overflow. */
+  return (uint64_t)product;
+  
+# pragma GCC diagnostic pop
+#else
+  
+  /* If we are not using GCC we cannot be
+     sure that we have `__int128` so we have
+     to use `uint64_t` and perform overflow
+     checkes based on the input value. */
+  
+  /* Convert to integer. */
+  uint64_t product = (uint64_t)(value * (double)UINT64_MAX);
+  /* Negative overflow,
+     if the input is less than 0,5 but
+     the output is greater then we got
+     -1 when we should have gotten 0. */
+  if ((value < (double)0.1f) && (product > 0xF000000000000000ULL))
+    product = 0;
+  /* Positive overflow.
+     if the input is greater than 0,5
+     but the output is less then we got
+     0 when we should have gotten ~0. */
+  else if ((value > (double)0.9f) && (product < 0x1000000000000000ULL))
+    product = (uint64_t)~0;
+  /* Did not overflow. */
+  return product;
+  
+#endif
+}
 
 
 /**
@@ -48,13 +189,13 @@ static void translate_to_64(signed depth, size_t n, uint64_t* restrict out, libg
   switch (depth)
     {
       /* Translate integer. */
-    case 16:  __translate(out[i] = (uint64_t)(in.bits16.red[i]) * 0x0001000100010001ULL);
-    case 32:  __translate(out[i] = (uint64_t)(in.bits32.red[i]) * 0x0000000100000001ULL);
+    case 16:  __translate(out[i] = (uint64_t)(in.bits16.ALL[i]) * 0x0001000100010001ULL);
+    case 32:  __translate(out[i] = (uint64_t)(in.bits32.ALL[i]) * 0x0000000100000001ULL);
       /* Identity translation. */
-    case 64:  __translate(out[i] = in.bits64.red[i]);
+    case 64:  __translate(out[i] = in.bits64.ALL[i]);
       /* Translate floating point. */
-    case -1:  __translate(out[i] = (uint64_t)(in.float_single.red[i] * (float)UINT64_MAX));
-    case -2:  __translate(out[i] = (uint64_t)(in.float_double.red[i] * (double)UINT64_MAX));
+    case -1:  __translate(out[i] =  float_to_64(in.float_single.ALL[i]));
+    case -2:  __translate(out[i] = double_to_64(in.float_double.ALL[i]));
     default:
       /* This is not possible. */
       abort();
@@ -77,13 +218,13 @@ static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t
   switch (depth)
     {
       /* Translate integer. */
-    case 16:  __translate(out.bits16.red[i] = (uint16_t)(in[i] / 0x0001000100010001ULL));
-    case 32:  __translate(out.bits32.red[i] = (uint32_t)(in[i] / 0x0000000100000001ULL));
+    case 16:  __translate(out.bits16.ALL[i] = (uint16_t)(in[i] / 0x0001000100010001ULL));
+    case 32:  __translate(out.bits32.ALL[i] = (uint32_t)(in[i] / 0x0000000100000001ULL));
       /* Identity translation. */
-    case 64:  __translate(out.bits64.red[i] = in[i]);
+    case 64:  __translate(out.bits64.ALL[i] = in[i]);
       /* Translate floating point. */
-    case -1:  __translate(out.float_single.red[i] = (float)(in[i]) / (float)UINT64_MAX);
-    case -2:  __translate(out.float_double.red[i] = (double)(in[i]) / (double)UINT64_MAX);
+    case -1:  __translate(out.float_single.ALL[i] =  (float)(in[i]) /  (float)UINT64_MAX);
+    case -2:  __translate(out.float_double.ALL[i] = (double)(in[i]) / (double)UINT64_MAX);
     default:
       /* This is not possible. */
       abort();
@@ -229,5 +370,6 @@ int libgamma_translated_ramp_set_(libgamma_crtc_state_t* restrict this,
 
 
 #undef __translate
+#undef ALL
 #undef ANY
 
