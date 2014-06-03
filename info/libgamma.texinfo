@@ -884,14 +884,14 @@ could not successfully be read. This function
 takes three arguments:
 
 @table @asis
-@item @code{this} @code{libgamma_crtc_information_t*}
+@item @code{this} [@code{libgamma_crtc_information_t*}]
 Instance of a data structure to fill with the
 information about the CRTC.
 
-@item @code{crtc} @code{libgamma_crtc_state_t*}
+@item @code{crtc} [@code{libgamma_crtc_state_t*}]
 The state of the CRTC whose information should be read.
 
-@item @code{fields} @code{int32_t}
+@item @code{fields} [@code{int32_t}]
 OR:ed identifiers for the information about
 the CRTC that should be read.
 @end table
