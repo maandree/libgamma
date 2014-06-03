@@ -490,6 +490,8 @@ int main(void)
       printf("Done!\n");
     }
   
+  /* TODO Test gamma ramp restore functions. */
+  
   libgamma_gamma_ramps_destroy(&ramps);
   libgamma_gamma_ramps_destroy(&old_ramps);
   libgamma_crtc_free(crtc_state);
