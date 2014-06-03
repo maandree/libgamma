@@ -202,7 +202,7 @@ install-lib: bin/libgamma.so.$(LIB_VERSION)
 .PHONY: install-include
 install-include:
 	install -dm755 -- "$(DESTDIR)$(INCLUDEDIR)"
-	install -m644 $(foreach H,$(HEADERS),src/$(H).h) -- "$(DESTDIR)$(INCLUDEDIR)"
+	install -m644 $(foreach H,$(HEADERS),src/lib/$(H).h) -- "$(DESTDIR)$(INCLUDEDIR)"
 
 
 .PHONY: install-copyright
