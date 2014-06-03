@@ -284,6 +284,57 @@ print_crtc_information_(float, "f")
 #endif
 print_crtc_information_(str, "s")
 
+#undef print_crtc_information_
+
+
+#define __case(VALUE)  case VALUE: return #VALUE;
+
+static const char* subpixel_order_str(libgamma_subpixel_order_t value)
+{
+  switch (value)
+    {
+    __case (LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN)
+    __case (LIBGAMMA_SUBPIXEL_ORDER_NONE)
+    __case (LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB)
+    __case (LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_BGR)
+    __case (LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_RGB)
+    __case (LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_BGR)
+    default:
+      return "(unknown)";
+    }
+}
+
+static const char* connector_type_str(libgamma_connector_type_t value)
+{
+  switch (value)
+    {
+    __case (LIBGAMMA_CONNECTOR_TYPE_Unknown)
+    __case (LIBGAMMA_CONNECTOR_TYPE_VGA)
+    __case (LIBGAMMA_CONNECTOR_TYPE_DVI)
+    __case (LIBGAMMA_CONNECTOR_TYPE_DVII)
+    __case (LIBGAMMA_CONNECTOR_TYPE_DVID)
+    __case (LIBGAMMA_CONNECTOR_TYPE_DVIA)
+    __case (LIBGAMMA_CONNECTOR_TYPE_Composite)
+    __case (LIBGAMMA_CONNECTOR_TYPE_SVIDEO)
+    __case (LIBGAMMA_CONNECTOR_TYPE_LVDS)
+    __case (LIBGAMMA_CONNECTOR_TYPE_Component)
+    __case (LIBGAMMA_CONNECTOR_TYPE_9PinDIN)
+    __case (LIBGAMMA_CONNECTOR_TYPE_DisplayPort)
+    __case (LIBGAMMA_CONNECTOR_TYPE_HDMI)
+    __case (LIBGAMMA_CONNECTOR_TYPE_HDMIA)
+    __case (LIBGAMMA_CONNECTOR_TYPE_HDMIB)
+    __case (LIBGAMMA_CONNECTOR_TYPE_TV)
+    __case (LIBGAMMA_CONNECTOR_TYPE_eDP)
+    __case (LIBGAMMA_CONNECTOR_TYPE_VIRTUAL)
+    __case (LIBGAMMA_CONNECTOR_TYPE_DSI)
+    __case (LIBGAMMA_CONNECTOR_TYPE_LFP)
+    default:
+      return "(unknown)";
+    }
+}
+
+#undef __case
+
 
 static void crtc_information(libgamma_crtc_state_t* restrict crtc)
 {
@@ -333,10 +384,22 @@ static void crtc_information(libgamma_crtc_state_t* restrict crtc)
   print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "blue gamma ramp size", blue_gamma_size, gamma_size_error);
   print(signed, LIBGAMMA_CRTC_INFO_GAMMA_DEPTH, "gamma ramp depth", gamma_depth);
   print(int, LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT, "gamma support", gamma_support);
-  /* print(size_t, LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER, "subpixel order", subpixel_order); */
+  if ((fields & LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER))
+    {
+      if (info.subpixel_order_error)
+	libgamma_perror("  (error) subpixel order", info.subpixel_order_error);
+      else
+	printf("  subpixel order: %s\n", subpixel_order_str(info.subpixel_order));
+    }
   print(int, LIBGAMMA_CRTC_INFO_ACTIVE, "active", active);
   print(str, LIBGAMMA_CRTC_INFO_CONNECTOR_NAME, "connector name", connector_name);
-  /* LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE connector_type */
+  if ((fields & LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE))
+    {
+      if (info.connector_type_error)
+	libgamma_perror("  (error) subpixel order", info.connector_type_error);
+      else
+	printf("  subpixel order: %s\n", connector_type_str(info.connector_type));
+    }
   print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "red gamma characteristics", gamma_red, gamma_error);
   print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "green gamma characteristics", gamma_green, gamma_error);
   print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "blue gamma characteristics", gamma_blue, gamma_error);
