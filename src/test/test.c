@@ -155,9 +155,9 @@ static void error_test(void)
   printf("\n");
   printf("Testing libgamma_perror:\n");
   libgamma_perror("  Expecting LIBGAMMA_STATE_UNKNOWN", LIBGAMMA_STATE_UNKNOWN);
-  libgamma_perror("  Expecting an description for ENOMEM", ENOMEM);
-  libgamma_perror("  Expecting an description for successfulness", 0);
-  libgamma_perror("  Expecting an description for ENOMEM", (errno = ENOMEM, LIBGAMMA_ERRNO_SET));
+  libgamma_perror("  Expecting a description for ENOMEM", ENOMEM);
+  libgamma_perror("  Expecting a description for successfulness", 0);
+  libgamma_perror("  Expecting a description for ENOMEM", (errno = ENOMEM, LIBGAMMA_ERRNO_SET));
   libgamma_group_gid = 10;
   libgamma_group_name = "test";
   libgamma_perror("  Expecting 'LIBGAMMA_DEVICE_REQUIRE_GROUP: test (10)'", LIBGAMMA_DEVICE_REQUIRE_GROUP);
