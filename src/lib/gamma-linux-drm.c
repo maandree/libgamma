@@ -451,15 +451,19 @@ static drmModeConnector* find_connector(libgamma_crtc_state_t* restrict this, in
       if ((card->encoders   = calloc(n, sizeof(drmModeEncoder*)))   == NULL)  goto fail;
       /* Fill connector and encoder arrays. */
       for (i = 0; i < n; i++)
-	if (((card->connectors[i] = drmModeGetConnector(card->fd, card->res->connectors[i])) == NULL) ||
-	    ((card->encoders[i] = drmModeGetEncoder(card->fd, card->connectors[i]->encoder_id)) == NULL))
-	  goto fail;
+	{
+	  if ((card->connectors[i] = drmModeGetConnector(card->fd, card->res->connectors[i])) == NULL)
+	    goto fail;
+	  if ((card->connectors[i]->encoder_id != 0) &&
+	      ((card->encoders[i] = drmModeGetEncoder(card->fd, card->connectors[i]->encoder_id)) == NULL))
+	    goto fail;
+	}
     }
   /* No error has occurred yet. */
   *error = 0;
   /* Find connector. */
   for (i = 0; i < n; i++)
-    if (card->encoders[i]->crtc_id == crtc_id)
+    if ((card->encoders[i] != NULL) && (card->encoders[i]->crtc_id == crtc_id))
       return card->connectors[i];
   /* We did not find the connector. */
   *error = LIBGAMMA_CONNECTOR_UNKNOWN;
@@ -749,6 +753,8 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
   /* Find connector. */
   if ((connector = find_connector(crtc, &error)) == NULL)
     {
+      perror("connector not found");
+      abort();
       /* Store reported error in affected fields. */
       e |= this->width_mm_error      = this->height_mm_error
 	 = this->connector_type      = this->subpixel_order_error
