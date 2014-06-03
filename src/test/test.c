@@ -179,13 +179,13 @@ static void error_test(void)
 
 int main(void)
 {
+  libgamma_site_state_t* site_state = malloc(sizeof(libgamma_site_state_t));
+  libgamma_partition_state_t* part_state = malloc(sizeof(libgamma_partition_state_t));
+  libgamma_crtc_state_t* crtc_state = malloc(sizeof(libgamma_crtc_state_t));
   int method;
   char* site;
   char* tmp;
   char buf[256];
-  libgamma_site_state_t site_state;
-  libgamma_partition_state_t part_state;
-  libgamma_crtc_state_t crtc_state;
   int r;
   
   list_methods_lists();
@@ -216,49 +216,49 @@ int main(void)
       memcpy(site, buf, strlen(buf) + 1);
     }
   
-  if ((r = libgamma_site_initialise(&site_state, method, site)))
+  if ((r = libgamma_site_initialise(site_state, method, site)))
     {
       free(site);
       return libgamma_perror("error", r), 1;
     }
   
-  if (site_state.partitions_available == 0)
+  if (site_state->partitions_available == 0)
     {
-      libgamma_site_destroy(&site_state);
+      libgamma_site_free(site_state);
       return printf("No partitions found\n"), 1;
     }
   
-  printf("Select partition [0, %lu]: ", site_state.partitions_available - 1);
+  printf("Select partition [0, %lu]: ", site_state->partitions_available - 1);
   fflush(stdout);
   fgets(buf, sizeof(buf) / sizeof(char), stdin);
   
-  if ((r = libgamma_partition_initialise(&part_state, &site_state, (size_t)atoll(buf))))
+  if ((r = libgamma_partition_initialise(part_state, site_state, (size_t)atoll(buf))))
     {
-      libgamma_site_destroy(&site_state);
+      libgamma_site_free(site_state);
       return libgamma_perror("error", r), 1;
     }
   
-  if (part_state.crtcs_available == 0)
+  if (part_state->crtcs_available == 0)
     {
-      libgamma_partition_destroy(&part_state);
-      libgamma_site_destroy(&site_state);
+      libgamma_partition_free(part_state);
+      libgamma_site_free(site_state);
       return printf("No CRTC:s found\n"), 1;
     }
   
-  printf("Select CRTC [0, %lu]: ", part_state.crtcs_available - 1);
+  printf("Select CRTC [0, %lu]: ", part_state->crtcs_available - 1);
   fflush(stdout);
   fgets(buf, sizeof(buf) / sizeof(char), stdin);
   
-  if ((r = libgamma_crtc_initialise(&crtc_state, &part_state, (size_t)atoll(buf))))
+  if ((r = libgamma_crtc_initialise(crtc_state, part_state, (size_t)atoll(buf))))
     {
-      libgamma_partition_destroy(&part_state);
-      libgamma_site_destroy(&site_state);
+      libgamma_partition_free(part_state);
+      libgamma_site_free(site_state);
       return libgamma_perror("error", r), 1;
     }
   
-  libgamma_crtc_destroy(&crtc_state);
-  libgamma_partition_destroy(&part_state);
-  libgamma_site_destroy(&site_state);
+  libgamma_crtc_free(crtc_state);
+  libgamma_partition_free(part_state);
+  libgamma_site_free(site_state);
   return 0;
 }
 
