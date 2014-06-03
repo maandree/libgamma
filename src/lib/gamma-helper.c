@@ -263,7 +263,12 @@ static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
   /* Copy the gamma ramp sizes. */
   ramps_sys->ANY = ramps.ANY;
   /* Allocate the new ramps. */
-  ramps_sys->ANY.red   = malloc(n * d);
+#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
+  /* Valgrind complains about us reading uninitialize memory if we just use malloc. */
+  ramps_sys->ANY.red = calloc(n, d);
+#else
+  ramps_sys->ANY.red = malloc(n * d);
+#endif
   ramps_sys->ANY.green = (void*)(((char*)(ramps_sys->ANY.  red)) + ramps.ANY.  red_size * d / sizeof(char));
   ramps_sys->ANY.blue  = (void*)(((char*)(ramps_sys->ANY.green)) + ramps.ANY.green_size * d / sizeof(char));
   

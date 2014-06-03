@@ -37,7 +37,12 @@
 int libgamma_gamma_ramps_initialise(libgamma_gamma_ramps_t* restrict this)
 {
   size_t n = this->red_size + this->green_size + this->blue_size;
-  this->red   = malloc(n * sizeof(uint16_t));
+#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
+  /* Valgrind complains about us reading uninitialize memory if we just use malloc. */
+  this->red = calloc(n, sizeof(uint16_t));
+#else
+  this->red = malloc(n * sizeof(uint16_t));
+#endif
   this->green = this->  red + this->  red_size;
   this->blue  = this->green + this->green_size;
   return this->red == NULL ? -1 : 0;
@@ -233,12 +238,7 @@ void libgamma_gamma_rampsf_free(libgamma_gamma_rampsf_t* restrict this)
 int libgamma_gamma_rampsd_initialise(libgamma_gamma_rampsd_t* restrict this)
 {
   size_t n = this->red_size + this->green_size + this->blue_size;
-#ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-  /* Valgrind complains about us reading uninitialize memory if we just use malloc. */
-  this->red = calloc(n, sizeof(double));
-#else
-  this->red = malloc(n * sizeof(double));
-#endif
+  this->red   = malloc(n * sizeof(double));
   this->green = this->  red + this->  red_size;
   this->blue  = this->green + this->green_size;
   return this->red == NULL ? -1 : 0;
