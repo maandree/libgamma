@@ -413,6 +413,7 @@ static void crtc_information(libgamma_crtc_state_t* restrict crtc)
   
   free(info.edid);
   free(info.connector_name);
+  printf("\n");
 }
 
 
@@ -421,6 +422,10 @@ int main(void)
   libgamma_site_state_t* restrict site_state = malloc(sizeof(libgamma_site_state_t));
   libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
   libgamma_crtc_state_t* restrict crtc_state = malloc(sizeof(libgamma_crtc_state_t));
+  libgamma_crtc_information_t info;
+  libgamma_gamma_ramps_t ramps;
+  size_t i, n;
+  int r;
   
   list_methods_lists();
   method_availability();
@@ -433,9 +438,44 @@ int main(void)
   
   crtc_information(crtc_state);
   
+  libgamma_get_crtc_information(&info, crtc_state, LIBGAMMA_CRTC_INFO_GAMMA_SIZE);
+  ramps.red_size = info.red_gamma_size;
+  ramps.green_size = info.green_gamma_size;
+  ramps.blue_size = info.blue_gamma_size;
+  libgamma_gamma_ramps_initialise(&ramps);
+  
+  r = libgamma_crtc_get_gamma_ramps(crtc_state, &ramps);
+  if (r)
+    libgamma_perror("libgamma_crtc_get_gamma_ramps", r);
+  else
+    {
+      n = ramps.red_size;
+      n = n < ramps.green_size ? n : ramps.green_size;
+      n = n < ramps.blue_size ? n : ramps.blue_size;
+      printf("Current gamma ramps:\n");
+      for (i = 0; i < n; i++)
+	{
+	  if (i < ramps.red_size)
+	    printf("  \033[31m%04X\033[00m", ramps.red[i]);
+	  else
+	    printf("      ");
+	  if (i < ramps.green_size)
+	    printf("  \033[32m%04X\033[00m", ramps.green[i]);
+	  else
+	    printf("      ");
+	  if (i < ramps.blue_size)
+	    printf("  \033[34m%04X\033[00m", ramps.blue[i]);
+	  else
+	    printf("      ");
+	  printf("\n");
+	}
+    }
+  printf("\n");
+  
+  libgamma_gamma_ramps_destroy(&ramps);
   libgamma_crtc_free(crtc_state);
   libgamma_partition_free(part_state);
   libgamma_site_free(site_state);
-  return 0;
+  return r;
 }
 
