@@ -114,11 +114,11 @@ bin/libgamma.so.$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/lib/$(O).o)
 
 bin/libgamma.so.$(LIB_MAJOR):
 	mkdir -p $(shell dirname $@)
-	ln -s libgamma.so.$(LIB_VERSION) $@
+	ln -sf libgamma.so.$(LIB_VERSION) $@
 
 bin/libgamma.so:
 	mkdir -p $(shell dirname $@)
-	ln -s libgamma.so.$(LIB_VERSION) $@
+	ln -sf libgamma.so.$(LIB_VERSION) $@
 
 obj/lib/%.o: src/lib/%.c src/lib/*.h
 	mkdir -p $(shell dirname $@)
