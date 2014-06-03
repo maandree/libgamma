@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 
 #ifdef __GNUC__
@@ -423,6 +424,7 @@ int main(void)
   libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
   libgamma_crtc_state_t* restrict crtc_state = malloc(sizeof(libgamma_crtc_state_t));
   libgamma_crtc_information_t info;
+  libgamma_gamma_ramps_t old_ramps;
   libgamma_gamma_ramps_t ramps;
   size_t i, n;
   int r;
@@ -439,11 +441,14 @@ int main(void)
   crtc_information(crtc_state);
   
   libgamma_get_crtc_information(&info, crtc_state, LIBGAMMA_CRTC_INFO_GAMMA_SIZE);
-  ramps.red_size = info.red_gamma_size;
-  ramps.green_size = info.green_gamma_size;
-  ramps.blue_size = info.blue_gamma_size;
+  old_ramps.red_size = info.red_gamma_size;
+  old_ramps.green_size = info.green_gamma_size;
+  old_ramps.blue_size = info.blue_gamma_size;
+  ramps = old_ramps;
+  libgamma_gamma_ramps_initialise(&old_ramps);
   libgamma_gamma_ramps_initialise(&ramps);
   
+  libgamma_crtc_get_gamma_ramps(crtc_state, &old_ramps);
   r = libgamma_crtc_get_gamma_ramps(crtc_state, &ramps);
   if (r)
     libgamma_perror("libgamma_crtc_get_gamma_ramps", r);
@@ -469,10 +474,24 @@ int main(void)
 	    printf("      ");
 	  printf("\n");
 	}
+      printf("\n");
+      
+      for (i = 0; i < ramps.red_size + ramps.green_size + ramps.blue_size; i++)
+	ramps.red[i] /= 2;
+      
+      printf("Dimming monitor for 1 second...\n");
+      r = libgamma_crtc_set_gamma_ramps(crtc_state, ramps);
+      if (r)
+	libgamma_perror("libgamma_crtc_set_gamma_ramps", r);
+      sleep(1);
+      r = libgamma_crtc_set_gamma_ramps(crtc_state, old_ramps);
+      if (r)
+	libgamma_perror("libgamma_crtc_set_gamma_ramps", r);
+      printf("Done!\n");
     }
-  printf("\n");
   
   libgamma_gamma_ramps_destroy(&ramps);
+  libgamma_gamma_ramps_destroy(&old_ramps);
   libgamma_crtc_free(crtc_state);
   libgamma_partition_free(part_state);
   libgamma_site_free(site_state);
