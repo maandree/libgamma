@@ -701,7 +701,7 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 	libgamma_gamma_ramps_any_t ramps_;
 	ramps_.bits16 = *ramps;
 	return libgamma_translated_ramp_get(this, &ramps_, 16, -1,
-					    libgamma_crtc_get_gamma_ramps);
+					    libgamma_crtc_get_gamma_rampsf);
       }
 #endif
       
@@ -744,7 +744,7 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 	libgamma_gamma_ramps_any_t ramps_;
 	ramps_.bits16 = ramps;
 	return libgamma_translated_ramp_set(this, ramps_, 16, -1,
-					    libgamma_crtc_set_gamma_ramps);
+					    libgamma_crtc_set_gamma_rampsf);
       }
 #endif
       
@@ -803,7 +803,7 @@ int libgamma_crtc_£{action}_gamma_£{ramps}(libgamma_crtc_state_t* restrict thi
       /* Something else is used and we convert to Single precision float. */
       ramps_.£{type} = £{p}ramps;
       return libgamma_translated_ramp_£{action}(this, £{p:+&}ramps_, £{bits}, -1,
-						libgamma_crtc_£{action}_gamma_ramps);
+						libgamma_crtc_£{action}_gamma_rampsf);
 £>fi
 #endif
       
