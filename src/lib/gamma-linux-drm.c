@@ -452,8 +452,14 @@ static drmModeConnector* find_connector(libgamma_crtc_state_t* restrict this, in
       /* Fill connector and encoder arrays. */
       for (i = 0; i < n; i++)
 	{
+	  /* Get connector, */
 	  if ((card->connectors[i] = drmModeGetConnector(card->fd, card->res->connectors[i])) == NULL)
 	    goto fail;
+	  /* Get encoder if the connector is enabled.
+	     If it is disabled it will not have an
+	     encoder, which is indicated by the
+	     encoder ID being 0. In such case, leave
+	     the encoder to be `NULL`. */
 	  if ((card->connectors[i]->encoder_id != 0) &&
 	      ((card->encoders[i] = drmModeGetEncoder(card->fd, card->connectors[i]->encoder_id)) == NULL))
 	    goto fail;
