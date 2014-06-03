@@ -23,6 +23,15 @@
 #include <stdint.h>
 
 
+/*
+ * EDID structure revision 1.1:
+ *   http://en.wikipedia.org/w/index.php?title=Extended_display_identification_data&oldid=46295569
+ * 
+ * EDID structure revision 1.3:
+ *   http://en.wikipedia.org/wiki/Extended_display_identification_data
+ */
+
+
 /**
  * Parse the EDID of a monitor.
  * 
@@ -34,25 +43,30 @@
  */
 int libgamma_parse_edid(libgamma_crtc_information_t* restrict this, int32_t fields)
 {
-#define __test_version(edid, major, minor)  (((edid)[18] == major) && ((edid)[19] == minor))
+#define __test_version(edid, major, minor_min, minor_max)  \
+  (((edid)[18] == major) && (minor_min <= (edid)[19]) && ((edid)[19] <= minor_max))
 #define __m(value)  (this->edid[index++] != value)
   
   int error = 0;
   int checksum = 0;
   size_t i, index = 0;
   
-  /* If the length of the EDID is not 128 bytes, we know that it is not of
-     EDID structure revision 1.3, and thus we do not support it. Additionally
+  /* If the length of the EDID is not 128 bytes, we know that it is not of EDID
+     structure revision 1.0–1.3, and thus we do not support it. Additionally
      this make sure we do not do segmentation violation on the next test. */
   if (this->edid_length != 128)
     error = LIBGAMMA_EDID_LENGTH_UNSUPPORTED;
   /* Check that the magic number of that of the EDID structure. */
   else if (__m(0x00) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0x00))
     error = LIBGAMMA_EDID_WRONG_MAGIC_NUMBER;
-  /* Check that EDID structure revision 1.3 is used, it is the only version
-     we support. It is also by far the most commonly use revision and it is
-     currently the newest revision. */
-  else if (__test_version(this->edid, 1, 3) == 0)
+  /* Check that EDID structure revision 1.1–1.3 is used, those are the only
+     version we support. EDID structure revision 1.3 is also by far the most
+     commonly use revision and it is currently the newest revision. We know
+     that parsing works for both revision 1.1 and revision 1.3, because of
+     this we assume it is also correct for revision 1.2. However, we are not
+     assuming this for revision 1.0 which appeared in August 1994 and was
+     replaced by revision 1.1 in April 1996. */
+  else if (__test_version(this->edid, 1, 1, 3) == 0)
     error = LIBGAMMA_EDID_REVISION_UNSUPPORTED;
   
   /* If we have encountered an error, report it for the fields that require
