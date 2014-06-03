@@ -92,7 +92,7 @@ static void list_methods_lists(void)
 static void method_availability(void)
 {
   int method;
-  printf("Testing the availability of an non-existing adjustment method: ");
+  printf("Testing the availability of a non-existing adjustment method: ");
   printf("%s\n", libgamma_is_method_available(9999) ? "available" : "not available");
   for (method = 0; method < LIBGAMMA_METHOD_COUNT; method++)
     {
