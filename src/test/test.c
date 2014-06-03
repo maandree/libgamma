@@ -369,10 +369,15 @@ static void crtc_information(libgamma_crtc_state_t* restrict crtc)
 	libgamma_perror("  (error) EDID", info.edid_error);
       else
 	{
-	  char* edid = libgamma_behex_edid(info.edid, info.edid_length);
-	  printf("  EDID: %s\n", edid);
+	  char* edid_lc = libgamma_behex_edid(info.edid, info.edid_length);
+	  unsigned char* edid_raw = libgamma_unhex_edid(edid_lc);
+	  char* edid_uc = libgamma_behex_edid_uppercase(edid_raw, info.edid_length);;
+	  printf("  EDID: %s\n", edid_lc);
+	  printf("  EDID (uppercase): %s\n", edid_uc);
 	  printf("  EDID (length): %lu\n", info.edid_length);
-	  free(edid);
+	  free(edid_lc);
+	  free(edid_raw);
+	  free(edid_uc);
 	}
     }
   print(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM, "width", width_mm);

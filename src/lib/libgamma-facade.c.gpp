@@ -637,7 +637,7 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid)
     return errno = EINVAL, NULL;
   
   /* Allocate memory area for output octet array. */
-  if ((out = malloc(n / 2 * sizeof(unsigned char))) == NULL)
+  if ((out = malloc(n /= 2 * sizeof(unsigned char))) == NULL)
     return NULL;
   
   /* Convert to raw octet array. */
