@@ -177,22 +177,15 @@ static void error_test(void)
 }
 
 
-int main(void)
+static int select_monitor(libgamma_site_state_t* restrict site_state,
+			  libgamma_partition_state_t* restrict part_state,
+			  libgamma_crtc_state_t* restrict crtc_state)
 {
-  libgamma_site_state_t* site_state = malloc(sizeof(libgamma_site_state_t));
-  libgamma_partition_state_t* part_state = malloc(sizeof(libgamma_partition_state_t));
-  libgamma_crtc_state_t* crtc_state = malloc(sizeof(libgamma_crtc_state_t));
   int method;
   char* site;
   char* tmp;
   char buf[256];
   int r;
-  
-  list_methods_lists();
-  method_availability();
-  list_default_sites();
-  method_capabilities();
-  error_test();
   
   printf("Select adjustment method:\n");
   for (method = 0; method < LIBGAMMA_METHOD_COUNT; method++)
@@ -255,6 +248,25 @@ int main(void)
       libgamma_site_free(site_state);
       return libgamma_perror("error", r), 1;
     }
+  
+  return 0;
+}
+
+
+int main(void)
+{
+  libgamma_site_state_t* restrict site_state = malloc(sizeof(libgamma_site_state_t));
+  libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
+  libgamma_crtc_state_t* restrict crtc_state = malloc(sizeof(libgamma_crtc_state_t));
+  
+  list_methods_lists();
+  method_availability();
+  list_default_sites();
+  method_capabilities();
+  error_test();
+  
+  if (select_monitor(site_state, part_state, crtc_state))
+    return 1;
   
   libgamma_crtc_free(crtc_state);
   libgamma_partition_free(part_state);
