@@ -192,7 +192,7 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
   /* Connect to the display server. */
   this->data = connection = xcb_connect(site, NULL);
   if (connection == NULL)
-    return LIBGAMMA_NO_SUCH_SITE;
+    return LIBGAMMA_OPEN_SITE_FAILED;
   
   /* Query the version of the X RandR extension protocol. */
   cookie = xcb_randr_query_version(connection, RANDR_VERSION_MAJOR, RANDR_VERSION_MINOR);
@@ -203,6 +203,10 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
     {
       /* Release resources. */
       free(reply);
+      /* If `xcb_connect` failed, both `error` and `reply` will be `NULL`.
+	 XXX: Can both be `NULL` for any other reason? */
+      if ((error == NULL) && (reply == NULL))
+	return LIBGAMMA_OPEN_SITE_FAILED;
       xcb_disconnect(connection);
       /* Translate and report error. */
       if (error != NULL)
@@ -311,6 +315,7 @@ int libgamma_x_randr_partition_initialise(libgamma_partition_state_t* restrict t
   /* Get screen list. */
   if ((setup = xcb_get_setup(connection)) == NULL)
     return LIBGAMMA_LIST_PARTITIONS_FAILED;
+  iter = xcb_setup_roots_iterator(setup);
   
   /* Get the screen. */
   for (i = 0; iter.rem > 0; i++, xcb_screen_next(&iter))
