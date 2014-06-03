@@ -285,6 +285,8 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
     return LIBGAMMA_ERRNO_SET;
   data->fd = -1;
   data->res = NULL;
+  data->encoders = NULL;
+  data->connectors = NULL;
   
   /* Get the pathname for the graphics card. */
   snprintf(pathname, sizeof(pathname) / sizeof(char),
@@ -313,6 +315,7 @@ int libgamma_linux_drm_partition_initialise(libgamma_partition_state_t* restrict
       goto fail_res;
     }
   this->crtcs_available = (size_t)(data->res->count_crtcs);
+  this->data = data;
   return 0;
   
  fail_res:   drmModeFreeResources(data->res);
