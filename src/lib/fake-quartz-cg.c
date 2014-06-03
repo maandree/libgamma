@@ -147,8 +147,10 @@ static uint16_t* restrict original_ramps = NULL;
 
 
 /* xcb violates the rule to never return struct:s. */
+#ifdef __GNUC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Waggregate-return"
+#endif
 
 
 CGError CGGetOnlineDisplayList(uint32_t max_size,
@@ -362,7 +364,9 @@ uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
 }
 
 
+#ifdef __GNUC__
 # pragma GCC diagnostic pop
+#endif
 
 
 void close_fake_quartz_cg(void)

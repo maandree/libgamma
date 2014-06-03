@@ -162,8 +162,10 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
 
 
 /* xcb violates the rule to never return struct:s. */
+#ifdef __GNUC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Waggregate-return"
+#endif
 
 
 /**
@@ -604,6 +606,7 @@ static int get_connector_type(libgamma_crtc_information_t* restrict this)
   __select ("DVI-I",        DVII);
   __select ("DVI-D",        DVID);
   __select ("DVI-A",        DVIA);
+  __select ("DVI",          DVI);
   __select ("Composite",    Composite);
   __select ("S-Video",      SVIDEO);
   __select ("Component",    Component);
@@ -641,7 +644,7 @@ static int get_output_name(libgamma_crtc_information_t* restrict out, xcb_randr_
     return out->connector_name_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
   
   /* Allocate a memory area for a NUL-terminated copy of the name. */
-  store = malloc(((size_t)length + 1) * sizeof(char));
+  store = out->connector_name = malloc(((size_t)length + 1) * sizeof(char));
   if (store == NULL)
     return out->connector_name_error = errno, -1;
   
@@ -750,6 +753,7 @@ static int get_edid(libgamma_crtc_information_t* restrict out,
 	}
       
       /* Store the EDID. */
+      out->edid_length = (size_t)length;
       out->edid = malloc((size_t)length * sizeof(unsigned char));
       if (out->edid == NULL)
 	out->edid_error = errno;
@@ -783,13 +787,16 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
   int e = 0;
   xcb_randr_get_output_info_reply_t* restrict output_info = NULL;
   xcb_randr_output_t output;
-  int free_edid;
+  int free_edid, free_name;
   
   /* Wipe all error indicators. */
   memset(this, 0, sizeof(libgamma_crtc_information_t));
   
   /* We need to free the EDID after us if it is not explicitly requested.  */
   free_edid = (fields & LIBGAMMA_CRTC_INFO_EDID) == 0;
+  
+  /* We need to free the output's name after us if it is not explicitly requested.  */
+  free_name = (fields & LIBGAMMA_CRTC_INFO_CONNECTOR_NAME) == 0;
   
   /* Jump if the output information is not required. */
   if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_ACTIVE | LIBGAMMA_CRTC_INFO_MACRO_CONNECTOR)) == 0)
@@ -874,6 +881,12 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
     {
       free(this->edid);
       this->edid = NULL;
+    }
+  /* Free the output name after us. */
+  if (free_name)
+    {
+      free(this->connector_name);
+      this->connector_name = NULL;
     }
   
   free(output_info);
@@ -961,5 +974,7 @@ int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 }
 
 
+#ifdef __GNUC__
 # pragma GCC diagnostic pop
+#endif
 

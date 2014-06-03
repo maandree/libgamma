@@ -30,7 +30,7 @@
 # if LIBGAMMA_METHOD_COUNT > 6
 #  warning New adjust methods has been added to libgamma
 # endif
-# if LIBGAMMA_CONNECTOR_TYPE_COUNT > 19
+# if LIBGAMMA_CONNECTOR_TYPE_COUNT > 20
 #  warning New connector types have been added to libgamma.
 # endif
 # if LIBGAMMA_SUBPIXEL_ORDER_COUNT > 6
@@ -249,7 +249,102 @@ static int select_monitor(libgamma_site_state_t* restrict site_state,
       return libgamma_perror("error", r), 1;
     }
   
+  printf("\n");
   return 0;
+}
+
+
+#define print_crtc_information_(type, notation)								   \
+  static void print_crtc_information_##type(int do_print, const char* description, int error, type value)  \
+  {													   \
+    char buf[256];											   \
+    if (do_print)											   \
+      {													   \
+	if (error)											   \
+	  {												   \
+	    snprintf(buf, sizeof(buf) / sizeof(char), "  (error) %s", description); 			   \
+	    libgamma_perror(buf, error);								   \
+	  }												   \
+	else												   \
+	  printf("  %s: %" notation "\n", description, value);						   \
+      }													   \
+  }
+
+typedef const char* str;
+print_crtc_information_(size_t, "lu")
+print_crtc_information_(signed, "i")
+print_crtc_information_(int, "i")
+#ifdef __GNUC__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdouble-promotion"
+#endif
+print_crtc_information_(float, "f")
+#ifdef __GNUC__
+# pragma GCC diagnostic pop
+#endif
+print_crtc_information_(str, "s")
+
+
+static void crtc_information(libgamma_crtc_state_t* restrict crtc)
+{
+  libgamma_method_capabilities_t caps;
+  libgamma_crtc_information_t info;
+  int fields;
+  int field;
+  
+  libgamma_method_capabilities(&caps, crtc->partition->site->method);
+  
+  for (fields = caps.crtc_information; field = fields & -fields, fields; fields ^= field)
+    {
+      if (libgamma_get_crtc_information(&info, crtc, field))
+	printf("Could not read CRTC information field %i\n", field);
+      free(info.edid);
+      free(info.connector_name);
+    }
+  
+  fields = caps.crtc_information;
+  if (libgamma_get_crtc_information(&info, crtc, fields))
+    printf("An error occurred while reading CRTC information\n");
+
+#define print2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, ERROR_VAR)  \
+  print_crtc_information_##TYPE(fields & FIELD_ID, DESCRIPTION, info.ERROR_VAR, info.FIELD_VAR);
+#define print(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR)  \
+  print2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, FIELD_VAR##_error);
+  
+  printf("CRTC information:\n");
+  if ((fields & LIBGAMMA_CRTC_INFO_EDID))
+    {
+      if (info.edid_error)
+	libgamma_perror("  (error) EDID", info.edid_error);
+      else
+	{
+	  char* edid = libgamma_behex_edid(info.edid, info.edid_length);
+	  printf("  EDID: %s\n", edid);
+	  printf("  EDID (length): %lu\n", info.edid_length);
+	  free(edid);
+	}
+    }
+  print(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM, "width", width_mm);
+  print(size_t, LIBGAMMA_CRTC_INFO_HEIGHT_MM, "height", height_mm);
+  print(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID, "width per EDID", width_mm_edid);
+  print(size_t, LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID, "height per EDID", height_mm_edid);
+  print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "red gamma ramp size", red_gamma_size, gamma_size_error);
+  print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "green gamma ramp size", green_gamma_size, gamma_size_error);
+  print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "blue gamma ramp size", blue_gamma_size, gamma_size_error);
+  print(signed, LIBGAMMA_CRTC_INFO_GAMMA_DEPTH, "gamma ramp depth", gamma_depth);
+  print(int, LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT, "gamma support", gamma_support);
+  /* print(size_t, LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER, "subpixel order", subpixel_order); */
+  print(int, LIBGAMMA_CRTC_INFO_ACTIVE, "active", active);
+  print(str, LIBGAMMA_CRTC_INFO_CONNECTOR_NAME, "connector name", connector_name);
+  /* LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE connector_type */
+  print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "red gamma characteristics", gamma_red, gamma_error);
+  print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "green gamma characteristics", gamma_green, gamma_error);
+  print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "blue gamma characteristics", gamma_blue, gamma_error);
+  
+#undef print
+  
+  free(info.edid);
+  free(info.connector_name);
 }
 
 
@@ -267,6 +362,8 @@ int main(void)
   
   if (select_monitor(site_state, part_state, crtc_state))
     return 1;
+  
+  crtc_information(crtc_state);
   
   libgamma_crtc_free(crtc_state);
   libgamma_partition_free(part_state);

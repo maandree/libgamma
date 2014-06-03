@@ -205,8 +205,10 @@ int GetDeviceCaps(HDC hDC, int nIndex)
 
 
 /* xcb violates the rule to never return struct:s. */
+#ifdef __GNUC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Waggregate-return"
+#endif
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx */
@@ -318,7 +320,9 @@ HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
 }
 
 
+#ifdef __GNUC__
 # pragma GCC diagnostic pop
+#endif
 
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx */

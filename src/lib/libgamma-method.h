@@ -320,6 +320,11 @@ typedef enum libgamma_connector_type
     LIBGAMMA_CONNECTOR_TYPE_VGA,
     
     /**
+     * Digital Visual Interface, unknown type.
+     */
+    LIBGAMMA_CONNECTOR_TYPE_DVI,
+    
+    /**
      * Digital Visual Interface, integrated (DVI-I).
      */
     LIBGAMMA_CONNECTOR_TYPE_DVII,
@@ -410,7 +415,7 @@ typedef enum libgamma_connector_type
 /**
  * The number of values defined in `libgamma_connector_type_t`.
  */
-#define LIBGAMMA_CONNECTOR_TYPE_COUNT  19
+#define LIBGAMMA_CONNECTOR_TYPE_COUNT  20
 
 /**
  * Orders for subpixels. Currently the possible values are
@@ -533,7 +538,7 @@ typedef enum libgamma_subpixel_order
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * values for `gamma_red`, `gamma_green` and `gamma_blue`
- * and report errors to `connector_type_error`.
+ * and report errors to `gamma_error`.
  */
 #define LIBGAMMA_CRTC_INFO_GAMMA  (1 << 12)
 

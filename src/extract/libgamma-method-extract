@@ -42,7 +42,7 @@ def list_enum(prefix, *blacklist):
 
 def list_struct(name):
     global data
-    data = data[data.find('\ntypedef struct ' + name):]
+    data = data[data.find('\ntypedef struct ' + name + '\n'):]
     data = data[:data.find('\n}')]
     test1 = lambda line : line.startswith('  ') and line.endswith(';')
     test2 = lambda line : ' * ' not in line
@@ -52,7 +52,7 @@ def list_struct(name):
 
 def type_struct(name):
     global data
-    data = data[data.find('\ntypedef struct ' + name):]
+    data = data[data.find('\ntypedef struct ' + name + '\n'):]
     data = data[:data.find('\n}')]
     test1 = lambda line : line.startswith('  ')
     test2 = lambda line : ' * ' not in line
@@ -69,7 +69,7 @@ def type_struct(name):
 
 def doc_typedef(name):
     global data
-    data = data[:data.find('\ntypedef ' + name):]
+    data = data[:data.find('\ntypedef ' + name + '\n'):]
     data = data[:data.rfind('\n */')]
     data = data[data.rfind('/**\n') + len('/**\n'):]
     data = [line[3:] for line in data.split('\n')]
@@ -78,7 +78,7 @@ def doc_typedef(name):
 
 def doc_define():
     global data
-    data = data[:data.find('\n#define ' + sys.argv[2])]
+    data = data[:data.find('\n#define ' + sys.argv[2] + ' ')]
     data = data[:data.rfind('\n */')]
     data = data[data.rfind('/**\n') + len('/**\n'):]
     data = [line[3:] for line in data.split('\n')]
@@ -96,7 +96,7 @@ def doc_enum():
 
 def doc_struct(name):
     global data
-    data = data[data.find('\ntypedef struct ' + name):]
+    data = data[data.find('\ntypedef struct ' + name + '\n'):]
     data = data[:data.find('\n}')]
     test1 = lambda line : line.startswith('  ')
     test2 = lambda line : ' * ' not in line

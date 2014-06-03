@@ -60,8 +60,10 @@ lowercase ()
    not have any adjustment methods enabled. */
 #ifndef HAVE_LIBGAMMA_METHODS
 # define HAVE_NO_LIBGAMMA_METHODS
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
+# ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
+# endif
 #endif
 
 
@@ -1050,6 +1052,8 @@ int libgamma_crtc_set_gamma_£{2}_f(libgamma_crtc_state_t* restrict this,
 
 
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-# pragma GCC diagnostic pop
+# ifdef __GNUC__
+#  pragma GCC diagnostic pop
+# endif
 #endif
 
