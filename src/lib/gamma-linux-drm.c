@@ -655,7 +655,7 @@ static int read_connector_data(libgamma_crtc_state_t* restrict crtc, libgamma_cr
 	  c++;
       
       /* Construct and store connect name that is unique to the graphics card. */
-      sprintf(out->connector_name, "%s-" PRIu32, connector_name_base, (uint32_t)(c + 1));
+      sprintf(out->connector_name, "%s-%" PRIu32, connector_name_base, (uint32_t)(c + 1));
     }
   
   /* Did something go wrong? */
