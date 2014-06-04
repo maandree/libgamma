@@ -15,6 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef LIBGAMMA_TEST_UPDATE_WARNINGS_H
+#define LIBGAMMA_TEST_UPDATE_WARNINGS_H
+
 #include <libgamma.h>
 
 
@@ -56,5 +59,8 @@
 # if LIBGAMMA_CRTC_INFO_COUNT > 13
 #  warning New CRTC information fields have been added to libgamma.
 # endif
+#endif
+
+
 #endif
 
