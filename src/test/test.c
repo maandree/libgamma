@@ -17,30 +17,14 @@
  */
 #include <libgamma.h>
 
+#include "update-warnings.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
 
-
-#ifdef __GNUC__
-# if LIBGAMMA_ERROR_MIN < -46
-#  warning New error codes have been added to libgamma.
-# endif
-# if LIBGAMMA_METHOD_COUNT > 6
-#  warning New adjust methods has been added to libgamma
-# endif
-# if LIBGAMMA_CONNECTOR_TYPE_COUNT > 20
-#  warning New connector types have been added to libgamma.
-# endif
-# if LIBGAMMA_SUBPIXEL_ORDER_COUNT > 6
-#  warning New subpixel orders have been added to libgamma.
-# endif
-# if LIBGAMMA_CRTC_INFO_COUNT > 13
-#  warning New CRTC information fields have been added to libgamma.
-# endif
-#endif
 
 
 static const char* method_name(int method)

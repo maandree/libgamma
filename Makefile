@@ -139,7 +139,7 @@ bin/test: $(foreach O,$(TESTOBJ),obj/test/$(O).o) bin/libgamma.so.$(LIB_VERSION)
 	mkdir -p $(shell dirname $@)
 	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/test/$(O).o)
 
-obj/test/%.o: src/test/%.c src/lib/libgamma*.h
+obj/test/%.o: src/test/%.c src/test/*.h src/lib/libgamma*.h
 	mkdir -p $(shell dirname $@)
 	$(CC) $(TEST_FLAGS) -Isrc/lib -c -o $@ $<
 
