@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <libgamma.h>
-
 #include "update-warnings.h"
+#include "methods.h"
+
+#include <libgamma.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,109 +27,6 @@
 #include <unistd.h>
 
 
-
-static const char* method_name(int method)
-{
-  switch (method)
-    {
-    case LIBGAMMA_METHOD_DUMMY:                 return "dummy";
-    case LIBGAMMA_METHOD_X_RANDR:               return "RandR X extension";
-    case LIBGAMMA_METHOD_X_VIDMODE:             return "VidMode X extension";
-    case LIBGAMMA_METHOD_LINUX_DRM:             return "Linux DRM";
-    case LIBGAMMA_METHOD_W32_GDI:               return "Windows GDI";
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  return "Quartz using CoreGraphics";
-    default:
-      return "(unknown)";
-    }
-}
-
-
-static void list_methods(const char* description, int* methods, int operation)
-{
-  size_t i, n = libgamma_list_methods(methods, LIBGAMMA_METHOD_COUNT, operation);
-  printf("%s:\n", description);
-  for (i = 0; i < n; i++)
-    printf("  %s\n", method_name(methods[i]));
-  printf("\n");
-}
-
-
-static void list_methods_lists(void)
-{
-  int* methods = malloc(LIBGAMMA_METHOD_COUNT * sizeof(int));
-  size_t n = libgamma_list_methods(methods, LIBGAMMA_METHOD_COUNT, 4);
-  
-  if (n > LIBGAMMA_METHOD_COUNT)
-    {
-      printf("Warning: you should to recompile the program, libgamma has been updated.\n");
-      methods = realloc(methods, n * sizeof(int));
-    }
-  
-  list_methods("Available adjustment methods",               methods, 4);
-  list_methods("Available real adjustment methods",          methods, 3);
-  list_methods("Available real non-fake adjustment methods", methods, 2);
-  list_methods("Recommended adjustment methods",             methods, 1);
-  list_methods("Recommended non-fake adjustment methods",    methods, 0);
-  
-  free(methods);
-}
-
-
-static void method_availability(void)
-{
-  int method;
-  printf("Testing the availability of a non-existing adjustment method: ");
-  printf("%s\n", libgamma_is_method_available(9999) ? "available" : "not available");
-  for (method = 0; method < LIBGAMMA_METHOD_COUNT; method++)
-    {
-      printf("Testing the availability of %s: ", method_name(method));
-      printf("%s\n", libgamma_is_method_available(method) ? "available" : "not available");
-    }
-  printf("\n");
-}
-
-
-static void list_default_sites(void)
-{
-  int method;
-  for (method = 0; method < LIBGAMMA_METHOD_COUNT; method++)
-    if (libgamma_is_method_available(method))
-      {
-	printf("Default site for %s:\n", method_name(method));
-	printf("  Variable: %s\n", libgamma_method_default_site_variable(method));
-	printf("  Site name: %s\n", libgamma_method_default_site(method));
-	printf("\n");
-      }
-}
-
-
-static void method_capabilities(void)
-{
-  libgamma_method_capabilities_t caps;
-  int method;
-  for (method = 0; method < LIBGAMMA_METHOD_COUNT; method++)
-    if (libgamma_is_method_available(method))
-      {
-	printf("Capabilities of %s:\n", method_name(method));
-	libgamma_method_capabilities(&caps, method);
-	
-	printf("  %s: %X\n", "CRTC information",      caps.crtc_information);
-	printf("  %s: %s\n", "Default site known",    caps.default_site_known            ? "yes" : "no");
-	printf("  %s: %s\n", "Multiple sites",        caps.multiple_sites                ? "yes" : "no");
-	printf("  %s: %s\n", "Multiple partitions",   caps.multiple_partitions           ? "yes" : "no");
-	printf("  %s: %s\n", "Multiple crtcs",        caps.multiple_crtcs                ? "yes" : "no");
-	printf("  %s: %s\n", "Graphics cards",        caps.partitions_are_graphics_cards ? "yes" : "no");
-	printf("  %s: %s\n", "Site restore",          caps.site_restore                  ? "yes" : "no");
-	printf("  %s: %s\n", "Partition restore",     caps.partition_restore             ? "yes" : "no");
-	printf("  %s: %s\n", "CRTC restore",          caps.crtc_restore                  ? "yes" : "no");
-	printf("  %s: %s\n", "Identical gamma sizes", caps.identical_gamma_sizes         ? "yes" : "no");
-	printf("  %s: %s\n", "Fixed gamma size",      caps.fixed_gamma_size              ? "yes" : "no");
-	printf("  %s: %s\n", "Fixed gamma depth",     caps.fixed_gamma_depth             ? "yes" : "no");
-	printf("  %s: %s\n", "Real method",           caps.real                          ? "yes" : "no");
-	printf("  %s: %s\n", "Fake method",           caps.fake                          ? "yes" : "no");
-	printf("\n");
-      }
-}
 
 
 static void error_test(void)
@@ -475,6 +373,8 @@ int main(void)
     }
   
   /* TODO Test gamma ramp restore functions. */
+  /* TODO Test _f gamma ramp setters. */
+  /* TODO Test gamma ramp getters/setters of other bit depths. */
   
   libgamma_gamma_ramps_destroy(&ramps);
   libgamma_gamma_ramps_destroy(&old_ramps);
