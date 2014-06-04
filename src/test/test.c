@@ -17,6 +17,7 @@
  */
 #include "update-warnings.h"
 #include "methods.h"
+#include "errors.h"
 
 #include <libgamma.h>
 
@@ -26,38 +27,6 @@
 #include <string.h>
 #include <unistd.h>
 
-
-
-
-static void error_test(void)
-{
-  int i;
-  printf("Testing error API using LIBGAMMA_STATE_UNKNOWN:\n");
-  printf("  Expecting %i: %i\n", LIBGAMMA_STATE_UNKNOWN, libgamma_value_of_error("LIBGAMMA_STATE_UNKNOWN"));
-  printf("  Expecting %s: %s\n", "LIBGAMMA_STATE_UNKNOWN", libgamma_name_of_error(LIBGAMMA_STATE_UNKNOWN));
-  printf("\n");
-  printf("Testing libgamma_perror:\n");
-  libgamma_perror("  Expecting LIBGAMMA_STATE_UNKNOWN", LIBGAMMA_STATE_UNKNOWN);
-  libgamma_perror("  Expecting a description for ENOMEM", ENOMEM);
-  libgamma_perror("  Expecting a description for successfulness", 0);
-  libgamma_perror("  Expecting a description for ENOMEM", (errno = ENOMEM, LIBGAMMA_ERRNO_SET));
-  libgamma_group_gid = 10;
-  libgamma_group_name = "test";
-  libgamma_perror("  Expecting 'LIBGAMMA_DEVICE_REQUIRE_GROUP: test (10)'", LIBGAMMA_DEVICE_REQUIRE_GROUP);
-  libgamma_group_name = NULL;
-  libgamma_perror("  Expecting 'LIBGAMMA_DEVICE_REQUIRE_GROUP: 10'", LIBGAMMA_DEVICE_REQUIRE_GROUP);
-  printf("\n");
-  printf("Testing error code uniqueness: ");
-  for (i = -1; i >= LIBGAMMA_ERROR_MIN; i--)
-    if (libgamma_value_of_error(libgamma_name_of_error(i)) != i)
-      {
-	printf("failed\n");
-	goto not_unique;
-      }
-  printf("passed\n");
- not_unique:
-  printf("\n");
-}
 
 
 static int select_monitor(libgamma_site_state_t* restrict site_state,

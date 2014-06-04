@@ -63,7 +63,7 @@ HEADERS_INFO = libgamma-error libgamma-facade libgamma-method
 HEADERS = libgamma libgamma-config $(HEADERS_INFO)
 
 # Object files for the test.
-TESTOBJ = test methods
+TESTOBJ = test methods errors
 
 # The version of the library.
 LIB_MAJOR = 0
