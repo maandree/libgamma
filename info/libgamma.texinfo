@@ -2,7 +2,7 @@
 
 @c %**start of header
 @setfilename libgamma.info
-@settitle blueshift
+@settitle libgamma
 @afourpaper
 @documentencoding UTF-8
 @documentlanguage en
