@@ -32,7 +32,7 @@ PKGNAME ?= libgamma
 GPP ?= gpp
 
 # C compiler, GNU C Compiler by default
-CC = gcc
+CC ?= gcc
 
 
 # Enabled warnings.
