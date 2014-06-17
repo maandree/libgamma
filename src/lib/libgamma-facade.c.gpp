@@ -60,7 +60,7 @@ $>done
    not have any adjustment methods enabled. */
 #ifndef HAVE_LIBGAMMA_METHODS
 # define HAVE_NO_LIBGAMMA_METHODS
-# ifdef __GNUC__
+# ifdef __GCC__
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
 # endif
@@ -1053,7 +1053,7 @@ $>crtc_set_gamma_ramps_f double rampsd
 
 
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-# ifdef __GNUC__
+# ifdef __GCC__
 #  pragma GCC diagnostic pop
 # endif
 #endif

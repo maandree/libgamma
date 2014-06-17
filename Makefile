@@ -116,6 +116,12 @@ endif
 LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
 
 
+ifeq ($(CC),gcc)
+TEST_FLAGS += -D__GCC__
+LIB_FLAGS += -D__GCC__
+endif
+
+
 # Build rules.
 
 .PHONY: default

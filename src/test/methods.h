@@ -19,7 +19,7 @@
 #define LIBGAMMA_TEST_METHODS_H
 
 
-#ifndef __GNUC__
+#ifndef __GCC__
 # define __attribute__()
 #endif
 

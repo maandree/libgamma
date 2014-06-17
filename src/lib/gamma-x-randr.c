@@ -162,7 +162,7 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
 
 
 /* xcb violates the rule to never return struct:s. */
-#ifdef __GNUC__
+#ifdef __GCC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Waggregate-return"
 #endif
@@ -974,7 +974,7 @@ int libgamma_x_randr_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 }
 
 
-#ifdef __GNUC__
+#ifdef __GCC__
 # pragma GCC diagnostic pop
 #endif
 

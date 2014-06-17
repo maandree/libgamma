@@ -43,7 +43,7 @@
  * accomplish this.
  */
 
-#ifdef __GNUC__
+#ifdef __GCC__
 # if LIBGAMMA_ERROR_MIN < -46
 #  warning New error codes have been added to libgamma.
 # endif

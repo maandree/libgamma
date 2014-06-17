@@ -126,12 +126,12 @@ typedef const char* str;
 print_crtc_information_(size_t, "lu")
 print_crtc_information_(signed, "i")
 print_crtc_information_(int, "i")
-#ifdef __GNUC__
+#ifdef __GCC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wdouble-promotion"
 #endif
 print_crtc_information_(float, "f")
-#ifdef __GNUC__
+#ifdef __GCC__
 # pragma GCC diagnostic pop
 #endif
 print_crtc_information_(str, "s")

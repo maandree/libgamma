@@ -23,7 +23,7 @@
 #endif
 
 
-#ifndef __GNUC__
+#ifndef __GCC__
 # define __attribute__
 #endif
 
