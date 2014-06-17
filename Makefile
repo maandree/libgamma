@@ -39,17 +39,18 @@ CC ?= gcc
 WARN = -Wall -Wextra -pedantic -Wformat=2 -Winit-self -Wmissing-include-dirs   \
        -Wfloat-equal -Wshadow -Wmissing-prototypes -Wmissing-declarations      \
        -Wredundant-decls -Wnested-externs -Winline -Wno-variadic-macros        \
-       -Wswitch-default -Wconversion -Wunsafe-loop-optimizations -Wcast-align  \
-       -Wstrict-overflow -Wdeclaration-after-statement -Wundef -Wcast-qual     \
-       -Wbad-function-cast -Wwrite-strings -Waggregate-return -Wpacked         \
-       -Wstrict-prototypes -Wold-style-definition
+       -Wswitch-default -Wconversion -Wcast-align -Wstrict-overflow            \
+       -Wdeclaration-after-statement -Wundef -Wcast-qual -Wbad-function-cast   \
+       -Wwrite-strings -Waggregate-return -Wpacked -Wstrict-prototypes         \
+       -Wold-style-definition
 
 ifeq ($(CC),gcc)
 WARN += -Wdouble-promotion -Wtrampolines -Wsign-conversion -Wsync-nand  \
         -Wlogical-op -Wvector-operation-performance                     \
         -Wunsuffixed-float-constants -Wsuggest-attribute=const          \
         -Wsuggest-attribute=noreturn -Wsuggest-attribute=pure           \
-        -Wsuggest-attribute=format -Wnormalized=nfkc
+        -Wsuggest-attribute=format -Wnormalized=nfkc                    \
+        -Wunsafe-loop-optimizations
 endif
 
 
