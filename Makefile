@@ -42,14 +42,14 @@ WARN = -Wall -Wextra -pedantic -Wformat=2 -Winit-self -Wmissing-include-dirs   \
        -Wswitch-default -Wconversion -Wunsafe-loop-optimizations -Wcast-align  \
        -Wstrict-overflow -Wdeclaration-after-statement -Wundef -Wcast-qual     \
        -Wbad-function-cast -Wwrite-strings -Waggregate-return -Wpacked         \
-       -Wstrict-prototypes -Wold-style-definition -Wnormalized=nfkc
+       -Wstrict-prototypes -Wold-style-definition
 
 ifeq ($(CC),gcc)
 WARN += -Wdouble-promotion -Wtrampolines -Wsign-conversion -Wsync-nand  \
         -Wlogical-op -Wvector-operation-performance                     \
         -Wunsuffixed-float-constants -Wsuggest-attribute=const          \
         -Wsuggest-attribute=noreturn -Wsuggest-attribute=pure           \
-        -Wsuggest-attribute=format
+        -Wsuggest-attribute=format -Wnormalized=nfkc
 endif
 
 
@@ -104,17 +104,15 @@ endif
 
 # Options for the C compiler for the test.
 TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
-             -ftree-vrp -fstrict-aliasing -fipa-pure-const -fstrict-overflow   \
-             -funsafe-loop-optimizations -fno-builtin
+             -fstrict-aliasing -fstrict-overflow -fno-builtin
 
 ifeq ($(CC),gcc)
-TEST_FLAGS += -fstack-usage
+TEST_FLAGS += -fstack-usage -ftree-vrp -fipa-pure-const -funsafe-loop-optimizations
 endif
 
 
 # Options for the C compiler for the library.
 LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
-
 
 
 # Build rules.

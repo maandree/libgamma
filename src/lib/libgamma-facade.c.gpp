@@ -202,7 +202,7 @@ $>done
 int libgamma_is_method_available(int method)
 {
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-  (void) methods;
+  (void) method;
   return 0;
 #else
   switch (method)
