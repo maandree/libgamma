@@ -31,21 +31,27 @@ PKGNAME ?= libgamma
 # General-preprocess command. (https://github.com/maandree/gpp)
 GPP ?= gpp
 
+# C compiler, GNU C Compiler by default
 CC = gcc
 
 
 # Enabled warnings.
-WARN = -Wall -Wextra -pedantic -Wdouble-promotion -Wformat=2 -Winit-self       \
-       -Wmissing-include-dirs -Wtrampolines -Wfloat-equal -Wshadow             \
-       -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls           \
-       -Wnested-externs -Winline -Wno-variadic-macros -Wsign-conversion        \
-       -Wswitch-default -Wconversion -Wsync-nand -Wunsafe-loop-optimizations   \
-       -Wcast-align -Wstrict-overflow -Wdeclaration-after-statement -Wundef    \
-       -Wbad-function-cast -Wcast-qual -Wwrite-strings -Wlogical-op            \
-       -Waggregate-return -Wstrict-prototypes -Wold-style-definition -Wpacked  \
-       -Wvector-operation-performance -Wunsuffixed-float-constants             \
-       -Wsuggest-attribute=const -Wsuggest-attribute=noreturn                  \
-       -Wsuggest-attribute=pure -Wsuggest-attribute=format -Wnormalized=nfkc
+WARN = -Wall -Wextra -pedantic -Wformat=2 -Winit-self -Wmissing-include-dirs   \
+       -Wfloat-equal -Wshadow -Wmissing-prototypes -Wmissing-declarations      \
+       -Wredundant-decls -Wnested-externs -Winline -Wno-variadic-macros        \
+       -Wswitch-default -Wconversion -Wunsafe-loop-optimizations -Wcast-align  \
+       -Wstrict-overflow -Wdeclaration-after-statement -Wundef -Wcast-qual     \
+       -Wbad-function-cast -Wwrite-strings -Waggregate-return -Wpacked         \
+       -Wstrict-prototypes -Wold-style-definition -Wnormalized=nfkc
+
+ifeq ($(CC),gcc)
+WARN += -Wdouble-promotion -Wtrampolines -Wsign-conversion -Wsync-nand  \
+        -Wlogical-op -Wvector-operation-performance                     \
+        -Wunsuffixed-float-constants -Wsuggest-attribute=const          \
+        -Wsuggest-attribute=noreturn -Wsuggest-attribute=pure           \
+        -Wsuggest-attribute=format
+endif
+
 
 # The C standard used in the code.
 STD = c99
@@ -77,9 +83,17 @@ include .config.mk
 
 # Optimisation level (and debug flags.)
 ifeq ($(DEBUG),y)
+ifeq ($(CC),gcc)
 OPTIMISE = -Og -g
 else
+OPTIMISE = -g
+endif
+else
+ifeq ($(CC),gcc)
 OPTIMISE = -Ofast
+else
+OPTIMISE = -O6
+endif
 endif
 
 # C compiler debug flags.
@@ -90,8 +104,13 @@ endif
 
 # Options for the C compiler for the test.
 TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
-             -ftree-vrp -fstrict-aliasing -fipa-pure-const -fstack-usage       \
-             -fstrict-overflow -funsafe-loop-optimizations -fno-builtin
+             -ftree-vrp -fstrict-aliasing -fipa-pure-const -fstrict-overflow   \
+             -funsafe-loop-optimizations -fno-builtin
+
+ifeq ($(CC),gcc)
+TEST_FLAGS += -fstack-usage
+endif
+
 
 # Options for the C compiler for the library.
 LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
