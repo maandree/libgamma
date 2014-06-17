@@ -1,6 +1,6 @@
 /**
- * libgamma — Display server abstraction layer for gamma ramp adjustments
- * Copyright © 2014  Mattias Andrée (maandree@member.fsf.org)
+ * libgamma -- Display server abstraction layer for gamma ramp adjustments
+ * Copyright (C) 2014  Mattias Andrée (maandree@member.fsf.org)
  * 
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

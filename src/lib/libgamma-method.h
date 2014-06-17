@@ -1,6 +1,6 @@
 /**
- * libgamma — Display server abstraction layer for gamma ramp adjustments
- * Copyright © 2014  Mattias Andrée (maandree@member.fsf.org)
+ * libgamma -- Display server abstraction layer for gamma ramp adjustments
+ * Copyright (C) 2014  Mattias Andrée (maandree@member.fsf.org)
  * 
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -759,7 +759,7 @@ typedef struct libgamma_crtc_information
   
   /**
    * The layout of the subpixels.
-   * You cannot count on this value — especially for CRT:s —
+   * You cannot count on this value -- especially for CRT:s --
    * but it is provided anyway as a means of distinguishing monitors.
    */
   libgamma_subpixel_order_t subpixel_order;
