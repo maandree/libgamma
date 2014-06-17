@@ -25,7 +25,7 @@ BUILD DEPENDENCIES:
     coreutils
     gcc
     general-preprocessor (gpp)
-    python3
+    python                        Both Python 2 and Python 3 will work
     texinfo                       Optional: for info, pdf, ps and dvi manuals
     texlive-core                  Optional: for pdf, ps and dvi manuals
     bash                          Optional: for info, pdf, ps and dvi manuals
@@ -48,7 +48,7 @@ DEPENDENCIES SOURCES:
     coreutils                     https://www.gnu.org/software/coreutils
     gcc                           https://gcc.gnu.org
     general-preprocessor (gpp)    https://github.com/maandree/gpp
-    python3                       https://www.python.org/
+    python                        https://www.python.org/
     texinfo                       https://www.gnu.org/software/texinfo/
     texlive-core                  https://tug.org/texlive/
     bash                          https://www.gnu.org/software/bash
