@@ -762,11 +762,11 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
       perror("connector not found");
       abort();
       /* Store reported error in affected fields. */
-      e |= this->width_mm_error      = this->height_mm_error
-	 = this->connector_type      = this->subpixel_order_error
-	 = this->active_error        = this->connector_name_error
-	 = this->edid_error          = this->gamma_error
-	 = this->width_mm_edid_error = this->height_mm_edid_error = error;
+      e |= this->width_mm_error       = this->height_mm_error
+	 = this->connector_type_error = this->subpixel_order_error
+	 = this->active_error         = this->connector_name_error
+	 = this->edid_error           = this->gamma_error
+	 = this->width_mm_edid_error  = this->height_mm_edid_error = error;
       goto cont;
     }
   
