@@ -23,7 +23,7 @@ BUILD DEPENDENCIES:
     grep
     sed
     coreutils
-    c99
+    gcc
     general-preprocessor (gpp)
     python3
     texinfo                       Optional: for info, pdf, ps and dvi manuals
@@ -46,7 +46,7 @@ DEPENDENCIES SOURCES:
     grep                          https://www.gnu.org/software/grep
     sed                           https://www.gnu.org/software/sed
     coreutils                     https://www.gnu.org/software/coreutils
-    c99                           https://gcc.gnu.org
+    gcc                           https://gcc.gnu.org
     general-preprocessor (gpp)    https://github.com/maandree/gpp
     python3                       https://www.python.org/
     texinfo                       https://www.gnu.org/software/texinfo/

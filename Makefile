@@ -31,6 +31,8 @@ PKGNAME ?= libgamma
 # General-preprocess command. (https://github.com/maandree/gpp)
 GPP ?= gpp
 
+CC = gcc
+
 
 # Enabled warnings.
 WARN = -Wall -Wextra -pedantic -Wdouble-promotion -Wformat=2 -Winit-self       \
