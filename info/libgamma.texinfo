@@ -17,7 +17,7 @@
 
 
 @copying
-Copyright @copyright{} 2014 Mattias Andrée
+Copyright @copyright{} 2014 Mattias Andr@'ee
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -42,7 +42,7 @@ Texts. A copy of the license is included in the section entitled
 @titlepage
 @title libgamma
 @subtitle Display server abstraction layer for gamma ramp adjustments
-@author by Mattias Andrée (maandree)
+@author by Mattias Andr@'e (maandree)
 
 @page
 @c @center `'
