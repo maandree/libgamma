@@ -92,7 +92,7 @@ else
 ifeq ($(CC),gcc)
 OPTIMISE = -Ofast
 else
-OPTIMISE = -O6
+OPTIMISE = -O
 endif
 endif
 
