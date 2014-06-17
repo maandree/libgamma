@@ -175,6 +175,7 @@ size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operati
 {
 #ifdef HAVE_NO_LIBGAMMA_METHODS
   (void) methods;
+  (void) buf_size;
   (void) operation;
   return 0;
 #else
