@@ -129,7 +129,7 @@ obj/lib/%.o: obj/lib/%.c src/lib/*.h
 
 obj/%: src/%.gpp src/extract/libgamma-*-extract
 	mkdir -p $(shell dirname $@)
-	$(GPP) --symbol '£' --input $< --output $@
+	$(GPP) --symbol '$$' --input $< --output $@
 
 
 .PHONY: test
@@ -150,7 +150,7 @@ doc: info pdf dvi ps
 obj/libgamma.texinfo: info/libgamma.texinfo $(foreach H,$(HEADERS_INFO),src/lib/$(H).h) \
 	              src/extract/libgamma-*-extract info/texise info/behead
 	mkdir -p obj
-	$(GPP) --symbol '£' --input $< --output $@
+	$(GPP) --symbol '%' --input $< --output $@
 
 obj/%.texinfo: info/%.texinfo
 	mkdir -p obj

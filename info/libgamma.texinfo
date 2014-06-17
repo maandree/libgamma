@@ -1,13 +1,13 @@
 \input texinfo   @c -*-texinfo-*-
 
-@c %**start of header
+@c %%**start of header
 @setfilename libgamma.info
 @settitle libgamma
 @afourpaper
 @documentencoding UTF-8
 @documentlanguage en
 @finalout
-@c %**end of header
+@c %%**end of header
 
 
 @dircategory Library
@@ -29,9 +29,9 @@ Texts. A copy of the license is included in the section entitled
 @end quotation
 @end copying
 
-£>set -u
-£>cd src/extract
-£>export PATH=".:../../info:${PATH}"
+%>set -u
+%>cd src/extract
+%>export PATH=".:../../info:${PATH}"
 
 @ifnottex
 @node Top
@@ -550,10 +550,10 @@ excluded at compile-time are identfier by numerical
 values.
 
 @table @code
-£>for method in $(libgamma-method-extract --list --method); do
-@item £{method}
-£>libgamma-method-extract --method $method | texise
-£>done
+%>for method in $(libgamma-method-extract --list --method); do
+@item %{method}
+%>libgamma-method-extract --method $method | texise
+%>done
 @end table
 
 You can test whether an adjustment method
@@ -641,11 +641,11 @@ monitors. These levels are:
 
 @table @asis
 @item Sites
-£>libgamma-method-extract --doc --site-t | behead 2 | texise
+%>libgamma-method-extract --doc --site-t | behead 2 | texise
 @item Partitions
-£>libgamma-method-extract --doc --part-t | behead 2 | texise
+%>libgamma-method-extract --doc --part-t | behead 2 | texise
 @item CRTC:s (cathode ray tube controllers) @footnote{Do not be fooled by the legacy name, they are general video controllers.}
-£>libgamma-method-extract --doc --crtc-t | behead 2 | texise
+%>libgamma-method-extract --doc --crtc-t | behead 2 | texise
 @end table
 
 @command{libgamma} keeps tracks of these layers' states,
@@ -662,10 +662,10 @@ the data structure @code{libgamma_site_state_t}
 This structure contains the following variables:
 
 @table @asis
-£>for site in $(libgamma-method-extract --list --site-t); do
-@item @code{£{site}} [@code{£(libgamma-method-extract --type --site-t $site)}]
-£>libgamma-method-extract --site-t $site | texise | sed -e 's/"/``/1' | sed -e 's/"/'\'\''/'
-£>done
+%>for site in $(libgamma-method-extract --list --site-t); do
+@item @code{%{site}} [@code{%(libgamma-method-extract --type --site-t $site)}]
+%>libgamma-method-extract --site-t $site | texise | sed -e 's/"/``/1' | sed -e 's/"/'\'\''/'
+%>done
 @end table
 
 To select a site and initialise its state
@@ -736,10 +736,10 @@ the data structure @code{libgamma_partition_state_t}
 This structure contains the following variables:
 
 @table @asis
-£>for part in $(libgamma-method-extract --list --part-t); do
-@item @code{£{part}} [@code{£(libgamma-method-extract --type --part-t $part)}]
-£>libgamma-method-extract --part-t $part | texise
-£>done
+%>for part in $(libgamma-method-extract --list --part-t); do
+@item @code{%{part}} [@code{%(libgamma-method-extract --type --part-t $part)}]
+%>libgamma-method-extract --part-t $part | texise
+%>done
 @end table
 
 To select a partition and initialise its state
@@ -785,10 +785,10 @@ by the data structure @code{libgamma_crtc_state_t}
 This structure contains the following variables:
 
 @table @asis
-£>for crtc in $(libgamma-method-extract --list --crtc-t); do
-@item @code{£{crtc}} [@code{£(libgamma-method-extract --type --crtc-t crtc)}]
-£>libgamma-method-extract --crtc-t $crtc | texise
-£>done
+%>for crtc in $(libgamma-method-extract --list --crtc-t); do
+@item @code{%{crtc}} [@code{%(libgamma-method-extract --type --crtc-t crtc)}]
+%>libgamma-method-extract --crtc-t $crtc | texise
+%>done
 @end table
 
 To select a CRTC and initialise its state
@@ -861,13 +861,13 @@ value should be the adjument method's identifier.
 a data structure with the following variables:
 
 @table @asis
-£>for cap in $(libgamma-method-extract --list --cap-t); do
-@item @code{£{cap}} [@code{£(libgamma-method-extract --type --cap-t $cap)}]
-£>libgamma-method-extract --cap-t $cap | texise
-£>if [ $cap = crtc_information ]; then
+%>for cap in $(libgamma-method-extract --list --cap-t); do
+@item @code{%{cap}} [@code{%(libgamma-method-extract --type --cap-t $cap)}]
+%>libgamma-method-extract --cap-t $cap | texise
+%>if [ $cap = crtc_information ]; then
 See @ref{CRTC information} for more information.
-£>fi
-£>done
+%>fi
+%>done
 @end table
 
 
@@ -900,10 +900,10 @@ The valid values that can be OR:ed for the
 @code{fields} parameters are:
 
 @table @code
-£>for info in $(libgamma-method-extract --list --info); do
-@item £{info}
-£>libgamma-method-extract --info $info | texise
-£>done
+%>for info in $(libgamma-method-extract --list --info); do
+@item %{info}
+%>libgamma-method-extract --info $info | texise
+%>done
 @end table
 
 @code{libgamma_crtc_information_t}
@@ -913,10 +913,10 @@ information is stored in, contains the following
 variables:
 
 @table @asis
-£>for info in $(libgamma-method-extract --list --info-t); do
-@item @code{£{info}} [@code{£(libgamma-method-extract --type --info-t $info)}]
-£>libgamma-method-extract --info-t $info | texise
-£>done
+%>for info in $(libgamma-method-extract --list --info-t); do
+@item @code{%{info}} [@code{%(libgamma-method-extract --type --info-t $info)}]
+%>libgamma-method-extract --info-t $info | texise
+%>done
 @end table
 
 The data type for the variable @code{subpixel_order}
@@ -925,10 +925,10 @@ is @code{libgamma_subpixel_order_t}
 Its possible values are:
 
 @table @code
-£>for order in $(libgamma-method-extract --list --subpixel); do
-@item £{order}
-£>libgamma-method-extract --subpixel $order | texise
-£>done
+%>for order in $(libgamma-method-extract --list --subpixel); do
+@item %{order}
+%>libgamma-method-extract --subpixel $order | texise
+%>done
 @end table
 
 The data type for the variable @code{connector_type}
@@ -937,10 +937,10 @@ is @code{libgamma_connector_type_t}
 Its possible values are:
 
 @table @code
-£>for type in $(libgamma-method-extract --list --connector); do
-@item £{type}
-£>libgamma-method-extract --connector $type | texise
-£>done
+%>for type in $(libgamma-method-extract --list --connector); do
+@item %{type}
+%>libgamma-method-extract --connector $type | texise
+%>done
 @end table
 
 The variable @code{edid} is in raw format.
@@ -1266,10 +1266,10 @@ respectively.
 @command{libgamma} defines the following error codes
 that its functions may return:
 @table @code
-£>for err in $(libgamma-error-extract --list | sort); do
-@item £{err}
-£>libgamma-error-extract $err | texise
-£>done
+%>for err in $(libgamma-error-extract --list | sort); do
+@item %{err}
+%>libgamma-error-extract $err | texise
+%>done
 @end table
 
 The function @code{libgamma_name_of_error} can

@@ -27,9 +27,9 @@
 
 
 
-£>set -u
-£>cd src/extract
-£>export PATH=".:${PATH}"
+$>set -u
+$>cd src/extract
+$>export PATH=".:${PATH}"
 
 
 
@@ -113,9 +113,9 @@ const char* libgamma_name_of_error(int value)
      is sorted by error code in decreasing order. */
   static const char* error_names[] =
     {
-£>for error in $(libgamma-error-extract --list); do
-      "£{error}",
-£>done
+$>for error in $(libgamma-error-extract --list); do
+      "${error}",
+$>done
     };
   
   /* Return `NULL` if the error code is invalid. */
@@ -142,9 +142,9 @@ int libgamma_value_of_error(const char* name)
     return 0;
   
   /* Test error names against `name` and return the value of the match error. */
-£>for error in $(libgamma-error-extract --list); do
-  if (!strcmp(name, "£{error}"))  return £{error};
-£>done
+$>for error in $(libgamma-error-extract --list); do
+  if (!strcmp(name, "${error}"))  return ${error};
+$>done
   
   /* Return 0 (not a valid error code) if the error name is unknown. */
   return 0;
