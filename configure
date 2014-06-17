@@ -178,7 +178,7 @@ exec 4<&-
 exec 3<&-
 
 
-echo 'libgamma have not been configured.'
+echo 'libgamma has now been configured.'
 echo
 echo "  Debug mode:               ${have_debug}"
 echo "  Dummy method:             ${have_dummy}"
