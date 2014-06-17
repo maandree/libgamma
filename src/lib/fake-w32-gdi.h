@@ -24,7 +24,7 @@
 
 
 #ifndef __GCC__
-# define __attribute__
+# define __attribute__(x)
 #endif
 
 #include <stdint.h>
