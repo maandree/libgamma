@@ -19,6 +19,10 @@
 #define LIBGAMMA_TEST_METHODS_H
 
 
+#ifndef __GNUC__
+# define __attribute__()
+#endif
+
 /**
  * Get the name representation of an
  * adjustment method by its identifier.

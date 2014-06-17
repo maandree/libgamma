@@ -22,6 +22,11 @@
 # error libgamma-error.h should not be included directly, include libgamma.h instead
 #endif
 
+
+#ifndef __GNUC__
+# define __attribute__
+#endif
+
 #include <sys/types.h>
 
 

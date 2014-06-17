@@ -23,6 +23,10 @@
 #endif
 
 
+#ifndef __GNUC__
+# define __attribute__
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 

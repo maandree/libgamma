@@ -23,6 +23,11 @@
 #endif
 
 
+#ifndef __GNUC__
+# define __attribute__
+#endif
+
+
 /* This header file contains some capabilities of
  * <CoreGraphics/CGDirectDisplay.h> and <CoreGraphics/CGError.h>,
  * and can be used modify gamma ramps without Mac OS X and Quartz
