@@ -22,7 +22,7 @@ import os
 
 with open(os.path.dirname(sys.argv[0]) + '/../lib/libgamma-error.h', 'rb') as file:
     data = file.read()
-data = data.decode('utf-8', 'error')
+data = data.decode('utf-8')
 
 if sys.argv[1] == '--list':
     defs = [line for line in data.split('\n') if line.startswith('#define') and not line.endswith('_H')]

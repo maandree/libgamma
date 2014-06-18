@@ -22,7 +22,7 @@ import os
 
 with open(os.path.dirname(sys.argv[0]) + '/../lib/libgamma-method.h', 'rb') as file:
     data = file.read()
-data = data.decode('utf-8', 'error')
+data = data.decode('utf-8')
 
 
 def list_define(prefix, *blacklist):
