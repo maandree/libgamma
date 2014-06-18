@@ -2,8 +2,8 @@ libgamma is a library that aims to abstract away the
 display server when adjusting the colours curves
 for monitors via gamma ramps.
 
-It pricipal goal of libgamma is to provide abstraction
+The pricipal goal of libgamma is to provide abstraction
 now that we are entering a world of multiple display
-servers and reduce code duplication both within and
+servers and to reduce code duplication both within and
 between software like redshift and blueshift.
 
