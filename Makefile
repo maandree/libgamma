@@ -79,6 +79,9 @@ LIB_MAJOR = 0
 LIB_MINOR = 1
 LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
 
+# Change by .config.mk to reflect what is used in the OS, linux uses so: libgamma.so
+SO = so
+
 # Include configurations from `./configure`.
 include .config.mk
 
@@ -114,6 +117,9 @@ endif
 
 # Options for the C compiler for the library.
 LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
+# These two below are changed by .config.mk if required
+SHARED = -shared
+LDSO = -Wl,-soname,libgamma.$(SO).$(LIB_MAJOR)
 
 
 ifeq ($(CC),gcc)
@@ -132,19 +138,19 @@ all: lib test doc
 
 
 .PHONY: lib
-lib: bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so.$(LIB_MAJOR) bin/libgamma.so
+lib: bin/libgamma.$(SO).$(LIB_VERSION) bin/libgamma.$(SO).$(LIB_MAJOR) bin/libgamma.$(SO)
 
-bin/libgamma.so.$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/lib/$(O).o)
+bin/libgamma.$(SO).$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/lib/$(O).o)
 	mkdir -p $(shell dirname $@)
-	$(CC) $(LIB_FLAGS) $(LIBS_LD) -shared -Wl,-soname,libgamma.so.$(LIB_MAJOR) -o $@ $^
+	$(CC) $(LIB_FLAGS) $(LIBS_LD) $(SHARED) $(LDSO) -o $@ $^
 
-bin/libgamma.so.$(LIB_MAJOR):
+bin/libgamma.$(SO).$(LIB_MAJOR):
 	mkdir -p $(shell dirname $@)
-	ln -sf libgamma.so.$(LIB_VERSION) $@
+	ln -sf libgamma.$(SO).$(LIB_VERSION) $@
 
-bin/libgamma.so:
+bin/libgamma.$(SO):
 	mkdir -p $(shell dirname $@)
-	ln -sf libgamma.so.$(LIB_VERSION) $@
+	ln -sf libgamma.$(SO).$(LIB_VERSION) $@
 
 obj/lib/%.o: src/lib/%.c src/lib/*.h
 	mkdir -p $(shell dirname $@)
@@ -161,7 +167,7 @@ obj/%: src/%.gpp src/extract/libgamma-*-extract
 .PHONY: test
 test: bin/test
 
-bin/test: $(foreach O,$(TESTOBJ),obj/test/$(O).o) bin/libgamma.so.$(LIB_VERSION) bin/libgamma.so
+bin/test: $(foreach O,$(TESTOBJ),obj/test/$(O).o) bin/libgamma.$(SO).$(LIB_VERSION) bin/libgamma.$(SO)
 	mkdir -p $(shell dirname $@)
 	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/test/$(O).o)
 
@@ -219,11 +225,11 @@ install-base: install-lib install-include install-copyright
 
 
 .PHONY: install-lib
-install-lib: bin/libgamma.so.$(LIB_VERSION)
+install-lib: bin/libgamma.$(SO).$(LIB_VERSION)
 	install -dm755 -- "$(DESTDIR)$(LIBDIR)"
-	install -m755 $< -- "$(DESTDIR)$(LIBDIR)/libgamma.so.$(LIB_VERSION)"
-	ln -sf libgamma.so.$(LIB_VERSION) -- "$(DESTDIR)$(LIBDIR)/libgamma.so.$(LIB_MAJOR)"
-	ln -sf libgamma.so.$(LIB_VERSION) -- "$(DESTDIR)$(LIBDIR)/libgamma.so"
+	install -m755 $< -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO).$(LIB_VERSION)"
+	ln -sf libgamma.$(SO).$(LIB_VERSION) -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO).$(LIB_MAJOR)"
+	ln -sf libgamma.$(SO).$(LIB_VERSION) -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO)"
 
 .PHONY: install-include
 install-include:
@@ -273,9 +279,9 @@ install-dvi: libgamma.dvi
 
 .PHONY: uninstall
 uninstall:
-	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.so.$(LIB_VERSION)"
-	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.so.$(LIB_MAJOR)"
-	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.so"
+	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO).$(LIB_VERSION)"
+	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO).$(LIB_MAJOR)"
+	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO)"
 	-rm -- $(foreach H,$(HEADERS),"$(DESTDIR)$(INCLUDEDIR)/$(H).h")
 	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
 	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
