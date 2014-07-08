@@ -36,7 +36,7 @@ while i < n:
         delimiter = sys.argv[i]
     elif arg == '-f':
         i += 1
-        fields += [int(f) for f in sys.argv[i].split(',')]
+        fields += [int(f) - 1 for f in sys.argv[i].split(',')]
     elif arg == '--complement':
         complement = True
     i += 1
@@ -47,7 +47,7 @@ fields = set(fields)
 
 def modify(line):
     line = line.split(delimiter)
-    if not complement:
+    if complement:
         line = [line[i] for i in range(len(line)) if i not in fields]
     else:
         line = [line[i] for i in range(len(line)) if i in fields]

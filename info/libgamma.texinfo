@@ -271,6 +271,14 @@ Quartz/CoreGraphics adjustment method.
 Also enables @option{--debug}.
 @end table
 
+Configuring with @option{--windows} or
+@option{--windows=developer} will also add
+configurations to the make script needed
+to compile for Windows. @option{--mac-os-x} or
+@option{--mac-os-x=developer} will do add
+configurations to the make script needed
+to compile for OS X.
+
 When you have configured @command{libgamma}
 using @command{./configure} you can compile
 the library with @command{make}. Straight up

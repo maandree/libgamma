@@ -37,7 +37,11 @@ $>export PATH=".:${PATH}"
  * Group that the user needs to be a member of if
  * `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned.
  */
+#ifndef __WIN32__
 gid_t libgamma_group_gid = 0;
+#else
+short libgamma_group_gid = 0;
+#endif
 
 /**
  * Group that the user needs to be a member of if

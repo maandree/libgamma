@@ -36,10 +36,12 @@ for arg in "$@"; do
 					 enable_drm=1
 					 fake_w32gdi=1
 					 fake_quartz=1
+					 os=gnu
 					 ;;
 	(--linux)                        enable_vidmode=1
 					 enable_randr=1
 					 enable_drm=1
+					 os=gnu
 					 ;;
 	(--*bsd=developer)               enable_debug=1
 					 enable_dummy=1
@@ -176,10 +178,14 @@ if [ ${fake_quartz} = 1 ]; then
 fi
 if [ ${os} = w32 ]; then
     echo 'SO = dll' >&3
+    echo 'PIC = ' >&3
+    echo 'SHARED = -mdll' >&3
 elif [ ${os} = os ]; then
-    echo 'SO = dylib' >&3n
+    echo 'SO = dylib' >&3
     echo 'SHARED = -dynamiclib' >&3
     echo 'LDSO = ' >&3
+elif [ ${os} = gnu ]; then
+    echo 'HAVE_INT128 = y' >&3
 fi
 
 echo >&4

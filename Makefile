@@ -33,6 +33,7 @@ GPP ?= gpp
 
 # C compiler, GNU C Compiler by default
 CC ?= gcc
+CC_BASE ?= $(shell echo $(CC) | cut -d ' ' -f 1)
 
 
 # Enabled warnings.
@@ -44,7 +45,7 @@ WARN = -Wall -Wextra -pedantic -Wformat=2 -Winit-self -Wmissing-include-dirs   \
        -Wwrite-strings -Waggregate-return -Wpacked -Wstrict-prototypes         \
        -Wold-style-definition
 
-ifeq ($(CC),gcc)
+ifeq ($(CC_BASE),gcc)
 WARN += -Wdouble-promotion -Wtrampolines -Wsign-conversion -Wsync-nand  \
         -Wlogical-op -Wvector-operation-performance                     \
         -Wunsuffixed-float-constants -Wsuggest-attribute=const          \
@@ -82,18 +83,23 @@ LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
 # Change by .config.mk to reflect what is used in the OS, linux uses so: libgamma.so
 SO = so
 
+# These three below are changed by .config.mk if required
+SHARED = -shared
+LDSO = -Wl,-soname,libgamma.$(SO).$(LIB_MAJOR)
+PIC = -fPIC
+
 # Include configurations from `./configure`.
 include .config.mk
 
 # Optimisation level (and debug flags.)
 ifeq ($(DEBUG),y)
-ifeq ($(CC),gcc)
-OPTIMISE = -Og -g
+ifeq ($(CC_BASE),gcc)
+OPTIMISE = -Og -g3
 else
 OPTIMISE = -g
 endif
 else
-ifeq ($(CC),gcc)
+ifeq ($(CC_BASE),gcc)
 OPTIMISE = -Ofast
 else
 OPTIMISE = -O
@@ -110,22 +116,23 @@ endif
 TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
              -fstrict-aliasing -fstrict-overflow -fno-builtin
 
-ifeq ($(CC),gcc)
+ifeq ($(CC_BASE),gcc)
 TEST_FLAGS += -fstack-usage -ftree-vrp -fipa-pure-const -funsafe-loop-optimizations
 endif
 
 
 # Options for the C compiler for the library.
 LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
-# These two below are changed by .config.mk if required
-SHARED = -shared
-LDSO = -Wl,-soname,libgamma.$(SO).$(LIB_MAJOR)
 
-
-ifeq ($(CC),gcc)
+ifeq ($(CC_BASE),gcc)
 TEST_FLAGS += -D__GCC__
 LIB_FLAGS += -D__GCC__
 endif
+
+ifeq ($(HAVE_INT128),y)
+LIB_FLAGS += -DHAVE_INT128
+endif
+
 
 
 # Build rules.
@@ -154,10 +161,10 @@ bin/libgamma.$(SO):
 
 obj/lib/%.o: src/lib/%.c src/lib/*.h
 	mkdir -p $(shell dirname $@)
-	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -c -o $@ $<
+	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $<
 
 obj/lib/%.o: obj/lib/%.c src/lib/*.h
-	$(CC) $(LIB_FLAGS) $(LIBS_C) -fPIC -iquote"$$(dirname "$<" | sed -e 's:^obj:src:')" -c -o $@ $<
+	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -iquote"$$(dirname "$<" | sed -e 's:^obj:src:')" -c -o $@ $<
 
 obj/%: src/%.gpp src/extract/libgamma-*-extract
 	mkdir -p $(shell dirname $@)

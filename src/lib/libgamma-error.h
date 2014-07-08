@@ -34,7 +34,11 @@
  * Group that the user needs to be a member of if
  * `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned.
  */
+#ifndef __WIN32__
 extern gid_t libgamma_group_gid;
+#else
+extern short libgamma_group_gid;
+#endif
 
 /**
  * Group that the user needs to be a member of if

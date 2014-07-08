@@ -55,7 +55,7 @@ static inline uint64_t float_to_64(float value)
 {
   /* XXX Which is faster? */
   
-#ifdef __GCC__
+#ifdef HAVE_INT128
   /* `__int128` is a GNU C extension, which
      (because it is not ISO C) emits a warning
      under -pedantic. */
@@ -121,7 +121,7 @@ static inline uint64_t double_to_64(double value)
 {
   /* XXX Which is faster? */
   
-#ifdef __GCC__
+#ifdef HAVE_INT128
   /* `__int128` is a GNU C extension, which
      (because it is not ISO C) emits a warning
      under -pedantic. */
