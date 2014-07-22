@@ -52,8 +52,7 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restri
 {
   /* Gamma ramps size, depth and support can be queried. */
   this->crtc_information = LIBGAMMA_CRTC_INFO_GAMMA_SIZE
-			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH
-			 | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT;
+			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH;
   /* Windows GDI does not support sites or partitions. */
   this->default_site_known = 1;
   this->multiple_sites = 0;
@@ -266,7 +265,7 @@ int libgamma_w32_gdi_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
-#define KNOWN_FIELDS  (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT)
+#define KNOWN_FIELDS  (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH)
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   
   /* Windows GDI does not support EDID or monitor dimensions. */
@@ -284,10 +283,15 @@ int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict 
   this->gamma_depth = 16;
   this->gamma_depth_error = 0;
   /* It is possible to query Windows GDI whether the device
-     have gamma ramp support. It cannot fail. */
+     have gamma ramp support. It cannot fail. However, I think
+     the result is incorrect if multiple monitors are active,
+     so we cannot include this. */
+  /*
   if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT))
     this->gamma_support = GetDeviceCaps(crtc->data, COLORMGMTCAPS) == CM_GAMMA_RAMP;
   this->gamma_support_error = 0;
+  */
+  this->gamma_support_error = _E(LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT);
   /* Windows GDI does not support EDID or connector information. */
   this->subpixel_order_error = _E(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER);
   this->active_error = _E(LIBGAMMA_CRTC_INFO_ACTIVE);
