@@ -215,7 +215,9 @@ int libgamma_w32_gdi_crtc_initialise(libgamma_crtc_state_t* restrict this,
   if (!EnumDisplayDevices(NULL, (DWORD)crtc, &display, 0))
     return LIBGAMMA_NO_SUCH_CRTC;
   /* Check that the connector is enabled,
-   * newer versions of Windows will always pass. */
+   * newer versions of Windows will always pass.
+   * (According to w32's documentation, but that
+   * that is a load of crap.)*/
   if (!(display.StateFlags & DISPLAY_DEVICE_ACTIVE))
     return LIBGAMMA_CONNECTOR_DISABLED;
   /* Acquire CRTC connection. */
