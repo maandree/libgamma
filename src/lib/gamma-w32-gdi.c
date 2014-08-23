@@ -270,6 +270,8 @@ int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t* restrict 
 #define KNOWN_FIELDS  (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH)
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
   
+  (void) crtc;
+  
   /* Windows GDI does not support EDID or monitor dimensions. */
   this->edid_error = _E(LIBGAMMA_CRTC_INFO_EDID);
   this->width_mm_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM);
