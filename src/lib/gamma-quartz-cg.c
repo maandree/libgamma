@@ -26,6 +26,7 @@
 #ifdef FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
 # include "fake-quartz-cg.h"
 #else
+# include <ApplicationServices/ApplicationServices.h>
 # include <CoreGraphics/CGDirectDisplay.h>
 # define close_fake_quartz_cg() /* For compatibility with "fake-quartz-cg.h". */
 #endif
