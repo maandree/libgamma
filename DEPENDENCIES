@@ -24,6 +24,7 @@ BUILD DEPENDENCIES:
     sed
     coreutils
     c99                           gcc is preferred
+    pkg-config
     general-preprocessor (gpp)
     python                        Both Python 2 and Python 3 will work
     texinfo                       Optional: for info, pdf, ps and dvi manuals
@@ -47,6 +48,7 @@ DEPENDENCIES SOURCES:
     sed                           https://www.gnu.org/software/sed
     coreutils                     https://www.gnu.org/software/coreutils
     c99                           https://gcc.gnu.org
+    pkg-config			  http://pkgconfig.freedesktop.org
     general-preprocessor (gpp)    https://github.com/maandree/gpp
     python                        https://www.python.org/
     texinfo                       https://www.gnu.org/software/texinfo/
