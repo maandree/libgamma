@@ -91,7 +91,7 @@ on any of the BSD:s, it is only tested on GNU/Linux.
 
 Furthermore @command{libgamma} provides a dummy
 method that can be used to ignore adjustments
-and can be controlled from a another program to
+and can be controlled from another program to
 pretend like the environment has changed. This
 can be used test how well your software handles
 such events. It can also be configured at runtime

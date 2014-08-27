@@ -22,6 +22,217 @@
 #include "gamma-dummy.h"
 
 #include "libgamma-error.h"
+#include "libgamma-method.h"
+
+#include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+
+
+/**
+ * Configuration set for the dummy adjustment method.
+ */
+typedef struct libgamma_dummy_configurations
+{
+  /**
+   * The method's capabilities.
+   */
+  libgamma_method_capabilities_t capabilities;
+  
+  /**
+   * The adjustment method to use.
+   */
+  int real_method;
+  
+  /**
+   * The number of sites on the system.
+   */
+  size_t site_count;
+  
+  /**
+   * The number of paritions on a site before it has been configured.
+   */
+  size_t default_partition_count;
+  
+  /**
+   * The number of CRTC:s on a paritions before it has been configured.
+   */
+  size_t default_crtc_count;
+  
+  /**
+   * Whether the sites should be inherited from the real method.
+   */
+  unsigned inherit_sites : 1;
+  
+  /**
+   * Whether the partitions should be inherited from the real method.
+   */
+  unsigned inherit_partition_count : 1;
+  
+  /**
+   * Whether the CRTC:s should be inherited from the real method.
+   */
+  unsigned inherit_crtc_count : 1;
+  
+  /**
+   * When a site has been created, stall until the partition count has
+   * been configured.
+   */
+  unsigned stall_for_partition_count : 1;
+  
+  /**
+   * When a parition has been created, stall until the CRTC count has
+   * been configured.
+   */
+  unsigned stall_for_crtc_count : 1;
+  
+  /**
+   * Methods should stall until the system has been configured
+   * unless $LIBGAMMA_DUMMY_STALL is not true.
+   */
+  unsigned stalled_start : 1;
+  
+  /**
+   * Whether to print what is going on in the phony system.
+   */
+  unsigned verbose : 1;
+  
+} libgamma_dummy_configurations_t;
+
+
+/**
+ * Dummy adjustment method internal data for a CRTC.
+ */
+typedef struct libgamma_dummy_crtc
+{
+  /**
+   * The gamma ramp for the red channel.
+   */
+  void* restrict gamma_red;
+  
+  /**
+   * The gamma ramp for the green channel.
+   */
+  void* restrict gamma_green;
+  
+  /**
+   * The gamma ramp for the blue channel.
+   */
+  void* restrict gamma_blue;
+  
+  /**
+   * The number of stops in the gamma ramps.
+   */
+  size_t gamma_size;
+  
+  /**
+   * The depth of the gamma ramps, -1 for `float`, -2 for `double`.
+   */
+  int gamma_depth;
+  
+  /**
+   * CRTC state that contains this information.
+   */
+  libgamma_crtc_state_t* state;
+  
+} libgamma_dummy_crtc_t;
+
+
+/**
+ * Dummy adjustment method internal data for a partition.
+ */
+typedef struct libgamma_dummy_partition
+{
+  /**
+   * The CRTC:s on the system.
+   */
+  libgamma_dummy_crtc_t* crtcs;
+  
+  /**
+   * The number of CRTC:s on the system.
+   */
+  size_t crtc_count;
+  
+  /**
+   * Partition state that contains this information.
+   */
+  libgamma_partition_state_t* state;
+  
+} libgamma_dummy_partition_t;
+
+
+/**
+ * Dummy adjustment method internal data for a site.
+ */
+typedef struct libgamma_dummy_site
+{
+  /**
+   * The partitions on the system.
+   */
+  libgamma_dummy_partition_t* partitions;
+  
+  /**
+   * The number of partitions on the system.
+   */
+  size_t partition_count;
+  
+  /**
+   * Site state that contains this information.
+   */
+  libgamma_site_state_t* state;
+  
+} libgamma_dummy_site_t;
+
+
+
+/**
+ * Restore the gamma ramps for a CRTC to the system settings for that CRTC
+ * and ignore the method's capabilities.
+ * 
+ * @param   this  The CRTC data
+ * @return        Zero on success, otherwise (negative) the value of an
+ *                error identifier provided by this library.
+ */
+static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict data);
+
+
+
+/**
+ * Configurations for the dummy adjustment method.
+ */
+static libgamma_dummy_configurations_t libgamma_dummy_configurations =
+  {
+    .capabilities =
+      {
+	.crtc_information = 0, /* TODO */
+	.default_site_known = 1,
+	.multiple_sites = 1,
+	.multiple_partitions = 1,
+	.multiple_crtcs = 1,
+	.partitions_are_graphics_cards = 1,
+	.site_restore = 1,
+	.partition_restore = 1,
+	.crtc_restore = 1,
+	.identical_gamma_sizes = 0,
+	.fixed_gamma_size = 0,
+	.fixed_gamma_depth = 0,
+	.real = 0,
+	.fake = 0
+      },
+    .real_method = LIBGAMMA_METHOD_DUMMY,
+    .site_count = 2,
+    .default_partition_count = 2,
+    .default_crtc_count = 2,
+    .inherit_sites = 1,
+    .inherit_partition_count = 1,
+    .inherit_crtc_count = 1,
+    .stall_for_partition_count = 0,
+    .stall_for_crtc_count = 0,
+    .stalled_start = 1,
+    .verbose = 0
+  };
+
 
 
 /**
@@ -31,6 +242,9 @@
  */
 void libgamma_dummy_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
+  *this = libgamma_dummy_configurations.capabilities;
+  this->real = libgamma_dummy_configurations.real_method != LIBGAMMA_METHOD_DUMMY;
+  this->fake = this->real;
 }
 
 
@@ -60,6 +274,12 @@ int libgamma_dummy_site_initialise(libgamma_site_state_t* restrict this,
  */
 void libgamma_dummy_site_destroy(libgamma_site_state_t* restrict this)
 {
+  libgamma_dummy_site_t* data = this->data;
+  if (data == NULL)
+    return;
+  
+  free(data->partitions);
+  free(data);
 }
 
 
@@ -72,6 +292,18 @@ void libgamma_dummy_site_destroy(libgamma_site_state_t* restrict this)
  */
 int libgamma_dummy_site_restore(libgamma_site_state_t* restrict this)
 {
+  libgamma_dummy_site_t* data = this->data;
+  size_t i, j;
+  
+  if (libgamma_dummy_configurations.capabilities.site_restore == 0)
+    return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
+  
+  for (j = 0; j < data->partition_count; j++)
+    for (i = 0; i < data->partitions[j].crtc_count; i++)
+      if (libgamma_dummy_crtc_restore_forced(data->partitions[j].crtcs + i) < 0)
+	return -1;
+  
+  return 0;
 }
 
 
@@ -98,6 +330,12 @@ int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict thi
  */
 void libgamma_dummy_partition_destroy(libgamma_partition_state_t* restrict this)
 {
+  libgamma_dummy_partition_t* data = this->data;
+  if (data == NULL)
+    return;
+  
+  free(data->crtcs);
+  data->crtcs = NULL;
 }
 
 
@@ -110,6 +348,17 @@ void libgamma_dummy_partition_destroy(libgamma_partition_state_t* restrict this)
  */
 int libgamma_dummy_partition_restore(libgamma_partition_state_t* restrict this)
 {
+  libgamma_dummy_partition_t* data = this->data;
+  size_t i;
+  
+  if (libgamma_dummy_configurations.capabilities.partition_restore == 0)
+    return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
+  
+  for (i = 0; i < data->crtc_count; i++)
+    if (libgamma_dummy_crtc_restore_forced(data->crtcs + i) < 0)
+      return -1;
+  
+  return 0;
 }
 
 
@@ -126,6 +375,40 @@ int libgamma_dummy_partition_restore(libgamma_partition_state_t* restrict this)
 int libgamma_dummy_crtc_initialise(libgamma_crtc_state_t* restrict this,
 				   libgamma_partition_state_t* restrict partition, size_t crtc)
 {
+  libgamma_dummy_partition_t* partition_data = partition->data;
+  libgamma_dummy_crtc_t* data = partition_data->crtcs + crtc;
+  size_t stop_size;
+  
+  this->data = NULL;
+  
+  if (crtc >= partition_data->crtc_count)
+    return LIBGAMMA_NO_SUCH_CRTC;
+  
+  this->data = data;
+  data->state = this;
+  
+  if (data->gamma_depth == -1)
+    stop_size = sizeof(float);
+  else if (data->gamma_depth == -2)
+    stop_size = sizeof(double);
+  else
+    stop_size = (size_t)(data->gamma_depth) / 8;
+  
+  data->gamma_red   = malloc(3 * data->gamma_size * stop_size);
+  data->gamma_green = ((char*)(data->gamma_red))   + data->gamma_size * stop_size;
+  data->gamma_blue  = ((char*)(data->gamma_green)) + data->gamma_size * stop_size;
+  
+  if (data->gamma_red == NULL)
+    goto fail;
+  
+  return libgamma_dummy_crtc_restore_forced(data);
+  
+ fail:
+  free(data->gamma_red);
+  data->gamma_red   = NULL;
+  data->gamma_green = NULL;
+  data->gamma_blue  = NULL;
+  return LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -136,6 +419,14 @@ int libgamma_dummy_crtc_initialise(libgamma_crtc_state_t* restrict this,
  */
 void libgamma_dummy_crtc_destroy(libgamma_crtc_state_t* restrict this)
 {
+  libgamma_dummy_crtc_t* data = this->data;
+  if (data == NULL)
+    return;
+  
+  free(data->gamma_red);
+  data->gamma_red   = NULL;
+  data->gamma_green = NULL;
+  data->gamma_blue  = NULL;
 }
 
 
@@ -148,6 +439,87 @@ void libgamma_dummy_crtc_destroy(libgamma_crtc_state_t* restrict this)
  */
 int libgamma_dummy_crtc_restore(libgamma_crtc_state_t* restrict this)
 {
+  if (libgamma_dummy_configurations.capabilities.crtc_restore == 0)
+    return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
+  
+  return libgamma_dummy_crtc_restore_forced(this->data);
+}
+
+
+/**
+ * Restore the gamma ramps for a CRTC to the system settings for that CRTC
+ * and ignore the method's capabilities.
+ * 
+ * @param   this  The CRTC data
+ * @return        Zero on success, otherwise (negative) the value of an
+ *                error identifier provided by this library.
+ */
+static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict data)
+{
+  size_t i, n = data->gamma_size;
+  if (data->gamma_red == NULL)
+    return 0;
+  
+  if (data->gamma_depth == 8)
+    {
+      int8_t* red   = data->gamma_red;
+      int8_t* green = data->gamma_green;
+      int8_t* blue  = data->gamma_blue;
+      double max = (double)INT8_MAX;
+      for (i = 0; i < n; i++)
+	red[i] = green[i] = blue[i] =
+	  (int8_t)(max * ((double)i / (double)(n - 1)));
+    }
+  else if (data->gamma_depth == 16)
+    {
+      int16_t* red   = data->gamma_red;
+      int16_t* green = data->gamma_green;
+      int16_t* blue  = data->gamma_blue;
+      double max = (double)INT16_MAX;
+      for (i = 0; i < n; i++)
+	red[i] = green[i] = blue[i] =
+	  (int16_t)(max * ((double)i / (double)(n - 1)));
+    }
+  else if (data->gamma_depth == 32)
+    {
+      int32_t* red   = data->gamma_red;
+      int32_t* green = data->gamma_green;
+      int32_t* blue  = data->gamma_blue;
+      double max = (double)INT32_MAX;
+      for (i = 0; i < n; i++)
+	red[i] = green[i] = blue[i] =
+	  (int32_t)(max * ((double)i / (double)(n - 1)));
+    }
+  else if (data->gamma_depth == 64)
+    {
+      int64_t* red   = data->gamma_red;
+      int64_t* green = data->gamma_green;
+      int64_t* blue  = data->gamma_blue;
+      double max = (double)INT64_MAX;
+      for (i = 0; i < n; i++)
+	red[i] = green[i] = blue[i] =
+	  (int64_t)(max * ((double)i / (double)(n - 1)));
+    }
+  else if (data->gamma_depth == -1)
+    {
+      float* red   = data->gamma_red;
+      float* green = data->gamma_green;
+      float* blue  = data->gamma_blue;
+      for (i = 0; i < n; i++)
+	red[i] = green[i] = blue[i] =
+	  (float)((double)i / (double)(n - 1));
+    }
+  else
+    {
+      double* red   = data->gamma_red;
+      double* green = data->gamma_green;
+      double* blue  = data->gamma_blue;
+      for (i = 0; i < n; i++)
+	red[i] = green[i] = blue[i] =
+	  (double)i / (double)(n - 1);
+    }
+  
+  return 0;
 }
 
 
