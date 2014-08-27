@@ -80,7 +80,7 @@ Manager which lets software work with graphics
 outside of graphical environments. Additionally
 @command{libgamma} have support for Windows
 Graphics Device Interface (Windows GDI) under
-Linux and Quartz using CoreGraphics under OS X.
+Windows and Quartz using CoreGraphics under OS X.
 However Windows GDI and Quartz/CoreGraphics do
 not receive first-party testing on their target
 platforms but do receive first-party testing
