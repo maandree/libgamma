@@ -264,6 +264,45 @@ void libgamma_dummy_method_capabilities(libgamma_method_capabilities_t* restrict
 int libgamma_dummy_site_initialise(libgamma_site_state_t* restrict this,
 				   char* restrict site)
 {
+  libgamma_dummy_site_t* data = NULL;
+  size_t i, sites, crtcs;
+  
+  sites = libgamma_dummy_configurations.site_count;
+  if (libgamma_dummy_configurations.capabilities.multiple_sites == 0)
+    sites = sites == 0 ? 0 : 1;
+  this->data = NULL;
+  
+  if ((site != NULL) && (*site) && ((atoll(site) < 0) || (sites <= (unsigned long long)atoll(site))))
+    return LIBGAMMA_NO_SUCH_SITE;
+  
+  data = malloc(sizeof(libgamma_dummy_site_t));
+  if (data == NULL)
+    goto fail;
+  
+  this->data = data;
+  data->state = this;
+  
+  data->partition_count = libgamma_dummy_configurations.default_partition_count;
+  if (libgamma_dummy_configurations.capabilities.multiple_partitions == 0)
+    data->partition_count = data->partition_count == 0 ? 0 : 1;
+  
+  crtcs = libgamma_dummy_configurations.default_crtc_count;
+  if (libgamma_dummy_configurations.capabilities.multiple_crtcs == 0)
+    crtcs = crtcs == 0 ? 0 : 1;
+  
+  data->partitions = malloc(data->partition_count * sizeof(libgamma_dummy_partition_t));
+  if (data->partitions == NULL)
+    goto fail;
+  
+  for (i = 0; i < data->partition_count; i++)
+    data->partitions[i].crtc_count = crtcs;
+  
+  return 0;
+  
+ fail:
+  free(data);
+  this->data = NULL;
+  return LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -320,6 +359,33 @@ int libgamma_dummy_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict this,
 					libgamma_site_state_t* restrict site, size_t partition)
 {
+  libgamma_dummy_site_t* site_data = site->data;
+  libgamma_dummy_partition_t* data = site_data->partitions + partition;
+  size_t i;
+  
+  this->data = NULL;
+  
+  if (partition >= site_data->partition_count)
+    return LIBGAMMA_NO_SUCH_PARTITION;
+  
+  this->data = data;
+  data->state = this;
+  
+  data->crtcs = malloc(data->crtc_count * sizeof(libgamma_dummy_crtc_t));
+  if (data->crtcs == NULL)
+    goto fail;
+  for (i = 0; i < data->crtc_count; i++)
+    {
+      data->crtcs[i].gamma_size = 2048;
+      data->crtcs[i].gamma_size = 64;
+    }
+  
+  return 0;
+  
+ fail:
+  free(data->crtcs);
+  data->crtcs = NULL;
+  return LIBGAMMA_ERRNO_SET;
 }
 
 
