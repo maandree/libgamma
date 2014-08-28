@@ -762,7 +762,7 @@ $>done
  * 
  * @param   1      Either `get` or `set`, for the action that the name of value implies.
  * @param   2      The `ramp*` pattern for the ramp structure and function to call.
- * @param   3      Either of `bit16`, `bit32`, `bit64`, `float_single`, `float_double`;
+ * @param   3      Either of `bit8`, `bit16`, `bit32`, `bit64`, `float_single`, `float_double`;
  *                 rather self-explanatory.
  * @param   4      The number of bits in the gamma depth, -1 for single precision float,
  *                 (`float`) and -2 for double percition float (`double`).
@@ -816,6 +816,29 @@ $>fi
     }
 }
 $>}
+
+
+
+/**
+ * Get current the gamma ramps for a CRTC, 8-bit gamma-depth version.
+ * 
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to fill with the current values.
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library.
+ */
+$>crtc_set_get_gamma_ramps get ramps8 bits8 8
+
+
+/**
+ * Set the gamma ramps for a CRTC, 32-bit gamma-depth version.
+ * 
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library.
+ */
+$>crtc_set_get_gamma_ramps set ramps8 bits8 8
 
 
 
@@ -974,6 +997,21 @@ int libgamma_crtc_set_gamma_${2}_f(libgamma_crtc_state_t* restrict this,
   return e;
 }
 $>}
+
+
+/**
+ * Set the gamma ramps for a CRTC, 8-bit gamma-depth function version.
+ * 
+ * Note that this will probably involve the library allocating temporary data.
+ * 
+ * @param   this            The CRTC state.
+ * @param   red_function    The function that generates the the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @return                  Zero on success, otherwise (negative) the value of an
+ *                          error identifier provided by this library.
+ */
+$>crtc_set_gamma_ramps_f uint8_t ramps8
 
 
 /**

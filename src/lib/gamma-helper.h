@@ -28,6 +28,11 @@
 typedef union libgamma_gamma_ramps_any
 {
   /**
+   * 8-bit gamma ramps.
+   */
+  libgamma_gamma_ramps8_t bits8;
+  
+  /**
    * 16-bit gamma ramps.
    */
   libgamma_gamma_ramps16_t bits16;

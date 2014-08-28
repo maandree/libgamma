@@ -862,6 +862,44 @@ typedef struct libgamma_crtc_information
 
 
 /**
+ * Gamma ramp structure for 8-bit gamma ramps.
+ */
+typedef struct libgamma_gamma_ramps8
+{
+  /**
+   * The size of `red`.
+   */
+  size_t red_size;
+  
+  /**
+   * The size of `green`.
+   */
+  size_t green_size;
+  
+  /**
+   * The size of `blue`.
+   */
+  size_t blue_size;
+  
+  /**
+   * The gamma ramp for the red channel.
+   */
+  uint8_t* red;
+  
+  /**
+   * The gamma ramp for the green channel.
+   */
+  uint8_t* green;
+  
+  /**
+   * The gamma ramp for the blue channel.
+   */
+  uint8_t* blue;
+  
+} libgamma_gamma_ramps8_t;
+
+
+/**
  * Gamma ramp structure for 16-bit gamma ramps.
  */
 typedef struct libgamma_gamma_ramps16
@@ -1062,11 +1100,43 @@ typedef struct libgamma_gamma_rampsd
  * @param   this  The gamma ramps.
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
+int libgamma_gamma_ramps8_initialise(libgamma_gamma_ramps8_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps8_initialise` or otherwise
+ * initialises in the proper manner.
+ * 
+ * @param  this  The gamma ramps.
+ */
+void libgamma_gamma_ramps8_destroy(libgamma_gamma_ramps8_t* restrict this);
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps8_initialise` or otherwise
+ * initialises in the proper manner, as well as release the pointer
+ * to the structure.
+ * 
+ * @param  this  The gamma ramps.
+ */
+void libgamma_gamma_ramps8_free(libgamma_gamma_ramps8_t* restrict this);
+
+
+/**
+ * Initialise a gamma ramp in the proper way that allows all adjustment
+ * methods to read from and write to it without causing segmentation violation.
+ * 
+ * The input must have `red_size`, `green_size` and `blue_size` set to the
+ * sizes of the gamma ramps that should be allocated.
+ * 
+ * @param   this  The gamma ramps.
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
+ */
 int libgamma_gamma_ramps16_initialise(libgamma_gamma_ramps16_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
- * has been allocated by `libgamma_gamma_ramps_initialise` or otherwise
+ * has been allocated by `libgamma_gamma_ramps16_initialise` or otherwise
  * initialises in the proper manner.
  * 
  * @param  this  The gamma ramps.
@@ -1075,7 +1145,7 @@ void libgamma_gamma_ramps16_destroy(libgamma_gamma_ramps16_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
- * has been allocated by `libgamma_gamma_ramps_initialise` or otherwise
+ * has been allocated by `libgamma_gamma_ramps16_initialise` or otherwise
  * initialises in the proper manner, as well as release the pointer
  * to the structure.
  * 

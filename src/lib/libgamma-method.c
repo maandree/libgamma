@@ -34,6 +34,55 @@
  * @param   this  The gamma ramps.
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
+int libgamma_gamma_ramps8_initialise(libgamma_gamma_ramps8_t* restrict this)
+{
+  size_t n = this->red_size + this->green_size + this->blue_size;
+  this->red   = malloc(n * sizeof(uint8_t));
+  this->green = this->  red + this->  red_size;
+  this->blue  = this->green + this->green_size;
+  return this->red == NULL ? -1 : 0;
+}
+
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps8_initialise` or otherwise
+ * initialises in the proper manner.
+ * 
+ * @param  this  The gamma ramps.
+ */
+void libgamma_gamma_ramps8_destroy(libgamma_gamma_ramps8_t* restrict this)
+{
+  free(this->red);
+}
+
+
+/**
+ * Release resources that are held by a gamma ramp strcuture that
+ * has been allocated by `libgamma_gamma_ramps8_initialise` or otherwise
+ * initialises in the proper manner, as well as release the pointer
+ * to the structure.
+ * 
+ * @param  this  The gamma ramps.
+ */
+void libgamma_gamma_ramps8_free(libgamma_gamma_ramps8_t* restrict this)
+{
+  free(this->red);
+  free(this);
+}
+
+
+
+/**
+ * Initialise a gamma ramp in the proper way that allows all adjustment
+ * methods to read from and write to it without causing segmentation violation.
+ * 
+ * The input must have `red_size`, `green_size` and `blue_size` set to the
+ * sizes of the gamma ramps that should be allocated.
+ * 
+ * @param   this  The gamma ramps.
+ * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
+ */
 int libgamma_gamma_ramps16_initialise(libgamma_gamma_ramps16_t* restrict this)
 {
   size_t n = this->red_size + this->green_size + this->blue_size;

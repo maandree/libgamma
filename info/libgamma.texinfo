@@ -1043,6 +1043,10 @@ other than what the adjustment
 method uses, it will be converted.
 
 @table @asis
+@item @code{libgamma_gamma_ramps8_t} (@code{struct libgamma_gamma_ramps8})
+8-bit integer (@code{uint8_t}).
+Currently no adjustment method.
+
 @item @code{libgamma_gamma_ramps16_t} (@code{struct libgamma_gamma_ramps16})
 16-bit integer (@code{uint16_t}).
 This is by far the most common.
@@ -1110,7 +1114,8 @@ functions to create and destroy gamma
 ramp structures.
 
 @table @asis
-@item @code{libgamma_gamma_ramps16_initialise} [@code{int *(libgamma_gamma_ramps16_t*)}]
+@item @code{libgamma_gamma_ramps8_initialise} [@code{int *(libgamma_gamma_ramps8_t*)}]
+@itemx @code{libgamma_gamma_ramps16_initialise} [@code{int *(libgamma_gamma_ramps16_t*)}]
 @itemx @code{libgamma_gamma_ramps32_initialise} [@code{int *(libgamma_gamma_ramps32_t*)}]
 @itemx @code{libgamma_gamma_ramps64_initialise} [@code{int *(libgamma_gamma_ramps64_t*)}]
 @itemx @code{libgamma_gamma_rampsf_initialise} [@code{int *(libgamma_gamma_rampsf_t*)}]
@@ -1130,7 +1135,8 @@ Zero is returned on success. On error
 is set accordingly. These functions can
 only fail on @code{malloc} error.
 
-@item @code{libgamma_gamma_ramps16_destroy} [@code{void *(libgamma_gamma_ramps16_t*)}]
+@item @code{libgamma_gamma_ramps8_destroy} [@code{void *(libgamma_gamma_ramps8_t*)}]
+@itemx @code{libgamma_gamma_ramps16_destroy} [@code{void *(libgamma_gamma_ramps16_t*)}]
 @itemx @code{libgamma_gamma_ramps32_destroy} [@code{void *(libgamma_gamma_ramps32_t*)}]
 @itemx @code{libgamma_gamma_ramps64_destroy} [@code{void *(libgamma_gamma_ramps64_t*)}]
 @itemx @code{libgamma_gamma_rampsf_destroy} [@code{void *(libgamma_gamma_rampsf_t*)}]
@@ -1140,7 +1146,8 @@ ramp structure that has been allocated by
 @code{libgamma_gamma_ramps_initialise} or
 otherwise initialises in the proper manner.
 
-@item @code{libgamma_gamma_ramps16_free} [@code{void *(libgamma_gamma_ramps16_t*)}]
+@item @code{libgamma_gamma_ramps8_free} [@code{void *(libgamma_gamma_ramps8_t*)}]
+@itemx @code{libgamma_gamma_ramps16_free} [@code{void *(libgamma_gamma_ramps16_t*)}]
 @itemx @code{libgamma_gamma_ramps32_free} [@code{void *(libgamma_gamma_ramps32_t*)}]
 @itemx @code{libgamma_gamma_ramps64_free} [@code{void *(libgamma_gamma_ramps64_t*)}]
 @itemx @code{libgamma_gamma_rampsf_free} [@code{void *(libgamma_gamma_rampsf_t*)}]
@@ -1218,23 +1225,28 @@ type gamma ramps. But it is possible
 to use other element types as well:
 
 @table @code
+@item uint8_t
+Substitute all @code{ramps16} for @code{ramps8}
+in the the function names and date type
+definition names.
+
 @item uint32_t
-Substitute all @code{ramps} for @code{ramps32}
+Substitute all @code{ramps16} for @code{ramps32}
 in the the function names and date type
 definition names.
 
 @item uint64_t
-Substitute all @code{ramps} for @code{ramps64}
+Substitute all @code{ramps16} for @code{ramps64}
 in the the function names and date type
 definition names.
 
 @item float
-Substitute all @code{ramps} for @code{rampsf}
+Substitute all @code{ramps16} for @code{rampsf}
 in the the function names and date type
 definition names.
 
 @item double
-Substitute all @code{ramps} for @code{rampsd}
+Substitute all @code{ramps16} for @code{rampsd}
 in the the function names and date type
 definition names.
 @end table
