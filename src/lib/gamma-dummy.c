@@ -23,10 +23,12 @@
 
 #include "libgamma-error.h"
 #include "libgamma-method.h"
+#include "edid.h"
 
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 
@@ -39,6 +41,11 @@ typedef struct libgamma_dummy_configurations
    * The method's capabilities.
    */
   libgamma_method_capabilities_t capabilities;
+  
+  /**
+   * Template for CRTC:s information.
+   */
+  libgamma_crtc_information_t crtc_info_template;
   
   /**
    * The adjustment method to use.
@@ -122,27 +129,22 @@ typedef struct libgamma_dummy_crtc
   void* restrict gamma_blue;
   
   /**
-   * The number of stops in the red gamma ramp.
+   * Information about the CRTC and monitor.
+   * 
+   * Some feilds are ignored:
+   * - width_mm_edid
+   * - width_mm_edid_error
+   * - height_mm_edid
+   * - height_mm_edid_error
+   * - gamma_red
+   * - gamma_green
+   * - gamma_blue
+   * - gamma_error
    */
-  size_t gamma_red_size;
+  libgamma_crtc_information_t info;
   
   /**
-   * The number of stops in the green gamma ramp.
-   */
-  size_t gamma_green_size;
-  
-  /**
-   * The number of stops in the blue gamma ramp.
-   */
-  size_t gamma_blue_size;
-  
-  /**
-   * The depth of the gamma ramps, -1 for `float`, -2 for `double`.
-   */
-  int gamma_depth;
-  
-  /**
-   * CRTC state that contains this information.
+   * Partition state that contains this information.
    */
   libgamma_crtc_state_t* state;
   
@@ -215,7 +217,7 @@ static libgamma_dummy_configurations_t libgamma_dummy_configurations =
   {
     .capabilities =
       {
-	.crtc_information = 0, /* TODO */
+	.crtc_information = (1 << LIBGAMMA_CRTC_INFO_COUNT) - 1,
 	.default_site_known = 1,
 	.multiple_sites = 1,
 	.multiple_partitions = 1,
@@ -227,8 +229,32 @@ static libgamma_dummy_configurations_t libgamma_dummy_configurations =
 	.identical_gamma_sizes = 0,
 	.fixed_gamma_size = 0,
 	.fixed_gamma_depth = 0,
-	.real = 0,
-	.fake = 0
+      },
+    .crtc_info_template =
+    {
+      .edid = NULL,
+      .edid_length = 0,
+      .edid_error = LIBGAMMA_EDID_NOT_FOUND,
+      .width_mm = 400,
+      .width_mm_error = 0,
+      .height_mm = 300,
+      .height_mm_error = 0,
+      .red_gamma_size = 1024,
+      .green_gamma_size = 2048,
+      .blue_gamma_size = 512,
+      .gamma_size_error = 0,
+      .gamma_depth = 64,
+      .gamma_depth_error = 0,
+      .gamma_support = 1,
+      .gamma_support_error = 0,
+      .subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB,
+      .subpixel_order_error = 0,
+      .active = 1,
+      .active_error = 0,
+      .connector_name = NULL,
+      .connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED,
+      .connector_type = LIBGAMMA_CONNECTOR_TYPE_Unknown,
+      .connector_type_error = 0,
       },
     .real_method = LIBGAMMA_METHOD_DUMMY,
     .site_count = 2,
@@ -371,6 +397,7 @@ int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict thi
 {
   libgamma_dummy_site_t* site_data = site->data;
   libgamma_dummy_partition_t* data = site_data->partitions + partition;
+  libgamma_dummy_crtc_t* crtc_data;
   size_t i;
   
   this->data = NULL;
@@ -386,10 +413,10 @@ int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict thi
     goto fail;
   for (i = 0; i < data->crtc_count; i++)
     {
-      data->crtcs[i].gamma_red_size = 1024;
-      data->crtcs[i].gamma_green_size = 2048;
-      data->crtcs[i].gamma_blue_size = 512;
-      data->crtcs[i].gamma_depth = 64;
+      crtc_data = data->crtcs + i;
+      crtc_data->info = libgamma_dummy_configurations.crtc_info_template;
+      
+      /* TODO Duplicate strings. edid, connector_name */
     }
   
   return 0;
@@ -411,6 +438,8 @@ void libgamma_dummy_partition_destroy(libgamma_partition_state_t* restrict this)
   libgamma_dummy_partition_t* data = this->data;
   if (data == NULL)
     return;
+  
+  /* TODO free strings in CRTC info */
   
   free(data->crtcs);
   data->crtcs = NULL;
@@ -465,16 +494,19 @@ int libgamma_dummy_crtc_initialise(libgamma_crtc_state_t* restrict this,
   this->data = data;
   data->state = this;
   
-  if (data->gamma_depth == -1)
+  if (data->info.gamma_depth == -1)
     stop_size = sizeof(float);
-  else if (data->gamma_depth == -2)
+  else if (data->info.gamma_depth == -2)
     stop_size = sizeof(double);
   else
-    stop_size = (size_t)(data->gamma_depth) / 8;
+    stop_size = (size_t)(data->info.gamma_depth) / 8;
   
-  if ((data->gamma_red   = malloc(data->gamma_red_size   * stop_size)) == NULL)  goto fail;
-  if ((data->gamma_green = malloc(data->gamma_green_size * stop_size)) == NULL)  goto fail;
-  if ((data->gamma_blue  = malloc(data->gamma_blue_size  * stop_size)) == NULL)  goto fail;
+  if ((data->gamma_red   = malloc(data->info.red_gamma_size   * stop_size)) == NULL)
+    goto fail;
+  if ((data->gamma_green = malloc(data->info.green_gamma_size * stop_size)) == NULL)
+    goto fail;
+  if ((data->gamma_blue  = malloc(data->info.blue_gamma_size  * stop_size)) == NULL)
+    goto fail;
   
   return libgamma_dummy_crtc_restore_forced(data);
   
@@ -529,9 +561,9 @@ int libgamma_dummy_crtc_restore(libgamma_crtc_state_t* restrict this)
  */
 static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict data)
 {
-  size_t rn = data->gamma_blue_size;
-  size_t gn = data->gamma_green_size;
-  size_t bn = data->gamma_blue_size;
+  size_t rn = data->info.blue_gamma_size;
+  size_t gn = data->info.green_gamma_size;
+  size_t bn = data->info.blue_gamma_size;
   size_t i;
   if (data->gamma_red == NULL)
     return 0;
@@ -548,11 +580,11 @@ static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict da
   for (i = 0; i < bn; i++)							\
     blue[i]  = (int ## BITS ## _t)(max * ((double)i / (double)(bn - 1)))
   
-  if      (data->gamma_depth ==  8)  { __reset_ramps(8);  }
-  else if (data->gamma_depth == 16)  { __reset_ramps(16); }
-  else if (data->gamma_depth == 32)  { __reset_ramps(32); }
-  else if (data->gamma_depth == 64)  { __reset_ramps(64); }
-  else if (data->gamma_depth == -1)
+  if      (data->info.gamma_depth ==  8)  { __reset_ramps(8);  }
+  else if (data->info.gamma_depth == 16)  { __reset_ramps(16); }
+  else if (data->info.gamma_depth == 32)  { __reset_ramps(32); }
+  else if (data->info.gamma_depth == 64)  { __reset_ramps(64); }
+  else if (data->info.gamma_depth == -1)
     {
       float* red   = data->gamma_red;
       float* green = data->gamma_green;
@@ -595,6 +627,48 @@ static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict da
 int libgamma_dummy_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
+  libgamma_dummy_crtc_t* restrict data = crtc->data;
+  int e = 0;
+  
+  /* TODO Validate fields. */
+  
+  /* Copy over information. */
+  *this = data->info;
+  
+  /* Duplicate strings. */
+  if (this->edid != NULL)
+    {
+      this->edid = malloc(this->edid_length * sizeof(char));
+      if (this->edid == NULL)
+	this->edid_error = errno;
+      memcpy(this->edid, data->info.edid, this->edid_length * sizeof(char));
+    }
+  if (this->connector_name != NULL)
+    {
+      size_t n = strlen(this->connector_name);
+      this->connector_name = malloc((n + 1) * sizeof(char));
+      if (this->connector_name == NULL)
+	this->connector_name_error = errno;
+      memcpy(this->connector_name, data->info.connector_name, (n + 1) * sizeof(char));
+    }
+  
+  /* Test errors. */
+  e |= this->edid_error;
+  e |= this->width_mm_error;
+  e |= this->height_mm_error;
+  e |= this->gamma_size_error;
+  e |= this->gamma_depth_error;
+  e |= this->gamma_support_error;
+  e |= this->subpixel_order_error;
+  e |= this->active_error;
+  e |= this->connector_name_error;
+  e |= this->connector_type_error;
+  
+  /* Parse EDID. */
+  if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_EDID ^ LIBGAMMA_CRTC_INFO_EDID)))
+    e |= libgamma_parse_edid(this, fields);
+  
+  return e ? -1 : 0;
 }
 
 
