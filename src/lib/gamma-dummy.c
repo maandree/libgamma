@@ -526,46 +526,19 @@ static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict da
   if (data->gamma_red == NULL)
     return 0;
   
-  if (data->gamma_depth == 8)
-    {
-      int8_t* red   = data->gamma_red;
-      int8_t* green = data->gamma_green;
-      int8_t* blue  = data->gamma_blue;
-      double max = (double)INT8_MAX;
-      for (i = 0; i < n; i++)
-	red[i] = green[i] = blue[i] =
-	  (int8_t)(max * ((double)i / (double)(n - 1)));
-    }
-  else if (data->gamma_depth == 16)
-    {
-      int16_t* red   = data->gamma_red;
-      int16_t* green = data->gamma_green;
-      int16_t* blue  = data->gamma_blue;
-      double max = (double)INT16_MAX;
-      for (i = 0; i < n; i++)
-	red[i] = green[i] = blue[i] =
-	  (int16_t)(max * ((double)i / (double)(n - 1)));
-    }
-  else if (data->gamma_depth == 32)
-    {
-      int32_t* red   = data->gamma_red;
-      int32_t* green = data->gamma_green;
-      int32_t* blue  = data->gamma_blue;
-      double max = (double)INT32_MAX;
-      for (i = 0; i < n; i++)
-	red[i] = green[i] = blue[i] =
-	  (int32_t)(max * ((double)i / (double)(n - 1)));
-    }
-  else if (data->gamma_depth == 64)
-    {
-      int64_t* red   = data->gamma_red;
-      int64_t* green = data->gamma_green;
-      int64_t* blue  = data->gamma_blue;
-      double max = (double)INT64_MAX;
-      for (i = 0; i < n; i++)
-	red[i] = green[i] = blue[i] =
-	  (int64_t)(max * ((double)i / (double)(n - 1)));
-    }
+#define __reset_ramps(BITS)					\
+  int ## BITS ## _t* red   = data->gamma_red;			\
+  int ## BITS ## _t* green = data->gamma_green;			\
+  int ## BITS ## _t* blue  = data->gamma_blue;			\
+  double max = (double)INT ## BITS ## _MAX;			\
+  for (i = 0; i < n; i++)					\
+    red[i] = green[i] = blue[i] =				\
+      (int ## BITS ## _t)(max * ((double)i / (double)(n - 1)))
+  
+  if      (data->gamma_depth ==  8)  { __reset_ramps(8);  }
+  else if (data->gamma_depth == 16)  { __reset_ramps(16); }
+  else if (data->gamma_depth == 32)  { __reset_ramps(32); }
+  else if (data->gamma_depth == 64)  { __reset_ramps(64); }
   else if (data->gamma_depth == -1)
     {
       float* red   = data->gamma_red;
@@ -584,6 +557,8 @@ static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict da
 	red[i] = green[i] = blue[i] =
 	  (double)i / (double)(n - 1);
     }
+  
+#undef __reset_ramps
   
   return 0;
 }
