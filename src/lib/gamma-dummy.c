@@ -39,11 +39,25 @@ typedef struct libgamma_dummy_configurations
 {
   /**
    * The method's capabilities.
+   * 
+   * Some fields are ignored:
+   * - real
+   * - fake
    */
   libgamma_method_capabilities_t capabilities;
   
   /**
    * Template for CRTC:s information.
+   * 
+   * Some fields are ignored:
+   * - width_mm_edid
+   * - width_mm_edid_error
+   * - height_mm_edid
+   * - height_mm_edid_error
+   * - gamma_red
+   * - gamma_green
+   * - gamma_blue
+   * - gamma_error
    */
   libgamma_crtc_information_t crtc_info_template;
   
@@ -131,7 +145,7 @@ typedef struct libgamma_dummy_crtc
   /**
    * Information about the CRTC and monitor.
    * 
-   * Some feilds are ignored:
+   * Some fields are ignored:
    * - width_mm_edid
    * - width_mm_edid_error
    * - height_mm_edid
