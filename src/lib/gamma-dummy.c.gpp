@@ -608,7 +608,7 @@ int libgamma_dummy_crtc_restore(libgamma_crtc_state_t* restrict this)
  */
 static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict data)
 {
-  size_t rn = data->info.blue_gamma_size;
+  size_t rn = data->info.red_gamma_size;
   size_t gn = data->info.green_gamma_size;
   size_t bn = data->info.blue_gamma_size;
   size_t i;

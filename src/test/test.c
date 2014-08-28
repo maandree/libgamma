@@ -306,8 +306,8 @@ int main(void)
   else
     {
       n = ramps.red_size;
-      n = n < ramps.green_size ? n : ramps.green_size;
-      n = n < ramps.blue_size ? n : ramps.blue_size;
+      n = n > ramps.green_size ? n : ramps.green_size;
+      n = n > ramps.blue_size ? n : ramps.blue_size;
       printf("Current gamma ramps:\n");
       for (i = 0; i < n; i++)
 	{
