@@ -678,8 +678,8 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid)
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
-				  libgamma_gamma_ramps_t* restrict ramps)
+int libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
+				    libgamma_gamma_ramps16_t* restrict ramps)
 {
 #ifdef HAVE_NO_LIBGAMMA_METHODS
   (void) ramps;
@@ -691,7 +691,7 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
 $>for method in $(get-methods | grep -v QUARTZ_CORE_GRAPHICS); do
 #ifdef HAVE_LIBGAMMA_METHOD_${method}
     case LIBGAMMA_METHOD_${method}:
-      return libgamma_$(lowercase $method)_crtc_get_gamma_ramps(this, ramps);
+      return libgamma_$(lowercase $method)_crtc_get_gamma_ramps16(this, ramps);
 #endif
      
      /* The Quartz/CoreGraphics method uses single precision float. */
@@ -721,8 +721,8 @@ $>done
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
-				  libgamma_gamma_ramps_t ramps)
+int libgamma_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
+				    libgamma_gamma_ramps16_t ramps)
 {
 #ifdef HAVE_NO_LIBGAMMA_METHODS
   (void) ramps;
@@ -734,7 +734,7 @@ int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
 $>for method in $(get-methods | grep -v QUARTZ_CORE_GRAPHICS); do
 #ifdef HAVE_LIBGAMMA_METHOD_${method}
     case LIBGAMMA_METHOD_${method}:
-      return libgamma_$(lowercase $method)_crtc_set_gamma_ramps(this, ramps);
+      return libgamma_$(lowercase $method)_crtc_set_gamma_ramps16(this, ramps);
 #endif
 $>done
      
@@ -812,7 +812,7 @@ $>fi
     default:
       ramps_.${type} = ${p}ramps;
       return libgamma_translated_ramp_${action}(this, ${p:+&}ramps_, ${bits}, 16,
-						libgamma_crtc_${action}_gamma_ramps);
+						libgamma_crtc_${action}_gamma_ramps16);
     }
 }
 $>}
@@ -988,7 +988,7 @@ $>}
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
-$>crtc_set_gamma_ramps_f uint16_t ramps
+$>crtc_set_gamma_ramps_f uint16_t ramps16
 
 
 /**

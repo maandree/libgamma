@@ -864,7 +864,7 @@ typedef struct libgamma_crtc_information
 /**
  * Gamma ramp structure for 16-bit gamma ramps.
  */
-typedef struct libgamma_gamma_ramps
+typedef struct libgamma_gamma_ramps16
 {
   /**
    * The size of `red`.
@@ -896,7 +896,7 @@ typedef struct libgamma_gamma_ramps
    */
   uint16_t* blue;
   
-} libgamma_gamma_ramps_t;
+} libgamma_gamma_ramps16_t;
 
 
 /**
@@ -1062,7 +1062,7 @@ typedef struct libgamma_gamma_rampsd
  * @param   this  The gamma ramps.
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
-int libgamma_gamma_ramps_initialise(libgamma_gamma_ramps_t* restrict this);
+int libgamma_gamma_ramps16_initialise(libgamma_gamma_ramps16_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -1071,7 +1071,7 @@ int libgamma_gamma_ramps_initialise(libgamma_gamma_ramps_t* restrict this);
  * 
  * @param  this  The gamma ramps.
  */
-void libgamma_gamma_ramps_destroy(libgamma_gamma_ramps_t* restrict this);
+void libgamma_gamma_ramps16_destroy(libgamma_gamma_ramps16_t* restrict this);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -1081,7 +1081,7 @@ void libgamma_gamma_ramps_destroy(libgamma_gamma_ramps_t* restrict this);
  * 
  * @param  this  The gamma ramps.
  */
-void libgamma_gamma_ramps_free(libgamma_gamma_ramps_t* restrict this);
+void libgamma_gamma_ramps16_free(libgamma_gamma_ramps16_t* restrict this);
 
 
 /**

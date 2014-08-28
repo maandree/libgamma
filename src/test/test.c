@@ -275,8 +275,8 @@ int main(void)
   libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
   libgamma_crtc_state_t* restrict crtc_state = malloc(sizeof(libgamma_crtc_state_t));
   libgamma_crtc_information_t info;
-  libgamma_gamma_ramps_t old_ramps;
-  libgamma_gamma_ramps_t ramps;
+  libgamma_gamma_ramps16_t old_ramps;
+  libgamma_gamma_ramps16_t ramps;
   size_t i, n;
   int r;
   
@@ -296,13 +296,13 @@ int main(void)
   old_ramps.green_size = info.green_gamma_size;
   old_ramps.blue_size = info.blue_gamma_size;
   ramps = old_ramps;
-  libgamma_gamma_ramps_initialise(&old_ramps);
-  libgamma_gamma_ramps_initialise(&ramps);
+  libgamma_gamma_ramps16_initialise(&old_ramps);
+  libgamma_gamma_ramps16_initialise(&ramps);
   
-  libgamma_crtc_get_gamma_ramps(crtc_state, &old_ramps);
-  r = libgamma_crtc_get_gamma_ramps(crtc_state, &ramps);
+  libgamma_crtc_get_gamma_ramps16(crtc_state, &old_ramps);
+  r = libgamma_crtc_get_gamma_ramps16(crtc_state, &ramps);
   if (r)
-    libgamma_perror("libgamma_crtc_get_gamma_ramps", r);
+    libgamma_perror("libgamma_crtc_get_gamma_ramps16", r);
   else
     {
       n = ramps.red_size;
@@ -331,13 +331,13 @@ int main(void)
 	ramps.red[i] /= 2;
       
       printf("Dimming monitor for 1 second...\n");
-      r = libgamma_crtc_set_gamma_ramps(crtc_state, ramps);
+      r = libgamma_crtc_set_gamma_ramps16(crtc_state, ramps);
       if (r)
-	libgamma_perror("libgamma_crtc_set_gamma_ramps", r);
+	libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
       sleep(1);
-      r = libgamma_crtc_set_gamma_ramps(crtc_state, old_ramps);
+      r = libgamma_crtc_set_gamma_ramps16(crtc_state, old_ramps);
       if (r)
-	libgamma_perror("libgamma_crtc_set_gamma_ramps", r);
+	libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
       printf("Done!\n");
     }
   
@@ -345,8 +345,8 @@ int main(void)
   /* TODO Test _f gamma ramp setters. */
   /* TODO Test gamma ramp getters/setters of other bit depths. */
   
-  libgamma_gamma_ramps_destroy(&ramps);
-  libgamma_gamma_ramps_destroy(&old_ramps);
+  libgamma_gamma_ramps16_destroy(&ramps);
+  libgamma_gamma_ramps16_destroy(&old_ramps);
   libgamma_crtc_free(crtc_state);
   libgamma_partition_free(part_state);
   libgamma_site_free(site_state);

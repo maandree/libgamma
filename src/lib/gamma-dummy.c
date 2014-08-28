@@ -729,8 +729,8 @@ int libgamma_dummy_get_crtc_information(libgamma_crtc_information_t* restrict th
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
-					libgamma_gamma_ramps_t* restrict ramps)
+int libgamma_dummy_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
+					  libgamma_gamma_ramps16_t* restrict ramps)
 {
 }
 
@@ -743,8 +743,8 @@ int libgamma_dummy_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
-					libgamma_gamma_ramps_t ramps)
+int libgamma_dummy_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
+					  libgamma_gamma_ramps16_t ramps)
 {
 }
 

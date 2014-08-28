@@ -36,7 +36,7 @@
  * @param   encoding  [0, 1] float encoding value.
  * @return            [0, 2¹⁶ − 1] integer output value.
  */
-typedef uint16_t libgamma_gamma_ramps_fun(float encoding);
+typedef uint16_t libgamma_gamma_ramps16_fun(float encoding);
 
 /**
  * Mapping function from [0, 1] float encoding value to [0, 2³² − 1] integer output value.
@@ -323,8 +323,8 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid);
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
-				  libgamma_gamma_ramps_t* restrict ramps);
+int libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
+				    libgamma_gamma_ramps16_t* restrict ramps);
 
 /**
  * Set the gamma ramps for a CRTC, 16-bit gamma-depth version.
@@ -334,8 +334,8 @@ int libgamma_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
-				  libgamma_gamma_ramps_t ramps) __attribute__((hot));
+int libgamma_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
+				    libgamma_gamma_ramps16_t ramps) __attribute__((hot));
 
 
 /**
@@ -442,10 +442,10 @@ int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
-int libgamma_crtc_set_gamma_ramps_f(libgamma_crtc_state_t* restrict this,
-				    libgamma_gamma_ramps_fun* red_function,
-				    libgamma_gamma_ramps_fun* green_function,
-				    libgamma_gamma_ramps_fun* blue_function) __attribute__((cold));
+int libgamma_crtc_set_gamma_ramps16_f(libgamma_crtc_state_t* restrict this,
+				      libgamma_gamma_ramps16_fun* red_function,
+				      libgamma_gamma_ramps16_fun* green_function,
+				      libgamma_gamma_ramps16_fun* blue_function) __attribute__((cold));
 
 /**
  * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version.

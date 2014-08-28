@@ -30,7 +30,7 @@ typedef union libgamma_gamma_ramps_any
   /**
    * 16-bit gamma ramps.
    */
-  libgamma_gamma_ramps_t bits16;
+  libgamma_gamma_ramps16_t bits16;
   
   /**
    * 32-bit gamma ramps.

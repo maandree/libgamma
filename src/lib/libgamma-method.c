@@ -34,7 +34,7 @@
  * @param   this  The gamma ramps.
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly.
  */
-int libgamma_gamma_ramps_initialise(libgamma_gamma_ramps_t* restrict this)
+int libgamma_gamma_ramps16_initialise(libgamma_gamma_ramps16_t* restrict this)
 {
   size_t n = this->red_size + this->green_size + this->blue_size;
 #ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
@@ -56,7 +56,7 @@ int libgamma_gamma_ramps_initialise(libgamma_gamma_ramps_t* restrict this)
  * 
  * @param  this  The gamma ramps.
  */
-void libgamma_gamma_ramps_destroy(libgamma_gamma_ramps_t* restrict this)
+void libgamma_gamma_ramps16_destroy(libgamma_gamma_ramps16_t* restrict this)
 {
   free(this->red);
 }
@@ -70,7 +70,7 @@ void libgamma_gamma_ramps_destroy(libgamma_gamma_ramps_t* restrict this)
  * 
  * @param  this  The gamma ramps.
  */
-void libgamma_gamma_ramps_free(libgamma_gamma_ramps_t* restrict this)
+void libgamma_gamma_ramps16_free(libgamma_gamma_ramps16_t* restrict this)
 {
   free(this->red);
   free(this);

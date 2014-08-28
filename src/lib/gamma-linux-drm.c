@@ -823,8 +823,8 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_linux_drm_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps_t* restrict ramps)
+int libgamma_linux_drm_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
+					      libgamma_gamma_ramps16_t* restrict ramps)
 {
   libgamma_drm_card_data_t* restrict card = this->partition->data;
   int r;
@@ -849,8 +849,8 @@ int libgamma_linux_drm_crtc_get_gamma_ramps(libgamma_crtc_state_t* restrict this
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_linux_drm_crtc_set_gamma_ramps(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps_t ramps)
+int libgamma_linux_drm_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
+					      libgamma_gamma_ramps16_t ramps)
 {
   libgamma_drm_card_data_t* restrict card = this->partition->data;
   int r;
