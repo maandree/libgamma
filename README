@@ -1,5 +1,5 @@
 libgamma is a library that aims to abstract away the
-display server when adjusting the color curves
+display server when adjusting the colour curves
 for monitors via gamma ramps.
 
 The principal goal of libgamma is to provide abstraction
