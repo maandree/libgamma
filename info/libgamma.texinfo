@@ -1043,7 +1043,7 @@ other than what the adjustment
 method uses, it will be converted.
 
 @table @asis
-@item @code{libgamma_gamma_ramps_t} (@code{struct libgamma_gamma_ramps})
+@item @code{libgamma_gamma_ramps16_t} (@code{struct libgamma_gamma_ramps16})
 16-bit integer (@code{uint16_t}).
 This is by far the most common.
 
@@ -1075,7 +1075,7 @@ arrays --- @code{red}, @code{green} and
 @code{blue} --- whose type is specified
 in the table above. @code{red}, @code{green}
 and @code{blue} is a pointer of that type.
-For example, for @code{libgamma_gamma_ramps_t}
+For example, for @code{libgamma_gamma_ramps16_t}
 @code{red}, @code{green} and @code{blue}
 are of type @code{uint16_t*} since the
 element type is @code{uint16_t}.
@@ -1110,7 +1110,7 @@ functions to create and destroy gamma
 ramp structures.
 
 @table @asis
-@item @code{libgamma_gamma_ramps_initialise} [@code{int *(libgamma_gamma_ramps_t*)}]
+@item @code{libgamma_gamma_ramps16_initialise} [@code{int *(libgamma_gamma_ramps16_t*)}]
 @itemx @code{libgamma_gamma_ramps32_initialise} [@code{int *(libgamma_gamma_ramps32_t*)}]
 @itemx @code{libgamma_gamma_ramps64_initialise} [@code{int *(libgamma_gamma_ramps64_t*)}]
 @itemx @code{libgamma_gamma_rampsf_initialise} [@code{int *(libgamma_gamma_rampsf_t*)}]
@@ -1130,7 +1130,7 @@ Zero is returned on success. On error
 is set accordingly. These functions can
 only fail on @code{malloc} error.
 
-@item @code{libgamma_gamma_ramps_destroy} [@code{void *(libgamma_gamma_ramps_t*)}]
+@item @code{libgamma_gamma_ramps16_destroy} [@code{void *(libgamma_gamma_ramps16_t*)}]
 @itemx @code{libgamma_gamma_ramps32_destroy} [@code{void *(libgamma_gamma_ramps32_t*)}]
 @itemx @code{libgamma_gamma_ramps64_destroy} [@code{void *(libgamma_gamma_ramps64_t*)}]
 @itemx @code{libgamma_gamma_rampsf_destroy} [@code{void *(libgamma_gamma_rampsf_t*)}]
@@ -1140,7 +1140,7 @@ ramp structure that has been allocated by
 @code{libgamma_gamma_ramps_initialise} or
 otherwise initialises in the proper manner.
 
-@item @code{libgamma_gamma_ramps_free} [@code{void *(libgamma_gamma_ramps_t*)}]
+@item @code{libgamma_gamma_ramps16_free} [@code{void *(libgamma_gamma_ramps16_t*)}]
 @itemx @code{libgamma_gamma_ramps32_free} [@code{void *(libgamma_gamma_ramps32_t*)}]
 @itemx @code{libgamma_gamma_ramps64_free} [@code{void *(libgamma_gamma_ramps64_t*)}]
 @itemx @code{libgamma_gamma_rampsf_free} [@code{void *(libgamma_gamma_rampsf_t*)}]
@@ -1155,7 +1155,7 @@ structure.
 
 To read the current gamma ramps for a
 CRTC, you can use the function
-@code{libgamma_crtc_get_gamma_ramps}.
+@code{libgamma_crtc_get_gamma_ramps16}.
 This function returns zero on success,
 and a negative @code{int} on failure.
 If the function fails, the return
@@ -1168,15 +1168,15 @@ for the CRTC, and a
 that will be filled with the
 current gamma ramps, it must
 have been initialise by
-@code{libgamma_gamma_ramps_initialise}
+@code{libgamma_gamma_ramps16_initialise}
 or in a compatible manner.
 
 Similarly you can use
-@code{libgamma_crtc_set_gamma_ramps}
+@code{libgamma_crtc_set_gamma_ramps16}
 to apply gamma ramps to a CRTC.
 This function has the same return
 value and the same first argument
-as @code{libgamma_crtc_get_gamma_ramps},
+as @code{libgamma_crtc_get_gamma_ramps16},
 but its second argument is a
 @code{libgamma_gamma_rampsd_t}
 rather than a
@@ -1184,29 +1184,29 @@ rather than a
 Alternatively, but with some
 performance impact, you can use
 the function
-@code{libgamma_crtc_set_gamma_ramps_f}.
+@code{libgamma_crtc_set_gamma_ramps16_f}.
 The difference between
-@code{libgamma_crtc_set_gamma_ramps_f}
-and @code{libgamma_crtc_set_gamma_ramps}
+@code{libgamma_crtc_set_gamma_ramps16_f}
+and @code{libgamma_crtc_set_gamma_ramps16}
 is that the second argument is
 substitute for three separate argument
 that are used to generate the gamma ramps:
 
 @table @asis
-@item @code{red_function} [@code{libgamma_gamma_ramps_fun*}]
+@item @code{red_function} [@code{libgamma_gamma_ramps16_fun*}]
 The function that generates the the
 gamma ramp for the red channel.
 
-@item @code{green_function} [@code{libgamma_gamma_ramps_fun*}]
+@item @code{green_function} [@code{libgamma_gamma_ramps16_fun*}]
 The function that generates the the
 gamma ramp for the green channel.
 
-@item @code{blue_function} [@code{libgamma_gamma_ramps_fun*}]
+@item @code{blue_function} [@code{libgamma_gamma_ramps16_fun*}]
 The function that generates the the
 gamma ramp for the blue channel.
 @end table
 
-@code{libgamma_gamma_ramps_fun} is a
+@code{libgamma_gamma_ramps16_fun} is a
 @code{typedef} of @code{uint16_t (float encoding)}.
 As input, it takes a [0, 1] float of
 the encoding value and as output
