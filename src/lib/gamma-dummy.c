@@ -122,9 +122,19 @@ typedef struct libgamma_dummy_crtc
   void* restrict gamma_blue;
   
   /**
-   * The number of stops in the gamma ramps.
+   * The number of stops in the red gamma ramp.
    */
-  size_t gamma_size;
+  size_t gamma_red_size;
+  
+  /**
+   * The number of stops in the green gamma ramp.
+   */
+  size_t gamma_green_size;
+  
+  /**
+   * The number of stops in the blue gamma ramp.
+   */
+  size_t gamma_blue_size;
   
   /**
    * The depth of the gamma ramps, -1 for `float`, -2 for `double`.
@@ -376,8 +386,10 @@ int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict thi
     goto fail;
   for (i = 0; i < data->crtc_count; i++)
     {
-      data->crtcs[i].gamma_size = 2048;
-      data->crtcs[i].gamma_size = 64;
+      data->crtcs[i].gamma_red_size = 1024;
+      data->crtcs[i].gamma_green_size = 2048;
+      data->crtcs[i].gamma_blue_size = 512;
+      data->crtcs[i].gamma_depth = 64;
     }
   
   return 0;
@@ -460,20 +472,16 @@ int libgamma_dummy_crtc_initialise(libgamma_crtc_state_t* restrict this,
   else
     stop_size = (size_t)(data->gamma_depth) / 8;
   
-  data->gamma_red   = malloc(3 * data->gamma_size * stop_size);
-  data->gamma_green = ((char*)(data->gamma_red))   + data->gamma_size * stop_size;
-  data->gamma_blue  = ((char*)(data->gamma_green)) + data->gamma_size * stop_size;
-  
-  if (data->gamma_red == NULL)
-    goto fail;
+  if ((data->gamma_red   = malloc(data->gamma_red_size   * stop_size)) == NULL)  goto fail;
+  if ((data->gamma_green = malloc(data->gamma_green_size * stop_size)) == NULL)  goto fail;
+  if ((data->gamma_blue  = malloc(data->gamma_blue_size  * stop_size)) == NULL)  goto fail;
   
   return libgamma_dummy_crtc_restore_forced(data);
   
  fail:
-  free(data->gamma_red);
-  data->gamma_red   = NULL;
-  data->gamma_green = NULL;
-  data->gamma_blue  = NULL;
+  free(data->gamma_red),   data->gamma_red   = NULL;
+  free(data->gamma_green), data->gamma_green = NULL;
+  free(data->gamma_blue),  data->gamma_blue  = NULL;
   return LIBGAMMA_ERRNO_SET;
 }
 
@@ -489,10 +497,9 @@ void libgamma_dummy_crtc_destroy(libgamma_crtc_state_t* restrict this)
   if (data == NULL)
     return;
   
-  free(data->gamma_red);
-  data->gamma_red   = NULL;
-  data->gamma_green = NULL;
-  data->gamma_blue  = NULL;
+  free(data->gamma_red),   data->gamma_red   = NULL;
+  free(data->gamma_green), data->gamma_green = NULL;
+  free(data->gamma_blue),  data->gamma_blue  = NULL;
 }
 
 
@@ -522,18 +529,24 @@ int libgamma_dummy_crtc_restore(libgamma_crtc_state_t* restrict this)
  */
 static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict data)
 {
-  size_t i, n = data->gamma_size;
+  size_t rn = data->gamma_blue_size;
+  size_t gn = data->gamma_green_size;
+  size_t bn = data->gamma_blue_size;
+  size_t i;
   if (data->gamma_red == NULL)
     return 0;
   
-#define __reset_ramps(BITS)					\
-  int ## BITS ## _t* red   = data->gamma_red;			\
-  int ## BITS ## _t* green = data->gamma_green;			\
-  int ## BITS ## _t* blue  = data->gamma_blue;			\
-  double max = (double)INT ## BITS ## _MAX;			\
-  for (i = 0; i < n; i++)					\
-    red[i] = green[i] = blue[i] =				\
-      (int ## BITS ## _t)(max * ((double)i / (double)(n - 1)))
+#define __reset_ramps(BITS)							\
+  int ## BITS ## _t* red   = data->gamma_red;					\
+  int ## BITS ## _t* green = data->gamma_green;					\
+  int ## BITS ## _t* blue  = data->gamma_blue;					\
+  double max = (double)INT ## BITS ## _MAX;					\
+  for (i = 0; i < rn; i++)							\
+    red[i]   = (int ## BITS ## _t)(max * ((double)i / (double)(rn - 1)));	\
+  for (i = 0; i < gn; i++)							\
+    green[i] = (int ## BITS ## _t)(max * ((double)i / (double)(gn - 1)));	\
+  for (i = 0; i < bn; i++)							\
+    blue[i]  = (int ## BITS ## _t)(max * ((double)i / (double)(bn - 1)))
   
   if      (data->gamma_depth ==  8)  { __reset_ramps(8);  }
   else if (data->gamma_depth == 16)  { __reset_ramps(16); }
@@ -544,18 +557,24 @@ static int libgamma_dummy_crtc_restore_forced(libgamma_dummy_crtc_t* restrict da
       float* red   = data->gamma_red;
       float* green = data->gamma_green;
       float* blue  = data->gamma_blue;
-      for (i = 0; i < n; i++)
-	red[i] = green[i] = blue[i] =
-	  (float)((double)i / (double)(n - 1));
+      for (i = 0; i < rn; i++)
+	red[i]   = (float)((double)i / (double)(rn - 1));
+      for (i = 0; i < gn; i++)
+	green[i] = (float)((double)i / (double)(gn - 1));
+      for (i = 0; i < bn; i++)
+	blue[i]  = (float)((double)i / (double)(bn - 1));
     }
   else
     {
       double* red   = data->gamma_red;
       double* green = data->gamma_green;
       double* blue  = data->gamma_blue;
-      for (i = 0; i < n; i++)
-	red[i] = green[i] = blue[i] =
-	  (double)i / (double)(n - 1);
+      for (i = 0; i < rn; i++)
+	red[i]   = (double)i / (double)(rn - 1);
+      for (i = 0; i < gn; i++)
+	green[i] = (double)i / (double)(gn - 1);
+      for (i = 0; i < bn; i++)
+	blue[i]  = (double)i / (double)(bn - 1);
     }
   
 #undef __reset_ramps
