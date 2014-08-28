@@ -395,6 +395,7 @@ int libgamma_dummy_site_restore(libgamma_site_state_t* restrict this)
 int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict this,
 					libgamma_site_state_t* restrict site, size_t partition)
 {
+  libgamma_crtc_information_t template = libgamma_dummy_configurations.crtc_info_template;
   libgamma_dummy_site_t* site_data = site->data;
   libgamma_dummy_partition_t* data = site_data->partitions + partition;
   libgamma_dummy_crtc_t* crtc_data;
@@ -408,20 +409,40 @@ int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict thi
   this->data = data;
   data->state = this;
   
-  data->crtcs = malloc(data->crtc_count * sizeof(libgamma_dummy_crtc_t));
+  data->crtcs = calloc(data->crtc_count, sizeof(libgamma_dummy_crtc_t));
   if (data->crtcs == NULL)
     goto fail;
   for (i = 0; i < data->crtc_count; i++)
     {
       crtc_data = data->crtcs + i;
-      crtc_data->info = libgamma_dummy_configurations.crtc_info_template;
+      crtc_data->info = template;
       
-      /* TODO Duplicate strings. edid, connector_name */
+      /* Duplicate strings. */
+      if (crtc_data->info.edid != NULL)
+	{
+	  crtc_data->info.edid = malloc(crtc_data->info.edid_length * sizeof(char));
+	  if (crtc_data->info.edid == NULL)
+	    goto fail;
+	  memcpy(crtc_data->info.edid, template.edid, crtc_data->info.edid_length * sizeof(char));
+	}
+      if (crtc_data->info.connector_name != NULL)
+	{
+	  size_t n = strlen(crtc_data->info.connector_name);
+	  crtc_data->info.connector_name = malloc((n + 1) * sizeof(char));
+	  if (crtc_data->info.connector_name == NULL)
+	    goto fail;
+	  memcpy(crtc_data->info.connector_name, template.connector_name, (n + 1) * sizeof(char));
+	}
     }
   
   return 0;
   
  fail:
+  for (i = 0; i < data->crtc_count; i++)
+    {
+      free(data->crtcs[i].info.edid);
+      free(data->crtcs[i].info.connector_name);
+    }
   free(data->crtcs);
   data->crtcs = NULL;
   return LIBGAMMA_ERRNO_SET;
@@ -436,11 +457,16 @@ int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict thi
 void libgamma_dummy_partition_destroy(libgamma_partition_state_t* restrict this)
 {
   libgamma_dummy_partition_t* data = this->data;
+  size_t i;
+  
   if (data == NULL)
     return;
   
-  /* TODO free strings in CRTC info */
-  
+  for (i = 0; i < data->crtc_count; i++)
+    {
+      free(data->crtcs[i].info.edid);
+      free(data->crtcs[i].info.connector_name);
+    }
   free(data->crtcs);
   data->crtcs = NULL;
 }
