@@ -763,7 +763,7 @@ typedef struct libgamma_crtc_information
   
   /**
    * The layout of the subpixels.
-   * You cannot count on this value -- especially for CRT:s --
+   * You cannot count on this value --- especially for CRT:s ---
    * but it is provided anyway as a means of distinguishing monitors.
    */
   libgamma_subpixel_order_t subpixel_order;
