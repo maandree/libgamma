@@ -615,7 +615,7 @@ typedef struct libgamma_crtc_information
    * The Extended Display Identification Data associated with
    * the attached monitor. This is raw byte array that is usually
    * 128 bytes long. It is not NUL-terminate, rather its length
-   * is stored in `edid_size`.
+   * is stored in `edid_length`.
    */
   unsigned char* edid;
   
