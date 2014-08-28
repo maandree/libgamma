@@ -654,9 +654,8 @@ int libgamma_dummy_get_crtc_information(libgamma_crtc_information_t* restrict th
 					libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
   libgamma_dummy_crtc_t* restrict data = crtc->data;
+  int supported = libgamma_dummy_configurations.capabilities.crtc_information;
   int e = 0;
-  
-  /* TODO Validate fields. */
   
   /* Copy over information. */
   *this = data->info;
@@ -678,21 +677,31 @@ int libgamma_dummy_get_crtc_information(libgamma_crtc_information_t* restrict th
       memcpy(this->connector_name, data->info.connector_name, (n + 1) * sizeof(char));
     }
   
-  /* Test errors. */
-  e |= this->edid_error;
-  e |= this->width_mm_error;
-  e |= this->height_mm_error;
-  e |= this->gamma_size_error;
-  e |= this->gamma_depth_error;
-  e |= this->gamma_support_error;
-  e |= this->subpixel_order_error;
-  e |= this->active_error;
-  e |= this->connector_name_error;
-  e |= this->connector_type_error;
-  
   /* Parse EDID. */
   if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_EDID ^ LIBGAMMA_CRTC_INFO_EDID)))
     e |= libgamma_parse_edid(this, fields);
+  
+  /* Test errors. */
+#define _E(FIELD, VAR)  \
+  ((fields & FIELD) ? ((supported & FIELD) ? VAR : (VAR = LIBGAMMA_CRTC_INFO_NOT_SUPPORTED)) : 0)
+  e |= _E(LIBGAMMA_CRTC_INFO_EDID,           this->edid_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_WIDTH_MM,       this->width_mm_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM,      this->height_mm_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_GAMMA_SIZE,     this->gamma_size_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_GAMMA_DEPTH,    this->gamma_depth_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT,  this->gamma_support_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER, this->subpixel_order_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_ACTIVE,         this->active_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_CONNECTOR_NAME, this->connector_name_error);
+  e |= _E(LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE, this->connector_type_error);
+  
+  if ((fields & LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID) && !(supported & LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID))
+    e |= this->width_mm_edid_error = LIBGAMMA_CRTC_INFO_NOT_SUPPORTED;
+  if ((fields & LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID) && !(supported & LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID))
+    e |= this->height_mm_edid_error = LIBGAMMA_CRTC_INFO_NOT_SUPPORTED;
+  if ((fields & LIBGAMMA_CRTC_INFO_GAMMA) && !(supported & LIBGAMMA_CRTC_INFO_GAMMA))
+    e |= this->gamma_error = LIBGAMMA_CRTC_INFO_NOT_SUPPORTED;
+#undef _E
   
   return e ? -1 : 0;
 }
