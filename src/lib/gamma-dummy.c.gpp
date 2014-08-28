@@ -1,3 +1,4 @@
+/* -*- c -*- */
 /**
  * libgamma -- Display server abstraction layer for gamma ramp adjustments
  * Copyright (C) 2014  Mattias Andrée (maandree@member.fsf.org)
@@ -23,7 +24,9 @@
 
 #include "libgamma-error.h"
 #include "libgamma-method.h"
+#include "libgamma-facade.h"
 #include "edid.h"
+#include "gamma-helper.h"
 
 #include <errno.h>
 #include <stdint.h>
@@ -242,7 +245,7 @@ static libgamma_dummy_configurations_t libgamma_dummy_configurations =
 	.crtc_restore = 1,
 	.identical_gamma_sizes = 0,
 	.fixed_gamma_size = 0,
-	.fixed_gamma_depth = 0,
+	.fixed_gamma_depth = 0
       },
     .crtc_info_template =
       {
@@ -268,7 +271,7 @@ static libgamma_dummy_configurations_t libgamma_dummy_configurations =
 	.connector_name = NULL,
 	.connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED,
 	.connector_type = LIBGAMMA_CONNECTOR_TYPE_Unknown,
-	.connector_type_error = 0,
+	.connector_type_error = 0
       },
     .real_method = LIBGAMMA_METHOD_DUMMY,
     .site_count = 2,
@@ -722,6 +725,161 @@ int libgamma_dummy_get_crtc_information(libgamma_crtc_information_t* restrict th
 
 
 /**
+ * Get current the gamma ramps for a CRTC.
+ * 
+ * @param   1      The data type for the ramp stop elements.
+ * @param   2      The `ramp*` pattern for the ramp structure and function to call.
+ * @param   3      Either of `bit8`, `bit16`, `bit32`, `bit64`, `float_single`, `float_double`;
+ *                 rather self-explanatory.
+ * @param   4      The number of bits in the gamma depth, -1 for single precision float,
+ *                 (`float`) and -2 for double percition float (`double`).
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to fill with the current values.
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library.
+ */
+$>libgamma_dummy_crtc_get_gamma_ramps ()
+$>{
+int libgamma_dummy_crtc_get_gamma_${2}(libgamma_crtc_state_t* restrict this,
+				       libgamma_gamma_${2}_t* restrict ramps)
+{
+  libgamma_dummy_crtc_t* data = this->data;
+  libgamma_gamma_ramps_any_t ramps_;
+  ${1}* r_ramp = data->gamma_red;
+  ${1}* g_ramp = data->gamma_green;
+  ${1}* b_ramp = data->gamma_blue;
+  size_t rn = data->info.red_gamma_size;
+  size_t gn = data->info.green_gamma_size;
+  size_t bn = data->info.blue_gamma_size;
+  size_t i;
+  
+#ifdef DEBUG
+  /* Check gamma ramp sizes. */
+  if (libgamma_dummy_configurations.capabilities.identical_gamma_sizes)
+    if ((ramps->red_size != ramps->green_size) ||
+	(ramps->red_size != ramps->blue_size))
+      return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+  if ((ramps->red_size   != rn) ||
+      (ramps->green_size != gn) ||
+      (ramps->blue_size  != bn))
+    return LIBGAMMA_WRONG_GAMMA_RAMP_SIZE;
+#endif
+  
+  if (data->info.gamma_support == 0)
+    return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
+  
+#define __trans(DEPTH, SUFFIX)			\
+  if (data->info.gamma_depth == DEPTH)		\
+    return ramps_.${3} = *ramps,		\
+           libgamma_translated_ramp_get(this, &ramps_, ${4}, DEPTH, libgamma_crtc_get_gamma_ramps ## SUFFIX)
+$>if [ ! ${4} = 8 ]; then
+  __trans(8, 8);
+$>fi
+$>if [ ! ${4} = 16 ]; then
+  __trans(16, 16);
+$>fi
+$>if [ ! ${4} = 32 ]; then
+  __trans(32, 32);
+$>fi
+$>if [ ! ${4} = 64 ]; then
+  __trans(64, 64);
+$>fi
+$>if [ ! ${4} = -1 ]; then
+  __trans(-1, f);
+$>fi
+$>if [ ! ${4} = -2 ]; then
+  __trans(-2, d);
+$>fi
+#undef __trans
+  
+  for (i = 0; i < rn; i++)  ramps->red[i]   = r_ramp[i];
+  for (i = 0; i < gn; i++)  ramps->green[i] = g_ramp[i];
+  for (i = 0; i < bn; i++)  ramps->blue[i]  = b_ramp[i];
+  
+  return 0;
+}
+$>}
+
+
+/**
+ * Set the gamma ramps for a CRTC.
+ * 
+ * @param   1      The data type for the ramp stop elements.
+ * @param   2      The `ramp*` pattern for the ramp structure and function to call.
+ * @param   3      Either of `bit8`, `bit16`, `bit32`, `bit64`, `float_single`, `float_double`;
+ *                 rather self-explanatory.
+ * @param   4      The number of bits in the gamma depth, -1 for single precision float,
+ *                 (`float`) and -2 for double percition float (`double`).
+ * @param   this   The CRTC state.
+ * @param   ramps  The gamma ramps to apply.
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library.
+ */
+$>libgamma_dummy_crtc_set_gamma_ramps ()
+$>{
+int libgamma_dummy_crtc_set_gamma_${2}(libgamma_crtc_state_t* restrict this,
+				       libgamma_gamma_${2}_t ramps)
+{
+  libgamma_dummy_crtc_t* data = this->data;
+  libgamma_gamma_ramps_any_t ramps_;
+  ${1}* r_ramp = data->gamma_red;
+  ${1}* g_ramp = data->gamma_green;
+  ${1}* b_ramp = data->gamma_blue;
+  size_t rn = data->info.red_gamma_size;
+  size_t gn = data->info.green_gamma_size;
+  size_t bn = data->info.blue_gamma_size;
+  size_t i;
+  
+#ifdef DEBUG
+  /* Check gamma ramp sizes. */
+  if (libgamma_dummy_configurations.capabilities.identical_gamma_sizes)
+    if ((ramps.red_size != ramps.green_size) ||
+	(ramps.red_size != ramps.blue_size))
+      return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+  if ((ramps.red_size   != rn) ||
+      (ramps.green_size != gn) ||
+      (ramps.blue_size  != bn))
+    return LIBGAMMA_WRONG_GAMMA_RAMP_SIZE;
+#endif
+  
+  if (data->info.gamma_support == 0)
+    return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
+  
+#define __trans(DEPTH, SUFFIX)			\
+  if (data->info.gamma_depth == DEPTH)		\
+    return ramps_.${3} = ramps,			\
+           libgamma_translated_ramp_set(this, ramps_, ${4}, DEPTH, libgamma_crtc_set_gamma_ramps ## SUFFIX)
+$>if [ ! ${4} = 8 ]; then
+  __trans(8, 8);
+$>fi
+$>if [ ! ${4} = 16 ]; then
+  __trans(16, 16);
+$>fi
+$>if [ ! ${4} = 32 ]; then
+  __trans(32, 32);
+$>fi
+$>if [ ! ${4} = 64 ]; then
+  __trans(64, 64);
+$>fi
+$>if [ ! ${4} = -1 ]; then
+  __trans(-1, f);
+$>fi
+$>if [ ! ${4} = -2 ]; then
+  __trans(-2, d);
+$>fi
+#undef __trans
+  
+  for (i = 0; i < rn; i++)  r_ramp[i] = ramps.red[i];
+  for (i = 0; i < gn; i++)  g_ramp[i] = ramps.green[i];
+  for (i = 0; i < bn; i++)  b_ramp[i] = ramps.blue[i];
+  
+  return 0;
+}
+$>}
+
+
+
+/**
  * Get current the gamma ramps for a CRTC, 8-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
@@ -729,10 +887,7 @@ int libgamma_dummy_get_crtc_information(libgamma_crtc_information_t* restrict th
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_get_gamma_ramps8(libgamma_crtc_state_t* restrict this,
-					 libgamma_gamma_ramps8_t* restrict ramps)
-{
-}
+$>libgamma_dummy_crtc_get_gamma_ramps uint8_t ramps8 bits8 8
 
 
 /**
@@ -743,10 +898,7 @@ int libgamma_dummy_crtc_get_gamma_ramps8(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_set_gamma_ramps8(libgamma_crtc_state_t* restrict this,
-					 libgamma_gamma_ramps8_t ramps)
-{
-}
+$>libgamma_dummy_crtc_set_gamma_ramps uint8_t ramps8 bits8 8
 
 
 
@@ -758,10 +910,7 @@ int libgamma_dummy_crtc_set_gamma_ramps8(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
-					  libgamma_gamma_ramps16_t* restrict ramps)
-{
-}
+$>libgamma_dummy_crtc_get_gamma_ramps uint16_t ramps16 bits16 16
 
 
 /**
@@ -772,10 +921,7 @@ int libgamma_dummy_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
-					  libgamma_gamma_ramps16_t ramps)
-{
-}
+$>libgamma_dummy_crtc_set_gamma_ramps uint16_t ramps16 bits16 16
 
 
 
@@ -787,10 +933,7 @@ int libgamma_dummy_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
-					  libgamma_gamma_ramps32_t* restrict ramps)
-{
-}
+$>libgamma_dummy_crtc_get_gamma_ramps uint32_t ramps32 bits32 32
 
 
 /**
@@ -801,10 +944,7 @@ int libgamma_dummy_crtc_get_gamma_ramps32(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
-					  libgamma_gamma_ramps32_t ramps)
-{
-}
+$>libgamma_dummy_crtc_set_gamma_ramps uint32_t ramps32 bits32 32
 
 
 
@@ -816,10 +956,7 @@ int libgamma_dummy_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
-					  libgamma_gamma_ramps64_t* restrict ramps)
-{
-}
+$>libgamma_dummy_crtc_get_gamma_ramps uint64_t ramps64 bits64 64
 
 
 /**
@@ -830,10 +967,7 @@ int libgamma_dummy_crtc_get_gamma_ramps64(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
-					  libgamma_gamma_ramps64_t ramps)
-{
-}
+$>libgamma_dummy_crtc_set_gamma_ramps uint64_t ramps64 bits64 64
 
 
 
@@ -845,10 +979,7 @@ int libgamma_dummy_crtc_set_gamma_ramps64(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
-					 libgamma_gamma_rampsf_t* restrict ramps)
-{
-}
+$>libgamma_dummy_crtc_get_gamma_ramps float rampsf float_single -1
 
 
 /**
@@ -859,10 +990,8 @@ int libgamma_dummy_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
-					 libgamma_gamma_rampsf_t ramps)
-{
-}
+$>libgamma_dummy_crtc_set_gamma_ramps float rampsf float_single -1
+
 
 
 /**
@@ -873,10 +1002,7 @@ int libgamma_dummy_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
-					 libgamma_gamma_rampsd_t* restrict ramps)
-{
-}
+$>libgamma_dummy_crtc_get_gamma_ramps double rampsd float_double -2
 
 
 /**
@@ -887,8 +1013,5 @@ int libgamma_dummy_crtc_get_gamma_rampsd(libgamma_crtc_state_t* restrict this,
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library.
  */
-int libgamma_dummy_crtc_set_gamma_rampsd(libgamma_crtc_state_t* restrict this,
-					 libgamma_gamma_rampsd_t ramps)
-{
-}
+$>libgamma_dummy_crtc_set_gamma_ramps double rampsd float_double -2
 
