@@ -350,6 +350,8 @@ int libgamma_dummy_site_initialise(libgamma_site_state_t* restrict this,
   for (i = 0; i < data->partition_count; i++)
     data->partitions[i].crtc_count = crtcs;
   
+  this->partitions_available = data->partition_count;
+  
   return 0;
   
  fail:
@@ -451,6 +453,8 @@ int libgamma_dummy_partition_initialise(libgamma_partition_state_t* restrict thi
 	  memcpy(crtc_data->info.connector_name, template.connector_name, (n + 1) * sizeof(char));
 	}
     }
+  
+  this->crtcs_available = data->crtc_count;
   
   return 0;
   
@@ -695,7 +699,9 @@ int libgamma_dummy_get_crtc_information(libgamma_crtc_information_t* restrict th
     }
   
   /* Parse EDID. */
-  if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_EDID ^ LIBGAMMA_CRTC_INFO_EDID)))
+  if (this->edid_error)
+    this->width_mm_edid_error = this->height_mm_edid_error = this->gamma_error = this->edid_error;
+  else if ((fields & (LIBGAMMA_CRTC_INFO_MACRO_EDID ^ LIBGAMMA_CRTC_INFO_EDID)))
     e |= libgamma_parse_edid(this, fields);
   
   /* Test errors. */
