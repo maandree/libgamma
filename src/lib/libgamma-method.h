@@ -316,7 +316,7 @@ typedef enum libgamma_connector_type
      * The adjustment method does not know the connector's type
      * (This could be considered an error).
      */
-    LIBGAMMA_CONNECTOR_TYPE_Unknown,
+    LIBGAMMA_CONNECTOR_TYPE_Unknown = 0,
     
     /**
      * Video Graphics Array (VGA).
@@ -431,7 +431,7 @@ typedef enum libgamma_subpixel_order
      * The adjustment method does not know the order of the subpixels.
      * (This could be considered an error.)
      */
-    LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN,
+    LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN = 0,
     
     /**
      * There are no subpixels in the monitor.
