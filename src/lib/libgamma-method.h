@@ -1105,7 +1105,7 @@ int libgamma_gamma_ramps8_initialise(libgamma_gamma_ramps8_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps8_initialise` or otherwise
- * initialises in the proper manner.
+ * initialised in the proper manner.
  * 
  * @param  this  The gamma ramps.
  */
@@ -1114,7 +1114,7 @@ void libgamma_gamma_ramps8_destroy(libgamma_gamma_ramps8_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps8_initialise` or otherwise
- * initialises in the proper manner, as well as release the pointer
+ * initialised in the proper manner, as well as release the pointer
  * to the structure.
  * 
  * @param  this  The gamma ramps.
@@ -1137,7 +1137,7 @@ int libgamma_gamma_ramps16_initialise(libgamma_gamma_ramps16_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps16_initialise` or otherwise
- * initialises in the proper manner.
+ * initialised in the proper manner.
  * 
  * @param  this  The gamma ramps.
  */
@@ -1146,7 +1146,7 @@ void libgamma_gamma_ramps16_destroy(libgamma_gamma_ramps16_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps16_initialise` or otherwise
- * initialises in the proper manner, as well as release the pointer
+ * initialised in the proper manner, as well as release the pointer
  * to the structure.
  * 
  * @param  this  The gamma ramps.
@@ -1169,7 +1169,7 @@ int libgamma_gamma_ramps32_initialise(libgamma_gamma_ramps32_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps32_initialise` or otherwise
- * initialises in the proper manner.
+ * initialised in the proper manner.
  * 
  * @param  this  The gamma ramps.
  */
@@ -1178,7 +1178,7 @@ void libgamma_gamma_ramps32_destroy(libgamma_gamma_ramps32_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps32_initialise` or otherwise
- * initialises in the proper manner, as well as release the pointer
+ * initialised in the proper manner, as well as release the pointer
  * to the structure.
  * 
  * @param  this  The gamma ramps.
@@ -1201,7 +1201,7 @@ int libgamma_gamma_ramps64_initialise(libgamma_gamma_ramps64_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps64_initialise` or otherwise
- * initialises in the proper manner.
+ * initialised in the proper manner.
  * 
  * @param  this  The gamma ramps.
  */
@@ -1210,7 +1210,7 @@ void libgamma_gamma_ramps64_destroy(libgamma_gamma_ramps64_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_ramps64_initialise` or otherwise
- * initialises in the proper manner, as well as release the pointer
+ * initialised in the proper manner, as well as release the pointer
  * to the structure.
  * 
  * @param  this  The gamma ramps.
@@ -1233,7 +1233,7 @@ int libgamma_gamma_rampsf_initialise(libgamma_gamma_rampsf_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_rampsf_initialise` or otherwise
- * initialises in the proper manner.
+ * initialised in the proper manner.
  * 
  * @param  this  The gamma ramps.
  */
@@ -1242,7 +1242,7 @@ void libgamma_gamma_rampsf_destroy(libgamma_gamma_rampsf_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_rampsf_initialise` or otherwise
- * initialises in the proper manner, as well as release the pointer
+ * initialised in the proper manner, as well as release the pointer
  * to the structure.
  * 
  * @param  this  The gamma ramps.
@@ -1265,7 +1265,7 @@ int libgamma_gamma_rampsd_initialise(libgamma_gamma_rampsd_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_rampsd_initialise` or otherwise
- * initialises in the proper manner.
+ * initialised in the proper manner.
  * 
  * @param  this  The gamma ramps.
  */
@@ -1274,7 +1274,7 @@ void libgamma_gamma_rampsd_destroy(libgamma_gamma_rampsd_t* restrict this);
 /**
  * Release resources that are held by a gamma ramp strcuture that
  * has been allocated by `libgamma_gamma_rampsd_initialise` or otherwise
- * initialises in the proper manner, as well as release the pointer
+ * initialised in the proper manner, as well as release the pointer
  * to the structure.
  * 
  * @param  this  The gamma ramps.
