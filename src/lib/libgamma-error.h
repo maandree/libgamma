@@ -370,7 +370,7 @@ const char* libgamma_name_of_error(int value) __attribute__((const));
  * Return the value of a `libgamma` error definition refered to by name.
  * 
  * @param   name  The name of the definition associated with the error code.
- * @return        The error code, zero if the name does is `NULL`
+ * @return        The error code, zero if the name is `NULL`
  *                or does not refer to a `libgamma` error.
  */
 int libgamma_value_of_error(const char* name) __attribute__((const));
