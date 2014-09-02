@@ -406,7 +406,7 @@ $>switch this.method return site_restore this
  * 
  * @param   this       The partition state to initialise.
  * @param   site       The site state for the site that the partition belongs to.
- * @param   partition  The the index of the partition within the site.
+ * @param   partition  The index of the partition within the site.
  * @return             Zero on success, otherwise (negative) the value of an
  *                     error identifier provided by this library.
  */
@@ -462,7 +462,7 @@ $>switch this.site.method return partition_restore this
  * 
  * @param   this       The CRTC state to initialise.
  * @param   partition  The partition state for the partition that the CRTC belongs to.
- * @param   crtc       The the index of the CRTC within the partition.
+ * @param   crtc       The index of the CRTC within the partition.
  * @return             Zero on success, otherwise (negative) the value of an
  *                     error identifier provided by this library.
  */
@@ -941,9 +941,9 @@ $>crtc_set_get_gamma_ramps set rampsd float_double -2
  * @param   1               The data type for the ramp stop elements.
  * @param   2               The `ramp*` pattern for the ramp structure and function to call.
  * @param   this            The CRTC state.
- * @param   red_function    The function that generates the the gamma ramp for the red channel.
- * @param   green_function  The function that generates the the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @param   red_function    The function that generates the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel.
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
@@ -1005,9 +1005,9 @@ $>}
  * Note that this will probably involve the library allocating temporary data.
  * 
  * @param   this            The CRTC state.
- * @param   red_function    The function that generates the the gamma ramp for the red channel.
- * @param   green_function  The function that generates the the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @param   red_function    The function that generates the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel.
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
@@ -1020,9 +1020,9 @@ $>crtc_set_gamma_ramps_f uint8_t ramps8
  * Note that this will probably involve the library allocating temporary data.
  * 
  * @param   this            The CRTC state.
- * @param   red_function    The function that generates the the gamma ramp for the red channel.
- * @param   green_function  The function that generates the the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @param   red_function    The function that generates the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel.
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
@@ -1035,9 +1035,9 @@ $>crtc_set_gamma_ramps_f uint16_t ramps16
  * Note that this will probably involve the library allocating temporary data.
  * 
  * @param   this            The CRTC state.
- * @param   red_function    The function that generates the the gamma ramp for the red channel.
- * @param   green_function  The function that generates the the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @param   red_function    The function that generates the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel.
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
@@ -1050,9 +1050,9 @@ $>crtc_set_gamma_ramps_f uint32_t ramps32
  * Note that this will probably involve the library allocating temporary data.
  * 
  * @param   this            The CRTC state.
- * @param   red_function    The function that generates the the gamma ramp for the red channel.
- * @param   green_function  The function that generates the the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @param   red_function    The function that generates the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel.
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
@@ -1065,9 +1065,9 @@ $>crtc_set_gamma_ramps_f uint64_t ramps64
  * Note that this will probably involve the library allocating temporary data.
  * 
  * @param   this            The CRTC state.
- * @param   red_function    The function that generates the the gamma ramp for the red channel.
- * @param   green_function  The function that generates the the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @param   red_function    The function that generates the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel.
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
@@ -1080,9 +1080,9 @@ $>crtc_set_gamma_ramps_f float rampsf
  * Note that this will probably involve the library allocating temporary data.
  * 
  * @param   this            The CRTC state.
- * @param   red_function    The function that generates the the gamma ramp for the red channel.
- * @param   green_function  The function that generates the the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the the gamma ramp for the blue channel.
+ * @param   red_function    The function that generates the gamma ramp for the red channel.
+ * @param   green_function  The function that generates the gamma ramp for the green channel.
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel.
  * @return                  Zero on success, otherwise (negative) the value of an
  *                          error identifier provided by this library.
  */
