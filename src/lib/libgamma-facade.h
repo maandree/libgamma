@@ -118,7 +118,7 @@ int libgamma_is_method_available(int method) __attribute__((const));
 void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this, int method);
 
 /**
- * Return the capabilities of an adjustment method.
+ * Return the default site for an adjustment method.
  * 
  * @param   method  The adjustment method (display server and protocol.)
  * @return          The default site, `NULL` if it cannot be determined or
@@ -128,7 +128,8 @@ void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this,
 char* libgamma_method_default_site(int method);
 
 /**
- * Return the capabilities of an adjustment method.
+ * Return the default variable that determines
+ * the default site for an adjustment method.
  * 
  * @param   method  The adjustment method (display server and protocol.)
  * @return          The environ variables that is used to determine the
