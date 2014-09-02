@@ -103,7 +103,7 @@
 
 
 /**
- * Capabilities of adjustment methods
+ * Capabilities of adjustment methods.
  */
 typedef struct libgamma_method_capabilities
 {
