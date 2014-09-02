@@ -302,7 +302,7 @@ int libgamma_quartz_cg_get_crtc_information(libgamma_crtc_information_t* restric
 
 
 /**
- * Get current the gamma ramps for a CRTC, `float` version.
+ * Get the current gamma ramps for a CRTC, `float` version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.

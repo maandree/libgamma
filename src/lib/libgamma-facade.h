@@ -324,7 +324,7 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid);
 
 
 /**
- * Get current the gamma ramps for a CRTC, 8-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 8-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values
@@ -347,7 +347,7 @@ int libgamma_crtc_set_gamma_ramps8(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values
@@ -370,7 +370,7 @@ int libgamma_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, 32-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 32-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -393,7 +393,7 @@ int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, 64-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 64-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -427,7 +427,7 @@ int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 				   libgamma_gamma_rampsf_t ramps);
 
 /**
- * Get current the gamma ramps for a CRTC, `float` version.
+ * Get the current gamma ramps for a CRTC, `float` version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -439,7 +439,7 @@ int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, `double` version.
+ * Get the current gamma ramps for a CRTC, `double` version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.

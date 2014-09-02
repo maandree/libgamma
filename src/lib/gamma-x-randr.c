@@ -896,7 +896,7 @@ int libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t* restrict 
 
 
 /**
- * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.

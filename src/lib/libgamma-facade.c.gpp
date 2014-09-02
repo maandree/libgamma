@@ -671,7 +671,7 @@ unsigned char* libgamma_unhex_edid(const char* restrict edid)
 
 
 /**
- * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -820,7 +820,7 @@ $>}
 
 
 /**
- * Get current the gamma ramps for a CRTC, 8-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 8-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -843,7 +843,7 @@ $>crtc_set_get_gamma_ramps set ramps8 bits8 8
 
 
 /**
- * Get current the gamma ramps for a CRTC, 32-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 32-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -866,7 +866,7 @@ $>crtc_set_get_gamma_ramps set ramps32 bits32 32
 
 
 /**
- * Get current the gamma ramps for a CRTC, 64-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 64-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -888,7 +888,7 @@ $>crtc_set_get_gamma_ramps set ramps64 bits64 64
 
 
 /**
- * Get current the gamma ramps for a CRTC, `float` version.
+ * Get the current gamma ramps for a CRTC, `float` version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -911,7 +911,7 @@ $>crtc_set_get_gamma_ramps set rampsf float_single -1
 
 
 /**
- * Get current the gamma ramps for a CRTC, `double` version.
+ * Get the current gamma ramps for a CRTC, `double` version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.

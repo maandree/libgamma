@@ -731,7 +731,7 @@ int libgamma_dummy_get_crtc_information(libgamma_crtc_information_t* restrict th
 
 
 /**
- * Get current the gamma ramps for a CRTC.
+ * Get the current gamma ramps for a CRTC.
  * 
  * @param   1      The data type for the ramp stop elements.
  * @param   2      The `ramp*` pattern for the ramp structure and function to call.
@@ -886,7 +886,7 @@ $>}
 
 
 /**
- * Get current the gamma ramps for a CRTC, 8-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 8-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -909,7 +909,7 @@ $>libgamma_dummy_crtc_set_gamma_ramps uint8_t ramps8 bits8 8
 
 
 /**
- * Get current the gamma ramps for a CRTC, 16-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -932,7 +932,7 @@ $>libgamma_dummy_crtc_set_gamma_ramps uint16_t ramps16 bits16 16
 
 
 /**
- * Get current the gamma ramps for a CRTC, 32-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 32-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -955,7 +955,7 @@ $>libgamma_dummy_crtc_set_gamma_ramps uint32_t ramps32 bits32 32
 
 
 /**
- * Get current the gamma ramps for a CRTC, 64-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 64-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -978,7 +978,7 @@ $>libgamma_dummy_crtc_set_gamma_ramps uint64_t ramps64 bits64 64
 
 
 /**
- * Get current the gamma ramps for a CRTC, `float` version.
+ * Get the current gamma ramps for a CRTC, `float` version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.
@@ -1001,7 +1001,7 @@ $>libgamma_dummy_crtc_set_gamma_ramps float rampsf float_single -1
 
 
 /**
- * Get current the gamma ramps for a CRTC, `double` version.
+ * Get the current gamma ramps for a CRTC, `double` version.
  * 
  * @param   this   The CRTC state.
  * @param   ramps  The gamma ramps to fill with the current values.

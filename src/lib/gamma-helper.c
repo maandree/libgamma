@@ -280,7 +280,7 @@ static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
 
 
 /**
- * Get current the gamma ramps for a CRTC, re-encoding version.
+ * Get the current gamma ramps for a CRTC, re-encoding version.
  * 
  * @param   this          The CRTC state.
  * @param   ramps         The gamma ramps to fill with the current values.

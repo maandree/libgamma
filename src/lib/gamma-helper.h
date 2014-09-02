@@ -85,7 +85,7 @@ typedef int libgamma_set_ramps_any_fun(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, re-encoding versio.n
+ * Get the current gamma ramps for a CRTC, re-encoding versio.n
  * 
  * @param   this          The CRTC state.
  * @param   ramps         The gamma ramps to fill with the current values.
@@ -125,7 +125,7 @@ typedef int libgamma_set_ramps_any_fun(libgamma_crtc_state_t* restrict this,
 
 
 /**
- * Get current the gamma ramps for a CRTC, re-encoding version.
+ * Get the current gamma ramps for a CRTC, re-encoding version.
  * 
  * @param   this          The CRTC state.
  * @param   ramps         The gamma ramps to fill with the current values.
