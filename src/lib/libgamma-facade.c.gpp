@@ -565,7 +565,7 @@ void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
  * @param   2       The hexadecimal alphabet.
  * @param   edid    The EDID in raw representation.
  * @param   length  The length of `edid`.
- * @retrun          The EDID in hexadecimal representation,
+ * @return          The EDID in hexadecimal representation,
  *                  `NULL` on allocation error, `errno` will be set accordingly.
  */
 $>behex_edid ()
@@ -598,7 +598,7 @@ $>}
  * 
  * @param   edid    The EDID in raw representation.
  * @param   length  The length of `edid`.
- * @retrun          The EDID in lowercase hexadecimal representation,
+ * @return          The EDID in lowercase hexadecimal representation,
  *                  `NULL` on allocation error, `errno` will be set accordingly.
  */
 $>behex_edid lowercase 0123456789abcdef
@@ -609,7 +609,7 @@ $>behex_edid lowercase 0123456789abcdef
  * 
  * @param   edid    The EDID in raw representation.
  * @param   length  The length of `edid`.
- * @retrun          The EDID in uppercase hexadecimal representation,
+ * @return          The EDID in uppercase hexadecimal representation,
  *                  NULL` on allocation error, `errno` will be set accordingly.
  */
 $>behex_edid uppercase 0123456789ABCDEF
@@ -619,7 +619,7 @@ $>behex_edid uppercase 0123456789ABCDEF
  * Convert an hexadecimal representation of an EDID to a raw representation.
  * 
  * @param   edid  The EDID in hexadecimal representation.
- * @retrun        The EDID in raw representation, it will be half the length
+ * @return        The EDID in raw representation, it will be half the length
  *                of `edid` (the input value). `NULL` on allocation error or
  *                if the EDID is malformated, `errno` will be set accordingly.
  */

@@ -297,7 +297,7 @@ void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this);
  * 
  * @param   edid    The EDID in raw representation.
  * @param   length  The length of `edid`.
- * @retrun          The EDID in lowercase hexadecimal representation,
+ * @return          The EDID in lowercase hexadecimal representation,
  *                  `NULL` on allocation error, `errno` will be set accordingly.
  */
 char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t length);
@@ -307,7 +307,7 @@ char* libgamma_behex_edid_lowercase(const unsigned char* restrict edid, size_t l
  * 
  * @param   edid    The EDID in raw representation.
  * @param   length  The length of `edid`.
- * @retrun          The EDID in uppercase hexadecimal representation,
+ * @return          The EDID in uppercase hexadecimal representation,
  *                  NULL` on allocation error, `errno` will be set accordingly.
  */
 char* libgamma_behex_edid_uppercase(const unsigned char* restrict edid, size_t length);
@@ -316,7 +316,7 @@ char* libgamma_behex_edid_uppercase(const unsigned char* restrict edid, size_t l
  * Convert an hexadecimal representation of an EDID to a raw representation.
  * 
  * @param   edid  The EDID in hexadecimal representation.
- * @retrun        The EDID in raw representation, it will be half the length
+ * @return        The EDID in raw representation, it will be half the length
  *                of `edid` (the input value). `NULL` on allocation error or
  *                if the EDID is malformated, `errno` will be set accordingly.
  */
