@@ -344,7 +344,7 @@ int libgamma_crtc_get_gamma_ramps8(libgamma_crtc_state_t* restrict this,
  *                 error identifier provided by this library.
  */
 int libgamma_crtc_set_gamma_ramps8(libgamma_crtc_state_t* restrict this,
-				   libgamma_gamma_ramps8_t ramps) __attribute__((hot));
+				   libgamma_gamma_ramps8_t ramps);
 
 
 /**
