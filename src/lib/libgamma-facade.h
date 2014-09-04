@@ -173,7 +173,7 @@ void libgamma_site_destroy(libgamma_site_state_t* restrict this);
 void libgamma_site_free(libgamma_site_state_t* restrict this);
 
 /**
- * Restore the gamma ramps all CRTC:s with a site to the system settings.
+ * Restore the gamma ramps all CRTC:s within a site to the system settings.
  * 
  * @param   this  The site state.
  * @return        Zero on success, otherwise (negative) the value of an
@@ -210,7 +210,7 @@ void libgamma_partition_destroy(libgamma_partition_state_t* restrict this);
 void libgamma_partition_free(libgamma_partition_state_t* restrict this);
 
 /**
- * Restore the gamma ramps all CRTC:s with a partition to the system settings.
+ * Restore the gamma ramps all CRTC:s within a partition to the system settings.
  * 
  * @param   this  The partition state.
  * @return        Zero on success, otherwise (negative) the value of an
