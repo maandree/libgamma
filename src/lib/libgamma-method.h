@@ -499,7 +499,7 @@ typedef enum libgamma_subpixel_order
 /**
  * For a `libgamma_crtc_information_t` fill in the
  * values for `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`.
- * and report errors to `gamma_size_error`
+ * and report errors to `gamma_size_error`.
  */
 #define LIBGAMMA_CRTC_INFO_GAMMA_SIZE  (1 << 5)
 
