@@ -249,7 +249,7 @@ void libgamma_crtc_free(libgamma_crtc_state_t* restrict this);
 /**
  * Restore the gamma ramps for a CRTC to the system settings for that CRTC.
  * 
- * @param   this  The CRTC state
+ * @param   this  The CRTC state.
  * @return        Zero on success, otherwise (negative) the value of an
  *                error identifier provided by this library.
  */
