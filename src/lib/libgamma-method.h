@@ -89,7 +89,7 @@
 /**
  * The index of the last gamma method, neither it
  * nor any index before it may actually be supported
- * as it could have been disabled at compile-time
+ * as it could have been disabled at compile-time.
  */
 #define LIBGAMMA_METHOD_MAX  5
 
