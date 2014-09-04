@@ -1283,5 +1283,9 @@ void libgamma_gamma_rampsd_free(libgamma_gamma_rampsd_t* restrict this);
 
 
 
+#ifndef __GCC__
+# undefine __attribute__
+#endif
+
 #endif
 

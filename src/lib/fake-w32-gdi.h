@@ -82,5 +82,10 @@ BOOL EnumDisplayDevices(LPCTSTR restrict lpDevice, DWORD iDevNum,
 			PDISPLAY_DEVICE restrict lpDisplayDevice, DWORD dwFlags);
 
 
+
+#ifndef __GCC__
+# undefine __attribute__
+#endif
+
 #endif
 

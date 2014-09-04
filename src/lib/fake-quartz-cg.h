@@ -73,5 +73,10 @@ uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display) __attribute__((c
 void close_fake_quartz_cg(void);
 
 
+
+#ifndef __GCC__
+# undefine __attribute__
+#endif
+
 #endif
 
