@@ -17,11 +17,6 @@
  */
 #include "methods.h"
 
-#include <libgamma.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-
 
 /**
  * Get the name representation of an

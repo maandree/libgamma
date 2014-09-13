@@ -17,9 +17,6 @@
  */
 #include "crtcinfo.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 
 /**
  * Conditionally print a CRTC information field.

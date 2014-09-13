@@ -19,6 +19,12 @@
 #define LIBGAMMA_TEST_METHODS_H
 
 
+#include <libgamma.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
 #ifndef __GCC__
 # define __attribute__(x)
 #endif

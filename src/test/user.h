@@ -19,7 +19,13 @@
 #define LIBGAMMA_TEST_USER_H
 
 
+#include "methods.h"
+
 #include <libgamma.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
 
 
 /**

@@ -17,11 +17,41 @@
  */
 #include "user.h"
 
-#include "methods.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifdef __GCC__
+# include <string.h>
+#else
+/* Hack to circumvent that the funcions are defined multiples. */
+# define strlen strlen_
+# define memcpy memcpy_
+# define strchr strchr_
+static size_t strlen_(const char* str)
+{
+  size_t n = 0;
+  while (str[n])
+    n++;
+  return n;
+}
+static void* memcpy_(void* dest, const void* src, size_t n)
+{
+  char* restrict d = dest;
+  const char* restrict s = src;
+  size_t i;
+  for (i = 0; i < n; i++)
+    d[i] = s[i];
+  return dest;
+}
+static char* strchr_(const char* s, int c)
+{
+  char find = (char)c;
+  while (*s)
+    if (*s == find)
+      return s;
+    else
+      s++;
+  return NULL;
+}
+#endif
 
 
 /**

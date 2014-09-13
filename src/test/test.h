@@ -15,22 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBGAMMA_TEST_CRTCINFO_H
-#define LIBGAMMA_TEST_CRTCINFO_H
+#ifndef LIBGAMMA_TEST_TEST_H
+#define LIBGAMMA_TEST_TEST_H
 
+
+#include "update-warnings.h"
+#include "methods.h"
+#include "errors.h"
+#include "crtcinfo.h"
+#include "user.h"
+#include "ramps.h"
 
 #include <libgamma.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-
-
-/**
- * The CRTC information for a CRTC.
- * 
- * @param  crtc  The CRTC.
- */
-void crtc_information(libgamma_crtc_state_t* restrict crtc);
+#include <unistd.h>
+#include <stdint.h>
 
 
 #endif

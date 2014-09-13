@@ -17,12 +17,6 @@
  */
 #include "errors.h"
 
-#include <libgamma.h>
-
-#include <stdio.h>
-#include <errno.h>
-
-
 
 /**
  * The error API.
