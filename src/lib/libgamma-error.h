@@ -35,7 +35,7 @@
  * `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned.
  */
 #ifndef __WIN32__
-extern gid_t libgamma_group_gid;
+extern __thread gid_t libgamma_group_gid;
 #else
 extern short libgamma_group_gid;
 #endif
@@ -46,7 +46,11 @@ extern short libgamma_group_gid;
  * `NULL` if the name of the group `libgamma_group_gid`
  * cannot be determined.
  */
+#ifndef __WIN32__
+extern __thread const char* libgamma_group_name;
+#else
 extern const char* libgamma_group_name;
+#endif
 
 
 /**

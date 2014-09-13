@@ -38,7 +38,7 @@ $>export PATH=".:${PATH}"
  * `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned.
  */
 #ifndef __WIN32__
-gid_t libgamma_group_gid = 0;
+__thread gid_t libgamma_group_gid = 0;
 #else
 short libgamma_group_gid = 0;
 #endif
@@ -49,7 +49,11 @@ short libgamma_group_gid = 0;
  * `NULL` if the name of the group `libgamma_group_gid`
  * cannot be determined.
  */
+#ifndef __WIN32__
+__thread const char* libgamma_group_name = NULL;
+#else
 const char* libgamma_group_name = NULL;
+#endif
 
 
 

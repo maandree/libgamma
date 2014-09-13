@@ -1280,8 +1280,11 @@ group is stored in @code{libgamma_group_name}.
 @code{NULL} is stored if the name of the group
 cannto be determined. @file{libgamma.h} give
 you access to these variables, they are defined
-as @code{gid_t} and @code{const char*} types
-respectively.
+as @code{gid_t} (@code{short int} for Windows)
+and @code{const char*} types respectively.
+Additionally, except on Windows, these use thread
+local storage, defined with the @code{__thread}
+modifier.
 
 @command{libgamma} defines the following error codes
 that its functions may return:
