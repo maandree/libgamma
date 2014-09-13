@@ -166,18 +166,12 @@ int main(void)
   printf("Current gamma ramps (" #R "):\n");				\
   for (i = 0; i < n; i++)						\
     {									\
-      if (i < R.red_size)						\
-	printf("  \033[31m%1.8lf\033[00m", (double)(R.red[i]));		\
-      else								\
-	printf("      ");						\
-      if (i < R.green_size)						\
-	printf("  \033[32m%1.8lf\033[00m", (double)(R.green[i]));	\
-      else								\
-	printf("      ");						\
-      if (i < R.blue_size)						\
-	printf("  \033[34m%1.8lf\033[00m", (double)(R.blue[i]));	\
-      else								\
-	printf("      ");						\
+      if (i < R.red_size)    Y(R, red);					\
+      else                   printf("      ");				\
+      if (i < R.green_size)  Y(R, green);				\
+      else                   printf("      ");				\
+      if (i < R.blue_size)   Y(R, blue);				\
+      else                   printf("      ");				\
       printf("\n");							\
     }									\
   printf("\n");								\
@@ -196,49 +190,13 @@ int main(void)
   printf("Done!\n");							\
   printf("Sleeping for 1 second...\n");					\
   sleep(1);
+#define Y(R, C)  printf("  \033[32m%1.8lf\033[00m", (double)(R.C[i]))
   LIST_FLOAT_RAMPS
-#undef X
-  
-#define X(R)								\
-  n = R.red_size;							\
-  n = n > R.green_size ? n : R.green_size;				\
-  n = n > R.blue_size ? n : R.blue_size;				\
-  printf("Current gamma ramps (" #R "):\n");				\
-  for (i = 0; i < n; i++)						\
-    {									\
-      if (i < R.red_size)						\
-	printf("  \033[31m%16llX\033[00m", (uint64_t)(R.red[i]));	\
-      else								\
-	printf("      ");						\
-      if (i < R.green_size)						\
-	printf("  \033[32m%16llX\033[00m", (uint64_t)(R.green[i]));	\
-      else								\
-	printf("      ");						\
-      if (i < R.blue_size)						\
-	printf("  \033[34m%16llX\033[00m", (uint64_t)(R.blue[i]));	\
-      else								\
-	printf("      ");						\
-      printf("\n");							\
-    }									\
-  printf("\n");								\
-									\
-  for (i = 0; i < R.red_size + R.green_size + R.blue_size; i++)		\
-    R.red[i] /= 2;							\
-									\
-  printf("Dimming monitor for 1 second...\n");				\
-  r = libgamma_crtc_set_gamma_##R(crtc_state, R);			\
-  if (r)								\
-    libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
-  sleep(1);								\
-  r = libgamma_crtc_set_gamma_##R(crtc_state, old_##R);			\
-  if (r)								\
-    libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
-  printf("Done!\n");							\
-  printf("Sleeping for 1 second...\n");					\
-  sleep(1);
+#undef Y
+#define Y(R, C)  printf("  \033[31m%16llX\033[00m", (uint64_t)(R.C[i]))
   LIST_INTEGER_RAMPS
+#undef Y
 #undef X
-  
   
  done:
 #define X(R)					\
