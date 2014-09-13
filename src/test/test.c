@@ -271,12 +271,21 @@ static void crtc_information(libgamma_crtc_state_t* restrict crtc)
 
 int main(void)
 {
+  /* ramps16 is last because we want to make sure that the gamma ramps are
+     preserved exactly on exit, and we assume RandR X is used. */
+#define LIST_INTEGER_RAMPS  X(ramps32) X(ramps64) X(ramps16)
+#define LIST_FLOAT_RAMPS  X(rampsf) X(rampsd)
+#define LIST_RAMPS  LIST_FLOAT_RAMPS LIST_INTEGER_RAMPS
+  /* TODO X(ramps8) */
+
   libgamma_site_state_t* restrict site_state = malloc(sizeof(libgamma_site_state_t));
   libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
   libgamma_crtc_state_t* restrict crtc_state = malloc(sizeof(libgamma_crtc_state_t));
   libgamma_crtc_information_t info;
-  libgamma_gamma_ramps16_t old_ramps;
-  libgamma_gamma_ramps16_t ramps;
+#define X(R)					\
+  libgamma_gamma_##R##_t old_##R, R;
+  LIST_RAMPS
+#undef X
   size_t i, n;
   int r;
   
@@ -292,64 +301,123 @@ int main(void)
   crtc_information(crtc_state);
   
   libgamma_get_crtc_information(&info, crtc_state, LIBGAMMA_CRTC_INFO_GAMMA_SIZE);
-  old_ramps.red_size = info.red_gamma_size;
-  old_ramps.green_size = info.green_gamma_size;
-  old_ramps.blue_size = info.blue_gamma_size;
-  ramps = old_ramps;
-  libgamma_gamma_ramps16_initialise(&old_ramps);
-  libgamma_gamma_ramps16_initialise(&ramps);
   
-  libgamma_crtc_get_gamma_ramps16(crtc_state, &old_ramps);
-  r = libgamma_crtc_get_gamma_ramps16(crtc_state, &ramps);
-  if (r)
-    libgamma_perror("libgamma_crtc_get_gamma_ramps16", r);
-  else
-    {
-      n = ramps.red_size;
-      n = n > ramps.green_size ? n : ramps.green_size;
-      n = n > ramps.blue_size ? n : ramps.blue_size;
-      printf("Current gamma ramps:\n");
-      for (i = 0; i < n; i++)
-	{
-	  if (i < ramps.red_size)
-	    printf("  \033[31m%04X\033[00m", ramps.red[i]);
-	  else
-	    printf("      ");
-	  if (i < ramps.green_size)
-	    printf("  \033[32m%04X\033[00m", ramps.green[i]);
-	  else
-	    printf("      ");
-	  if (i < ramps.blue_size)
-	    printf("  \033[34m%04X\033[00m", ramps.blue[i]);
-	  else
-	    printf("      ");
-	  printf("\n");
-	}
-      printf("\n");
-      
-      for (i = 0; i < ramps.red_size + ramps.green_size + ramps.blue_size; i++)
-	ramps.red[i] /= 2;
-      
-      printf("Dimming monitor for 1 second...\n");
-      r = libgamma_crtc_set_gamma_ramps16(crtc_state, ramps);
-      if (r)
-	libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
-      sleep(1);
-      r = libgamma_crtc_set_gamma_ramps16(crtc_state, old_ramps);
-      if (r)
-	libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
-      printf("Done!\n");
+#define X(R)					\
+  old_##R.red_size = info.red_gamma_size;	\
+  old_##R.green_size = info.green_gamma_size;	\
+  old_##R.blue_size = info.blue_gamma_size;	\
+  R = old_##R;					\
+  libgamma_gamma_##R##_initialise(&old_##R);	\
+  libgamma_gamma_##R##_initialise(&R);
+  LIST_RAMPS
+#undef X
+  
+#define X(R)							\
+  libgamma_crtc_get_gamma_##R(crtc_state, &old_##R);		\
+  if (r = libgamma_crtc_get_gamma_##R(crtc_state, &R), r)	\
+    {								\
+      libgamma_perror("libgamma_crtc_get_gamma_" #R, r);	\
+      goto done;						\
     }
+  LIST_RAMPS
+#undef X
+  
+#define X(R)								\
+  n = R.red_size;							\
+  n = n > R.green_size ? n : R.green_size;				\
+  n = n > R.blue_size ? n : R.blue_size;				\
+  printf("Current gamma ramps (" #R "):\n");				\
+  for (i = 0; i < n; i++)						\
+    {									\
+      if (i < R.red_size)						\
+	printf("  \033[31m%1.8lf\033[00m", (double)(R.red[i]));		\
+      else								\
+	printf("      ");						\
+      if (i < R.green_size)						\
+	printf("  \033[32m%1.8lf\033[00m", (double)(R.green[i]));	\
+      else								\
+	printf("      ");						\
+      if (i < R.blue_size)						\
+	printf("  \033[34m%1.8lf\033[00m", (double)(R.blue[i]));	\
+      else								\
+	printf("      ");						\
+      printf("\n");							\
+    }									\
+  printf("\n");								\
+									\
+  for (i = 0; i < R.red_size + R.green_size + R.blue_size; i++)		\
+    R.red[i] /= 2;							\
+									\
+  printf("Dimming monitor for 1 second...\n");				\
+  r = libgamma_crtc_set_gamma_##R(crtc_state, R);			\
+  if (r)								\
+    libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
+  sleep(1);								\
+  r = libgamma_crtc_set_gamma_##R(crtc_state, old_##R);			\
+  if (r)								\
+    libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
+  printf("Done!\n");							\
+  printf("Sleeping for 1 second...\n");					\
+  sleep(1);
+  LIST_FLOAT_RAMPS
+#undef X
+  
+#define X(R)								\
+  n = R.red_size;							\
+  n = n > R.green_size ? n : R.green_size;				\
+  n = n > R.blue_size ? n : R.blue_size;				\
+  printf("Current gamma ramps (" #R "):\n");				\
+  for (i = 0; i < n; i++)						\
+    {									\
+      if (i < R.red_size)						\
+	printf("  \033[31m%16llX\033[00m", (uint64_t)(R.red[i]));	\
+      else								\
+	printf("      ");						\
+      if (i < R.green_size)						\
+	printf("  \033[32m%16llX\033[00m", (uint64_t)(R.green[i]));	\
+      else								\
+	printf("      ");						\
+      if (i < R.blue_size)						\
+	printf("  \033[34m%16llX\033[00m", (uint64_t)(R.blue[i]));	\
+      else								\
+	printf("      ");						\
+      printf("\n");							\
+    }									\
+  printf("\n");								\
+									\
+  for (i = 0; i < R.red_size + R.green_size + R.blue_size; i++)		\
+    R.red[i] /= 2;							\
+									\
+  printf("Dimming monitor for 1 second...\n");				\
+  r = libgamma_crtc_set_gamma_##R(crtc_state, R);			\
+  if (r)								\
+    libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
+  sleep(1);								\
+  r = libgamma_crtc_set_gamma_##R(crtc_state, old_##R);			\
+  if (r)								\
+    libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
+  printf("Done!\n");							\
+  printf("Sleeping for 1 second...\n");					\
+  sleep(1);
+  LIST_INTEGER_RAMPS
+#undef X
+  
+  
+ done:
+#define X(R)					\
+  libgamma_gamma_##R##_destroy(&R);		\
+  libgamma_gamma_##R##_destroy(&old_##R);
+  LIST_RAMPS
+#undef X
   
   /* TODO Test gamma ramp restore functions. */
   /* TODO Test _f gamma ramp setters. */
-  /* TODO Test gamma ramp getters/setters of other bit depths. */
   
-  libgamma_gamma_ramps16_destroy(&ramps);
-  libgamma_gamma_ramps16_destroy(&old_ramps);
   libgamma_crtc_free(crtc_state);
   libgamma_partition_free(part_state);
   libgamma_site_free(site_state);
   return r;
+  
+#undef LIST_RAMPS
 }
 
