@@ -382,7 +382,7 @@ int libgamma_value_of_error(const char* name) __attribute__((const));
 
 
 #ifndef __GCC__
-# undefine __attribute__
+# undef __attribute__
 #endif
 
 #endif

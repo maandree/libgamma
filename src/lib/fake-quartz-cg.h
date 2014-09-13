@@ -75,7 +75,7 @@ void close_fake_quartz_cg(void);
 
 
 #ifndef __GCC__
-# undefine __attribute__
+# undef __attribute__
 #endif
 
 #endif
