@@ -371,13 +371,10 @@ uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
 
 void close_fake_quartz_cg(void)
 {
-  free(res_reply);
-  res_reply = NULL;
+  free(res_reply), res_reply = NULL;
   if (connection != NULL)
-    xcb_disconnect(connection);
-  connection = NULL;
-  free(original_ramps);
-  original_ramps = NULL;
+    xcb_disconnect(connection), connection = NULL;
+  free(original_ramps), original_ramps = NULL;
 }
 
 #endif
