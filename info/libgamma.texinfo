@@ -1284,7 +1284,7 @@ as @code{gid_t} (@code{short int} for Windows)
 and @code{const char*} types respectively.
 Additionally, except on Windows, these use thread
 local storage, defined with the @code{__thread}
-modifier.
+qualifier.
 
 @command{libgamma} defines the following error codes
 that its functions may return:

@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef  LIBGAMMA_TEST_ERRROS_H
-#define  LIBGAMMA_TEST_ERRROS_H
+#ifndef LIBGAMMA_TEST_ERRROS_H
+#define LIBGAMMA_TEST_ERRROS_H
 
 
 /**
