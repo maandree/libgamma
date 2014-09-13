@@ -44,6 +44,8 @@
  */
 
 #ifdef __GCC__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wcpp"
 # if LIBGAMMA_ERROR_MIN < -46
 #  warning New error codes have been added to libgamma.
 # endif
@@ -59,6 +61,7 @@
 # if LIBGAMMA_CRTC_INFO_COUNT > 13
 #  warning New CRTC information fields have been added to libgamma.
 # endif
+# pragma GCC diagnostic pop
 #endif
 
 

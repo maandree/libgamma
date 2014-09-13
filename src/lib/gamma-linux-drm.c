@@ -268,7 +268,7 @@ static int figure_out_card_open_error(const char* pathname)
 # ifdef __GCC__
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wcpp"
-#  warning figure_out_card_open_error is not thread-safe
+#  warning figure_out_card_open_error is not thread-safe.
 #  pragma GCC diagnostic pop
 # endif
   /* Not thread-safe. */
