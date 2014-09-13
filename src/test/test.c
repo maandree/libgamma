@@ -33,7 +33,7 @@
 /**
  * Test `libgamma`
  * 
- * @return  Non-zero on machine detectable error, it library
+ * @return  Non-zero on machine detectable error, this library
  *          may still be faulty if zero is returned.
  */
 int main(void)
