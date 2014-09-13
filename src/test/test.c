@@ -18,6 +18,7 @@
 #include "update-warnings.h"
 #include "methods.h"
 #include "errors.h"
+#include "crtcinfo.h"
 
 #include <libgamma.h>
 
@@ -103,169 +104,6 @@ static int select_monitor(libgamma_site_state_t* restrict site_state,
   
   printf("\n");
   return 0;
-}
-
-
-#define print_crtc_information_(type, notation)								   \
-  static void print_crtc_information_##type(int do_print, const char* description, int error, type value)  \
-  {													   \
-    char buf[256];											   \
-    if (do_print)											   \
-      {													   \
-	if (error)											   \
-	  {												   \
-	    snprintf(buf, sizeof(buf) / sizeof(char), "  (error) %s", description); 			   \
-	    libgamma_perror(buf, error);								   \
-	  }												   \
-	else												   \
-	  printf("  %s: %" notation "\n", description, value);						   \
-      }													   \
-  }
-
-typedef const char* str;
-print_crtc_information_(size_t, "lu")
-print_crtc_information_(signed, "i")
-print_crtc_information_(int, "i")
-#ifdef __GCC__
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdouble-promotion"
-#endif
-print_crtc_information_(float, "f")
-#ifdef __GCC__
-# pragma GCC diagnostic pop
-#endif
-print_crtc_information_(str, "s")
-
-#undef print_crtc_information_
-
-
-#define __case(VALUE)  case VALUE: return #VALUE;
-
-static const char* subpixel_order_str(libgamma_subpixel_order_t value)
-{
-  switch (value)
-    {
-    __case (LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN)
-    __case (LIBGAMMA_SUBPIXEL_ORDER_NONE)
-    __case (LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB)
-    __case (LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_BGR)
-    __case (LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_RGB)
-    __case (LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_BGR)
-    default:
-      return "(unknown)";
-    }
-}
-
-static const char* connector_type_str(libgamma_connector_type_t value)
-{
-  switch (value)
-    {
-    __case (LIBGAMMA_CONNECTOR_TYPE_Unknown)
-    __case (LIBGAMMA_CONNECTOR_TYPE_VGA)
-    __case (LIBGAMMA_CONNECTOR_TYPE_DVI)
-    __case (LIBGAMMA_CONNECTOR_TYPE_DVII)
-    __case (LIBGAMMA_CONNECTOR_TYPE_DVID)
-    __case (LIBGAMMA_CONNECTOR_TYPE_DVIA)
-    __case (LIBGAMMA_CONNECTOR_TYPE_Composite)
-    __case (LIBGAMMA_CONNECTOR_TYPE_SVIDEO)
-    __case (LIBGAMMA_CONNECTOR_TYPE_LVDS)
-    __case (LIBGAMMA_CONNECTOR_TYPE_Component)
-    __case (LIBGAMMA_CONNECTOR_TYPE_9PinDIN)
-    __case (LIBGAMMA_CONNECTOR_TYPE_DisplayPort)
-    __case (LIBGAMMA_CONNECTOR_TYPE_HDMI)
-    __case (LIBGAMMA_CONNECTOR_TYPE_HDMIA)
-    __case (LIBGAMMA_CONNECTOR_TYPE_HDMIB)
-    __case (LIBGAMMA_CONNECTOR_TYPE_TV)
-    __case (LIBGAMMA_CONNECTOR_TYPE_eDP)
-    __case (LIBGAMMA_CONNECTOR_TYPE_VIRTUAL)
-    __case (LIBGAMMA_CONNECTOR_TYPE_DSI)
-    __case (LIBGAMMA_CONNECTOR_TYPE_LFP)
-    default:
-      return "(unknown)";
-    }
-}
-
-#undef __case
-
-
-static void crtc_information(libgamma_crtc_state_t* restrict crtc)
-{
-  libgamma_method_capabilities_t caps;
-  libgamma_crtc_information_t info;
-  int fields;
-  int field;
-  
-  libgamma_method_capabilities(&caps, crtc->partition->site->method);
-  
-  for (fields = caps.crtc_information; field = fields & -fields, fields; fields ^= field)
-    {
-      if (libgamma_get_crtc_information(&info, crtc, field))
-	printf("Could not read CRTC information field %i\n", field);
-      free(info.edid);
-      free(info.connector_name);
-    }
-  
-  fields = caps.crtc_information;
-  if (libgamma_get_crtc_information(&info, crtc, fields))
-    printf("An error occurred while reading CRTC information\n");
-
-#define print2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, ERROR_VAR)  \
-  print_crtc_information_##TYPE(fields & FIELD_ID, DESCRIPTION, info.ERROR_VAR, info.FIELD_VAR);
-#define print(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR)  \
-  print2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, FIELD_VAR##_error);
-  
-  printf("CRTC information:\n");
-  if ((fields & LIBGAMMA_CRTC_INFO_EDID))
-    {
-      if (info.edid_error)
-	libgamma_perror("  (error) EDID", info.edid_error);
-      else
-	{
-	  char* edid_lc = libgamma_behex_edid(info.edid, info.edid_length);
-	  unsigned char* edid_raw = libgamma_unhex_edid(edid_lc);
-	  char* edid_uc = libgamma_behex_edid_uppercase(edid_raw, info.edid_length);;
-	  printf("  EDID: %s\n", edid_lc);
-	  printf("  EDID (uppercase): %s\n", edid_uc);
-	  printf("  EDID (length): %lu\n", info.edid_length);
-	  free(edid_lc);
-	  free(edid_raw);
-	  free(edid_uc);
-	}
-    }
-  print(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM, "width", width_mm);
-  print(size_t, LIBGAMMA_CRTC_INFO_HEIGHT_MM, "height", height_mm);
-  print(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID, "width per EDID", width_mm_edid);
-  print(size_t, LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID, "height per EDID", height_mm_edid);
-  print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "red gamma ramp size", red_gamma_size, gamma_size_error);
-  print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "green gamma ramp size", green_gamma_size, gamma_size_error);
-  print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "blue gamma ramp size", blue_gamma_size, gamma_size_error);
-  print(signed, LIBGAMMA_CRTC_INFO_GAMMA_DEPTH, "gamma ramp depth", gamma_depth);
-  print(int, LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT, "gamma support", gamma_support);
-  if ((fields & LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER))
-    {
-      if (info.subpixel_order_error)
-	libgamma_perror("  (error) subpixel order", info.subpixel_order_error);
-      else
-	printf("  subpixel order: %s\n", subpixel_order_str(info.subpixel_order));
-    }
-  print(int, LIBGAMMA_CRTC_INFO_ACTIVE, "active", active);
-  print(str, LIBGAMMA_CRTC_INFO_CONNECTOR_NAME, "connector name", connector_name);
-  if ((fields & LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE))
-    {
-      if (info.connector_type_error)
-	libgamma_perror("  (error) subpixel order", info.connector_type_error);
-      else
-	printf("  subpixel order: %s\n", connector_type_str(info.connector_type));
-    }
-  print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "red gamma characteristics", gamma_red, gamma_error);
-  print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "green gamma characteristics", gamma_green, gamma_error);
-  print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "blue gamma characteristics", gamma_blue, gamma_error);
-  
-#undef print
-  
-  free(info.edid);
-  free(info.connector_name);
-  printf("\n");
 }
 
 
@@ -417,6 +255,8 @@ int main(void)
   libgamma_site_free(site_state);
   return r;
   
+#undef LIST_FLOAT_RAMPS
+#undef LIST_INTEGER_RAMPS
 #undef LIST_RAMPS
 }
 
