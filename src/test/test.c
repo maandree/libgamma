@@ -30,6 +30,14 @@
 
 
 
+/**
+ * Let the user select adjustment method, site, partition and CRTC.
+ * 
+ * @param   site_state  Output slot for the site.
+ * @param   part_state  Output slot for the partition.
+ * @param   crtc_state  Output slot for the CRTC.
+ * @return              Zero on and only on success.
+ */
 static int select_monitor(libgamma_site_state_t* restrict site_state,
 			  libgamma_partition_state_t* restrict part_state,
 			  libgamma_crtc_state_t* restrict crtc_state)
@@ -40,6 +48,10 @@ static int select_monitor(libgamma_site_state_t* restrict site_state,
   char buf[256];
   int r;
   
+  
+  /* -- Adjustment method -- */
+  
+  /* Let the user select adjustment method. */
   printf("Select adjustment method:\n");
   for (method = 0; method < LIBGAMMA_METHOD_COUNT; method++)
     printf("    %i:  %s\n", method, method_name(method));
@@ -48,6 +60,10 @@ static int select_monitor(libgamma_site_state_t* restrict site_state,
   fgets(buf, sizeof(buf) / sizeof(char), stdin);
   method = atoi(buf);
   
+  
+  /* -- Site -- */
+  
+  /* Let the user select site. */
   printf("Select site: ");
   fflush(stdout);
   fgets(buf, sizeof(buf) / sizeof(char), stdin);
@@ -62,28 +78,39 @@ static int select_monitor(libgamma_site_state_t* restrict site_state,
       memcpy(site, buf, strlen(buf) + 1);
     }
   
+  /* Initialise site state. */
   if ((r = libgamma_site_initialise(site_state, method, site)))
     {
       free(site);
       return libgamma_perror("error", r), 1;
     }
   
+  
+  /* -- Partition -- */
+  
+  /* Check that the site has at least one partition. */
   if (site_state->partitions_available == 0)
     {
       libgamma_site_free(site_state);
       return printf("No partitions found\n"), 1;
     }
   
+  /* Let the user select partition. */
   printf("Select partition [0, %lu]: ", site_state->partitions_available - 1);
   fflush(stdout);
   fgets(buf, sizeof(buf) / sizeof(char), stdin);
   
+  /* Initialise partition state. */
   if ((r = libgamma_partition_initialise(part_state, site_state, (size_t)atoll(buf))))
     {
       libgamma_site_free(site_state);
       return libgamma_perror("error", r), 1;
     }
   
+  
+  /* -- CRTC -- */
+  
+  /* Check that the partition has at least one CRTC. */
   if (part_state->crtcs_available == 0)
     {
       libgamma_partition_free(part_state);
@@ -91,10 +118,12 @@ static int select_monitor(libgamma_site_state_t* restrict site_state,
       return printf("No CRTC:s found\n"), 1;
     }
   
+  /* Let the user select CRTC. */
   printf("Select CRTC [0, %lu]: ", part_state->crtcs_available - 1);
   fflush(stdout);
   fgets(buf, sizeof(buf) / sizeof(char), stdin);
   
+  /* Initialise CRTC state. */
   if ((r = libgamma_crtc_initialise(crtc_state, part_state, (size_t)atoll(buf))))
     {
       libgamma_partition_free(part_state);
@@ -107,6 +136,12 @@ static int select_monitor(libgamma_site_state_t* restrict site_state,
 }
 
 
+/**
+ * Test `libgamma`
+ * 
+ * @return  Non-zero on machine detectable error, it library may still
+ *          be faulty if zero is returned.
+ */
 int main(void)
 {
   /* ramps16 is last because we want to make sure that the gamma ramps are
@@ -114,7 +149,7 @@ int main(void)
 #define LIST_INTEGER_RAMPS  X(ramps8) X(ramps32) X(ramps64) X(ramps16)
 #define LIST_FLOAT_RAMPS  X(rampsf) X(rampsd)
 #define LIST_RAMPS  LIST_FLOAT_RAMPS LIST_INTEGER_RAMPS
-
+  
   libgamma_site_state_t* restrict site_state = malloc(sizeof(libgamma_site_state_t));
   libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
   libgamma_crtc_state_t* restrict crtc_state = malloc(sizeof(libgamma_crtc_state_t));
@@ -124,21 +159,26 @@ int main(void)
   LIST_RAMPS
 #undef X
   size_t i, n;
-  int r;
+  int r, rr = 0;
   
+  /* Test miscellaneous parts of the library. */
   list_methods_lists();
   method_availability();
   list_default_sites();
   method_capabilities();
   error_test();
   
+  /* Select monitor for tests over CRTC:s, partitions and sites. */
   if (select_monitor(site_state, part_state, crtc_state))
     return 1;
   
+  /* Test CRTC information functions. */
   crtc_information(crtc_state);
   
+  /* Get the sizes of the gamma ramps for the selected CRTC. */
   libgamma_get_crtc_information(&info, crtc_state, LIBGAMMA_CRTC_INFO_GAMMA_SIZE);
   
+  /* Create gamma ramps for each bit-depth. */
 #define X(R)					\
   old_##R.red_size = info.red_gamma_size;	\
   old_##R.green_size = info.green_gamma_size;	\
@@ -149,9 +189,10 @@ int main(void)
   LIST_RAMPS
 #undef X
   
+  /* Fill gamma ramps, for each bit-depth, with the CRTC:s current ramps. */
 #define X(R)							\
   libgamma_crtc_get_gamma_##R(crtc_state, &old_##R);		\
-  if ((r = libgamma_crtc_get_gamma_##R(crtc_state, &R)))	\
+  if ((rr |= r = libgamma_crtc_get_gamma_##R(crtc_state, &R)))	\
     {								\
       libgamma_perror("libgamma_crtc_get_gamma_" #R, r);	\
       goto done;						\
@@ -159,10 +200,13 @@ int main(void)
   LIST_RAMPS
 #undef X
   
+  /* Test getting and setting gamma ramps. */
 #define X(R)								\
+  /* Get the grand size of the gamma ramps. */				\
   n = R.red_size;							\
   n = n > R.green_size ? n : R.green_size;				\
   n = n > R.blue_size ? n : R.blue_size;				\
+  /* Print the current gamma ramps. */					\
   printf("Current gamma ramps (" #R "):\n");				\
   for (i = 0; i < n; i++)						\
     {									\
@@ -172,17 +216,18 @@ int main(void)
       printf("\n");							\
     }									\
   printf("\n");								\
-									\
+  /* Adjust the gamma ramps for dimming the monitor. */			\
   for (i = 0; i < R.red_size + R.green_size + R.blue_size; i++)		\
     R.red[i] /= 2;							\
-									\
+  /* Dim the monitor for one second and the restore it. */		\
   printf("Dimming monitor for 1 second...\n");				\
-  if ((r = libgamma_crtc_set_gamma_##R(crtc_state, R)))			\
+  if ((rr |= r = libgamma_crtc_set_gamma_##R(crtc_state, R)))		\
     libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
   sleep(1);								\
-  if ((r = libgamma_crtc_set_gamma_##R(crtc_state, old_##R)))		\
+  if ((rr |= r = libgamma_crtc_set_gamma_##R(crtc_state, old_##R)))	\
     libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
   printf("Done!\n");							\
+  /* Sleep for one second, we have more bit-depths to test. */		\
   printf("Sleeping for 1 second...\n");					\
   sleep(1);
 #define Y(R, C)  printf("  \033[32m%1.8lf\033[00m", (double)(R.C[i]))
@@ -193,20 +238,20 @@ int main(void)
 #undef Y
 #undef X
   
+  /* TODO Test gamma ramp restore functions. */
+  /* TODO Test _f gamma ramp setters. */
+  
  done:
+  /* Release resouces. */
 #define X(R)					\
   libgamma_gamma_##R##_destroy(&R);		\
   libgamma_gamma_##R##_destroy(&old_##R);
   LIST_RAMPS
 #undef X
-  
-  /* TODO Test gamma ramp restore functions. */
-  /* TODO Test _f gamma ramp setters. */
-  
   libgamma_crtc_free(crtc_state);
   libgamma_partition_free(part_state);
   libgamma_site_free(site_state);
-  return r;
+  return rr;
   
 #undef LIST_FLOAT_RAMPS
 #undef LIST_INTEGER_RAMPS
