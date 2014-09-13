@@ -119,7 +119,7 @@ int main(void)
   libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
   libgamma_crtc_state_t* restrict crtc_state = malloc(sizeof(libgamma_crtc_state_t));
   libgamma_crtc_information_t info;
-#define X(R)					\
+#define X(R)				\
   libgamma_gamma_##R##_t old_##R, R;
   LIST_RAMPS
 #undef X
