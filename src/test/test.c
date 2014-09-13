@@ -151,7 +151,7 @@ int main(void)
   
 #define X(R)							\
   libgamma_crtc_get_gamma_##R(crtc_state, &old_##R);		\
-  if (r = libgamma_crtc_get_gamma_##R(crtc_state, &R), r)	\
+  if ((r = libgamma_crtc_get_gamma_##R(crtc_state, &R)))	\
     {								\
       libgamma_perror("libgamma_crtc_get_gamma_" #R, r);	\
       goto done;						\
@@ -166,12 +166,9 @@ int main(void)
   printf("Current gamma ramps (" #R "):\n");				\
   for (i = 0; i < n; i++)						\
     {									\
-      if (i < R.red_size)    Y(R, red);					\
-      else                   printf("      ");				\
-      if (i < R.green_size)  Y(R, green);				\
-      else                   printf("      ");				\
-      if (i < R.blue_size)   Y(R, blue);				\
-      else                   printf("      ");				\
+      if (i < R.red_size)    Y(R, red);    else  printf("      ");	\
+      if (i < R.green_size)  Y(R, green);  else  printf("      ");	\
+      if (i < R.blue_size)   Y(R, blue);   else  printf("      ");	\
       printf("\n");							\
     }									\
   printf("\n");								\
@@ -180,12 +177,10 @@ int main(void)
     R.red[i] /= 2;							\
 									\
   printf("Dimming monitor for 1 second...\n");				\
-  r = libgamma_crtc_set_gamma_##R(crtc_state, R);			\
-  if (r)								\
+  if ((r = libgamma_crtc_set_gamma_##R(crtc_state, R)))			\
     libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
   sleep(1);								\
-  r = libgamma_crtc_set_gamma_##R(crtc_state, old_##R);			\
-  if (r)								\
+  if ((r = libgamma_crtc_set_gamma_##R(crtc_state, old_##R)))		\
     libgamma_perror("libgamma_crtc_set_gamma_" #R, r);			\
   printf("Done!\n");							\
   printf("Sleeping for 1 second...\n");					\
