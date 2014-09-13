@@ -15,37 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBGAMMA_TEST_RAMPS_H
-#define LIBGAMMA_TEST_RAMPS_H
-
-
-#include <stdint.h>
-
-
-#ifndef __GCC__
-# define __attribute__(x)
-#endif
-
-
-/**
- * X macros of all integer gamma ramps
- */
-#define LIST_INTEGER_RAMPS  X(ramps8) X(ramps32) X(ramps64) X(ramps16)
-
-/**
- * X macros of all floating-point gamma ramps
- */
-#define LIST_FLOAT_RAMPS  X(rampsf) X(rampsd)
-
-/**
- * X macros of all gamma ramps
- */
-#define LIST_RAMPS  LIST_FLOAT_RAMPS LIST_INTEGER_RAMPS
-
-
-/* ramps16 is last because we want to make sure that the gamma ramps are
-   preserved exactly on exit, and we assume RandR X is used. */
-
+#include "ramps.h"
 
 
 /**
@@ -54,7 +24,17 @@
  * @param   encoding  [0, 1] float encoding value.
  * @return            [0, 2⁸ − 1] integer output value.
  */
-uint8_t invert_ramps8(float encoding) __attribute__((const));
+uint8_t invert_ramps8(float encoding)
+{
+  double i_encoding = (double)(1.f - encoding);
+  double f_output = ((double)UINT8_MAX) * i_encoding;
+  uint8_t output = (uint8_t)f_output;
+  if ((i_encoding < (double)(0.25f)) && (output > UINT8_MAX / 2))
+    output = 0;
+  if ((i_encoding > (double)(0.75f)) && (output < UINT8_MAX / 2))
+    output = UINT8_MAX;
+  return output;
+}
 
 /**
  * Test mapping function from [0, 1] float encoding value to [0, 2¹⁶ − 1] integer output value.
@@ -62,7 +42,17 @@ uint8_t invert_ramps8(float encoding) __attribute__((const));
  * @param   encoding  [0, 1] float encoding value.
  * @return            [0, 2¹⁶ − 1] integer output value.
  */
-uint16_t invert_ramps16(float encoding) __attribute__((const));
+uint16_t invert_ramps16(float encoding)
+{
+  double i_encoding = (double)(1.f - encoding);
+  double f_output = ((double)UINT16_MAX) * i_encoding;
+  uint16_t output = (uint16_t)f_output;
+  if ((i_encoding < (double)(0.25f)) && (output > UINT16_MAX / 2))
+    output = 0;
+  if ((i_encoding > (double)(0.75f)) && (output < UINT16_MAX / 2))
+    output = UINT16_MAX;
+  return output;
+}
 
 /**
  * Test mapping function from [0, 1] float encoding value to [0, 2³² − 1] integer output value.
@@ -70,7 +60,17 @@ uint16_t invert_ramps16(float encoding) __attribute__((const));
  * @param   encoding  [0, 1] float encoding value.
  * @return            [0, 2³² − 1] integer output value.
  */
-uint32_t invert_ramps32(float encoding) __attribute__((const));
+uint32_t invert_ramps32(float encoding)
+{
+  double i_encoding = (double)(1.f - encoding);
+  double f_output = ((double)UINT32_MAX) * i_encoding;
+  uint32_t output = (uint32_t)f_output;
+  if ((i_encoding < (double)(0.25f)) && (output > UINT32_MAX / 2))
+    output = 0;
+  if ((i_encoding > (double)(0.75f)) && (output < UINT32_MAX / 2))
+    output = UINT32_MAX;
+  return output;
+}
 
 /**
  * Test mapping function from [0, 1] float encoding value to [0, 2⁶⁴ − 1] integer output value.
@@ -78,7 +78,17 @@ uint32_t invert_ramps32(float encoding) __attribute__((const));
  * @param   encoding  [0, 1] float encoding value.
  * @return            [0, 2⁶⁴ − 1] integer output value.
  */
-uint64_t invert_ramps64(float encoding) __attribute__((const));
+uint64_t invert_ramps64(float encoding)
+{
+  double i_encoding = (double)(1.f - encoding);
+  double f_output = ((double)UINT64_MAX) * i_encoding;
+  uint64_t output = (uint64_t)f_output;
+  if ((i_encoding < (double)(0.25f)) && (output > UINT64_MAX / 2))
+    output = 0;
+  if ((i_encoding > (double)(0.75f)) && (output < UINT64_MAX / 2))
+    output = UINT64_MAX;
+  return output;
+}
 
 /**
  * Test mapping function from [0, 1] float encoding value to [0, 1] float output value.
@@ -86,7 +96,10 @@ uint64_t invert_ramps64(float encoding) __attribute__((const));
  * @param   encoding  [0, 1] float encoding value.
  * @return            [0, 1] float output value.
  */
-float invert_rampsf(float encoding) __attribute__((const));
+float invert_rampsf(float encoding)
+{
+  return 1.f - encoding;
+}
 
 /**
  * Test mapping function from [0, 1] double precision float encoding
@@ -95,8 +108,8 @@ float invert_rampsf(float encoding) __attribute__((const));
  * @param   encoding  [0, 1] float encoding value.
  * @return            [0, 1] float output value.
  */
-double invert_rampsd(double encoding) __attribute__((const));
-
-
-#endif
+double invert_rampsd(double encoding)
+{
+  return ((double)1.f) - encoding;
+}
 
