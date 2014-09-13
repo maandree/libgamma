@@ -191,68 +191,95 @@ int libgamma_linux_drm_site_restore(libgamma_site_state_t* restrict this)
  */
 static int figure_out_card_open_error(const char* pathname)
 {
+  gid_t supplemental_groups[NGROUPS_MAX];
+  struct group* group;
+  struct stat attr;
+  int i, n;
+  
+  
   /* Check which the device exists. */
   if ((errno == ENXIO) || (errno == ENODEV))
     return LIBGAMMA_NO_SUCH_PARTITION;
   
-  /* If we did not get access permission, figure out why. */
-  if (errno == EACCES)
-    {
-#define __test(R, W) ((attr.st_mode & (R | W)) == (R | W))
-      gid_t supplemental_groups[NGROUPS_MAX];
-      struct group* group;
-      struct stat attr;
-      int i, n;
-      
-      
-      /* Get permission requirement for the file. */
-      if (stat(pathname, &attr) < 0)
-	return errno == EACCES ? LIBGAMMA_NO_SUCH_PARTITION : LIBGAMMA_ERRNO_SET;
-      
-      /* Test owner's, group's and others' permissions. */
-      if ((attr.st_uid == geteuid() && __test(S_IRUSR, S_IWUSR)) ||
-	  (attr.st_gid == getegid() && __test(S_IRGRP, S_IWGRP)) ||
-	  __test(S_IROTH, S_IWOTH))
-	return LIBGAMMA_DEVICE_ACCESS_FAILED;
-      
-      /* The group should be "video", but perhaps
-	 it is "root" to restrict users. */
-      if (attr.st_gid == 0 /* root group */ || __test(S_IRGRP, S_IWGRP))
-	return LIBGAMMA_DEVICE_RESTRICTED;
-      
-      
-      /* Get the user's supplemental group membership list. */
-      if ((n = getgroups(NGROUPS_MAX, supplemental_groups)) < 0)
-	return LIBGAMMA_ERRNO_SET;
-      
-      /* Test whether any of the supplemental
-	 group should be satisfactory. */
-      for (i = 0; i < n; i++)
-	if (supplemental_groups[i] == attr.st_gid)
-	  break;
-      
-      /* If one of the supplemental groups
-	 should be satisfactory, then we
-	 do not know anything more than
-	 that access failed. */
-      if (i != n)
-	return LIBGAMMA_DEVICE_ACCESS_FAILED;
-      
-      /* Otherwise, try to get the name of
-	 the group that is required and
-	 report the missing group membership. */
-      errno = 0;
-      group = getgrgid(attr.st_gid); /* TODO: Not thread-safe. */
-      libgamma_group_gid = attr.st_gid;
-      libgamma_group_name = group != NULL ? group->gr_name : NULL;
-      return LIBGAMMA_DEVICE_REQUIRE_GROUP;
-#undef __test
-    }
   
-  /* If we could not figure out what
-     went wrong, just return the error
-     we got. */
-  return LIBGAMMA_ERRNO_SET;
+  /* If we did not get access permission, figure out why. */
+  
+  if (errno != EACCES)
+    /* If we could not figure out what
+       went wrong, just return the error
+       we got. */
+    return LIBGAMMA_ERRNO_SET;
+  
+#define __test(R, W) ((attr.st_mode & (R | W)) == (R | W))
+      
+  /* Get permission requirement for the file. */
+  if (stat(pathname, &attr) < 0)
+    return errno == EACCES ? LIBGAMMA_NO_SUCH_PARTITION : LIBGAMMA_ERRNO_SET;
+  
+  /* Test owner's, group's and others' permissions. */
+  if ((attr.st_uid == geteuid() && __test(S_IRUSR, S_IWUSR)) ||
+      (attr.st_gid == getegid() && __test(S_IRGRP, S_IWGRP)) ||
+      __test(S_IROTH, S_IWOTH))
+    return LIBGAMMA_DEVICE_ACCESS_FAILED;
+  
+  /* The group should be "video", but perhaps
+     it is "root" to restrict users. */
+  if (attr.st_gid == 0 /* root group */ || __test(S_IRGRP, S_IWGRP))
+    return LIBGAMMA_DEVICE_RESTRICTED;
+  
+  
+  /* Get the user's supplemental group membership list. */
+  if ((n = getgroups(NGROUPS_MAX, supplemental_groups)) < 0)
+    return LIBGAMMA_ERRNO_SET;
+  
+  /* Test whether any of the supplemental
+     group should be satisfactory. */
+  for (i = 0; i < n; i++)
+    if (supplemental_groups[i] == attr.st_gid)
+      break;
+  
+  /* If one of the supplemental groups
+     should be satisfactory, then we
+     do not know anything more than
+     that access failed. */
+  if (i != n)
+    return LIBGAMMA_DEVICE_ACCESS_FAILED;
+  
+  /* Otherwise, try to get the name of
+     the group that is required and
+     report the missing group membership. */ 
+#if _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE
+  /* Thread-safe. */
+  {
+    static __thread char buf[1024]; /* My output of `sysconf(_SC_GETGR_R_SIZE_MAX)`. */
+    struct group _grp;
+    
+    errno = getgrgid_r(attr.st_gid, &_grp, buf, sizeof(buf) / sizeof(char), &group);
+    if (errno == ERANGE)
+      {
+	/* The lenght of the group's name is absurdly long, degrade to thread-unsafe. */
+	errno = 0;
+	group = getgrgid(attr.st_gid);
+      }
+    else if (errno)
+      return LIBGAMMA_ERRNO_SET;
+  }
+#else
+# ifdef __GCC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wcpp"
+#  warning figure_out_card_open_error is not thread-safe
+#  pragma GCC diagnostic pop
+# endif
+  /* Not thread-safe. */
+  errno = 0;
+  group = getgrgid(attr.st_gid);
+#endif
+  
+  libgamma_group_gid = attr.st_gid;
+  libgamma_group_name = group != NULL ? group->gr_name : NULL;
+  return LIBGAMMA_DEVICE_REQUIRE_GROUP;
+#undef __test
 }
 
 
