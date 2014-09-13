@@ -37,7 +37,14 @@
 /* Use dummy translation. */
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144871(v=vs.85).aspx */
+
+/**
+ * Get the device context for a window or the entire screen.
+ * 
+ * @param   hWnd  The windows, `NULL` for the entire screen.
+ * @return        The device context.
+ * @see           http://msdn.microsoft.com/en-us/library/windows/desktop/dd144871(v=vs.85).aspx
+ */
 HDC GetDC(HWND hWnd)
 {
   /* Just a non-NULL value. */
@@ -45,7 +52,15 @@ HDC GetDC(HWND hWnd)
   return (HDC*)16;
 }
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162920(v=vs.85).aspx */
+
+/**
+ * Free a device context.
+ * 
+ * @param   hWnd  The window whose device context is `hDC`, `NULL` for the entire screen.
+ * @param   hDC   The device context to free.
+ * @return        Whether the call was successful.
+ * @see           http://msdn.microsoft.com/en-us/library/windows/desktop/dd162920(v=vs.85).aspx
+ */
 int ReleaseDC(HWND hWnd, HDC hDC)
 {
   /* Always successful. */
@@ -55,7 +70,16 @@ int ReleaseDC(HWND hWnd, HDC hDC)
 }
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144877(v=vs.85).aspx */
+
+/**
+ * Get information (capabilities) for a device context.
+ * 
+ * @param   hDC     The device context.
+ * @param   nIndex  The information to retrieve, may be `COLORMGMTCAPS`.
+ * @return          The details of the queried information, can return `CM_GAMMA_RAMP`
+ *                  if `nIndex` is `COLORMGMTCAPS`.
+ * @see             http://msdn.microsoft.com/en-us/library/windows/desktop/dd144877(v=vs.85).aspx
+ */
 int GetDeviceCaps(HDC hDC, int nIndex)
 {
   /* We have gamma ramps if the user asks for colour management capabilities. */
@@ -63,7 +87,16 @@ int GetDeviceCaps(HDC hDC, int nIndex)
   return CM_GAMMA_RAMP + nIndex - COLORMGMTCAPS;
 }
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx */
+
+/**
+ * Set the gamma ramps for a device.
+ * 
+ * @param   hDC     The device context.
+ * @param   lpRamp  The gamma ramps joined in the order: red, green, blue.
+ *                  This is a `WORD*` casted to `void*`.
+ * @return          Whether the call was successful.
+ * @see             http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx
+ */
 BOOL SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
   /* Always successful. */
@@ -72,7 +105,16 @@ BOOL SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
   return TRUE;
 }
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd316946(v=vs.85).aspx */
+
+/**
+ * Get the current gamma ramps for a device.
+ * 
+ * @param   hDC     The device context.
+ * @param   lpRamp  The output for the gamma ramps joined in the order: red, green, blue.
+ *                  This is a `WORD*` casted to `void*`.
+ * @return          Whether the call was successful.
+ * @see             http://msdn.microsoft.com/en-us/library/windows/desktop/dd316946(v=vs.85).aspx
+ */
 BOOL GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
   /* Always successful. */
@@ -82,9 +124,21 @@ BOOL GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 }
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183490(v=vs.85).aspx */
+
+/**
+ * Get the context for a device
+ * 
+ * @param   lpszDriver  The driver or a display device, use "DISPLAY" if you want a display.
+ * @param   lpszDevice  The name of the device. If you want a display use can use the member
+ *                      name `DeviceName` in the third parameter, an output parameter, of
+ *                      `EnumDisplayDevices`.
+ * @param   lpszOutput  We will always use `NULL` here.
+ * @param   lpInitData  We will always use `NULL` here. This should actually by a `const DEVMODE*`.
+ * @return  -
+ * @see     http://msdn.microsoft.com/en-us/library/windows/desktop/dd183490(v=vs.85).aspx
+ */
 HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
-	     void* restrict lpszOutput, void* restrict lpInitData)
+	     LPCTSTR restrict lpszOutput, const void* restrict lpInitData)
 {
   /* `NULL` if not asking for a CRTC, otherwise a non-NULL value. */
   (void) lpszOutput;
@@ -94,7 +148,17 @@ HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
 }
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx */
+/**
+ * Get a display device by its name or index.
+ * 
+ * @param   lpDevice         The name of the device, use `NULL` to base the call on `iDevNum` instead.
+ * @param   iDevNum          The index of the device.
+ * @param   lpDisplayDevice  Output for the found device.
+ * @param   dwFlags          Flags, we will always use zero.
+ * @return                   Whether the call was successful. Zero is also returned if `iDevNum`
+ *                           is greater than the largest device index on the system.
+ * @see                      http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx
+ */
 BOOL EnumDisplayDevices(LPCTSTR lpDevice, restrict DWORD iDevNum,
 			PDISPLAY_DEVICE restrict lpDisplayDevice, DWORD dwFlags)
 {
@@ -167,7 +231,13 @@ static size_t dc_count = 0;
 
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144871(v=vs.85).aspx */
+/**
+ * Get the device context for a window or the entire screen.
+ * 
+ * @param   hWnd  The windows, `NULL` for the entire screen.
+ * @return        The device context.
+ * @see           http://msdn.microsoft.com/en-us/library/windows/desktop/dd144871(v=vs.85).aspx
+ */
 HDC GetDC(HWND hWnd)
 {
   /* Return the primary CRTC. */
@@ -176,7 +246,14 @@ HDC GetDC(HWND hWnd)
 }
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162920(v=vs.85).aspx */
+/**
+ * Free a device context.
+ * 
+ * @param   hWnd  The window whose device context is `hDC`, `NULL` for the entire screen.
+ * @param   hDC   The device context to free.
+ * @return        Whether the call was successful.
+ * @see           http://msdn.microsoft.com/en-us/library/windows/desktop/dd162920(v=vs.85).aspx
+ */
 int ReleaseDC(HWND hWnd, HDC hDC)
 {
   /* Disconnect from the RandR display when all monitors have been closed. */
@@ -195,7 +272,16 @@ int ReleaseDC(HWND hWnd, HDC hDC)
 }
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144877(v=vs.85).aspx */
+
+/**
+ * Get information (capabilities) for a device context.
+ * 
+ * @param   hDC     The device context.
+ * @param   nIndex  The information to retrieve, may be `COLORMGMTCAPS`.
+ * @return          The details of the queried information, can return `CM_GAMMA_RAMP`
+ *                  if `nIndex` is `COLORMGMTCAPS`.
+ * @see             http://msdn.microsoft.com/en-us/library/windows/desktop/dd144877(v=vs.85).aspx
+ */
 int GetDeviceCaps(HDC hDC, int nIndex)
 {
   /* We have gamma ramps if the user asks for colour management capabilities. */
@@ -204,14 +290,22 @@ int GetDeviceCaps(HDC hDC, int nIndex)
 }
 
 
-/* xcb violates the rule to never return struct:s. */
+/* xcb violates the rule to never return `struct`:s. */
 #ifdef __GCC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Waggregate-return"
 #endif
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx */
+/**
+ * Set the gamma ramps for a device.
+ * 
+ * @param   hDC     The device context.
+ * @param   lpRamp  The gamma ramps joined in the order: red, green, blue.
+ *                  This is a `WORD*` casted to `void*`.
+ * @return          Whether the call was successful.
+ * @see             http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx
+ */
 BOOL SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
   /* We assume that our gamma ramps are of the same size
@@ -226,7 +320,15 @@ BOOL SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 }
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd316946(v=vs.85).aspx */
+/**
+ * Get the current gamma ramps for a device.
+ * 
+ * @param   hDC     The device context.
+ * @param   lpRamp  The output for the gamma ramps joined in the order: red, green, blue.
+ *                  This is a `WORD*` casted to `void*`.
+ * @return          Whether the call was successful.
+ * @see             http://msdn.microsoft.com/en-us/library/windows/desktop/dd316946(v=vs.85).aspx
+ */
 BOOL GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
   xcb_randr_get_crtc_gamma_cookie_t gamma_cookie;
@@ -255,9 +357,21 @@ BOOL GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 }
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183490(v=vs.85).aspx */
+
+/**
+ * Get the context for a device
+ * 
+ * @param   lpszDriver  The driver or a display device, use "DISPLAY" if you want a display.
+ * @param   lpszDevice  The name of the device. If you want a display use can use the member
+ *                      name `DeviceName` in the third parameter, an output parameter, of
+ *                      `EnumDisplayDevices`.
+ * @param   lpszOutput  We will always use `NULL` here.
+ * @param   lpInitData  We will always use `NULL` here. This should actually by a `const DEVMODE*`.
+ * @return  -
+ * @see     http://msdn.microsoft.com/en-us/library/windows/desktop/dd183490(v=vs.85).aspx
+ */
 HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
-	     void* restrict lpszOutput, void* restrict lpInitData)
+	     LPCTSTR restrict lpszOutput, const void* restrict lpInitData)
 {
   int crtc_index = atoi(lpszDevice);
   
@@ -325,7 +439,17 @@ HDC CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice,
 #endif
 
 
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx */
+/**
+ * Get a display device by its name or index.
+ * 
+ * @param   lpDevice         The name of the device, use `NULL` to base the call on `iDevNum` instead.
+ * @param   iDevNum          The index of the device.
+ * @param   lpDisplayDevice  Output for the found device.
+ * @param   dwFlags          Flags, we will always use zero.
+ * @return                   Whether the call was successful. Zero is also returned if `iDevNum`
+ *                           is greater than the largest device index on the system.
+ * @see                      http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx
+ */
 BOOL EnumDisplayDevices(LPCTSTR restrict lpDevice, DWORD iDevNum,
 			PDISPLAY_DEVICE restrict lpDisplayDevice, DWORD dwFlags)
 {

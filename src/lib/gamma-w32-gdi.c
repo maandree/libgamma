@@ -37,8 +37,9 @@
 
 
 /**
- * The gamma ramp size that devices will
- * always have in Windows GDI.
+ * The gamma ramp size that devices will always have in Windows GDI.
+ * 
+ * @see  http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx
  */
 #define GAMMA_RAMP_SIZE  256
 
