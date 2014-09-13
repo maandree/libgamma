@@ -19,137 +19,25 @@
 #include "methods.h"
 #include "errors.h"
 #include "crtcinfo.h"
+#include "user.h"
+#include "ramps.h"
 
 #include <libgamma.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <string.h>
 #include <unistd.h>
 
 
 
 /**
- * Let the user select adjustment method, site, partition and CRTC.
- * 
- * @param   site_state  Output slot for the site.
- * @param   part_state  Output slot for the partition.
- * @param   crtc_state  Output slot for the CRTC.
- * @return              Zero on and only on success.
- */
-static int select_monitor(libgamma_site_state_t* restrict site_state,
-			  libgamma_partition_state_t* restrict part_state,
-			  libgamma_crtc_state_t* restrict crtc_state)
-{
-  int method;
-  char* site;
-  char* tmp;
-  char buf[256];
-  int r;
-  
-  
-  /* -- Adjustment method -- */
-  
-  /* Let the user select adjustment method. */
-  printf("Select adjustment method:\n");
-  for (method = 0; method < LIBGAMMA_METHOD_COUNT; method++)
-    printf("    %i:  %s\n", method, method_name(method));
-  printf("> ");
-  fflush(stdout);
-  fgets(buf, sizeof(buf) / sizeof(char), stdin);
-  method = atoi(buf);
-  
-  
-  /* -- Site -- */
-  
-  /* Let the user select site. */
-  printf("Select site: ");
-  fflush(stdout);
-  fgets(buf, sizeof(buf) / sizeof(char), stdin);
-  tmp = strchr(buf, '\n');
-  if (tmp != NULL)
-    *tmp = '\0';
-  if (buf[0] == '\0')
-    site = NULL;
-  else
-    {
-      site = malloc((strlen(buf) + 1) * sizeof(char));
-      memcpy(site, buf, strlen(buf) + 1);
-    }
-  
-  /* Initialise site state. */
-  if ((r = libgamma_site_initialise(site_state, method, site)))
-    {
-      free(site);
-      return libgamma_perror("error", r), 1;
-    }
-  
-  
-  /* -- Partition -- */
-  
-  /* Check that the site has at least one partition. */
-  if (site_state->partitions_available == 0)
-    {
-      libgamma_site_free(site_state);
-      return printf("No partitions found\n"), 1;
-    }
-  
-  /* Let the user select partition. */
-  printf("Select partition [0, %lu]: ", site_state->partitions_available - 1);
-  fflush(stdout);
-  fgets(buf, sizeof(buf) / sizeof(char), stdin);
-  
-  /* Initialise partition state. */
-  if ((r = libgamma_partition_initialise(part_state, site_state, (size_t)atoll(buf))))
-    {
-      libgamma_site_free(site_state);
-      return libgamma_perror("error", r), 1;
-    }
-  
-  
-  /* -- CRTC -- */
-  
-  /* Check that the partition has at least one CRTC. */
-  if (part_state->crtcs_available == 0)
-    {
-      libgamma_partition_free(part_state);
-      libgamma_site_free(site_state);
-      return printf("No CRTC:s found\n"), 1;
-    }
-  
-  /* Let the user select CRTC. */
-  printf("Select CRTC [0, %lu]: ", part_state->crtcs_available - 1);
-  fflush(stdout);
-  fgets(buf, sizeof(buf) / sizeof(char), stdin);
-  
-  /* Initialise CRTC state. */
-  if ((r = libgamma_crtc_initialise(crtc_state, part_state, (size_t)atoll(buf))))
-    {
-      libgamma_partition_free(part_state);
-      libgamma_site_free(site_state);
-      return libgamma_perror("error", r), 1;
-    }
-  
-  printf("\n");
-  return 0;
-}
-
-
-/**
  * Test `libgamma`
  * 
- * @return  Non-zero on machine detectable error, it library may still
- *          be faulty if zero is returned.
+ * @return  Non-zero on machine detectable error, it library
+ *          may still be faulty if zero is returned.
  */
 int main(void)
 {
-  /* ramps16 is last because we want to make sure that the gamma ramps are
-     preserved exactly on exit, and we assume RandR X is used. */
-#define LIST_INTEGER_RAMPS  X(ramps8) X(ramps32) X(ramps64) X(ramps16)
-#define LIST_FLOAT_RAMPS  X(rampsf) X(rampsd)
-#define LIST_RAMPS  LIST_FLOAT_RAMPS LIST_INTEGER_RAMPS
-  
   libgamma_site_state_t* restrict site_state = malloc(sizeof(libgamma_site_state_t));
   libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
   libgamma_crtc_state_t* restrict crtc_state = malloc(sizeof(libgamma_crtc_state_t));
@@ -252,9 +140,5 @@ int main(void)
   libgamma_partition_free(part_state);
   libgamma_site_free(site_state);
   return rr;
-  
-#undef LIST_FLOAT_RAMPS
-#undef LIST_INTEGER_RAMPS
-#undef LIST_RAMPS
 }
 

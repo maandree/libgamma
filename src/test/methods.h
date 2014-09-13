@@ -23,6 +23,7 @@
 # define __attribute__(x)
 #endif
 
+
 /**
  * Get the name representation of an
  * adjustment method by its identifier.
