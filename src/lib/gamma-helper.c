@@ -189,6 +189,7 @@ static void translate_to_64(signed depth, size_t n, uint64_t* restrict out, libg
   switch (depth)
     {
       /* Translate integer. */
+    case  8:  __translate(out[i] = (uint64_t)(in.bits8. ALL[i]) * 0x0101010101010101ULL);
     case 16:  __translate(out[i] = (uint64_t)(in.bits16.ALL[i]) * 0x0001000100010001ULL);
     case 32:  __translate(out[i] = (uint64_t)(in.bits32.ALL[i]) * 0x0000000100000001ULL);
       /* Identity translation. */
@@ -218,6 +219,7 @@ static void translate_from_64(signed depth, size_t n, libgamma_gamma_ramps_any_t
   switch (depth)
     {
       /* Translate integer. */
+    case  8:  __translate(out.bits8. ALL[i] =  (uint8_t)(in[i] / 0x0101010101010101ULL));
     case 16:  __translate(out.bits16.ALL[i] = (uint16_t)(in[i] / 0x0001000100010001ULL));
     case 32:  __translate(out.bits32.ALL[i] = (uint32_t)(in[i] / 0x0000000100000001ULL));
       /* Identity translation. */
@@ -251,6 +253,7 @@ static int allocated_any_ramp(libgamma_gamma_ramps_any_t* restrict ramps_sys,
   size_t d, n = ramps.ANY.red_size + ramps.ANY.green_size + ramps.ANY.blue_size;
   switch (depth)
     {
+    case  8:  d = sizeof(uint8_t);   break;
     case 16:  d = sizeof(uint16_t);  break;
     case 32:  d = sizeof(uint32_t);  break;
     case 64:  d = sizeof(uint64_t);  break;

@@ -273,10 +273,9 @@ int main(void)
 {
   /* ramps16 is last because we want to make sure that the gamma ramps are
      preserved exactly on exit, and we assume RandR X is used. */
-#define LIST_INTEGER_RAMPS  X(ramps32) X(ramps64) X(ramps16)
+#define LIST_INTEGER_RAMPS  X(ramps8) X(ramps32) X(ramps64) X(ramps16)
 #define LIST_FLOAT_RAMPS  X(rampsf) X(rampsd)
 #define LIST_RAMPS  LIST_FLOAT_RAMPS LIST_INTEGER_RAMPS
-  /* TODO X(ramps8) */
 
   libgamma_site_state_t* restrict site_state = malloc(sizeof(libgamma_site_state_t));
   libgamma_partition_state_t* restrict part_state = malloc(sizeof(libgamma_partition_state_t));
