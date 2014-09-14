@@ -460,9 +460,8 @@ Installs the DVI manual.
 When compiling your program use @command{libgamma},
 you will not need to do anything for the compiling
 phase. But for the linking phase, will need to add
-the option @option{-lgamma}.
-Currently @command{libgamma}, does not provide
-an pkgconfig file.
+the option @option{-lgamma}. Currently
+@command{libgamma}, does not provide a pkg-config file.
 
 Keep in mind that @command{libgamma} is GNU General
 Public License version 3 software for your freedom
