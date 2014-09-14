@@ -1,6 +1,3 @@
-libgamma-icc
-	An extension with support for ICC profiles.
-
 libgamma-intl
 	An extension with support for text description
 	of constants and internationalisation.
