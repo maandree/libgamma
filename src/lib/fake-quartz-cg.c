@@ -37,6 +37,16 @@
 /* Use dummy translation. */
 
 
+/**
+ * Get a list of all online displays on the system.
+ * 
+ * @param   max_size      The number of elements allocated for `displays_out`.
+ * @param   displays_out  List ot fill with the ID for each online display on the system.
+ * @param   count_out     Output parameter for the number of elements stored in `displays_out`.
+ *                        if `displays_out` is too small to fit all display ID:s,
+ *                        `*count_out` will be `max_size`.
+ * @return                `kCGErrorSuccess` on success, and error number of failure.
+ */
 CGError CGGetOnlineDisplayList(uint32_t max_size,
 			       CGDirectDisplayID* restrict displays_out, uint32_t* restrict count_out)
 {
@@ -49,6 +59,16 @@ CGError CGGetOnlineDisplayList(uint32_t max_size,
 }
 
 
+/**
+ * Set the gamma ramps for a display.
+ * 
+ * @param   display     The ID of the display.
+ * @param   gamma_size  The number of stops in gamma ramps.
+ * @param   red         The gamma ramp for the red channel.
+ * @param   green       The gamma ramp for the green channel.
+ * @param   blue        The gamma ramp for the blue channel.
+ * @return              `kCGErrorSuccess` on success, and error number of failure.
+ */
 CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, const CGGammaValue* red,
 				    const CGGammaValue* green, const CGGammaValue* blue)
 {
@@ -67,6 +87,17 @@ CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
 }
 
 
+/**
+ * Get the current gamma ramps for a display.
+ * 
+ * @param   display         The ID of the display.
+ * @param   gamma_size      The number of stops you have allocated for the gamma ramps.
+ * @param   red             Table allocated for the gamma ramp for the red channel.
+ * @param   green           Table allocated for the gamma ramp for the green channel.
+ * @param   blue            Table allocated for the gamma ramp for the blue channel.
+ * @param   gamma_size_out  Output parameter for the actual number of stops in the gamma ramps.
+ * @return                  `kCGErrorSuccess` on success, and error number of failure.
+ */
 CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size,
 				    CGGammaValue* restrict red, CGGammaValue* restrict green,
 				    CGGammaValue* restrict blue, uint32_t* restrict gamma_size_out)
@@ -91,11 +122,22 @@ CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
   return kCGErrorSuccess;
 }
 
+
+/**
+ * Restore each display's gamma ramps to the settings in ColorSync.
+ */
 void CGDisplayRestoreColorSyncSettings(void)
 {
   /* Do nothing. */
 }
 
+
+/**
+ * Get the number of stops in the gamma ramps for a display.
+ * 
+ * @param   display  The ID of the display.
+ * @return           The number of stops in the gamma ramps.
+ */
 uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
 {
   /* We pretend that our gamma ramps are of size 256. */
@@ -103,6 +145,10 @@ uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
   return 256;
 }
 
+
+/**
+ * Release resources used by the backend.
+ */
 void close_fake_quartz(void)
 {
   /* Do nothing. */
@@ -153,6 +199,16 @@ static uint16_t* restrict original_ramps = NULL;
 #endif
 
 
+/**
+ * Get a list of all online displays on the system.
+ * 
+ * @param   max_size      The number of elements allocated for `displays_out`.
+ * @param   displays_out  List ot fill with the ID for each online display on the system.
+ * @param   count_out     Output parameter for the number of elements stored in `displays_out`.
+ *                        if `displays_out` is too small to fit all display ID:s,
+ *                        `*count_out` will be `max_size`.
+ * @return                `kCGErrorSuccess` on success, and error number of failure.
+ */
 CGError CGGetOnlineDisplayList(uint32_t max_size,
 			       CGDirectDisplayID* restrict displays_out, uint32_t* restrict count_out)
 {
@@ -242,6 +298,16 @@ CGError CGGetOnlineDisplayList(uint32_t max_size,
 }
 
 
+/**
+ * Set the gamma ramps for a display.
+ * 
+ * @param   display     The ID of the display.
+ * @param   gamma_size  The number of stops in gamma ramps.
+ * @param   red         The gamma ramp for the red channel.
+ * @param   green       The gamma ramp for the green channel.
+ * @param   blue        The gamma ramp for the blue channel.
+ * @return              `kCGErrorSuccess` on success, and error number of failure.
+ */
 CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size, const CGGammaValue* red,
 				    const CGGammaValue* green, const CGGammaValue* blue)
 {
@@ -283,6 +349,17 @@ CGError CGSetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
 }
 
 
+/**
+ * Get the current gamma ramps for a display.
+ * 
+ * @param   display         The ID of the display.
+ * @param   gamma_size      The number of stops you have allocated for the gamma ramps.
+ * @param   red             Table allocated for the gamma ramp for the red channel.
+ * @param   green           Table allocated for the gamma ramp for the green channel.
+ * @param   blue            Table allocated for the gamma ramp for the blue channel.
+ * @param   gamma_size_out  Output parameter for the actual number of stops in the gamma ramps.
+ * @return                  `kCGErrorSuccess` on success, and error number of failure.
+ */
 CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_size,
 				    CGGammaValue* restrict red, CGGammaValue* restrict green,
 				    CGGammaValue* restrict blue, uint32_t* restrict gamma_size_out)
@@ -333,6 +410,9 @@ CGError CGGetDisplayTransferByTable(CGDirectDisplayID display, uint32_t gamma_si
 }
 
 
+/**
+ * Restore each display's gamma ramps to the settings in ColorSync.
+ */
 void CGDisplayRestoreColorSyncSettings(void)
 {
   xcb_generic_error_t* error;
@@ -355,6 +435,12 @@ void CGDisplayRestoreColorSyncSettings(void)
 }
 
 
+/**
+ * Get the number of stops in the gamma ramps for a display.
+ * 
+ * @param   display  The ID of the display.
+ * @return           The number of stops in the gamma ramps.
+ */
 uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
 {
   /* We assume that our gamma ramps are of the size
@@ -369,6 +455,9 @@ uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID display)
 #endif
 
 
+/**
+ * Release resources used by the backend.
+ */
 void close_fake_quartz_cg(void)
 {
   free(res_reply), res_reply = NULL;
