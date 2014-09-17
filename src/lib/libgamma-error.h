@@ -36,6 +36,8 @@
  */
 #ifndef __WIN32__
 extern __thread gid_t libgamma_group_gid;
+gid_t get_libgamma_group_gid(void) __attribute__((pure));
+void set_libgamma_group_gid(gid_t value);
 #else
 extern short libgamma_group_gid;
 #endif
@@ -48,6 +50,8 @@ extern short libgamma_group_gid;
  */
 #ifndef __WIN32__
 extern __thread const char* libgamma_group_name;
+const char* get_libgamma_group_name(void) __attribute__((pure));
+void set_libgamma_group_name(const char* value);
 #else
 extern const char* libgamma_group_name;
 #endif
