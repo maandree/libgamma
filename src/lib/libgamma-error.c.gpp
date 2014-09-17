@@ -39,11 +39,11 @@ $>export PATH=".:${PATH}"
  */
 #ifndef __WIN32__
 __thread gid_t libgamma_group_gid = 0;
-gid_t get_libgamma_group_gid(void)
+gid_t libgamma_group_gid_get(void)
 {
   return libgamma_group_gid;
 }
-void set_libgamma_group_gid(gid_t value)
+void libgamma_group_gid_set(gid_t value)
 {
   libgamma_group_gid = value;
 }
@@ -59,11 +59,11 @@ short libgamma_group_gid = 0;
  */
 #ifndef __WIN32__
 __thread const char* libgamma_group_name = NULL;
-const char* get_libgamma_group_name(void)
+const char* libgamma_group_name_get(void)
 {
   return libgamma_group_name;
 }
-void set_libgamma_group_name(const char* value)
+void libgamma_group_name_set(const char* value)
 {
   libgamma_group_name = value;
 }
