@@ -77,7 +77,7 @@ TESTOBJ = test methods errors crtcinfo user ramps
 
 # The version of the library.
 LIB_MAJOR = 0
-LIB_MINOR = 6
+LIB_MINOR = 7
 LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
 
 # Change by .config.mk to reflect what is used in the OS, linux uses so: libgamma.so
