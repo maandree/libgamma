@@ -48,13 +48,13 @@ DEPENDENCIES SOURCES:
     sed                           https://www.gnu.org/software/sed
     coreutils                     https://www.gnu.org/software/coreutils
     c99                           https://gcc.gnu.org
-    pkg-config			  http://pkgconfig.freedesktop.org
+    pkg-config                    http://pkgconfig.freedesktop.org
     general-preprocessor (gpp)    https://github.com/maandree/gpp
     python                        https://www.python.org/
     texinfo                       https://www.gnu.org/software/texinfo/
     texlive-core                  https://tug.org/texlive/
     bash                          https://www.gnu.org/software/bash
-    libc			  https://www.gnu.org/software/libc
+    libc                          https://www.gnu.org/software/libc
     libxcb                        http://xcb.freedesktop.org/
     libx11 (xlib)                 http://xorg.freedesktop.org/
     libxxf86vm                    http://xorg.freedesktop.org/
