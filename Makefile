@@ -113,8 +113,7 @@ DEBUG_FLAGS += -D'DEBUG'
 endif
 
 # Options for the C compiler for the test.
-TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)  \
-             -fstrict-aliasing -fstrict-overflow -fno-builtin
+TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) -fstrict-aliasing -fstrict-overflow -fno-builtin
 
 ifeq ($(CC_BASE),gcc)
 TEST_FLAGS += -fstack-usage -ftree-vrp -fipa-pure-const -funsafe-loop-optimizations
@@ -149,7 +148,7 @@ lib: bin/libgamma.$(SO).$(LIB_VERSION) bin/libgamma.$(SO).$(LIB_MAJOR) bin/libga
 
 bin/libgamma.$(SO).$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/lib/$(O).o)
 	mkdir -p $(shell dirname $@)
-	$(CC) $(LIB_FLAGS) $(LIBS_LD) $(SHARED) $(LDSO) -o $@ $^
+	$(CC) $(LIB_FLAGS) $(LIBS_LD) $(SHARED) $(LDSO) -o $@ $^ $(LDFLAGS)
 
 bin/libgamma.$(SO).$(LIB_MAJOR):
 	mkdir -p $(shell dirname $@)
@@ -161,10 +160,10 @@ bin/libgamma.$(SO):
 
 obj/lib/%.o: src/lib/%.c src/lib/*.h
 	mkdir -p $(shell dirname $@)
-	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $<
+	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
 
 obj/lib/%.o: obj/lib/%.c src/lib/*.h
-	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -iquote"$$(dirname "$<" | sed -e 's:^obj:src:')" -c -o $@ $<
+	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -iquote"$$(dirname "$<" | sed -e 's:^obj:src:')" -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
 
 obj/%: src/%.gpp src/extract/libgamma-*-extract
 	mkdir -p $(shell dirname $@)
@@ -176,11 +175,11 @@ test: bin/test
 
 bin/test: $(foreach O,$(TESTOBJ),obj/test/$(O).o) bin/libgamma.$(SO).$(LIB_VERSION) bin/libgamma.$(SO)
 	mkdir -p $(shell dirname $@)
-	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/test/$(O).o)
+	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/test/$(O).o) $(LDFLAGS)
 
 obj/test/%.o: src/test/%.c src/test/*.h src/lib/libgamma*.h
 	mkdir -p $(shell dirname $@)
-	$(CC) $(TEST_FLAGS) -Isrc/lib -c -o $@ $<
+	$(CC) $(TEST_FLAGS) -Isrc/lib -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
 
 
 .PHONY: doc
