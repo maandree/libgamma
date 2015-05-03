@@ -179,12 +179,46 @@ size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operati
   (void) operation;
   return 0;
 #else
-  size_t n = 0;
+  size_t n = 0, len;
+  int included[LIBGAMMA_METHOD_COUNT];
+  char* begin;
+  char* end;
+  
+  memset(included, 0, LIBGAMMA_METHOD_COUNT * sizeof(int));
+  begin = getenv("PREFERRED_DISPLAY");
+  while (begin && *begin)
+    {
+      end = strchr(begin, ' ');
+      len = (size_t)(end - begin);
+      if (len == 0);
+#ifdef HAVE_LIBGAMMA_METHOD_WAYLAND
+      else if ((len == 7) && !strncmp(begin, "wayland", len)) /* 7 is strlen("wayland") */
+	{
+	  if (libgamma_list_method_test(LIBGAMMA_METHOD_WAYLAND, operation) && (n++ < buf_size))
+	    methods[n - 1] = LIBGAMMA_METHOD_WAYLAND, included[methods[n - 1]] = 1;
+	}
+#endif
+#if defined(HAVE_LIBGAMMA_METHOD_X_RANDR) || defined(HAVE_LIBGAMMA_METHOD_X_VIDMODE)
+      else if ((len == 3) && !strncmp(begin, "x11", len)) /* 3 is strlen("x11") */
+	{
+# ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
+	  if (libgamma_list_method_test(LIBGAMMA_METHOD_X_RANDR, operation) && (n++ < buf_size))
+	    methods[n - 1] = LIBGAMMA_METHOD_X_RANDR, included[methods[n - 1]] = 1;
+# endif
+# ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
+	  if (libgamma_list_method_test(LIBGAMMA_METHOD_X_VIDMODE, operation) && (n++ < buf_size))
+	    methods[n - 1] = LIBGAMMA_METHOD_X_VIDMODE, included[methods[n - 1]] = 1;
+# endif
+	}
+#endif
+      begin = end + 1;
+    }
   
 $>for method in $(get-methods); do
 #ifdef HAVE_LIBGAMMA_METHOD_${method}
-  if (libgamma_list_method_test(LIBGAMMA_METHOD_${method}, operation) && (n++ < buf_size))
-    methods[n - 1] = LIBGAMMA_METHOD_${method};
+  if (included[LIBGAMMA_METHOD_${method}] == 0)
+    if (libgamma_list_method_test(LIBGAMMA_METHOD_${method}, operation) && (n++ < buf_size))
+      methods[n - 1] = LIBGAMMA_METHOD_${method};
 #endif
 $>done
   
