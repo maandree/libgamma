@@ -333,6 +333,12 @@ extern const char* libgamma_group_name;
  */
 #define LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED  (-46)
 
+/**
+ * Gamma ramps are not supported.
+ * (Only returned in debug mode.)
+ */
+#define LIBGAMMA_GAMMA_RAMPS_NOT_SUPPORTED  (-47)
+
 
 
 /**
@@ -341,7 +347,7 @@ extern const char* libgamma_group_name;
  * number your program thinks it should be sould
  * update your program for new errors.
  */
-#define LIBGAMMA_ERROR_MIN  (-46)
+#define LIBGAMMA_ERROR_MIN  (-47)
 
 
 

@@ -100,7 +100,6 @@ typedef struct libgamma_wayland_crtc_data
   
   /**
    * Whether `gamma_size` has been set.
-   * 
    */
   int gamma_size_announced;
   
@@ -201,8 +200,9 @@ static const struct gamma_control_listener gamma_control_listener =
 void libgamma_wayland_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
   char* display = getenv("WAYLAND_DISPLAY");
-  /* TODO */
-  this->crtc_information = 0;
+  this->crtc_information = LIBGAMMA_CRTC_INFO_GAMMA_SIZE
+			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH
+			 | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT;
   /* Wayland supports multiple sites and CRTC:s, but not paritions. */
   this->default_site_known = (display && *display) ? 1 : 0;
   this->multiple_sites = 1;
@@ -506,6 +506,9 @@ int libgamma_wayland_crtc_initialise(libgamma_crtc_state_t* restrict this,
   
   data = site->crtcs[crtc];
   
+  if (site->gamma_maybe_supported == 0)
+    return this->data = data, 0;
+    
   data->gamma_control = gamma_control_manager_get_gamma_control(site->gamma_control_manager, data->output);
   if (data->gamma_control)
     {
@@ -555,7 +558,6 @@ int libgamma_wayland_crtc_restore(libgamma_crtc_state_t* restrict this)
 
 
 
-# pragma GCC diagnostic ignored "-Wsuggest-attribute=const" /* TODO */
 /**
  * Read information about a CRTC.
  * 
@@ -567,7 +569,69 @@ int libgamma_wayland_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_wayland_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
-  return 0; (void) this, (void) crtc, (void) fields; /* TODO */
+#define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
+  
+  libgamma_wayland_crtc_data_t* data = crtc->data;
+  int e = 0;
+  
+  /* Wipe all error indicators. */
+  memset(this, 0, sizeof(libgamma_crtc_information_t));
+  
+  
+  /*unsigned char* edid;
+  size_t edid_length;*/
+  e |= this->edid_error = _E(LIBGAMMA_CRTC_INFO_EDID);
+  
+  
+  /*size_t width_mm;*/
+  e |= this->width_mm_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM);
+  
+  /*size_t height_mm;*/
+  e |= this->height_mm_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM);
+  
+  /*size_t width_mm_edid;*/
+  e |= this->width_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID);
+  
+  /*size_t height_mm_edid;*/
+  e |= this->height_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID);
+  
+  
+  this->red_gamma_size   = (size_t)(data->gamma_size);
+  this->green_gamma_size = (size_t)(data->gamma_size);
+  this->blue_gamma_size  = (size_t)(data->gamma_size);
+  e |= this->gamma_size_error = data->gamma_maybe_supported ? 0 :
+    (fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE) ? LIBGAMMA_GAMMA_RAMPS_NOT_SUPPORTED : 0;
+  
+  this->gamma_depth = 16;
+  this->gamma_depth_error = 0;
+  
+  this->gamma_support = data->gamma_maybe_supported;
+  this->gamma_support_error = 0;
+  
+  
+  /*libgamma_subpixel_order_t subpixel_order;*/
+  e |= this->subpixel_order_error = _E(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER);
+  
+  /*int active;*/
+  e |= this->active_error = _E(LIBGAMMA_CRTC_INFO_ACTIVE);
+  
+  /*char* connector_name;*/
+  e |= this->connector_name_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_NAME);
+  
+  /*libgamma_connector_type_t connector_type;*/
+  e |= this->connector_type_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE);
+  
+  
+  /*float gamma_red;
+  float gamma_green;
+  float gamma_blue;*/
+  e |= this->gamma_error = _E(LIBGAMMA_CRTC_INFO_GAMMA);
+  
+  
+  /* There was a failure if and only if unsupport field was requested. */
+  return e ? -1 : 0;
+  
+#undef _E
 }
 
 
@@ -605,7 +669,13 @@ int libgamma_wayland_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this
   struct wl_array green;
   struct wl_array blue;
   
-  /* TODO Verify that gamma can be set. */
+  /* Verify that gamma can be set. */
+#ifdef DEBUG
+  if (crtc->gamma_maybe_supported == 0)
+    return LIBGAMMA_GAMMA_RAMPS_NOT_SUPPORTED;
+#endif
+  if (crtc->removed)
+    return 0;
   
 #ifdef DEBUG
   /* Gamma ramp sizes are identical but not fixed. */

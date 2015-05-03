@@ -46,7 +46,7 @@
 #ifdef __GCC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wcpp"
-# if LIBGAMMA_ERROR_MIN < -46
+# if LIBGAMMA_ERROR_MIN < -47
 #  warning New error codes have been added to libgamma.
 # endif
 # if LIBGAMMA_METHOD_COUNT > 7
