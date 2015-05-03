@@ -76,6 +76,25 @@ static void registry_global_remover(void* site_state, struct wl_registry* regist
  */
 static void gamma_control_gamma_size(void* crtc, struct gamma_control* control, uint32_t size);
 
+/**
+ * This function is called when the display server
+ * tells us about an output's geometry.
+ * 
+ * @param  info_            The CRTC's information structure to fill
+ * @param  output           The output
+ * @param  x                The left position, within the global compositor space, of the output
+ * @param  y                The top position, within the global compositor space, of the output
+ * @param  physical_width   Width in millimeters of the monitor's viewport
+ * @param  physical_height  Weight in millimeters of the monitor's viewport
+ * @param  subpixel_        The monitor's subpixel-orientation
+ * @param  make             Textual description of the monitor's manufacturer
+ * @param  model            Textual description of the monitor's model
+ * @param  transform        Output flipping and rotation
+ */
+static void geometry(void* info_, struct wl_output* output, int32_t x, int32_t y,
+		     int32_t physical_width, int32_t physical_height, int32_t subpixel_,
+		     const char* make, const char* model, int32_t transform);
+
 
 
 /**
@@ -190,6 +209,17 @@ static const struct gamma_control_listener gamma_control_listener =
     gamma_control_gamma_size,
   };
 
+/**
+ * Output event handlers.
+ */
+static const struct wl_output_listener output_listener =
+  {
+    geometry,
+    NULL,
+    NULL,
+    NULL,
+  };
+
 
 
 /**
@@ -202,7 +232,9 @@ void libgamma_wayland_method_capabilities(libgamma_method_capabilities_t* restri
   char* display = getenv("WAYLAND_DISPLAY");
   this->crtc_information = LIBGAMMA_CRTC_INFO_GAMMA_SIZE
 			 | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH
-			 | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT;
+			 | LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT
+			 | LIBGAMMA_CRTC_INFO_MACRO_VIEWPORT
+			 | LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER;
   /* Wayland supports multiple sites and CRTC:s, but not paritions. */
   this->default_site_known = (display && *display) ? 1 : 0;
   this->multiple_sites = 1;
@@ -559,6 +591,61 @@ int libgamma_wayland_crtc_restore(libgamma_crtc_state_t* restrict this)
 
 
 /**
+ * This function is called when the display server
+ * tells us about an output's geometry.
+ * 
+ * @param  info_            The CRTC's information structure to fill
+ * @param  output           The output
+ * @param  x                The left position, within the global compositor space, of the output
+ * @param  y                The top position, within the global compositor space, of the output
+ * @param  physical_width   Width in millimeters of the monitor's viewport
+ * @param  physical_height  Weight in millimeters of the monitor's viewport
+ * @param  subpixel_        The monitor's subpixel-orientation
+ * @param  make             Textual description of the monitor's manufacturer
+ * @param  model            Textual description of the monitor's model
+ * @param  transform        Output flipping and rotation
+ */
+static void geometry(void* info_, struct wl_output* output, int32_t x, int32_t y,
+		     int32_t physical_width, int32_t physical_height, int32_t subpixel_,
+		     const char* make, const char* model, int32_t transform)
+{
+  libgamma_crtc_information_t* info = info_;
+  enum wl_output_subpixel subpixel = subpixel_;
+  
+  (void) output;
+  (void) x;
+  (void) y;
+  (void) transform;
+  (void) make;  /* TODO new field */
+  (void) model; /* TODO new field */
+  
+  info->width_mm = (size_t)(physical_width < 0 ? 0 : physical_width);
+  info->height_mm = (size_t)(physical_height < 0 ? 0 : physical_height);
+  info->width_mm_error = 0;
+  info->height_mm_error = 0;
+  
+  info->subpixel_order_error = 0;
+  switch (subpixel)
+    {
+#define O(ORDER)						\
+    case WL_OUTPUT_SUBPIXEL_##ORDER:				\
+      info->subpixel_order = LIBGAMMA_SUBPIXEL_ORDER_##ORDER;	\
+      break
+    O(UNKNOWN);
+    O(NONE);
+    O(HORIZONTAL_RGB);
+    O(HORIZONTAL_BGR);
+    O(VERTICAL_RGB);
+    O(VERTICAL_BGR);
+#undef O
+    default:
+      info->subpixel_order_error = LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED;
+      break;
+    }
+}
+
+
+/**
  * Read information about a CRTC.
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC.
@@ -569,7 +656,8 @@ int libgamma_wayland_crtc_restore(libgamma_crtc_state_t* restrict this)
 int libgamma_wayland_get_crtc_information(libgamma_crtc_information_t* restrict this,
 					  libgamma_crtc_state_t* restrict crtc, int32_t fields)
 {
-#define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
+#define _EE(FIELD, ERROR)  ((fields & FIELD) ? ERROR : 0)
+#define _E(FIELD)          _EE(FIELD, LIBGAMMA_CRTC_INFO_NOT_SUPPORTED)
   
   libgamma_wayland_crtc_data_t* data = crtc->data;
   int e = 0;
@@ -578,60 +666,48 @@ int libgamma_wayland_get_crtc_information(libgamma_crtc_information_t* restrict 
   memset(this, 0, sizeof(libgamma_crtc_information_t));
   
   
-  /*unsigned char* edid;
-  size_t edid_length;*/
-  e |= this->edid_error = _E(LIBGAMMA_CRTC_INFO_EDID);
+  /* Get geometry. */
+  this->width_mm_error       = _EE(LIBGAMMA_CRTC_INFO_WIDTH_MM,       LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED);
+  this->height_mm_error      = _EE(LIBGAMMA_CRTC_INFO_HEIGHT_MM,      LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED);
+  this->subpixel_order_error = _EE(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER, LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED);
+  if (this->width_mm_error || this->height_mm_error || this->subpixel_order_error)
+    {
+      /* TODO add listener and wait for events */
+      e |= this->width_mm_error | this->height_mm_error | this->subpixel_order_error;
+      /* TODO remove listener */
+    }
   
   
-  /*size_t width_mm;*/
-  e |= this->width_mm_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM);
-  
-  /*size_t height_mm;*/
-  e |= this->height_mm_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM);
-  
-  /*size_t width_mm_edid;*/
-  e |= this->width_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID);
-  
-  /*size_t height_mm_edid;*/
+  /* There is no support for EDID, or any other way to get the gamma. */
+  e |= this->edid_error           = _E(LIBGAMMA_CRTC_INFO_EDID);
+  e |= this->width_mm_edid_error  = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID);
   e |= this->height_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID);
+  e |= this->gamma_error          = _E(LIBGAMMA_CRTC_INFO_GAMMA);
   
-  
+  /* Store gamma size. */
   this->red_gamma_size   = (size_t)(data->gamma_size);
   this->green_gamma_size = (size_t)(data->gamma_size);
   this->blue_gamma_size  = (size_t)(data->gamma_size);
   e |= this->gamma_size_error = data->gamma_maybe_supported ? 0 :
-    (fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE) ? LIBGAMMA_GAMMA_RAMPS_NOT_SUPPORTED : 0;
+    _EE(LIBGAMMA_CRTC_INFO_GAMMA_SIZE, LIBGAMMA_GAMMA_RAMPS_NOT_SUPPORTED);
   
+  /* Store gamma depth and gamma support. */
   this->gamma_depth = 16;
-  this->gamma_depth_error = 0;
-  
   this->gamma_support = data->gamma_maybe_supported;
-  this->gamma_support_error = 0;
   
-  
-  /*libgamma_subpixel_order_t subpixel_order;*/
-  e |= this->subpixel_order_error = _E(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER);
-  
-  /*int active;*/
-  e |= this->active_error = _E(LIBGAMMA_CRTC_INFO_ACTIVE);
-  
-  /*char* connector_name;*/
+  /* Store active. */
+  this->active = data->removed == 0;
+
+  /* There is no connector support. */
   e |= this->connector_name_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_NAME);
-  
-  /*libgamma_connector_type_t connector_type;*/
   e |= this->connector_type_error = _E(LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE);
-  
-  
-  /*float gamma_red;
-  float gamma_green;
-  float gamma_blue;*/
-  e |= this->gamma_error = _E(LIBGAMMA_CRTC_INFO_GAMMA);
   
   
   /* There was a failure if and only if unsupport field was requested. */
   return e ? -1 : 0;
   
 #undef _E
+#undef _EE
 }
 
 
