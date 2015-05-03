@@ -145,7 +145,7 @@ int libgamma_wayland_get_crtc_information(libgamma_crtc_information_t* restrict 
  *                 error identifier provided by this library.
  */
 int libgamma_wayland_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
-					    libgamma_gamma_ramps16_t* restrict ramps);
+					    libgamma_gamma_ramps16_t* restrict ramps) __attribute__((const));
 
 /**
  * Set the gamma ramps for a CRTC, 16-bit gamma-depth version.

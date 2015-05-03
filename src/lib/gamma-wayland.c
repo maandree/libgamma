@@ -582,7 +582,9 @@ int libgamma_wayland_get_crtc_information(libgamma_crtc_information_t* restrict 
 int libgamma_wayland_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps16_t* restrict ramps)
 {
-  return 0; (void) this, (void) ramps; /* TODO */
+  (void) this;
+  (void) ramps;
+  return errno = ENOTSUP, LIBGAMMA_ERRNO_SET;
 }
 
 
@@ -597,6 +599,35 @@ int libgamma_wayland_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this
 int libgamma_wayland_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
 					    libgamma_gamma_ramps16_t ramps)
 {
-  return 0; (void) this, (void) ramps; /* TODO */
+  libgamma_wayland_site_data_t* site = this->partition->site->data;
+  libgamma_wayland_crtc_data_t* crtc = this->data;
+  struct wl_array red;
+  struct wl_array green;
+  struct wl_array blue;
+  
+  /* TODO Verify that gamma can be set. */
+  
+#ifdef DEBUG
+  /* Gamma ramp sizes are identical but not fixed. */
+  if ((ramps.red_size != ramps.green_size) ||
+      (ramps.red_size != ramps.blue_size))
+    return LIBGAMMA_MIXED_GAMMA_RAMP_SIZE;
+#endif
+  
+  /* Translate gamma ramps to Wayland structure. */
+  red  .size = red  .alloc = ramps.  red_size * sizeof(uint16_t);
+  green.size = green.alloc = ramps.green_size * sizeof(uint16_t);
+  blue .size = blue .alloc = ramps. blue_size * sizeof(uint16_t);
+  red  .data = ramps.red;
+  green.data = ramps.green;
+  blue .data = ramps.blue;
+  
+  /* Apply gamma ramps. */
+  gamma_control_set_gamma(crtc->gamma_control, &red, &green, &blue);
+  wl_display_flush(site->display);
+  
+  /* TODO Check for errors. */
+  
+  return 0;
 }
 
