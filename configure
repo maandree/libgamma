@@ -10,6 +10,7 @@ have_debug='No, enable with --debug'
 have_dummy='No, enable with --enable-dummy'
 have_randr='No, enable with --enable-randr'
 have_vidmode='No, enable with --enable-vidmode'
+have_wayland='No, enable with --enable-wayland'
 have_drm='No, enable with --enable-drm'
 have_w32gdi='No, enable with --enable-w32gdi[=fake]'
 have_quartz='No, enable with --enable-quartz[=fake]'
@@ -18,6 +19,7 @@ enable_debug=0
 enable_dummy=0
 enable_randr=0
 enable_vidmode=0
+enable_wayland=0
 enable_drm=0
 enable_w32gdi=0
 enable_quartz=0
@@ -31,15 +33,17 @@ for arg in "$@"; do
     case "${arg}" in
 	(--linux=developer|--developer)  enable_debug=1
 					 enable_dummy=1
-					 enable_vidmode=1
 					 enable_randr=1
+					 enable_vidmode=1
+					 enable_wayland=1
 					 enable_drm=1
 					 fake_w32gdi=1
 					 fake_quartz=1
 					 os=gnu
 					 ;;
-	(--linux)                        enable_vidmode=1
-					 enable_randr=1
+	(--linux)                        enable_randr=1
+					 enable_vidmode=1
+					 enable_wayland=1
 					 enable_drm=1
 					 os=gnu
 					 ;;
@@ -73,6 +77,7 @@ for arg in "$@"; do
 	(--enable-dummy)                 enable_dummy=1    ;;
 	(--enable-randr)                 enable_randr=1    ;;
 	(--enable-vidmode)               enable_vidmode=1  ;;
+	(--enable-wayland)               enable_wayland=1  ;;
 	(--enable-drm)                   enable_drm=1      ;;
 	(--enable-w32gdi)                enable_w32gdi=1   ;;
 	(--enable-quartz)                enable_quartz=1   ;;
@@ -130,6 +135,15 @@ if [ ${enable_vidmode} = 1 ]; then
     echo 'LIBS_C += $$(pkg-config --cflags x11 xxf86vm)' >&3
     echo '#define HAVE_LIBGAMMA_METHOD_X_VIDMODE' >&4
     have_vidmode='Yes'
+fi
+if [ ${enable_wayland} = 1 ]; then
+    echo 'LIBOBJ += gamma-wayland wayland-gamma-control-protocol' >&3
+    echo 'DEFINITIONS += -DHAVE_LIBGAMMA_METHOD_WAYLAND' >&3
+    echo 'LIBS_LD += $$(pkg-config --libs wayland-client)' >&3
+    echo 'LIBS_C += $$(pkg-config --cflags wayland-client)' >&3
+    echo 'WAYLAND_SCANNER = $(shell pkg-config --variable=wayland_scanner wayland-scanner)' >&3
+    echo '#define HAVE_LIBGAMMA_METHOD_WAYLAND' >&4
+    have_wayland='Yes'
 fi
 if [ ${enable_drm} = 1 ]; then
     echo 'LIBOBJ += gamma-linux-drm' >&3
@@ -203,6 +217,7 @@ echo "  Debug mode:               ${have_debug}"
 echo "  Dummy method:             ${have_dummy}"
 echo "  X.org via RandR:          ${have_randr}"
 echo "  X.org via VidMode:        ${have_vidmode}"
+echo "  Wayland/Orbital:          ${have_wayland}"
 echo "  Linux DRM:                ${have_drm}"
 echo "  Windows GDI:              ${have_w32gdi}"
 echo "  Quartz via CoreGraphics:  ${have_quartz}"

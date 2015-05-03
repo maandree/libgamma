@@ -49,7 +49,7 @@
 # if LIBGAMMA_ERROR_MIN < -46
 #  warning New error codes have been added to libgamma.
 # endif
-# if LIBGAMMA_METHOD_COUNT > 6
+# if LIBGAMMA_METHOD_COUNT > 7
 #  warning New adjust methods has been added to libgamma
 # endif
 # if LIBGAMMA_CONNECTOR_TYPE_COUNT > 20

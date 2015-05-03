@@ -85,13 +85,20 @@
  */
 #define LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS  5
 
+/**
+ * The identifier for the adjustment method with
+ * uses the Orbital Wayland compositor's protocol
+ * for gamma ramp control.
+ */
+#define LIBGAMMA_METHOD_WAYLAND  6
+
 
 /**
  * The index of the last gamma method, neither it
  * nor any index before it may actually be supported
  * as it could have been disabled at compile-time.
  */
-#define LIBGAMMA_METHOD_MAX  5
+#define LIBGAMMA_METHOD_MAX  6
 
 /**
  * The number adjustment methods provided by this library.

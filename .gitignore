@@ -14,7 +14,10 @@ obj/
 *.o
 /config.mk
 /src/lib/libgamma-config.h
+/src/lib/wayland-*-protocol.c
+/src/lib/wayland-*-protocol.h
 *.info
+*.info-*
 *.pdf
 *.dvi
 *.ps

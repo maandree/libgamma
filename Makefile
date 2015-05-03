@@ -158,6 +158,17 @@ bin/libgamma.$(SO):
 	mkdir -p $(shell dirname $@)
 	ln -sf libgamma.$(SO).$(LIB_VERSION) $@
 
+obj/lib/wayland-%-protocol.c: src/lib/wayland-%-protocol.xml # XML, yuck!
+	mkdir -p $(shell dirname $@)
+	$(WAYLAND_SCANNER) code < $< > $@
+
+src/lib/wayland-%-client-protocol.h: src/lib/wayland-%-protocol.xml # XML, yuck!
+	$(WAYLAND_SCANNER) client-header < $< > $@
+
+obj/lib/gamma-wayland.o: src/lib/gamma-wayland.c src/lib/*.h src/lib/wayland-gamma-control-client-protocol.h
+	mkdir -p $(shell dirname $@)
+	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
+
 obj/lib/%.o: src/lib/%.c src/lib/*.h
 	mkdir -p $(shell dirname $@)
 	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
@@ -305,9 +316,9 @@ uninstall:
 
 .PHONY: clean
 clean:
-	-rm -rf obj bin libgamma.{info,pdf,ps,dvi}
+	-rm -rf obj bin libgamma.info libgamma.info-* libgamma.pdf libgamma.ps libgamma.dvi
 
 .PHONY: distclean
 distclean: clean
-	-rm -f .config.mk src/lib/libgamma-config.h
+	-rm -f .config.mk src/lib/libgamma-config.h src/lib/wayland-*-protocol.c src/lib/wayland-*-protocol.h
 

@@ -5,6 +5,7 @@ RUNTIME DEPENDENCIES:
     libx11                        Optional: for the X VidMode adjustment method
     libxxf86vm                    Optional: for the X VidMode adjustment method
     libdrm                        Optional: for the Linux DRM adjustment method
+    wayland                       Optional: for the Wayland/Orbital adjustment method
 
     Optional dependencies are mandatory when they have been selected at
     compile-time and are not utilisable if not selected at compile-time.

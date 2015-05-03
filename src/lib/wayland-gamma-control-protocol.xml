@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="gamma_control">
+  <copyright>
+    libgamma -- Display server abstraction layer for gamma ramp adjustments
+    Copyright (C) 2014, 2015  Mattias Andrée (maandree@member.fsf.org)
+    
+    This library is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this library.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+  </copyright>
+  
+  
+  <!--
+    - Gamma ramp controller for a display.
+    -->
+  <interface name="gamma_control_manager" version="1">
+    <!--
+      - Acquirer a gamma ramp controller for an output.
+      - 
+      - @param   :struct gamma_control_manager*  The gamma ramp controller for the display.
+      - @param   output:struct wl_output*        The output.
+      - @return  id:struct gamma_control*        Gamma ramp controller for the output.
+      -->
+    <request name="get_gamma_control">
+      <arg name="id"     type="new_id" interface="gamma_control"/>
+      <arg name="output" type="object" interface="wl_output"/>
+    </request>
+    
+    <!--
+      - Release a gamma ramp controller for a display.
+      - 
+      - @param  :struct gamma_control_manager*  The gamma ramp controller.
+      -->
+    <request name="destroy" type="destructor"/>
+  </interface>
+  
+  
+  <!--
+    - Gamma ramp controller for an output.
+    -->
+  <interface name="gamma_control" version="1">
+    <!--
+      - List of errors for `gamma_control` methods.
+      -->
+    <enum name="error">
+      <!--
+	- The gamma ramps do not have the same number of stops.
+        -->
+      <entry name="invalid_gamma" value="0"/>
+    </enum>
+    
+    <!--
+      - Event that notifies the program about the number
+      - of stops in the gamma ramps.
+      - 
+      - @param  user_data:void*         Data registered to be passsed to the
+      -                                 function to identify the event registry.
+      - @param  :struct gamma_control*  The gamma ramp control of the output.
+      - @param  size:uint32_t           The number of stops in the gamma ramps.
+      -->
+    <event name="gamma_size">
+      <arg name="size" type="uint"/>
+    </event>
+    
+    <!--
+      - Set the gamma ramps for an output.
+      - 
+      - @param  :struct gamma_control*            The gamma ramp control of the output.
+      - @param  red:struct wl_array*<uint16_t>    The gamma ramp for the red channel.
+      - @param  green:struct wl_array*<uint16_t>  The gamma ramp for the green channel.
+      - @param  blue:struct wl_array*<uint16_t>   The gamma ramp for the blue channel.
+      -->
+    <request name="set_gamma">
+      <arg name="red"   type="array"/>
+      <arg name="green" type="array"/>
+      <arg name="blue"  type="array"/>
+    </request>
+    
+    <!--
+      - Undo all modifications to an output's gamma ramps.
+      - 
+      - @param  :struct gamma_control*  The gamma ramp control of the output.
+      -->
+    <request name="reset_gamma"/>
+    
+    <!--
+      - Release a gamma ramp controller for an output.
+      - 
+      - @param  :struct gamma_control*  The gamma ramp controller.
+      -->
+    <request name="destroy" type="destructor"/>
+  </interface>
+  
+  
+</protocol>
+

@@ -334,6 +334,10 @@ const char* libgamma_method_default_site_variable(int method)
     case LIBGAMMA_METHOD_X_VIDMODE:
       return "DISPLAY";
 #endif
+#ifdef HAVE_LIBGAMMA_METHOD_WAYLAND
+    case LIBGAMMA_METHOD_WAYLAND:
+      return "WAYLAND_DISPLAY";
+#endif
     default:
       return NULL;
     }

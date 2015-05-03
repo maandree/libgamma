@@ -7,6 +7,5 @@ Unsupported display servers:
 	GNU Hurd TTY   Does it have gamma ramp support?
 	The BSD TTY:s  Do they have gamma ramp support?
 	Haiku          Haiku does not have gamma ramp support
-	Wayland        I do not think Wayland have gamma ramp support
 	Mir            I do not think Mir have gamma ramp support
 

@@ -35,6 +35,7 @@ const char* method_name(int method)
     case LIBGAMMA_METHOD_LINUX_DRM:             return "Linux DRM";
     case LIBGAMMA_METHOD_W32_GDI:               return "Windows GDI";
     case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:  return "Quartz using CoreGraphics";
+    case LIBGAMMA_METHOD_WAYLAND:               return "Wayland/Orbital";
     default:
       return "(unknown)";
     }
