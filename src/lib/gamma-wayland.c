@@ -74,13 +74,23 @@ static void registry_global_remover(void* site_state, struct wl_registry* regist
  * @param  control    The gamma ramp controll for the CRTC
  * @param  size       The number of stops in the gamma ramps of the CRTC
  */
-static void gamma_control_gamma_size(void* crtc, struct gamma_control* control, uint32_t size);
+static void gamma_control_gamma_size(void* crtc_data, struct gamma_control* control, uint32_t size);
+
+/**
+ * This function is invoked when the display server
+ * tells us that a request has been completed.
+ * 
+ * @param  crtc_data     The protocol-specific data for the CRTC
+ * @param  callback      The callback
+ * @param  request_data  Request-specific callback data
+ */
+static void display_synced(void* crtc_data, struct wl_callback* callback, uint32_t request_data);
 
 /**
  * This function is called when the display server
  * tells us about an output's geometry.
  * 
- * @param  info_            The CRTC's information structure to fill
+ * @param  crtc_data        The protocol-specific data for the CRTC
  * @param  output           The output
  * @param  x                The left position, within the global compositor space, of the output
  * @param  y                The top position, within the global compositor space, of the output
@@ -91,7 +101,7 @@ static void gamma_control_gamma_size(void* crtc, struct gamma_control* control, 
  * @param  model            Textual description of the monitor's model
  * @param  transform        Output flipping and rotation
  */
-static void geometry(void* info_, struct wl_output* output, int32_t x, int32_t y,
+static void geometry(void* crtc_data, struct wl_output* output, int32_t x, int32_t y,
 		     int32_t physical_width, int32_t physical_height, int32_t subpixel_,
 		     const char* make, const char* model, int32_t transform);
 
@@ -106,6 +116,11 @@ typedef struct libgamma_wayland_crtc_data
    * Wayland-representation of the output.
    */
   struct wl_output* output;
+  
+  /**
+   * Display synchronisation callback.
+   */
+  struct wl_callback* display_sync;
   
   /**
    * Gamma controller for the output.
@@ -133,9 +148,19 @@ typedef struct libgamma_wayland_crtc_data
   uint32_t global_id;
   
   /**
-   * Whether the CRTC has been removed;
+   * Whether the CRTC has been removed.
    */
   int removed;
+  
+  /**
+   * Whether the CRTC have an geometry listener assigned.
+   */
+  int have_geometry_listener;
+  
+  /**
+   * The output's geometry.
+   */
+  libgamma_crtc_information_t geometry;
   
 } libgamma_wayland_crtc_data_t;
 
@@ -218,6 +243,11 @@ static const struct wl_output_listener output_listener =
     NULL,
     NULL,
     NULL,
+  };
+
+static const struct wl_callback_listener display_sync_listener =
+  {
+    display_synced,
   };
 
 
@@ -421,14 +451,21 @@ void libgamma_wayland_site_destroy(libgamma_site_state_t* restrict this)
 {
   libgamma_wayland_site_data_t* data = this->data;
   libgamma_wayland_crtc_data_t* crtc;
-  gamma_control_manager_destroy(data->gamma_control_manager);
-  wl_registry_destroy(data->registry);
-  wl_display_disconnect(data->display);
+  if (data->gamma_control_manager != NULL)
+    gamma_control_manager_destroy(data->gamma_control_manager);
+  if (data->registry != NULL)
+    wl_registry_destroy(data->registry);
+  if (data->display != NULL)
+    wl_display_disconnect(data->display);
   while (data->crtcs_available--)
     {
       crtc = data->crtcs[data->crtcs_available];
-      gamma_control_destroy(crtc->gamma_control);
-      wl_output_destroy(crtc->output);
+      if (crtc->gamma_control != NULL)
+	gamma_control_destroy(crtc->gamma_control);
+      if (crtc->output != NULL)
+	wl_output_destroy(crtc->output);
+      if (crtc->display_sync != NULL)
+	wl_callback_destroy(crtc->display_sync);
       free(crtc);
     }
   free(data->crtcs);
@@ -594,7 +631,7 @@ int libgamma_wayland_crtc_restore(libgamma_crtc_state_t* restrict this)
  * This function is called when the display server
  * tells us about an output's geometry.
  * 
- * @param  info_            The CRTC's information structure to fill
+ * @param  crtc_data        The protocol-specific data for the CRTC
  * @param  output           The output
  * @param  x                The left position, within the global compositor space, of the output
  * @param  y                The top position, within the global compositor space, of the output
@@ -605,11 +642,12 @@ int libgamma_wayland_crtc_restore(libgamma_crtc_state_t* restrict this)
  * @param  model            Textual description of the monitor's model
  * @param  transform        Output flipping and rotation
  */
-static void geometry(void* info_, struct wl_output* output, int32_t x, int32_t y,
+static void geometry(void* crtc_data, struct wl_output* output, int32_t x, int32_t y,
 		     int32_t physical_width, int32_t physical_height, int32_t subpixel_,
 		     const char* make, const char* model, int32_t transform)
 {
-  libgamma_crtc_information_t* info = info_;
+  libgamma_wayland_crtc_data_t* data = crtc_data;
+  libgamma_crtc_information_t* info = &(data->geometry);
   enum wl_output_subpixel subpixel = subpixel_;
   
   (void) output;
@@ -660,6 +698,7 @@ int libgamma_wayland_get_crtc_information(libgamma_crtc_information_t* restrict 
 #define _E(FIELD)          _EE(FIELD, LIBGAMMA_CRTC_INFO_NOT_SUPPORTED)
   
   libgamma_wayland_crtc_data_t* data = crtc->data;
+  libgamma_wayland_site_data_t* site = crtc->partition->site->data;
   int e = 0;
   
   /* Wipe all error indicators. */
@@ -672,9 +711,15 @@ int libgamma_wayland_get_crtc_information(libgamma_crtc_information_t* restrict 
   this->subpixel_order_error = _EE(LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER, LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED);
   if (this->width_mm_error || this->height_mm_error || this->subpixel_order_error)
     {
-      /* TODO add listener and wait for events */
+      if (data->have_geometry_listener == 0)
+	{
+	  data->have_geometry_listener = 1;
+	  data->geometry = *this;
+	  wl_output_add_listener(data->output, &output_listener, data);
+	  wl_display_roundtrip(site->display);
+	}
+      *this = data->geometry;
       e |= this->width_mm_error | this->height_mm_error | this->subpixel_order_error;
-      /* TODO remove listener */
     }
   
   
@@ -729,6 +774,25 @@ int libgamma_wayland_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this
 
 
 /**
+ * This function is invoked when the display server
+ * tells us that a request has been completed.
+ * 
+ * @param  crtc_data     The protocol-specific data for the CRTC
+ * @param  callback      The callback
+ * @param  request_data  Request-specific callback data
+ */
+static void display_synced(void* crtc_data, struct wl_callback* callback, uint32_t request_data)
+{
+  libgamma_wayland_crtc_data_t* crtc = crtc_data;
+  
+  (void) request_data;
+  
+  crtc->display_sync = NULL;
+  wl_callback_destroy(callback);
+}
+
+
+/**
  * Set the gamma ramps for a CRTC, 16-bit gamma-depth version.
  * 
  * @param   this   The CRTC state.
@@ -744,6 +808,7 @@ int libgamma_wayland_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this
   struct wl_array red;
   struct wl_array green;
   struct wl_array blue;
+  int r = 0;
   
   /* Verify that gamma can be set. */
 #ifdef DEBUG
@@ -770,7 +835,13 @@ int libgamma_wayland_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this
   
   /* Apply gamma ramps. */
   gamma_control_set_gamma(crtc->gamma_control, &red, &green, &blue);
+  crtc->display_sync = wl_display_sync(site->display);
+  wl_callback_add_listener(crtc->display_sync, &display_sync_listener, crtc);
   wl_display_flush(site->display);
+  while (crtc->display_sync && (r >= 0))
+    r = wl_display_dispatch(site->display);
+  if (r < 0)
+    return LIBGAMMA_GAMMA_RAMP_WRITE_FAILED;
   
   /* TODO Check for errors. */
   
