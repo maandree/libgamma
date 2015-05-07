@@ -10,3 +10,7 @@ Unsupported display servers:
 	Wayland        I do not think Wayland have gamma ramp support
 	Mir            I do not think Mir have gamma ramp support
 
+
+Adjustments in Quartz are reverted when the process exits,
+this information must be available in the method capabilities.
+
