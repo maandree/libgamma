@@ -616,8 +616,8 @@ static void geometry(void* info_, struct wl_output* output, int32_t x, int32_t y
   (void) x;
   (void) y;
   (void) transform;
-  (void) make;  /* TODO new field */
-  (void) model; /* TODO new field */
+  (void) make;  /* TODO new field (fix after merge to master branch) */
+  (void) model; /* TODO new field (fix after merge to master branch) */
   
   info->width_mm = (size_t)(physical_width < 0 ? 0 : physical_width);
   info->height_mm = (size_t)(physical_height < 0 ? 0 : physical_height);
