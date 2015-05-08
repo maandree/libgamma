@@ -114,6 +114,8 @@ void libgamma_linux_drm_method_capabilities(libgamma_method_capabilities_t* rest
   /* DRM is a real non-faked adjustment method */
   this->real = 1;
   this->fake = 0;
+  /* Gamma ramp adjustments are persistent. */
+  this->auto_restore = 0;
 }
 
 
@@ -827,7 +829,7 @@ int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t* restric
   e |= (fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE) ? get_gamma_ramp_size(this, crtc) : 0;
   /* Store gamma ramp depth. */
   this->gamma_depth = 16;
-  /* X RandR does not support quering gamma ramp support. */
+  /* DRM does not support quering gamma ramp support. */
   e |= this->gamma_support_error = _E(LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT);
   
   /* Free the EDID after us. */

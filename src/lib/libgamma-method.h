@@ -163,7 +163,7 @@ typedef struct libgamma_method_capabilities
    * Whether the adjustment method supports `libgamma_crtc_restore`.
    */
   unsigned crtc_restore : 1;
-    
+  
   /**
    * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
    * fields in `libgamma_crtc_information_t` will always have the same
@@ -194,6 +194,12 @@ typedef struct libgamma_method_capabilities
    */
   unsigned fake : 1;
   
+  /**
+   * Whether adjustments are undone when the process disconnects from
+   * the display server.
+   */
+  unsigned auto_restore : 1;
+
 } libgamma_method_capabilities_t;
 
 
@@ -471,6 +477,29 @@ typedef enum libgamma_subpixel_order
  * The number of values defined in `libgamma_subpixel_order_t`.
  */
 #define LIBGAMMA_SUBPIXEL_ORDER_COUNT  6
+
+
+/**
+ * Answer enum to a decision problem.
+ */
+typedef enum libgamma_decision
+  {
+    /**
+     * The answer is negative.
+     */
+    LIBGAMMA_NO = 0,
+    
+    /**
+     * The answer is unknown.
+     */
+    LIBGAMMA_MAYBE = 1,
+    
+    /**
+     * The answer is positive.
+     */
+    LIBGAMMA_YES = 2
+    
+  } libgamma_decision_t;
 
 
 /**
@@ -756,9 +785,14 @@ typedef struct libgamma_crtc_information
   
   
   /**
-   * Non-zero gamma ramp adjustments are supported.
+   * `LIBGAMMA_NO` indicates that the CRTC does not support
+   * gamma ramp adjustments. `LIBGAMMA_MAYBE` indicates that
+   * the CRTC may or may not support gamma ramp adjustments,
+   * meaning that the display server really does not know, but
+   * the protocol is available. `LIBGAMMA_NO` indicates that
+   * the CRTC does support gamma ramp adjustments.
    */
-  int gamma_support;
+  libgamma_decision_t gamma_support;
   
   /**
    * Zero on success, positive it holds the value `errno` had

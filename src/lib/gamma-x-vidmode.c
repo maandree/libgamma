@@ -60,6 +60,8 @@ void libgamma_x_vidmode_method_capabilities(libgamma_method_capabilities_t* rest
   /* X VidMode is a real non-faked adjustment method */
   this->real = 1;
   this->fake = 0;
+  /* Gamma ramp adjustments are persistent. */
+  this->auto_restore = 0;
 }
 
 

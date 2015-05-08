@@ -295,9 +295,11 @@ static libgamma_dummy_configurations_t libgamma_dummy_configurations =
  */
 void libgamma_dummy_method_capabilities(libgamma_method_capabilities_t* restrict this)
 {
+  int real_method = libgamma_dummy_configurations.real_method;
   *this = libgamma_dummy_configurations.capabilities;
-  this->real = libgamma_dummy_configurations.real_method != LIBGAMMA_METHOD_DUMMY;
+  this->real = real_method != LIBGAMMA_METHOD_DUMMY;
   this->fake = this->real;
+  this->auto_restore = real_method == LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS;
 }
 
 

@@ -9,3 +9,6 @@ Unsupported display servers:
 	Haiku          Haiku does not have gamma ramp support
 	Mir            I do not think Mir have gamma ramp support
 
+
+Add hotplug support.
+

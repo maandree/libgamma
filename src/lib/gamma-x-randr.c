@@ -155,9 +155,11 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
   this->fixed_gamma_size = 0;
   /* Gamma ramp depths are fixed. */
   this->fixed_gamma_depth = 1;
-  /* X RandR is a real non-faked adjustment method */
+  /* X RandR is a real non-faked adjustment method. */
   this->real = 1;
   this->fake = 0;
+  /* Gamma ramp adjustments are persistent. */
+  this->auto_restore = 0;
 }
 
 

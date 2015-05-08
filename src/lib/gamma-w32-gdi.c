@@ -84,6 +84,8 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t* restri
   this->fake = 0;
   this->real = 1;
 #endif
+  /* Gamma ramp adjustments are persistent. */
+  this->auto_restore = 0;
 }
 
 
