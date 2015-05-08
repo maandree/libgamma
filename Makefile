@@ -167,11 +167,11 @@ src/lib/wayland-%-client-protocol.h: src/lib/wayland-%-protocol.xml # XML, yuck!
 
 obj/lib/gamma-wayland.o: src/lib/gamma-wayland.c src/lib/*.h src/lib/wayland-gamma-control-client-protocol.h
 	mkdir -p $(shell dirname $@)
-	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
+	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
 
 obj/lib/%.o: src/lib/%.c src/lib/*.h
 	mkdir -p $(shell dirname $@)
-	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
+	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
 
 obj/lib/%.o: obj/lib/%.c src/lib/*.h
 	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -iquote"$$(dirname "$<" | sed -e 's:^obj:src:')" -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
@@ -190,7 +190,7 @@ bin/test: $(foreach O,$(TESTOBJ),obj/test/$(O).o) bin/libgamma.$(SO).$(LIB_VERSI
 
 obj/test/%.o: src/test/%.c src/test/*.h src/lib/libgamma*.h
 	mkdir -p $(shell dirname $@)
-	$(CC) $(TEST_FLAGS) -Isrc/lib -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
+	$(CC) $(TEST_FLAGS) -Isrc/lib -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
 
 
 .PHONY: doc
