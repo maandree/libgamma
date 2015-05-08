@@ -283,6 +283,8 @@ void libgamma_wayland_method_capabilities(libgamma_method_capabilities_t* restri
   /* Wayland/Orbital is a real non-faked adjustment method. */
   this->real = 1;
   this->fake = 0;
+  /* Gamma ramp adjustments are non-persistent. */
+  this->auto_restore = 1;
 }
 
 
@@ -738,7 +740,7 @@ int libgamma_wayland_get_crtc_information(libgamma_crtc_information_t* restrict 
   
   /* Store gamma depth and gamma support. */
   this->gamma_depth = 16;
-  this->gamma_support = data->gamma_maybe_supported;
+  this->gamma_support = data->gamma_maybe_supported ? LIBGAMMA_MAYBE : LIBGAMMA_NO;
   
   /* Store active. */
   this->active = data->removed == 0;
