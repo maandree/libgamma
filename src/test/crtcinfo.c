@@ -125,6 +125,25 @@ static const char* connector_type_str(libgamma_connector_type_t value)
     }
 }
 
+
+/**
+ * Get a string representation of a decision.
+ * 
+ * @param   value  The decision.
+ * @return         String representation.
+ */
+static const char* decision_str(libgamma_decision_t value)
+{
+  switch (value)
+    {
+    __case (LIBGAMMA_NO)
+    __case (LIBGAMMA_MAYBE)
+    __case (LIBGAMMA_YES)
+    default:
+      return "(unknown)";
+    }
+}
+
 #undef __case
 
 
@@ -196,7 +215,14 @@ void crtc_information(libgamma_crtc_state_t* restrict crtc)
   print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "green gamma ramp size", green_gamma_size, gamma_size_error);
   print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "blue gamma ramp size", blue_gamma_size, gamma_size_error);
   print(signed, LIBGAMMA_CRTC_INFO_GAMMA_DEPTH, "gamma ramp depth", gamma_depth);
-  print(int, LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT, "gamma support", gamma_support);
+  /* Print gamma ramp support. */
+  if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT))
+    {
+      if (info.gamma_support_error)
+	libgamma_perror("  (error) gamma support", info.gamma_support_error);
+      else
+	printf("  gamma support: %s\n", decision_str(info.gamma_support));
+    }
   /* Print subpixel order for the monitor. */
   if ((fields & LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER))
     {

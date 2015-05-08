@@ -178,6 +178,7 @@ void method_capabilities(void)
 	printf("  %s: %s\n", "Fixed gamma depth",     caps.fixed_gamma_depth             ? "yes" : "no");
 	printf("  %s: %s\n", "Real method",           caps.real                          ? "yes" : "no");
 	printf("  %s: %s\n", "Fake method",           caps.fake                          ? "yes" : "no");
+	printf("  %s: %s\n", "Auto restore",          caps.auto_restore                  ? "yes" : "no");
 	printf("\n");
       }
 }
