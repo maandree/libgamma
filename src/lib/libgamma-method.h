@@ -156,7 +156,7 @@ typedef struct libgamma_method_capabilities
    * Whether the adjustment method supports `libgamma_crtc_restore`.
    */
   unsigned crtc_restore : 1;
-    
+  
   /**
    * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
    * fields in `libgamma_crtc_information_t` will always have the same
@@ -187,6 +187,12 @@ typedef struct libgamma_method_capabilities
    */
   unsigned fake : 1;
   
+  /**
+   * Whether adjustments are undone when the process disconnects from
+   * the display server.
+   */
+  unsigned auto_restore : 1;
+
 } libgamma_method_capabilities_t;
 
 

@@ -11,9 +11,6 @@ Unsupported display servers:
 	Mir            I do not think Mir have gamma ramp support
 
 
-Adjustments in Quartz are reverted when the process exits,
-this information must be available in the method capabilities.
-
 Gamma ramp support test should return yes, no or maybe.
 
 Add hotplug support.

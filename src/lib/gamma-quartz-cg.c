@@ -77,6 +77,8 @@ void libgamma_quartz_cg_method_capabilities(libgamma_method_capabilities_t* rest
   this->fake = 0;
   this->real = 1;
 #endif
+  /* Gamma ramp adjustments are non-persistent. */
+  this->auto_restore = 1;
 }
 
 
