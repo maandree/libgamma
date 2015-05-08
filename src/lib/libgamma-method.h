@@ -473,6 +473,29 @@ typedef enum libgamma_subpixel_order
 
 
 /**
+ * Answer enum to a decision problem.
+ */
+typedef enum libgamma_decision
+  {
+    /**
+     * The answer is negative.
+     */
+    LIBGAMMA_NO = 0,
+    
+    /**
+     * The answer is unknown.
+     */
+    LIBGAMMA_MAYBE = 1,
+    
+    /**
+     * The answer is positive.
+     */
+    LIBGAMMA_YES = 2
+    
+  } libgamma_decision_t;
+
+
+/**
  * For a `libgamma_crtc_information_t` fill in the
  * values for `edid` and `edid_length` and report errors to `edid_error`.
  */
@@ -755,9 +778,14 @@ typedef struct libgamma_crtc_information
   
   
   /**
-   * Non-zero gamma ramp adjustments are supported.
+   * `LIBGAMMA_NO` indicates that the CRTC does not support
+   * gamma ramp adjustments. `LIBGAMMA_MAYBE` indicates that
+   * the CRTC may or may not support gamma ramp adjustments,
+   * meaning that the display server really does not know, but
+   * the protocol is available. `LIBGAMMA_NO` indicates that
+   * the CRTC does support gamma ramp adjustments.
    */
-  int gamma_support;
+  libgamma_decision_t gamma_support;
   
   /**
    * Zero on success, positive it holds the value `errno` had

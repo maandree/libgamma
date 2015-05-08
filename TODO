@@ -11,7 +11,5 @@ Unsupported display servers:
 	Mir            I do not think Mir have gamma ramp support
 
 
-Gamma ramp support test should return yes, no or maybe.
-
 Add hotplug support.
 
