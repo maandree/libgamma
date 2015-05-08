@@ -209,6 +209,10 @@ Enables the X VidMode extension adjustment method.
 @itemx --linux
 Enables the Direct Rendering Manager adjustment method.
 
+@item --enable-wayland
+@itemx --linux
+Enables the Wayland/Orbital adjustment method.
+
 @item --enable-w32gdi
 @itemx --windows
 Enables the Windows GDI adjustment method.
