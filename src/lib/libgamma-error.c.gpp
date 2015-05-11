@@ -108,17 +108,29 @@ void libgamma_perror(const char* name, int error_code)
       long int gid = (long int)libgamma_group_gid;
       if (libgamma_group_name == NULL)
 	/* Group name unknown. */
-	fprintf(stderr, "%s: %s: %ld\n", name, error, gid);
+	if (name && *name)
+	  fprintf(stderr, "%s: %s: %ld\n", name, error, gid);
+	else
+	  fprintf(stderr, "%s: %ld\n", error, gid);
       else
 	/* Group name known, ID is second class. */
-	fprintf(stderr, "%s: %s: %s (%ld)\n", name, error, libgamma_group_name, gid);
+	if (name && *name)
+	  fprintf(stderr, "%s: %s: %s (%ld)\n", name, error, libgamma_group_name, gid);
+	else
+	  fprintf(stderr, "%s: %s (%ld)\n", error, libgamma_group_name, gid);
     }
   else if (error_code < LIBGAMMA_ERROR_MIN)
     /* If the error code does not exist, print "(?)" */
-    fprintf(stderr, "%s: (?)\n", name);
+    if (name && *name)
+      fprintf(stderr, "%s: (?)\n", name);
+    else
+      fprintf(stderr, "(?)\n");
   else
     /* Print the name of the error. */
-    fprintf(stderr, "%s: %s\n", name, libgamma_name_of_error(error_code));
+    if (name && *name)
+      fprintf(stderr, "%s: %s\n", name, libgamma_name_of_error(error_code));
+    else
+      fprintf(stderr, "%s\n", libgamma_name_of_error(error_code));
 }
 
 
