@@ -136,6 +136,30 @@ int main(void)
 #undef Y
 #undef X
   
+  /* Test order of gamma ramps. */
+  memcpy(ramps16.red, old_ramps16.red, ramps16.red_size * sizeof(uint16_t));
+  memset(ramps16.green, 0, ramps16.green_size * sizeof(uint16_t));
+  memset(ramps16.blue, 0, ramps16.blue_size * sizeof(uint16_t));
+  printf("Making the monitor red-only for 1 second...\n");
+  if ((rr |= r = libgamma_crtc_set_gamma_ramps16(crtc_state, ramps16)))
+    libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
+  sleep(1);
+  memset(ramps16.red, 0, ramps16.red_size * sizeof(uint16_t));
+  memcpy(ramps16.green, old_ramps16.green, ramps16.green_size * sizeof(uint16_t));
+  printf("Making the monitor green-only for 1 second...\n");
+  if ((rr |= r = libgamma_crtc_set_gamma_ramps16(crtc_state, ramps16)))
+    libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
+  sleep(1);
+  memset(ramps16.green, 0, ramps16.green_size * sizeof(uint16_t));
+  memcpy(ramps16.blue, old_ramps16.blue, ramps16.blue_size * sizeof(uint16_t));
+  printf("Making the monitor green-only for 1 second...\n");
+  if ((rr |= r = libgamma_crtc_set_gamma_ramps16(crtc_state, ramps16)))
+    libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
+  sleep(1);
+  if ((rr |= r = libgamma_crtc_set_gamma_ramps64(crtc_state, old_ramps64)))
+    libgamma_perror("libgamma_crtc_set_gamma_ramps64", r);
+  printf("Done!\n");
+  
   /* TODO Test gamma ramp restore functions. */
   
  done:
