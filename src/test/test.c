@@ -67,12 +67,16 @@ int main(void)
 #undef X
   
   /* Fill gamma ramps, for each depth, with the CRTC:s current ramps. */
-#define X(R)							\
-  libgamma_crtc_get_gamma_##R(crtc_state, &old_##R);		\
-  if ((rr |= r = libgamma_crtc_get_gamma_##R(crtc_state, &R)))	\
-    {								\
-      libgamma_perror("libgamma_crtc_get_gamma_" #R, r);	\
-      goto done;						\
+#define X(R)								\
+  if ((rr |= r = libgamma_crtc_get_gamma_##R(crtc_state, &old_##R)))	\
+    {									\
+      libgamma_perror("libgamma_crtc_get_gamma_" #R, r);		\
+      goto done;							\
+    }									\
+  if ((rr |= r = libgamma_crtc_get_gamma_##R(crtc_state, &R)))		\
+    {									\
+      libgamma_perror("libgamma_crtc_get_gamma_" #R, r);		\
+      goto done;							\
     }
   LIST_RAMPS
 #undef X
