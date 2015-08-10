@@ -86,6 +86,8 @@ static int libgamma_is_vt_proper(int fd)
     return 0;
   
   /* Validate TTY path. */
+  if (!strcmp(buf, "/dev/console"))
+    return 1;
   if (strstr(buf, "/dev/tty") != buf)
     return 0;
   
