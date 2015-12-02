@@ -1,9 +1,20 @@
-libgamma is a library that aims to abstract away the
-display server when adjusting the colour curves
-for monitors via gamma ramps.
+NAME
+	libgamma - Display server abstraction layer for gamma ramps
 
-The principal goal of libgamma is to provide abstraction
-now that we are entering a world of multiple display
-servers and to reduce code duplication both within and
-between software like redshift and blueshift.
+DESCRIPTION
+	libgamma is a library that aims to abstract away the
+	display server when adjusting the colour curves
+	for monitors via gamma ramps.
+
+RATIONALE
+	The principal goal of libgamma is to provide abstraction
+	now that we are entering a world of multiple display
+	servers and to reduce code duplication both within and
+	between software like redshift(1) and blueshift(1).
+
+SEE ALSO
+	blueshift(1), xgamma(1), xrandr(1), pylibgamma, jlibgamma,
+	libgammamm
+
+	Full documentation available locally via: info '(libgamma)'
 
