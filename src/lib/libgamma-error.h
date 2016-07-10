@@ -23,11 +23,11 @@
 #endif
 
 
+#include <sys/types.h>
+
 #ifndef __GCC__
 # define __attribute__(x)
 #endif
-
-#include <sys/types.h>
 
 
 /**

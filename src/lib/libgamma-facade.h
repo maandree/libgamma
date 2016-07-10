@@ -28,6 +28,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifndef __GCC__
+# define __attribute__(x)
+#endif
+
 
 
 /**
@@ -564,6 +568,10 @@ int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t* restrict this,
 				     libgamma_gamma_rampsd_fun* green_function,
 				     libgamma_gamma_rampsd_fun* blue_function) __attribute__((cold));
 
+
+#ifndef __GCC__
+# undef __attribute__
+#endif
 
 #endif
 
