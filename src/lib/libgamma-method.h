@@ -811,7 +811,7 @@ typedef struct libgamma_crtc_information
   
   
   /**
-   * Whether there is a monitors connected to the CRTC.
+   * Whether there is a monitor connected to the CRTC.
    */
   int active;
   
