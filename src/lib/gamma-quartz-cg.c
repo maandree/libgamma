@@ -87,7 +87,7 @@ void libgamma_quartz_cg_method_capabilities(libgamma_method_capabilities_t* rest
  * 
  * @param   this    The site state to initialise.
  * @param   site    The site identifier, unless it is `NULL` it must a
- *                  `free`:able. One the state is destroyed the library
+ *                  `free`:able. Once the state is destroyed the library
  *                  will attempt to free it. There you should not free
  *                  it yourself, and it must not be a string constant
  *                  or allocate on the stack. Note however that it will

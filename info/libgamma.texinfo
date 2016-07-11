@@ -694,7 +694,7 @@ these are listed in @ref{Adjustment methods}.
 
 @item @code{site} [@code{char*}]
 The site identifier, unless it is @code{NULL}
-it must a @code{free}:able. One the state is
+it must a @code{free}:able. Once the state is
 destroyed the library will attempt to free it.
 There you should not free it yourself, and it
 must not be a string constant or allocated on

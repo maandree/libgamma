@@ -175,7 +175,7 @@ void libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t* restri
  * 
  * @param   this    The site state to initialise.
  * @param   site    The site identifier, unless it is `NULL` it must a
- *                  `free`:able. One the state is destroyed the library
+ *                  `free`:able. Once the state is destroyed the library
  *                  will attempt to free it. There you should not free
  *                  it yourself, and it must not be a string constant
  *                  or allocate on the stack. Note however that it will
