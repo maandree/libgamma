@@ -12,9 +12,15 @@ RATIONALE
 	servers and to reduce code duplication both within and
 	between software like redshift(1) and blueshift(1).
 
+NOTES
+	You should avoid using libgamma, and use libcoopgamma
+	instead (which uses libgamma), it enables programs to
+	not monopolise the gamma ramps. Programs that use
+	libcoopgamma can run concurrently.
+
 SEE ALSO
-	blueshift(1), xgamma(1), xrandr(1), pylibgamma, jlibgamma,
-	libgammamm
+	libcoopgamma(7), blueshift(1), xgamma(1), xrandr(1),
+	pylibgamma, jlibgamma, libgammamm
 
 	Full documentation available locally via: info '(libgamma)'
 
