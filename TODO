@@ -1,3 +1,12 @@
+Important functionality:
+	CRTC info. shall report the x and y (CIE xyY) values
+	of the monitor's red, green, and blue colour, as well
+	as the default white point. CRTC info shall also
+	report the colour space of the monitors (sRGB, other RGB,
+	non-RGB, and monochrome/greyscale). This information
+	is obtainable from the monitor's EDID.
+
+
 libgamma-intl
 	An extension with support for text description
 	of constants and internationalisation.
