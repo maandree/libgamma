@@ -195,7 +195,7 @@ int libgamma_x_randr_site_initialise(libgamma_site_state_t* restrict this,
   
   /* Connect to the display server. */
   this->data = connection = xcb_connect(site, NULL);
-  if (connection == NULL)
+  if (connection == NULL || xcb_connection_has_error(connection))
     return LIBGAMMA_OPEN_SITE_FAILED;
   
   /* Query the version of the X RandR extension protocol. */
