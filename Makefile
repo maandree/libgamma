@@ -305,9 +305,8 @@ uninstall:
 
 .PHONY: clean
 clean:
-	-rm -rf obj bin libgamma.{info,pdf,ps,dvi}
+	-rm -rf obj bin libgamma.info libgamma.pdf libgamma.ps libgamma.dvi
 
 .PHONY: distclean
 distclean: clean
 	-rm -f .config.mk src/lib/libgamma-config.h
-

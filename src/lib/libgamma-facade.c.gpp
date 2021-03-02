@@ -1,21 +1,5 @@
 /* -*- c -*- */
-/**
- * libgamma -- Display server abstraction layer for gamma ramp adjustments
- * Copyright (C) 2014, 2015  Mattias Andrée (maandree@member.fsf.org)
- * 
- * This library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/>.
- */
+/* See LICENSE file for copyright and license details. */
 #include "libgamma-facade.h"
 
 #include "libgamma-error.h"
@@ -23,22 +7,23 @@
 #include "gamma-helper.h"
 
 
-/* Initialise the general preprocessor. */
+/* Initialise the general preprocessor */
 $>cd src/extract
 $>export PATH=".:${PATH}"
 
-/* Some general preprocessor we will use frequently. */
+/* Some general preprocessor we will use frequently */
 $<
 get-methods ()
-{ ./libgamma-method-extract --list --method | cut -d _ -f 1,2 --complement
+{
+	./libgamma-method-extract --list --method | cut -d _ -f 1,2 --complement
 }
 lowercase ()
-{ echo "$*" | sed -e y/QWERTYUIOPASDFGHJKLZXCVBNM/qwertyuiopasdfghjklzxcvbnm/ | sed -e s:core_graphics:cg:g
+{
+	echo "$*" | sed -e y/QWERTYUIOPASDFGHJKLZXCVBNM/qwertyuiopasdfghjklzxcvbnm/ | sed -e s:core_graphics:cg:g
 }
 $>
 
-/* Include all adjustment methods that
-   are enabled at compile-time. */
+/* Include all adjustment methods that are enabled at compile-time. */
 $>for method in $(get-methods); do
 #ifdef HAVE_LIBGAMMA_METHOD_${method}
 # include "gamma-$(lowercase $method | sed -e s:_:-:g).h"
@@ -57,10 +42,10 @@ $>done
 
 
 /* Some things to reduce warnings when we do
-   not have any adjustment methods enabled. */
+ * not have any adjustment methods enabled */
 #ifndef HAVE_LIBGAMMA_METHODS
 # define HAVE_NO_LIBGAMMA_METHODS
-# ifdef __GCC__
+# ifdef __GNUC__
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
 # endif
@@ -71,282 +56,286 @@ $>done
 #ifdef HAVE_LIBGAMMA_METHODS
 # ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
 /**
- * Test whether a file descriptor refers to a VT.
+ * Test whether a file descriptor refers to a VT
  * 
- * @param   fd  The file descriptor.
- * @return      Whether the file descriptor refers to a VT.
+ * @param   fd  The file descriptor
+ * @return      Whether the file descriptor refers to a VT
  */
-static int libgamma_is_vt_proper(int fd)
+static int
+libgamma_is_vt_proper(int fd)
 {
-  char buf[32];
-  char digit0;
-  
-  /* Get TTY. */
-  if (ttyname_r(fd, buf, sizeof(buf) / sizeof(char)))
-    return 0;
-  
-  /* Validate TTY path. */
-  if (!strcmp(buf, "/dev/console"))
-    return 1;
-  if (strstr(buf, "/dev/tty") != buf)
-    return 0;
-  
-  /* Validate TTY name. */
-  digit0 = buf[strlen("/dev/tty")];
-  return ('1' <= digit0) && (digit0 <= '9');
+	char buf[32], digit0;
+
+	/* Get TTY */
+	if (ttyname_r(fd, buf, sizeof(buf) / sizeof(char)))
+		return 0;
+
+	/* Validate TTY path */
+	if (!strcmp(buf, "/dev/console"))
+		return 1;
+	if (strstr(buf, "/dev/tty") != buf)
+		return 0;
+
+	/* Validate TTY name */
+	digit0 = buf[strlen("/dev/tty")];
+	return '1' <= digit0 && digit0 <= '9';
 }
 # endif
 
 
 /**
- * Test the availability of an adjustment method.
+ * Test the availability of an adjustment method
  * 
- * @param  method     The adjustment method.
+ * @param  method     The adjustment method
  * @param  operation  Allowed values:
- *                      0: Pass if the environment suggests it will work but is not fake.
- *                      1: Pass if the environment suggests it will work.
- *                      2: Pass if real and not fake.
- *                      3: Pass if real.
- *                      4: Always pass.
- *                    Other values invoke undefined behaviour.
- * @return            Whether the test passed.
+ *                      0: Pass if the environment suggests it will work but is not fake
+ *                      1: Pass if the environment suggests it will work
+ *                      2: Pass if real and not fake
+ *                      3: Pass if real
+ *                      4: Always pass
+ *                    Other values invoke undefined behaviour
+ * @return            Whether the test passed
  */
-static int libgamma_list_method_test(int method, int operation)
+static int
+libgamma_list_method_test(int method, int operation)
 {
-  libgamma_method_capabilities_t caps;
-  libgamma_method_capabilities(&caps, method);
-  
-  switch (operation)
-    {
-    case 0:
-      /* Methods that the environment suggests will work, excluding fake. */
-      if (caps.fake)
-	return 0;
-      /* Fall through. */
-      
-    case 1:
-      /* Methods that the environment suggests will work, including fake. */
-      if (caps.real == 0)
-	return 0;
+	libgamma_method_capabilities_t caps;
+	libgamma_method_capabilities(&caps, method);
+
+	switch (operation) {
+	case 0:
+		/* Methods that the environment suggests will work, excluding fake */
+		if (caps.fake)
+			return 0;
+		/* fall through */
+
+	case 1:
+		/* Methods that the environment suggests will work, including fake */
+		if (!caps.real)
+			return 0;
 #ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
-      if (method == LIBGAMMA_METHOD_LINUX_DRM)
-	return libgamma_is_vt_proper(STDIN_FILENO) ||
-	       libgamma_is_vt_proper(STDOUT_FILENO) ||
-	       libgamma_is_vt_proper(STDERR_FILENO);
+		if (method == LIBGAMMA_METHOD_LINUX_DRM) {
+			return libgamma_is_vt_proper(STDIN_FILENO) ||
+			       libgamma_is_vt_proper(STDOUT_FILENO) ||
+			       libgamma_is_vt_proper(STDERR_FILENO);
+		}
 #endif
 #ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-      if (method == LIBGAMMA_METHOD_DUMMY)
-	return 0;
+		if (method == LIBGAMMA_METHOD_DUMMY)
+			return 0;
 #endif
-      return caps.default_site_known;
-      
-    case 2:
-      /* All real non-fake methods. */
-      return caps.real && (caps.fake == 0);
-      
-    case 3:
-      /* All real methods. */
-      return caps.real;
-      
-    default:
-      /* All methods. */
-      return 1;
-    }
+		return caps.default_site_known;
+
+	case 2:
+		/* All real non-fake methods */
+		return caps.real && !caps.fake;
+
+	case 3:
+		/* All real methods */
+		return caps.real;
+
+	default:
+		/* All methods */
+		return 1;
+	}
 }
 #endif
 
 
 /**
- * List available adjustment methods by their order of preference based on the environment.
+ * List available adjustment methods by their order of preference based on the environment
  * 
- * @param  methods    Output array of methods, should be able to hold `LIBGAMMA_METHOD_COUNT` elements.
+ * @param  methods    Output array of methods, should be able to hold `LIBGAMMA_METHOD_COUNT` elements
  * @param  buf_size   The number of elements that fits in `methods`, it should be `LIBGAMMA_METHOD_COUNT`,
  *                    This is used to avoid writing outside the output buffer if this library adds new
- *                    adjustment methods without the users of the library recompiling.
+ *                    adjustment methods without the users of the library recompiling
  * @param  operation  Allowed values:
- *                      0: Methods that the environment suggests will work, excluding fake.
- *                      1: Methods that the environment suggests will work, including fake.
- *                      2: All real non-fake methods.
- *                      3: All real methods.
- *                      4: All methods.
- *                    Other values invoke undefined behaviour.
+ *                      0: Methods that the environment suggests will work, excluding fake
+ *                      1: Methods that the environment suggests will work, including fake
+ *                      2: All real non-fake methods
+ *                      3: All real methods
+ *                      4: All methods
+ *                    Other values invoke undefined behaviour
  * @return            The number of element that have been stored in `methods`, or should
  *                    have been stored if the buffer was large enough.
  */
-size_t libgamma_list_methods(int* restrict methods, size_t buf_size, int operation)
+size_t
+libgamma_list_methods(int *restrict methods, size_t buf_size, int operation)
 {
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-  (void) methods;
-  (void) buf_size;
-  (void) operation;
-  return 0;
+	(void) methods;
+	(void) buf_size;
+	(void) operation;
+	return 0;
 #else
-  size_t n = 0;
-  
+	size_t n = 0;
+
 $>for method in $(get-methods); do
 #ifdef HAVE_LIBGAMMA_METHOD_${method}
-  if (libgamma_list_method_test(LIBGAMMA_METHOD_${method}, operation) && (n++ < buf_size))
-    methods[n - 1] = LIBGAMMA_METHOD_${method};
+	if (libgamma_list_method_test(LIBGAMMA_METHOD_${method}, operation) && n++ < buf_size)
+		methods[n - 1] = LIBGAMMA_METHOD_${method};
 #endif
 $>done
-  
-  return n;
+
+	return n;
 #endif
 }
 
 
 /**
  * Check whether an adjustment method is available, non-existing (invalid) methods will be
- * identified as not available under the rationale that the library may be out of date.
+ * identified as not available under the rationale that the library may be out of date
  * 
- * @param   method  The adjustment method.
- * @return          Whether the adjustment method is available.
+ * @param   method  The adjustment method
+ * @return          Whether the adjustment method is available
  */
-int libgamma_is_method_available(int method)
+int
+libgamma_is_method_available(int method)
 {
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-  (void) method;
-  return 0;
+	(void) method;
+	return 0;
 #else
-  switch (method)
-    {
+	switch (method) {
 $>for method in $(get-methods); do
 #ifdef HAVE_LIBGAMMA_METHOD_${method}
-    case LIBGAMMA_METHOD_${method}:
+	case LIBGAMMA_METHOD_${method}:
 #endif
 $>done
-      return 1;
-      
-    default:
-      return 0;
-    }
+	return 1;
+
+	default:
+		return 0;
+	}
 #endif
 }
 
 
 /**
- * Call the adjustment method's implementation of the called function.
+ * Call the adjustment method's implementation of the called function
  * 
- * @param  1  The adjustment method, you may use `.` instead of `->` when resolving it.
- * @param  2  `return` if the function returns a value, `break` otherwise.
+ * @param  1  The adjustment method, you may use `.` instead of `->` when resolving it
+ * @param  2  `return` if the function returns a value, `break` otherwise
  * @param  3  The base name of the function to call, that is, the name of the function
- *            this is expended into without the libgamma namespace prefix.
- * @param  *  The function's parameters.
+ *            this is expended into without the libgamma namespace prefix
+ * @param  *  The function's parameters
  */
 $<switch ()
 $>{
-  /* Read out macro's parameters. */
+  /* Read out macro's parameters */
 $<method="${1//./->}"
   ctrl=$2
   fun=$3
   shift 3
   params="$*"
 $>params="${params// /, }"
-  
-  switch (${method})
-    {
+
+	switch (${method}) {
 $>for adjmethod in $(get-methods); do
 #ifdef HAVE_LIBGAMMA_METHOD_${adjmethod}
-    case LIBGAMMA_METHOD_${adjmethod}:
-      /* Call the adjustment method's implementation, either
-	 return or break after it depending on macro parameter's. */
-$>[ $ctrl = return ] &&
+	case LIBGAMMA_METHOD_${adjmethod}:
+	/* Call the adjustment method's implementation, either
+	 * return or break after it depending on macro parameter's */
+$> if [ $ctrl = return ]; then
       return
       libgamma_$(lowercase $adjmethod)_${fun}(${params});
-$>[ ! $ctrl = return ] &&
+$> elif [ ! $ctrl = return ]; then
       break;
+$> fi
 #endif
 $>done
     
-    default:
-      /* If the adjustment method does not exists, either return
-	 that error, or do nothing because the function this is
-	 expanded into does return errors. */
+	default:
+		/* If the adjustment method does not exists, either return
+		 * that error, or do nothing because the function this is
+		 * expanded into does return errors */
 $>if [ $ctrl = return ]; then
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+		return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
 $>else
-      /* Method does not exists/excluded at compile-time.
-	 We will assume that this is not done... */
-      break;
+		/* Method does not exists/excluded at compile-time.
+		 * We will assume that this is not done... */
+		break;
 $>fi
-    }
+	}
 $>}
 
 
 /**
- * Return the capabilities of an adjustment method.
+ * Return the capabilities of an adjustment method
  * 
- * @param  this    The data structure to fill with the method's capabilities.
- * @param  method  The adjustment method (display server and protocol.)
+ * @param  this    The data structure to fill with the method's capabilities
+ * @param  method  The adjustment method (display server and protocol)
  */
-void libgamma_method_capabilities(libgamma_method_capabilities_t* restrict this, int method)
+void
+libgamma_method_capabilities(libgamma_method_capabilities_t *restrict this, int method)
 {
-  memset(this, 0, sizeof(libgamma_method_capabilities_t));
+	memset(this, 0, sizeof(libgamma_method_capabilities_t));
 $>switch method break method_capabilities this
 }
 
 
 /**
- * Return the default site for an adjustment method.
+ * Return the default site for an adjustment method
  * 
- * @param   method  The adjustment method (display server and protocol.)
+ * @param   method  The adjustment method (display server and protocol)
  * @return          The default site, `NULL` if it cannot be determined or
  *                  if multiple sites are not supported by the adjustment
- *                  method. This value should not be `free`:d.
+ *                  method; this value should not be `free`:d
  */
-char* libgamma_method_default_site(int method)
+char *
+libgamma_method_default_site(int method)
 {
-  const char* restrict var = libgamma_method_default_site_variable(method);
-  char* restrict env;
-  
-  /* Return `NULL` there is not variable to read. */
-  if (var == NULL)
-    return NULL;
-  
-  /* Read the variable. */
-  env = getenv(var);
-  /* Return `NULL` if it does not exist (or is empty). */
-  if ((env == NULL) || (*env == '\0'))
-    return NULL;
-  
-  /* Return the variable's value. */
-  return env;
+	const char *restrict var = libgamma_method_default_site_variable(method);
+	char *restrict env;
+
+	/* Return `NULL` there is not variable to read */
+	if (!var)
+		return NULL;
+
+	/* Read the variable */
+	env = getenv(var);
+	/* Return `NULL` if it does not exist (or is empty) */
+	if (!env || !*env)
+		return NULL;
+
+	/* Return the variable's value */
+	return env;
 }
 
 
 /**
  * Return the default variable that determines
- * the default site for an adjustment method.
+ * the default site for an adjustment method
  * 
- * @param   method  The adjustment method (display server and protocol.)
+ * @param   method  The adjustment method (display server and protocol)
  * @return          The environ variables that is used to determine the
  *                  default site. `NULL` if there is none, that is, if
  *                  the method does not support multiple sites.
  *                  This value should not be `free`:d.
  */
-const char* libgamma_method_default_site_variable(int method)
+const char *
+libgamma_method_default_site_variable(int method)
 {
-  switch (method)
-    {
+	switch (method) {
 #ifdef HAVE_LIBGAMMA_METHOD_X_RANDR
-    case LIBGAMMA_METHOD_X_RANDR:
-      return "DISPLAY";
+	case LIBGAMMA_METHOD_X_RANDR:
+		return "DISPLAY";
 #endif
 #ifdef HAVE_LIBGAMMA_METHOD_X_VIDMODE
-    case LIBGAMMA_METHOD_X_VIDMODE:
-      return "DISPLAY";
+	case LIBGAMMA_METHOD_X_VIDMODE:
+		return "DISPLAY";
 #endif
-    default:
-      return NULL;
-    }
+	default:
+		return NULL;
+	}
 }
 
 
 /**
- * Initialise an allocated site state.
+ * Initialise an allocated site state
  * 
- * @param   this    The site state to initialise.
- * @param   method  The adjustment method (display server and protocol.)
+ * @param   this    The site state to initialise
+ * @param   method  The adjustment method (display server and protocol)
  * @param   site    The site identifier, unless it is `NULL` it must a
  *                  `free`:able. Once the state is destroyed the library
  *                  will attempt to free it. There you should not free
@@ -354,50 +343,53 @@ const char* libgamma_method_default_site_variable(int method)
  *                  or allocated on the stack. Note however that it will
  *                  not be `free`:d if this function fails.
  * @return          Zero on success, otherwise (negative) the value of an
- *                  error identifier provided by this library.
+ *                  error identifier provided by this library
  */
-int libgamma_site_initialise(libgamma_site_state_t* restrict this,
-			     int method, char* restrict site)
+int
+libgamma_site_initialise(libgamma_site_state_t *restrict this, int method, char *restrict site)
 {
-  this->method = method;
-  this->site = site;
+	this->method = method;
+	this->site = site;
 $>switch method return site_initialise this site
 }
 
 
 /**
- * Release all resources held by a site state.
+ * Release all resources held by a site state
  * 
- * @param  this  The site state.
+ * @param  this  The site state
  */
-void libgamma_site_destroy(libgamma_site_state_t* restrict this)
+void
+libgamma_site_destroy(libgamma_site_state_t *restrict this)
 {
 $>switch this.method break site_destroy this
-  free(this->site);
+	free(this->site);
 }
 
 
 /**
  * Release all resources held by a site state
- * and free the site state pointer.
+ * and free the site state pointer
  * 
- * @param  this  The site state.
+ * @param  this  The site state
  */
-void libgamma_site_free(libgamma_site_state_t* restrict this)
+void
+libgamma_site_free(libgamma_site_state_t *restrict this)
 {
-  libgamma_site_destroy(this);
-  free(this);
+	libgamma_site_destroy(this);
+	free(this);
 }
 
 
 /**
- * Restore the gamma ramps all CRTC:s with a site to the system settings.
+ * Restore the gamma ramps all CRTC:s with a site to the system settings
  * 
- * @param   this  The site state.
+ * @param   this  The site state
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library.
+ *                error identifier provided by this library
  */
-int libgamma_site_restore(libgamma_site_state_t* restrict this)
+int
+libgamma_site_restore(libgamma_site_state_t *restrict this)
 {
 $>switch this.method return site_restore this
 }
@@ -405,29 +397,30 @@ $>switch this.method return site_restore this
 
 
 /**
- * Initialise an allocated partition state.
+ * Initialise an allocated partition state
  * 
- * @param   this       The partition state to initialise.
- * @param   site       The site state for the site that the partition belongs to.
- * @param   partition  The index of the partition within the site.
+ * @param   this       The partition state to initialise
+ * @param   site       The site state for the site that the partition belongs to
+ * @param   partition  The index of the partition within the site
  * @return             Zero on success, otherwise (negative) the value of an
- *                     error identifier provided by this library.
+ *                     error identifier provided by this library
  */
-int libgamma_partition_initialise(libgamma_partition_state_t* restrict this,
-				  libgamma_site_state_t* restrict site, size_t partition)
+int
+libgamma_partition_initialise(libgamma_partition_state_t *restrict this, libgamma_site_state_t *restrict site, size_t partition)
 {
-  this->site = site;
-  this->partition = partition;
+	this->site = site;
+	this->partition = partition;
 $>switch site.method return partition_initialise this site partition
 }
 
 
 /**
- * Release all resources held by a partition state.
+ * Release all resources held by a partition state
  * 
- * @param  this  The partition state.
+ * @param  this  The partition state
  */
-void libgamma_partition_destroy(libgamma_partition_state_t* restrict this)
+void
+libgamma_partition_destroy(libgamma_partition_state_t *restrict this)
 {
 $>switch this.site.method break partition_destroy this
 }
@@ -435,25 +428,27 @@ $>switch this.site.method break partition_destroy this
 
 /**
  * Release all resources held by a partition state
- * and free the partition state pointer.
+ * and free the partition state pointer
  * 
- * @param  this  The partition state.
+ * @param  this  The partition state
  */
-void libgamma_partition_free(libgamma_partition_state_t* restrict this)
+void
+libgamma_partition_free(libgamma_partition_state_t *restrict this)
 {
-  libgamma_partition_destroy(this);
-  free(this);
+	libgamma_partition_destroy(this);
+	free(this);
 }
 
 
 /**
- * Restore the gamma ramps all CRTC:s with a partition to the system settings.
+ * Restore the gamma ramps all CRTC:s with a partition to the system settings
  * 
- * @param   this  The partition state.
+ * @param   this  The partition state
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library.
+ *                error identifier provided by this library
  */
-int libgamma_partition_restore(libgamma_partition_state_t* restrict this)
+int
+libgamma_partition_restore(libgamma_partition_state_t *restrict this)
 {
 $>switch this.site.method return partition_restore this
 }
@@ -461,29 +456,30 @@ $>switch this.site.method return partition_restore this
 
 
 /**
- * Initialise an allocated CRTC state.
+ * Initialise an allocated CRTC state
  * 
- * @param   this       The CRTC state to initialise.
- * @param   partition  The partition state for the partition that the CRTC belongs to.
- * @param   crtc       The index of the CRTC within the partition.
+ * @param   this       The CRTC state to initialise
+ * @param   partition  The partition state for the partition that the CRTC belongs to
+ * @param   crtc       The index of the CRTC within the partition
  * @return             Zero on success, otherwise (negative) the value of an
- *                     error identifier provided by this library.
+ *                     error identifier provided by this library
  */
-int libgamma_crtc_initialise(libgamma_crtc_state_t* restrict this,
-			     libgamma_partition_state_t* restrict partition, size_t crtc)
+int
+libgamma_crtc_initialise(libgamma_crtc_state_t *restrict this, libgamma_partition_state_t *restrict partition, size_t crtc)
 {
-  this->partition = partition;
-  this->crtc = crtc;
+	this->partition = partition;
+	this->crtc = crtc;
 $>switch partition.site.method return crtc_initialise this partition crtc
 }
 
 
 /**
- * Release all resources held by a CRTC state.
+ * Release all resources held by a CRTC state
  * 
- * @param  this  The CRTC state.
+ * @param  this  The CRTC state
  */
-void libgamma_crtc_destroy(libgamma_crtc_state_t* restrict this)
+void
+libgamma_crtc_destroy(libgamma_crtc_state_t *restrict this)
 {
 $>switch this.partition.site.method break crtc_destroy this
 }
@@ -491,25 +487,27 @@ $>switch this.partition.site.method break crtc_destroy this
 
 /**
  * Release all resources held by a CRTC state
- * and free the CRTC state pointer.
+ * and free the CRTC state pointer
  * 
- * @param  this  The CRTC state.
+ * @param  this  The CRTC state
  */
-void libgamma_crtc_free(libgamma_crtc_state_t* restrict this)
+void
+libgamma_crtc_free(libgamma_crtc_state_t *restrict this)
 {
-  libgamma_crtc_destroy(this);
-  free(this);
+	libgamma_crtc_destroy(this);
+	free(this);
 }
 
 
 /**
- * Restore the gamma ramps for a CRTC to the system settings for that CRTC.
+ * Restore the gamma ramps for a CRTC to the system settings for that CRTC
  * 
- * @param   this  The CRTC state.
+ * @param   this  The CRTC state
  * @return        Zero on success, otherwise (negative) the value of an
- *                error identifier provided by this library.
+ *                error identifier provided by this library
  */
-int libgamma_crtc_restore(libgamma_crtc_state_t* restrict this)
+int
+libgamma_crtc_restore(libgamma_crtc_state_t *restrict this)
 {
 $>switch this.partition.site.method return crtc_restore this
 }
@@ -517,585 +515,583 @@ $>switch this.partition.site.method return crtc_restore this
 
 
 /**
- * Read information about a CRTC.
+ * Read information about a CRTC
  * 
- * @param   this    Instance of a data structure to fill with the information about the CRTC.
- * @param   crtc    The state of the CRTC whose information should be read.
- * @param   fields  OR:ed identifiers for the information about the CRTC that should be read.
- * @return          Zero on success, -1 on error. On error refer to the error reports in `this`.
+ * @param   this    Instance of a data structure to fill with the information about the CRTC
+ * @param   crtc    The state of the CRTC whose information should be read
+ * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
+ * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
-int libgamma_get_crtc_information(libgamma_crtc_information_t* restrict this,
-				  libgamma_crtc_state_t* restrict crtc, int32_t fields)
+int
+libgamma_get_crtc_information(libgamma_crtc_information_t *restrict this, libgamma_crtc_state_t *restrict crtc, int32_t fields)
 {
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-  (void) fields;
+	(void) fields;
 #endif
-  this->edid = NULL;
-  this->connector_name = NULL;
+	this->edid = NULL;
+	this->connector_name = NULL;
 $>switch crtc.partition.site.method return get_crtc_information this crtc fields
 }
 
 
 /**
- * Release all resources in an information data structure for a CRTC.
+ * Release all resources in an information data structure for a CRTC
  * 
- * @param  this  The CRTC information.
+ * @param  this  The CRTC information
  */
-void libgamma_crtc_information_destroy(libgamma_crtc_information_t* restrict this)
+void
+libgamma_crtc_information_destroy(libgamma_crtc_information_t *restrict this)
 {
-  free(this->edid);
-  free(this->connector_name);
+	free(this->edid);
+	free(this->connector_name);
 }
 
 
 /**
  * Release all resources in an information data structure for a CRTC
- * and free the data structure pointer.
+ * and free the data structure pointer
  * 
- * @param  this  The CRTC information.
+ * @param  this  The CRTC information
  */
-void libgamma_crtc_information_free(libgamma_crtc_information_t* restrict this)
+void
+libgamma_crtc_information_free(libgamma_crtc_information_t *restrict this)
 {
-  libgamma_crtc_information_destroy(this);
-  free(this);
+	libgamma_crtc_information_destroy(this);
+	free(this);
 }
 
 
 /**
- * Convert a raw representation of an EDID to a hexadecimal representation.
+ * Convert a raw representation of an EDID to a hexadecimal representation
  * 
- * @param   1       Casing name.
- * @param   2       The hexadecimal alphabet.
- * @param   edid    The EDID in raw representation.
- * @param   length  The length of `edid`.
- * @return          The EDID in hexadecimal representation,
- *                  `NULL` on allocation error, `errno` will be set accordingly.
+ * @param   1       Casing name
+ * @param   2       The hexadecimal alphabet
+ * @param   edid    The EDID in raw representation
+ * @param   length  The length of `edid`
+ * @return          The EDID in hexadecimal representation
+ *                  `NULL` on allocation error, `errno` will be set accordingly
  */
 $>behex_edid ()
 $>{
-char* libgamma_behex_edid_${1}(const unsigned char* restrict edid, size_t length)
+char *
+libgamma_behex_edid_${1}(const unsigned char *restrict edid, size_t length)
 {
-  char* restrict out;
-  size_t i;
-  
-  /* Allocate memory area for the output string. */
-  if ((out = malloc((length * 2 + 1) * sizeof(char))) == NULL)
-    return NULL;
-  
-  /* Translate from raw octets to hexadecimal. */
-  for (i = 0; i < length; i++)
-    {
-      out[i * 2 + 0] = "${2}"[(edid[i] >> 4) & 15];
-      out[i * 2 + 1] = "${2}"[(edid[i] >> 0) & 15];
-    }
-  /* NUL-terminate the output string. */
-  out[length * 2] = '\0';
-  
-  return out;
+	char *restrict out;
+	size_t i;
+
+	/* Allocate memory area for the output string */
+	out = malloc((length * 2 + 1) * sizeof(char));
+	if (!out)
+		return NULL;
+
+	/* Translate from raw octets to hexadecimal */
+	for (i = 0; i < length; i++) {
+		out[i * 2 + 0] = "${2}"[(edid[i] >> 4) & 15];
+		out[i * 2 + 1] = "${2}"[(edid[i] >> 0) & 15];
+	}
+	/* NUL-terminate the output string */
+	out[length * 2] = '\0';
+
+	return out;
 }
 $>}
 
 
 /**
- * Convert a raw representation of an EDID to a lowercase hexadecimal representation.
+ * Convert a raw representation of an EDID to a lowercase hexadecimal representation
  * 
- * @param   edid    The EDID in raw representation.
- * @param   length  The length of `edid`.
+ * @param   edid    The EDID in raw representation
+ * @param   length  The length of `edid`
  * @return          The EDID in lowercase hexadecimal representation,
- *                  `NULL` on allocation error, `errno` will be set accordingly.
+ *                  `NULL` on allocation error, `errno` will be set accordingly
  */
 $>behex_edid lowercase 0123456789abcdef
 
 
 /**
- * Convert a raw representation of an EDID to an uppercase hexadecimal representation.
+ * Convert a raw representation of an EDID to an uppercase hexadecimal representation
  * 
- * @param   edid    The EDID in raw representation.
- * @param   length  The length of `edid`.
+ * @param   edid    The EDID in raw representation
+ * @param   length  The length of `edid`
  * @return          The EDID in uppercase hexadecimal representation,
- *                  NULL` on allocation error, `errno` will be set accordingly.
+ *                  NULL` on allocation error, `errno` will be set accordingly
  */
 $>behex_edid uppercase 0123456789ABCDEF
 
 
 /**
- * Convert an hexadecimal representation of an EDID to a raw representation.
+ * Convert an hexadecimal representation of an EDID to a raw representation
  * 
- * @param   edid  The EDID in hexadecimal representation.
+ * @param   edid  The EDID in hexadecimal representation
  * @return        The EDID in raw representation, it will be half the length
- *                of `edid` (the input value). `NULL` on allocation error or
- *                if the EDID is malformated, `errno` will be set accordingly.
+ *                of `edid` (the input value); `NULL` on allocation error or
+ *                if the EDID is malformated, `errno` will be set accordingly
  */
-unsigned char* libgamma_unhex_edid(const char* restrict edid)
+unsigned char *
+libgamma_unhex_edid(const char *restrict edid)
 {
-#define not_range(lower, V, upper)  ((V < lower) || (upper < V))
-#define is_not_hex(V)  (not_range('0', V, '9') && not_range('a', V, 'f') && not_range('A', V, 'F'))
-  
-  unsigned char* restrict out;
-  size_t n = strlen(edid);
-  size_t i;
-  
-  /* Check that the length of the strings is even,
-     otherwise it cannot represent bytes. */
-  if ((n & 1))
-    return errno = EINVAL, NULL;
-  
-  /* Allocate memory area for output octet array. */
-  if ((out = malloc(n /= 2 * sizeof(unsigned char))) == NULL)
-    return NULL;
-  
-  /* Convert to raw octet array. */
-  for (i = 0; i < n; i++)
-    {
-      /* Get the next character pair that, it represents an octet.o */
-      char a = edid[i * 2 + 0];
-      char b = edid[i * 2 + 1];
-      
-      /* Verify that the input is in hexadecimal. */
-      if (is_not_hex(a) || is_not_hex(b))
-	{
-	  free(out);
-	  return errno = EINVAL, NULL;
+#define not_range(lower, V, upper) (V < lower || upper < V)
+#define is_not_hex(V)              (not_range('0', V, '9') && not_range('a', V, 'f') && not_range('A', V, 'F'))
+
+	unsigned char *restrict out;
+	size_t i, n = strlen(edid);
+	char a, b;
+
+	/* Check that the length of the strings is even,
+	 * otherwise it cannot represent bytes */
+	if (n & 1) {
+		errno = EINVAL;
+		return NULL;
 	}
-      
-      /* Convert each chararacter to raw format. */
-      a = (char)((a & 15) + (a > '9' ? 9 : 0));
-      b = (char)((b & 15) + (b > '9' ? 9 : 0));
-      
-      /* Combine the two characters into one octet. */
-      out[i] = (unsigned char)((a << 4) | b);
-    }
-  
-  return out;
-  
+
+	/* Allocate memory area for output octet array */
+	n /= 2 * sizeof(unsigned char);
+	out = malloc(n);
+	if (!out)
+		return NULL;
+
+	/* Convert to raw octet array */
+	for (i = 0; i < n; i++) {
+		/* Get the next character pair that, it represents an octet. */
+		a = edid[i * 2 + 0];
+		b = edid[i * 2 + 1];
+
+		/* Verify that the input is in hexadecimal */
+		if (is_not_hex(a) || is_not_hex(b)) {
+			free(out);
+			errno = EINVAL;
+			return NULL;
+		}
+
+		/* Convert each chararacter to raw format */
+		a = (char)((a & 15) + (a > '9' ? 9 : 0));
+		b = (char)((b & 15) + (b > '9' ? 9 : 0));
+
+		/* Combine the two characters into one octet */
+		out[i] = (unsigned char)((a << 4) | b);
+	}
+
+	return out;
+
 #undef is_hex
 #undef not_range
 }
 
 
 /**
- * Get the current gamma ramps for a CRTC, 16-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 16-bit gamma-depth version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to fill with the current values.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to fill with the current values
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
-int libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t* restrict this,
-				    libgamma_gamma_ramps16_t* restrict ramps)
+int
+libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps16_t *restrict ramps)
 {
+	libgamma_gamma_ramps_any_t ramps_;
+
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-  (void) ramps;
+	(void) ramps;
 #endif
-  
-  switch (this->partition->site->method)
-    {
-      /* Methods other than Quartz/CoreGraphics uses 16-bit integers. */
+
+	switch (this->partition->site->method) {
+	/* Methods other than Quartz/CoreGraphics uses 16-bit integers */
 $>for method in $(get-methods | grep -v QUARTZ_CORE_GRAPHICS); do
 #ifdef HAVE_LIBGAMMA_METHOD_${method}
-    case LIBGAMMA_METHOD_${method}:
-      return libgamma_$(lowercase $method)_crtc_get_gamma_ramps16(this, ramps);
+	case LIBGAMMA_METHOD_${method}:
+		return libgamma_$(lowercase $method)_crtc_get_gamma_ramps16(this, ramps);
 #endif
-     
-     /* The Quartz/CoreGraphics method uses single precision float. */
+
+	/* The Quartz/CoreGraphics method uses single precision float */
 $>done
 #ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      {
-	libgamma_gamma_ramps_any_t ramps_;
-	ramps_.bits16 = *ramps;
-	return libgamma_translated_ramp_get(this, &ramps_, 16, -1,
-					    libgamma_crtc_get_gamma_rampsf);
-      }
+	case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+		ramps_.bits16 = *ramps;
+		return libgamma_translated_ramp_get(this, &ramps_, 16, -1, libgamma_crtc_get_gamma_rampsf);
 #endif
-      
-      /* The selected method does not exist. */
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+
+	/* The selected method does not exist */
+	default:
+		return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+	}
 }
 
 
 /**
- * Set the gamma ramps for a CRTC, 16-bit gamma-depth version.
+ * Set the gamma ramps for a CRTC, 16-bit gamma-depth version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to apply
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
-int libgamma_crtc_set_gamma_ramps16(libgamma_crtc_state_t* restrict this,
-				    libgamma_gamma_ramps16_t ramps)
+int
+libgamma_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps16_t ramps)
 {
+	libgamma_gamma_ramps_any_t ramps_;
+
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-  (void) ramps;
+	(void) ramps;
 #endif
   
-  switch (this->partition->site->method)
-    {
-      /* Methods other than Quartz/CoreGraphics uses 16-bit integers. */
+	switch (this->partition->site->method) {
+	/* Methods other than Quartz/CoreGraphics uses 16-bit integers */
 $>for method in $(get-methods | grep -v QUARTZ_CORE_GRAPHICS); do
 #ifdef HAVE_LIBGAMMA_METHOD_${method}
-    case LIBGAMMA_METHOD_${method}:
-      return libgamma_$(lowercase $method)_crtc_set_gamma_ramps16(this, ramps);
+	case LIBGAMMA_METHOD_${method}:
+		return libgamma_$(lowercase $method)_crtc_set_gamma_ramps16(this, ramps);
 #endif
 $>done
      
-     /* The Quartz/CoreGraphics method uses single precision float. */
+	/* The Quartz/CoreGraphics method uses single precision float */
 #ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
-      {
-	libgamma_gamma_ramps_any_t ramps_;
-	ramps_.bits16 = ramps;
-	return libgamma_translated_ramp_set(this, ramps_, 16, -1,
-					    libgamma_crtc_set_gamma_rampsf);
-      }
+	case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+		ramps_.bits16 = ramps;
+		return libgamma_translated_ramp_set(this, ramps_, 16, -1, libgamma_crtc_set_gamma_rampsf);
 #endif
-      
-      /* The selected method does not exist. */
-    default:
-      return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
-    }
+
+	/* The selected method does not exist. */
+	default:
+		return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
+	}
 }
 
 
 
 /**
- * Set or get the gamma ramps for a CRTC, non-16-bit gamma-depth version.
+ * Set or get the gamma ramps for a CRTC, non-16-bit gamma-depth version
  * 
- * @param   1      Either `get` or `set`, for the action that the name of value implies.
- * @param   2      The `ramp*` pattern for the ramp structure and function to call.
+ * @param   1      Either `get` or `set`, for the action that the name of value implies
+ * @param   2      The `ramp*` pattern for the ramp structure and function to call
  * @param   3      Either of `bit8`, `bit16`, `bit32`, `bit64`, `float_single`, `float_double`;
- *                 rather self-explanatory.
+ *                 rather self-explanatory
  * @param   4      The number of bits in the gamma depth, -1 for single precision float,
- *                 (`float`) and -2 for double percition float (`double`).
- * @param   this   The CRTC state.
+ *                 (`float`) and -2 for double percition float (`double`)
+ * @param   this   The CRTC state
  * @param   ramps  The gamma ramps to apply, or
- *                 the gamma ramps to fill with the current values.
+ *                 the gamma ramps to fill with the current values
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps ()
 $>{
-$<
-  action=$1
+$<action=$1
   ramps=$2
   type=$3
   bits=$4
   p=
-  [ $action = get ] && p='*'
+  if [ $action = get ]; then
+    p='*'
+  fi
 $>
-int libgamma_crtc_${action}_gamma_${ramps}(libgamma_crtc_state_t* restrict this,
-					   libgamma_gamma_${ramps}_t${p:+* restrict} ramps)
+int
+libgamma_crtc_${action}_gamma_${ramps}(libgamma_crtc_state_t *restrict this, libgamma_gamma_${ramps}_t${p:+* restrict} ramps)
 {
-  libgamma_gamma_ramps_any_t ramps_;
-  switch (this->partition->site->method)
-    {
-      /* The dummy method supports all ramp depths. */
+	libgamma_gamma_ramps_any_t ramps_;
+	switch (this->partition->site->method) {
+	/* The dummy method supports all ramp depths */
 #ifdef HAVE_LIBGAMMA_METHOD_DUMMY
-    case LIBGAMMA_METHOD_DUMMY:
-      return libgamma_dummy_crtc_${action}_gamma_${ramps}(this, ramps);
+	case LIBGAMMA_METHOD_DUMMY:
+		return libgamma_dummy_crtc_${action}_gamma_${ramps}(this, ramps);
 #endif
-      
-      /* The Quartz/CoreGraphics method uses single precision float. */
+
+	/* The Quartz/CoreGraphics method uses single precision float */
 #ifdef HAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-    case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
+	case LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS:
 $>if [ $bits = -1 ]; then
-      /* Single precision float is used. */
-      return libgamma_quartz_cg_crtc_${action}_gamma_${ramps}(this, ramps);
+		/* Single precision float is used */
+		return libgamma_quartz_cg_crtc_${action}_gamma_${ramps}(this, ramps);
 $>else
-      /* Something else is used and we convert to Single precision float. */
-      ramps_.${type} = ${p}ramps;
-      return libgamma_translated_ramp_${action}(this, ${p:+&}ramps_, ${bits}, -1,
-						libgamma_crtc_${action}_gamma_rampsf);
+		/* Something else is used and we convert to Single precision float */
+		ramps_.${type} = ${p}ramps;
+		return libgamma_translated_ramp_${action}(this, ${p:+&}ramps_, ${bits}, -1, libgamma_crtc_${action}_gamma_rampsf);
 $>fi
 #endif
-      
-      /* Other methods use 16-bit integers. */
-    default:
-      ramps_.${type} = ${p}ramps;
-      return libgamma_translated_ramp_${action}(this, ${p:+&}ramps_, ${bits}, 16,
-						libgamma_crtc_${action}_gamma_ramps16);
-    }
+
+	/* Other methods use 16-bit integers. */
+	default:
+		ramps_.${type} = ${p}ramps;
+		return libgamma_translated_ramp_${action}(this, ${p:+&}ramps_, ${bits}, 16, libgamma_crtc_${action}_gamma_ramps16);
+	}
 }
 $>}
 
 
 
 /**
- * Get the current gamma ramps for a CRTC, 8-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 8-bit gamma-depth version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to fill with the current values.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to fill with the current values
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps get ramps8 bits8 8
 
 
 /**
- * Set the gamma ramps for a CRTC, 32-bit gamma-depth version.
+ * Set the gamma ramps for a CRTC, 32-bit gamma-depth version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to apply
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps set ramps8 bits8 8
 
 
 
 /**
- * Get the current gamma ramps for a CRTC, 32-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 32-bit gamma-depth version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to fill with the current values.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to fill with the current values
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps get ramps32 bits32 32
 
 
 /**
- * Set the gamma ramps for a CRTC, 32-bit gamma-depth version.
+ * Set the gamma ramps for a CRTC, 32-bit gamma-depth version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to apply
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps set ramps32 bits32 32
 
 
 
 /**
- * Get the current gamma ramps for a CRTC, 64-bit gamma-depth version.
+ * Get the current gamma ramps for a CRTC, 64-bit gamma-depth version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to fill with the current values.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to fill with the current values
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps get ramps64 bits64 64
 
 
 /**
- * Set the gamma ramps for a CRTC, 64-bit gamma-depth version.
+ * Set the gamma ramps for a CRTC, 64-bit gamma-depth version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to apply
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps set ramps64 bits64 64
 
 
 /**
- * Get the current gamma ramps for a CRTC, `float` version.
+ * Get the current gamma ramps for a CRTC, `float` version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to fill with the current values.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to fill with the current values
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps get rampsf float_single -1
 
 
 /**
- * Set the gamma ramps for a CRTC, `float` version.
+ * Set the gamma ramps for a CRTC, `float` version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to apply
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps set rampsf float_single -1
 
 
 
 /**
- * Get the current gamma ramps for a CRTC, `double` version.
+ * Get the current gamma ramps for a CRTC, `double` version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to fill with the current values.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to fill with the current values
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps get rampsd float_double -2
 
 
 /**
- * Set the gamma ramps for a CRTC, `double` version.
+ * Set the gamma ramps for a CRTC, `double` version
  * 
- * @param   this   The CRTC state.
- * @param   ramps  The gamma ramps to apply.
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to apply
  * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library.
+ *                 error identifier provided by this library
  */
 $>crtc_set_get_gamma_ramps set rampsd float_double -2
 
 
 
 /**
- * Set the gamma ramps for a CRTC.
+ * Set the gamma ramps for a CRTC
  * 
- * Note that this will probably involve the library allocating temporary data.
+ * Note that this will probably involve the library allocating temporary data
  * 
- * @param   1               The data type for the ramp stop elements.
- * @param   2               The `ramp*` pattern for the ramp structure and function to call.
- * @param   this            The CRTC state.
- * @param   red_function    The function that generates the gamma ramp for the red channel.
- * @param   green_function  The function that generates the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the gamma ramp for the blue channel.
+ * @param   1               The data type for the ramp stop elements
+ * @param   2               The `ramp*` pattern for the ramp structure and function to call
+ * @param   this            The CRTC state
+ * @param   red_function    The function that generates the gamma ramp for the red channel
+ * @param   green_function  The function that generates the gamma ramp for the green channel
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel
  * @return                  Zero on success, otherwise (negative) the value of an
- *                          error identifier provided by this library.
+ *                          error identifier provided by this library
  */
 $>crtc_set_gamma_ramps_f ()
 $>{
-int libgamma_crtc_set_gamma_${2}_f(libgamma_crtc_state_t* restrict this,
-				   libgamma_gamma_${2}_fun* red_function,
-				   libgamma_gamma_${2}_fun* green_function,
-				   libgamma_gamma_${2}_fun* blue_function)
+int
+libgamma_crtc_set_gamma_${2}_f(libgamma_crtc_state_t *restrict this, libgamma_gamma_${2}_fun *red_function,
+                               libgamma_gamma_${2}_fun *green_function, libgamma_gamma_${2}_fun *blue_function)
 {
-  libgamma_crtc_information_t info;
-  libgamma_gamma_${2}_t ramps;
-  size_t i, n;
-  int e;
-  
-  /* Get the size of the gamma ramps. */
-  if (libgamma_get_crtc_information(&info, this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE))
-    {
-      if ((e = info.gamma_size_error) < 0)
+	libgamma_crtc_information_t info;
+	libgamma_gamma_${2}_t ramps;
+	size_t i, n;
+	int e;
+
+	/* Get the size of the gamma ramps */
+	if (libgamma_get_crtc_information(&info, this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE)) {
+		e = info.gamma_size_error;
+		if (e < 0)
+			return e;
+		errno = e;
+		return LIBGAMMA_ERRNO_SET;
+	}
+
+	/* Copy the size of the gamma ramps and calculte the grand size */
+	n  = ramps.  red_size = info.  red_gamma_size;
+	n += ramps.green_size = info.green_gamma_size;
+	n += ramps. blue_size = info. blue_gamma_size;
+
+	/* Allocate gamma ramps */
+	ramps.  red = malloc(n * sizeof(${1}));
+	ramps.green = &ramps.  red[ramps.  red_size];
+	ramps. blue = &ramps.green[ramps.green_size];
+	if (!ramps.red)
+		return LIBGAMMA_ERRNO_SET;
+
+	/* Generate the gamma ramp for the red chennel */
+	for (i = 0, n = ramps.red_size; i < n; i++)
+		ramps.red[i] = red_function((float)i / (float)(n - 1));
+
+	/* Generate the gamma ramp for the green chennel */
+	for (i = 0, n = ramps.green_size; i < n; i++)
+		ramps.green[i] = green_function((float)i / (float)(n - 1));
+
+	/* Generate the gamma ramp for the blue chennel */
+	for (i = 0, n = ramps.blue_size; i < n; i++)
+		ramps.blue[i] = blue_function((float)i / (float)(n - 1));
+
+	/* Apply the gamma ramps */
+	e = libgamma_crtc_set_gamma_${2}(this, ramps);
+	free(ramps.red);
 	return e;
-      return errno = e, LIBGAMMA_ERRNO_SET;
-    }
-  
-  /* Copy the size of the gamma ramps and calculte the grand size. */
-  n  = ramps.  red_size = info.  red_gamma_size;
-  n += ramps.green_size = info.green_gamma_size;
-  n += ramps. blue_size = info. blue_gamma_size;
-  
-  /* Allocate gamma ramps. */
-  ramps.  red = malloc(n * sizeof(${1}));
-  ramps.green = ramps.  red + ramps.  red_size;
-  ramps. blue = ramps.green + ramps.green_size;
-  if (ramps.red == NULL)
-    return LIBGAMMA_ERRNO_SET;
-  
-  /* Generate the gamma ramp for the red chennel. */
-  for (i = 0, n = ramps.red_size; i < n; i++)
-    ramps.red[i] = red_function((float)i / (float)(n - 1));
-  
-  /* Generate the gamma ramp for the green chennel. */
-  for (i = 0, n = ramps.green_size; i < n; i++)
-    ramps.green[i] = green_function((float)i / (float)(n - 1));
-  
-  /* Generate the gamma ramp for the blue chennel. */
-  for (i = 0, n = ramps.blue_size; i < n; i++)
-    ramps.blue[i] = blue_function((float)i / (float)(n - 1));
-  
-  /* Apply the gamma ramps. */
-  e = libgamma_crtc_set_gamma_${2}(this, ramps);
-  free(ramps.red);
-  return e;
 }
 $>}
 
 
 /**
- * Set the gamma ramps for a CRTC, 8-bit gamma-depth function version.
+ * Set the gamma ramps for a CRTC, 8-bit gamma-depth function version
  * 
- * Note that this will probably involve the library allocating temporary data.
+ * Note that this will probably involve the library allocating temporary data
  * 
- * @param   this            The CRTC state.
- * @param   red_function    The function that generates the gamma ramp for the red channel.
- * @param   green_function  The function that generates the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the gamma ramp for the blue channel.
+ * @param   this            The CRTC state
+ * @param   red_function    The function that generates the gamma ramp for the red channel
+ * @param   green_function  The function that generates the gamma ramp for the green channel
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel
  * @return                  Zero on success, otherwise (negative) the value of an
- *                          error identifier provided by this library.
+ *                          error identifier provided by this library
  */
 $>crtc_set_gamma_ramps_f uint8_t ramps8
 
 
 /**
- * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version.
+ * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version
  * 
- * Note that this will probably involve the library allocating temporary data.
+ * Note that this will probably involve the library allocating temporary data
  * 
- * @param   this            The CRTC state.
- * @param   red_function    The function that generates the gamma ramp for the red channel.
- * @param   green_function  The function that generates the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the gamma ramp for the blue channel.
+ * @param   this            The CRTC state
+ * @param   red_function    The function that generates the gamma ramp for the red channel
+ * @param   green_function  The function that generates the gamma ramp for the green channel
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel
  * @return                  Zero on success, otherwise (negative) the value of an
- *                          error identifier provided by this library.
+ *                          error identifier provided by this library
  */
 $>crtc_set_gamma_ramps_f uint16_t ramps16
 
 
 /**
- * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version.
+ * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version
  * 
- * Note that this will probably involve the library allocating temporary data.
+ * Note that this will probably involve the library allocating temporary data
  * 
- * @param   this            The CRTC state.
- * @param   red_function    The function that generates the gamma ramp for the red channel.
- * @param   green_function  The function that generates the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the gamma ramp for the blue channel.
+ * @param   this            The CRTC state
+ * @param   red_function    The function that generates the gamma ramp for the red channel
+ * @param   green_function  The function that generates the gamma ramp for the green channel
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel
  * @return                  Zero on success, otherwise (negative) the value of an
- *                          error identifier provided by this library.
+ *                          error identifier provided by this library
  */
 $>crtc_set_gamma_ramps_f uint32_t ramps32
 
 
 /**
- * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version.
+ * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version
  * 
- * Note that this will probably involve the library allocating temporary data.
+ * Note that this will probably involve the library allocating temporary data
  * 
- * @param   this            The CRTC state.
- * @param   red_function    The function that generates the gamma ramp for the red channel.
- * @param   green_function  The function that generates the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the gamma ramp for the blue channel.
+ * @param   this            The CRTC state
+ * @param   red_function    The function that generates the gamma ramp for the red channel
+ * @param   green_function  The function that generates the gamma ramp for the green channel
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel
  * @return                  Zero on success, otherwise (negative) the value of an
- *                          error identifier provided by this library.
+ *                          error identifier provided by this library
  */
 $>crtc_set_gamma_ramps_f uint64_t ramps64
 
 
 /**
- * Set the gamma ramps for a CRTC, `float` function version.
+ * Set the gamma ramps for a CRTC, `float` function version
  * 
- * Note that this will probably involve the library allocating temporary data.
+ * Note that this will probably involve the library allocating temporary data
  * 
- * @param   this            The CRTC state.
- * @param   red_function    The function that generates the gamma ramp for the red channel.
- * @param   green_function  The function that generates the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the gamma ramp for the blue channel.
+ * @param   this            The CRTC state
+ * @param   red_function    The function that generates the gamma ramp for the red channel
+ * @param   green_function  The function that generates the gamma ramp for the green channel
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel
  * @return                  Zero on success, otherwise (negative) the value of an
- *                          error identifier provided by this library.
+ *                          error identifier provided by this library
  */
 $>crtc_set_gamma_ramps_f float rampsf
 
 
 /**
- * Set the gamma ramps for a CRTC, `double` function version.
+ * Set the gamma ramps for a CRTC, `double` function version
  * 
- * Note that this will probably involve the library allocating temporary data.
+ * Note that this will probably involve the library allocating temporary data
  * 
- * @param   this            The CRTC state.
- * @param   red_function    The function that generates the gamma ramp for the red channel.
- * @param   green_function  The function that generates the gamma ramp for the green channel.
- * @param   blue_function   The function that generates the gamma ramp for the blue channel.
+ * @param   this            The CRTC state
+ * @param   red_function    The function that generates the gamma ramp for the red channel
+ * @param   green_function  The function that generates the gamma ramp for the green channel
+ * @param   blue_function   The function that generates the gamma ramp for the blue channel
  * @return                  Zero on success, otherwise (negative) the value of an
- *                          error identifier provided by this library.
+ *                          error identifier provided by this library
  */
 $>crtc_set_gamma_ramps_f double rampsd
 
 
 
 #ifdef HAVE_NO_LIBGAMMA_METHODS
-# ifdef __GCC__
+# ifdef __GNUC__
 #  pragma GCC diagnostic pop
 # endif
 #endif
-

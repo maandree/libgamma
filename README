@@ -21,6 +21,3 @@ NOTES
 SEE ALSO
 	libcoopgamma(7), blueshift(1), xgamma(1), xrandr(1),
 	pylibgamma, jlibgamma, libgammamm
-
-	Full documentation available locally via: info '(libgamma)'
-

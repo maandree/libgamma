@@ -59,4 +59,3 @@ DEPENDENCIES SOURCES:
     libx11 (xlib)                 http://xorg.freedesktop.org/
     libxxf86vm                    http://xorg.freedesktop.org/
     libdrm                        http://dri.freedesktop.org/
-

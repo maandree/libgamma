@@ -1,0 +1,2 @@
+Special thanks to Alexis Megas for helping out with getting libgamma to compile
+on Mac OS X with proper linking and header inclusions and compile with clang.

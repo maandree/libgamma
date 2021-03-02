@@ -6,11 +6,9 @@ Important functionality:
 	non-RGB, and monochrome/greyscale). This information
 	is obtainable from the monitor's EDID.
 
-
 libgamma-intl
 	An extension with support for text description
 	of constants and internationalisation.
-
 
 Unsupported display servers:
 	GNU Hurd TTY   Does it have gamma ramp support?
@@ -19,6 +17,4 @@ Unsupported display servers:
 	Wayland        I do not think Wayland have gamma ramp support
 	Mir            I do not think Mir have gamma ramp support
 
-
 Add hotplug support.
-
