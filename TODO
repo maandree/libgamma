@@ -6,10 +6,6 @@ Important functionality:
 	non-RGB, and monochrome/greyscale). This information
 	is obtainable from the monitor's EDID.
 
-libgamma-intl
-	An extension with support for text description
-	of constants and internationalisation.
-
 Unsupported display servers:
 	GNU Hurd TTY   Does it have gamma ramp support?
 	The BSD TTY:s  Do they have gamma ramp support?

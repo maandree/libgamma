@@ -10,26 +10,18 @@ RUNTIME DEPENDENCIES:
     compile-time and are not utilisable if not selected at compile-time.
 
 
-CONFIGURE DEPENDENCIES:
-
-    sh
-    coreutils
-    sed
-
-
 BUILD DEPENDENCIES:
 
     make
-    grep
-    sed
-    coreutils
-    c99                           gcc is preferred
+    sh
+    printf
+    test
+    mv
+    rm
+    cat
+    c11
+    ar
     pkg-config
-    general-preprocessor (gpp)
-    python                        Both Python 2 and Python 3 will work
-    texinfo                       Optional: for info, pdf, ps and dvi manuals
-    texlive-core                  Optional: for pdf, ps and dvi manuals
-    bash                          Optional: for info, pdf, ps and dvi manuals
 
     And all runtime dependencies that are mandatory or has been opted for.
 
@@ -37,25 +29,7 @@ BUILD DEPENDENCIES:
 INSTALL DEPENDENCIES:
 
     make
-    coreutils
-
-
-DEPENDENCIES SOURCES:
-
-    sh                            bash can provide sh
-    make                          https://www.gnu.org/software/make
-    grep                          https://www.gnu.org/software/grep
-    sed                           https://www.gnu.org/software/sed
-    coreutils                     https://www.gnu.org/software/coreutils
-    c99                           https://gcc.gnu.org
-    pkg-config                    http://pkgconfig.freedesktop.org
-    general-preprocessor (gpp)    https://github.com/maandree/gpp
-    python                        https://www.python.org/
-    texinfo                       https://www.gnu.org/software/texinfo/
-    texlive-core                  https://tug.org/texlive/
-    bash                          https://www.gnu.org/software/bash
-    libc                          https://www.gnu.org/software/libc
-    libxcb                        http://xcb.freedesktop.org/
-    libx11 (xlib)                 http://xorg.freedesktop.org/
-    libxxf86vm                    http://xorg.freedesktop.org/
-    libdrm                        http://dri.freedesktop.org/
+    sh
+    mkdir
+    cp
+    ln

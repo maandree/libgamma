@@ -1,312 +1,192 @@
-# Copying and distribution of this file, with or without modification,
-# are permitted in any medium without royalty provided the copyright
-# notice and this notice are preserved.  This file is offered as-is,
-# without any warranty.
+.POSIX:
 
-
-# The package path prefix, if you want to install to another root, set DESTDIR to that root.
-PREFIX ?= /usr
-# The library path excluding prefix.
-LIB ?= /lib
-# The library header path excluding prefix.
-INCLUDE ?= /include
-# The resource path excluding prefix.
-DATA ?= /share
-# The library path including prefix.
-LIBDIR ?= $(PREFIX)$(LIB)
-# The library header including prefix.
-INCLUDEDIR ?= $(PREFIX)$(INCLUDE)
-# The resource path including prefix.
-DATADIR ?= $(PREFIX)$(DATA)
-# The generic documentation path including prefix.
-DOCDIR ?= $(DATADIR)/doc
-# The info manual documentation path including prefix.
-INFODIR ?= $(DATADIR)/info
-# The license base path including prefix.
-LICENSEDIR ?= $(DATADIR)/licenses
-
-# The name of the package as it should be installed.
-PKGNAME ?= libgamma
-
-# General-preprocess command. (https://github.com/maandree/gpp)
-GPP ?= gpp
-
-# C compiler, GNU C Compiler by default
-CC ?= gcc
-CC_BASE ?= $(shell echo $(CC) | cut -d ' ' -f 1)
-
-
-# Enabled warnings.
-WARN = -Wall -Wextra -pedantic -Wformat=2 -Winit-self -Wmissing-include-dirs   \
-       -Wfloat-equal -Wshadow -Wmissing-prototypes -Wmissing-declarations      \
-       -Wredundant-decls -Wnested-externs -Winline -Wno-variadic-macros        \
-       -Wswitch-default -Wconversion -Wcast-align -Wstrict-overflow            \
-       -Wdeclaration-after-statement -Wundef -Wcast-qual -Wbad-function-cast   \
-       -Wwrite-strings -Waggregate-return -Wpacked -Wstrict-prototypes         \
-       -Wold-style-definition
-
-ifeq ($(CC_BASE),gcc)
-WARN += -Wdouble-promotion -Wtrampolines -Wsign-conversion -Wsync-nand  \
-        -Wlogical-op -Wvector-operation-performance                     \
-        -Wunsuffixed-float-constants -Wsuggest-attribute=const          \
-        -Wsuggest-attribute=noreturn -Wsuggest-attribute=pure           \
-        -Wsuggest-attribute=format -Wnormalized=nfkc                    \
-        -Wunsafe-loop-optimizations
-endif
-
-
-# The C standard used in the code.
-STD = c99
-
-# Library linking flags for the linker.
-LIBS_LD =
-# Library linking flags for the C compiler.
-LIBS_C =
-
-# Object files for the library.
-LIBOBJ = libgamma-facade libgamma-method libgamma-error gamma-helper edid
-
-# Header files for the library are parsed for the info manual.
-HEADERS_INFO = libgamma-error libgamma-facade libgamma-method
-
-# Header files for the library, as installed.
-HEADERS = libgamma libgamma-config $(HEADERS_INFO)
-
-# Object files for the test.
-TESTOBJ = test methods errors crtcinfo user ramps
-
-# The version of the library.
 LIB_MAJOR = 0
-LIB_MINOR = 7
+LIB_MINOR = 8
 LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
 
-# Change by .config.mk to reflect what is used in the OS, linux uses so: libgamma.so
-SO = so
 
-# These three below are changed by .config.mk if required
-SHARED = -shared
-LDSO = -Wl,-soname,libgamma.$(SO).$(LIB_MAJOR)
-PIC = -fPIC
-
-# Include configurations from `./configure`.
-include .config.mk
-
-# Optimisation level (and debug flags.)
-ifeq ($(DEBUG),y)
-ifeq ($(CC_BASE),gcc)
-OPTIMISE = -Og -g3
-else
-OPTIMISE = -g
-endif
-else
-ifeq ($(CC_BASE),gcc)
-OPTIMISE = -Ofast
-else
-OPTIMISE = -O
-endif
-endif
-
-# C compiler debug flags.
-DEBUG_FLAGS =
-ifeq ($(DEBUG),y)
-DEBUG_FLAGS += -D'DEBUG'
-endif
-
-# Options for the C compiler for the test.
-TEST_FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) -fstrict-aliasing -fstrict-overflow -fno-builtin
-
-ifeq ($(CC_BASE),gcc)
-TEST_FLAGS += -fstack-usage -ftree-vrp -fipa-pure-const -funsafe-loop-optimizations
-endif
+X_RANDR_METHOD   = no
+X_VIDMODE_METHOD = no
+LINUX_DRM_METHOD = no
+W32_GDI_METHOD   = no
+QUARTZ_CG_METHOD = no
+DUMMY_METHOD     = yes
 
 
-# Options for the C compiler for the library.
-LIB_FLAGS = $(TEST_FLAGS) $(DEBUG_FLAGS) $(DEFINITIONS) -DLIBGAMMA_CONFIG_H
+CONFIGFILE = config.mk
+include $(CONFIGFILE)
 
-ifeq ($(CC_BASE),gcc)
-TEST_FLAGS += -D__GCC__
-LIB_FLAGS += -D__GCC__
-endif
-
-ifeq ($(HAVE_INT128),y)
-LIB_FLAGS += -DHAVE_INT128
-endif
+OS = linux
+# Linux:   linux
+# Mac OS:  macos
+# Windows: windows
+include mk/$(OS).mk
 
 
+HDR_METHODS      =
+CPPFLAGS_METHODS =
+METHODS_PARAMS   =
 
-# Build rules.
-
-.PHONY: default
-default: lib test info
-
-.PHONY: all
-all: lib test doc
-
-
-.PHONY: lib
-lib: bin/libgamma.$(SO).$(LIB_VERSION) bin/libgamma.$(SO).$(LIB_MAJOR) bin/libgamma.$(SO)
-
-bin/libgamma.$(SO).$(LIB_VERSION): $(foreach O,$(LIBOBJ),obj/lib/$(O).o)
-	mkdir -p $(shell dirname $@)
-	$(CC) $(LIB_FLAGS) $(LIBS_LD) $(SHARED) $(LDSO) -o $@ $^ $(LDFLAGS)
-
-bin/libgamma.$(SO).$(LIB_MAJOR):
-	mkdir -p $(shell dirname $@)
-	ln -sf libgamma.$(SO).$(LIB_VERSION) $@
-
-bin/libgamma.$(SO):
-	mkdir -p $(shell dirname $@)
-	ln -sf libgamma.$(SO).$(LIB_VERSION) $@
-
-obj/lib/%.o: src/lib/%.c src/lib/*.h
-	mkdir -p $(shell dirname $@)
-	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -s -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
-
-obj/lib/%.o: obj/lib/%.c src/lib/*.h
-	$(CC) $(LIB_FLAGS) $(LIBS_C) $(PIC) -iquote"$$(dirname "$<" | sed -e 's:^obj:src:')" -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
-
-obj/%: src/%.gpp src/extract/libgamma-*-extract
-	mkdir -p $(shell dirname $@)
-	$(GPP) --symbol '$$' --input $< --output $@
+QUARTZ_CORE_GRAPHICS_METHOD = $(QUARTZ_CG_METHOD)
+include mk/method-x-randr=$(X_RANDR_METHOD).mk
+include mk/method-x-vidmode=$(X_VIDMODE_METHOD).mk
+include mk/method-linux-drm=$(LINUX_DRM_METHOD).mk
+include mk/method-w32-gdi=$(W32_GDI_METHOD).mk
+include mk/method-quartz-cg=$(QUARTZ_CORE_GRAPHICS_METHOD).mk
+include mk/method-dummy=$(DUMMY_METHOD).mk
 
 
-.PHONY: test
-test: bin/test
+OBJ_PUBLIC =\
+	libgamma_behex_edid.o\
+	libgamma_behex_edid_lowercase.o\
+	libgamma_behex_edid_uppercase.o\
+	libgamma_connector_type_count.o\
+	libgamma_const_of_connector_type.o\
+	libgamma_const_of_method.o\
+	libgamma_const_of_subpixel_order.o\
+	libgamma_crtc_destroy.o\
+	libgamma_crtc_free.o\
+	libgamma_crtc_get_gamma_ramps16.o\
+	libgamma_crtc_get_gamma_ramps32.o\
+	libgamma_crtc_get_gamma_ramps64.o\
+	libgamma_crtc_get_gamma_ramps8.o\
+	libgamma_crtc_get_gamma_rampsd.o\
+	libgamma_crtc_get_gamma_rampsf.o\
+	libgamma_crtc_info_count.o\
+	libgamma_crtc_information_destroy.o\
+	libgamma_crtc_information_free.o\
+	libgamma_crtc_initialise.o\
+	libgamma_crtc_restore.o\
+	libgamma_crtc_set_gamma_ramps16.o\
+	libgamma_crtc_set_gamma_ramps16_f.o\
+	libgamma_crtc_set_gamma_ramps32.o\
+	libgamma_crtc_set_gamma_ramps32_f.o\
+	libgamma_crtc_set_gamma_ramps64.o\
+	libgamma_crtc_set_gamma_ramps64_f.o\
+	libgamma_crtc_set_gamma_ramps8.o\
+	libgamma_crtc_set_gamma_ramps8_f.o\
+	libgamma_crtc_set_gamma_rampsd.o\
+	libgamma_crtc_set_gamma_rampsd_f.o\
+	libgamma_crtc_set_gamma_rampsf.o\
+	libgamma_crtc_set_gamma_rampsf_f.o\
+	libgamma_error_min.o\
+	libgamma_gamma_ramps16_destroy.o\
+	libgamma_gamma_ramps16_free.o\
+	libgamma_gamma_ramps16_initialise.o\
+	libgamma_gamma_ramps32_destroy.o\
+	libgamma_gamma_ramps32_free.o\
+	libgamma_gamma_ramps32_initialise.o\
+	libgamma_gamma_ramps64_destroy.o\
+	libgamma_gamma_ramps64_free.o\
+	libgamma_gamma_ramps64_initialise.o\
+	libgamma_gamma_ramps8_destroy.o\
+	libgamma_gamma_ramps8_free.o\
+	libgamma_gamma_ramps8_initialise.o\
+	libgamma_gamma_rampsd_destroy.o\
+	libgamma_gamma_rampsd_free.o\
+	libgamma_gamma_rampsd_initialise.o\
+	libgamma_gamma_rampsf_destroy.o\
+	libgamma_gamma_rampsf_free.o\
+	libgamma_gamma_rampsf_initialise.o\
+	libgamma_get_crtc_information.o\
+	libgamma_group_gid.o\
+	libgamma_group_name.o\
+	libgamma_is_method_available.o\
+	libgamma_list_methods.o\
+	libgamma_method_capabilities.o\
+	libgamma_method_count.o\
+	libgamma_method_default_site.o\
+	libgamma_method_default_site_variable.o\
+	libgamma_name_of_connector_type.o\
+	libgamma_name_of_error.o\
+	libgamma_name_of_method.o\
+	libgamma_name_of_subpixel_order.o\
+	libgamma_partition_destroy.o\
+	libgamma_partition_free.o\
+	libgamma_partition_initialise.o\
+	libgamma_partition_restore.o\
+	libgamma_perror.o\
+	libgamma_site_destroy.o\
+	libgamma_site_free.o\
+	libgamma_site_initialise.o\
+	libgamma_site_restore.o\
+	libgamma_strerror.o\
+	libgamma_strerror_r.o\
+	libgamma_subpixel_order_count.o\
+	libgamma_unhex_edid.o\
+	libgamma_value_of_connector_type.o\
+	libgamma_value_of_error.o\
+	libgamma_value_of_method.o\
+	libgamma_value_of_subpixel_order.o
 
-bin/test: $(foreach O,$(TESTOBJ),obj/test/$(O).o) bin/libgamma.$(SO).$(LIB_VERSION) bin/libgamma.$(SO)
-	mkdir -p $(shell dirname $@)
-	$(CC) $(TEST_FLAGS) $(LIBS_LD) -Lbin -lgamma -o $@ $(foreach O,$(TESTOBJ),obj/test/$(O).o) $(LDFLAGS)
+OBJ_INTERNAL =\
+	libgamma_internal_allocated_any_ramp.o\
+	libgamma_internal_parse_edid.o\
+	libgamma_internal_translated_ramp_get_.o\
+	libgamma_internal_translated_ramp_set_.o\
+	libgamma_internal_translate_from_64.o\
+	libgamma_internal_translate_to_64.o\
 
-obj/test/%.o: src/test/%.c src/test/*.h src/lib/libgamma*.h
-	mkdir -p $(shell dirname $@)
-	$(CC) $(TEST_FLAGS) -Isrc/lib -c -o $@ $< $(CPPFLAGS) $(CFLAGS) 
+OBJ = $(OBJ_PUBLIC) $(OBJ_INTERNAL)
+LOBJ = $(OBJ:.o=.lo)
 
-
-.PHONY: doc
-doc: info pdf dvi ps
-
-obj/libgamma.texinfo: info/libgamma.texinfo $(foreach H,$(HEADERS_INFO),src/lib/$(H).h) \
-	              src/extract/libgamma-*-extract info/texise info/behead
-	mkdir -p obj
-	$(GPP) --symbol '%' --input $< --output $@
-
-obj/%.texinfo: info/%.texinfo
-	mkdir -p obj
-	cp $< $@
-
-.PHONY: info
-info: libgamma.info
-%.info: obj/%.texinfo obj/fdl.texinfo
-	makeinfo $<
-
-.PHONY: pdf
-pdf: libgamma.pdf
-%.pdf: obj/%.texinfo obj/fdl.texinfo
-	@mkdir -p obj/pdf
-	cd obj/pdf ; yes X | texi2pdf ../../$<
-	mv obj/pdf/$@ $@
-
-.PHONY: dvi
-dvi: libgamma.dvi
-%.dvi: obj/%.texinfo obj/fdl.texinfo
-	@mkdir -p obj/dvi
-	cd obj/dvi ; yes X | $(TEXI2DVI) ../../$<
-	mv obj/dvi/$@ $@
-
-.PHONY: ps
-ps: libgamma.ps
-%.ps: obj/%.texinfo obj/fdl.texinfo
-	@mkdir -p obj/ps
-	cd obj/ps ; yes X | texi2pdf --ps ../../$<
-	mv obj/ps/$@ $@
-
-
-# Install rules.
-
-.PHONY: install
-install: install-base install-info
-
-.PHONY: install
-install-all: install-base install-doc
-
-.PHONY: install-base
-install-base: install-lib install-include install-copyright
-
-
-.PHONY: install-lib
-install-lib: bin/libgamma.$(SO).$(LIB_VERSION)
-	install -dm755 -- "$(DESTDIR)$(LIBDIR)"
-	install -m755 $< -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO).$(LIB_VERSION)"
-	ln -sf libgamma.$(SO).$(LIB_VERSION) -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO).$(LIB_MAJOR)"
-	ln -sf libgamma.$(SO).$(LIB_VERSION) -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO)"
-
-.PHONY: install-include
-install-include:
-	install -dm755 -- "$(DESTDIR)$(INCLUDEDIR)"
-	install -m644 $(foreach H,$(HEADERS),src/lib/$(H).h) -- "$(DESTDIR)$(INCLUDEDIR)"
-
-
-.PHONY: install-copyright
-install-copyright: install-copying install-license
-
-.PHONY: install-copying
-install-copying:
-	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
-	install -m644 COPYING -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
-
-.PHONY: install-license
-install-license:
-	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
-	install -m644 LICENSE -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
-
-
-.PHONY: install-doc
-install-doc: install-info install-pdf install-ps install-dvi
-
-.PHONY: install-info
-install-info: libgamma.info
-	install -dm755 -- "$(DESTDIR)$(INFODIR)"
-	install -m644 $< -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
-
-.PHONY: install-pdf
-install-pdf: libgamma.pdf
-	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
-
-.PHONY: install-ps
-install-ps: libgamma.ps
-	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).ps"
-
-.PHONY: install-dvi
-install-dvi: libgamma.dvi
-	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 $< -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
+HDR =\
+	common.h\
+	config.h\
+	get_ramps.h\
+	libgamma.h\
+	set_ramps.h\
+	set_ramps_fun.h\
+	$(HDR_METHODS)
 
 
-# Uninstall rules.
+all: libgamma.a libgamma.$(LIBEXT)
+$(OBJ): $(@:.o=.c) $(HDR)
+$(LOBJ): $(@:.lo=.c) $(HDR)
 
-.PHONY: uninstall
+config.h: FORCE
+	printf '/* This file is auto-generated.mk */\n' > $@~
+	printf '#include "%s"\n' $(HDR_METHODS) >> $@~
+	printf '#define LIST_AVAILABLE_METHODS(_)' >> $@~
+	printf '\\\n\t_(%s, %s, %s, %s)' $(METHODS_PARAMS) >> $@~
+	printf '\n' >> $@~
+	if ! test -f $@ || ! test "$$(cat < $@)" = "$$(cat < $@~)"; then mv -- $@~ $@; fi
+
+libgamma.a: $(OBJ)
+	-rm -f -- $@
+	$(AR) -rc $@ $(OBJ)
+	$(AR) -s $@
+
+libgamma.$(LIBEXT): $(LOBJ)
+	$(CC) $(LIBFLAGS) $(LDFLAGS_METHODS) -o $@ $(LOBJ) $(LDFLAGS)
+
+.c.o:
+	$(CC) -c -o $@ $< $(CFLAGS) $(CFLAGS_METHODS) $(CPPFLAGS) $(CPPFLAGS_METHODS)
+
+.c.lo:
+	$(CC) -fPIC -c -o $@ $< $(CFLAGS) $(CFLAGS_METHODS) $(CPPFLAGS) $(CPPFLAGS_METHODS)
+
+install: libgamma.a libgamma.$(LIBEXT)
+	mkdir -p -- "$(DESTDIR)$(PREFIX)/lib/"
+	mkdir -p -- "$(DESTDIR)$(PREFIX)/include/"
+	cp -- libgamma.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMINOREXT)"
+	ln -sf -- libgamma.$(LIBMINOREXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMAJOREXT)"
+	ln -sf -- libgamma.$(LIBMAJOREXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBEXT)"
+	cp -- libgamma.a "$(DESTDIR)$(PREFIX)/lib/"
+	cp -- libgamma.h "$(DESTDIR)$(PREFIX)/include/"
+
 uninstall:
-	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO).$(LIB_VERSION)"
-	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO).$(LIB_MAJOR)"
-	-rm -- "$(DESTDIR)$(LIBDIR)/libgamma.$(SO)"
-	-rm -- $(foreach H,$(HEADERS),"$(DESTDIR)$(INCLUDEDIR)/$(H).h")
-	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
-	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
-	-rmdir -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
-	-rm -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).ps"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMAJOREXT)"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMINOREXT)"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBEXT)"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.a"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/include/libgamma.h"
 
-
-# Clean rules.
-
-.PHONY: clean
 clean:
-	-rm -rf obj bin libgamma.info libgamma.pdf libgamma.ps libgamma.dvi
+	-rm -f -- *.o *.lo *.su *.a *.$(LIBEXT)
 
-.PHONY: distclean
-distclean: clean
-	-rm -f .config.mk src/lib/libgamma-config.h
+.SUFFIXES:
+.SUFFIXES: .lo .o .c
+
+FORCE:
+.PHONY: all install uninstall clean FORCE
