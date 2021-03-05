@@ -1,5 +1,6 @@
 include config.mk
 
+CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_XOPEN_SOURCE=700 -D_GNU_SOURCE -DDEBUG
 CFLAGS   = -std=c11 -Og -g
 LDFLAGS  = 
 
