@@ -19,6 +19,8 @@ libgamma_perror(const char *name, int error_code)
 
 	if (error_code == LIBGAMMA_DEVICE_REQUIRE_GROUP) {
 		gid = (intmax_t)libgamma_group_gid_get();
+		if (!gid)
+			goto fallback;
 		gname = libgamma_group_name_get();
 		if (!gname) {
 			if (name && *name)
@@ -27,11 +29,12 @@ libgamma_perror(const char *name, int error_code)
 				fprintf(stderr, "%s in group %ji\n", desc, gid);
 		} else {
 			if (name && *name)
-				fprintf(stderr, "%s: %s in group %s (%ji)\n", name, desc, gname, gid);
+				fprintf(stderr, "%s: %s in the %s group (%ji)\n", name, desc, gname, gid);
 			else
-				fprintf(stderr, "%s in group %s (%ji)\n", desc, gname, gid);
+				fprintf(stderr, "%s in the %s group (%ji)\n", desc, gname, gid);
 		}
 	} else {
+	fallback:
 		if (name && *name)
 			fprintf(stderr, "%s: %s\n", name, desc);
 		else

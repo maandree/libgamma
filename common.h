@@ -48,7 +48,7 @@
 	_(LIBGAMMA_CONNECTOR_DISABLED, "Connector is disabled")\
 	_(LIBGAMMA_OPEN_CRTC_FAILED, "Could not open CRTC")\
 	_(LIBGAMMA_CRTC_INFO_NOT_SUPPORTED, "CRTC information is not supported")\
-	_(LIBGAMMA_GAMMA_RAMP_READ_FAILED, "Could not read readm gamma ramp")\
+	_(LIBGAMMA_GAMMA_RAMP_READ_FAILED, "Could not read from gamma ramp")\
 	_(LIBGAMMA_GAMMA_RAMP_WRITE_FAILED, "Could not write to gamma ramp")\
 	_(LIBGAMMA_GAMMA_RAMP_SIZE_CHANGED, "Gamma ramp size changed")\
 	_(LIBGAMMA_MIXED_GAMMA_RAMP_SIZE, "Mixed gamma ramp size")\
@@ -63,7 +63,7 @@
 	_(LIBGAMMA_DEVICE_REQUIRE_GROUP, "Device requires group membership")\
 	_(LIBGAMMA_GRAPHICS_CARD_REMOVED, "Graphics card was removed")\
 	_(LIBGAMMA_STATE_UNKNOWN, "Unknown state")\
-	_(LIBGAMMA_CONNECTOR_UNKNOWN, "Unknwon connector")\
+	_(LIBGAMMA_CONNECTOR_UNKNOWN, "Unknown connector")\
 	_(LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED, "Connector type not recognised")\
 	_(LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED, "Subpixel order not recognised")\
 	_(LIBGAMMA_EDID_LENGTH_UNSUPPORTED, "Unsupported EDID length")\

@@ -1582,7 +1582,7 @@ LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __const__)))
 const char *libgamma_name_of_error(int);
 
 /**
- * Get the value of a `libgamma` error definition refered to by name
+ * Get the value of a `libgamma` error definition referred to by name
  * 
  * @param   name  The name of the definition associated with the error code
  * @return        The error code, zero if the name is `NULL`
@@ -1639,7 +1639,6 @@ const char *libgamma_group_name_get(void);
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__access__(__read_only__, 1))))
 void libgamma_group_name_set(const char *);
-
 
 
 
@@ -1725,7 +1724,8 @@ const char *libgamma_const_of_connector_type(int);
  * @param   connector  The name of the connector type, for example
  *                     "VGA" or "LIBGAMMA_CONNECTOR_TYPE_VGA"
  * @return             The connector type; for example `LIBGAMMA_CONNECTOR_TYPE_VGA`
- *                     for "VGA" and "LIBGAMMA_CONNECTOR_TYPE_VGA"
+ *                     for "VGA" and "LIBGAMMA_CONNECTOR_TYPE_VGA";
+ *                     `LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED` of not defined
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
 int libgamma_value_of_connector_type(const char *);
@@ -1764,7 +1764,8 @@ const char *libgamma_const_of_subpixel_order(int);
  * @param   order  The name of the subpixel order, for example
  *                 "Horizontal RGB" or "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB"
  * @return         The subpixel order; for example `LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB`
- *                 for "Horizontal RGB" and "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB"
+ *                 for "Horizontal RGB" and "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB";
+ *                 `LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED` of not defined
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
 int libgamma_value_of_subpixel_order(const char *);

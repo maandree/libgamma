@@ -3,7 +3,7 @@
 
 
 /**
- * Get the value of a `libgamma` error definition refered to by name
+ * Get the value of a `libgamma` error definition referred to by name
  * 
  * @param   name  The name of the definition associated with the error code
  * @return        The error code, zero if the name is `NULL`

@@ -180,7 +180,7 @@ libgamma.$(LIBEXT): $(LOBJ)
 test.o: test.c libgamma.h
 	$(CC) -c -o $@ test.c $(CFLAGS) $(CPPFLAGS)
 
-test: test.o
+test: test.o libgamma.a
 	$(CC) -o $@ test.o libgamma.a $(LDFLAGS_METHODS) $(LDFLAGS)
 
 install: libgamma.a libgamma.$(LIBEXT)

@@ -14,19 +14,15 @@
 const char *
 libgamma_strerror(int error_code)
 {
-	const char *desc;
 	if (error_code == LIBGAMMA_ERRNO_SET)
 		error_code = errno;
 	switch (error_code) {
 #define X(NAME, DESC)\
 	case NAME:\
-		desc = DESC;\
-		break;
+		return DESC;
 	LIST_ERRORS(X)
 #undef X
 	default:
-		desc = NULL;
-		break;
+		return error_code < 0 ? NULL : strerror(error_code);
 	}
-	return desc ? desc : error_code < 0 ? NULL : strerror(error_code);
 }

@@ -26,16 +26,14 @@ libgamma_strerror_r(int error_code, char buf[], size_t bufsize)
 	switch (error_code) {
 #define X(NAME, DESC)\
 	case NAME:\
-		desc = DESC;\
-		break;
+		return DESC;
 	LIST_ERRORS(X)
 #undef X
 	default:
-		desc = NULL;
 		break;
 	}
-	if (desc)
-		return desc;
+	if (bufsize)
+		*buf = '\0';
 	if (error_code >= 0) {
 		saved_errno = errno;
 		desc = _Generic(strerror_r(error_code, buf, bufsize),
@@ -43,19 +41,20 @@ libgamma_strerror_r(int error_code, char buf[], size_t bufsize)
 		                int: (errno = (int)(intptr_t)strerror_r(error_code, buf, bufsize)) ? NULL : buf,
 		                /* GNU strerror_r */
 		                char *: (char *)(intptr_t)strerror_r(error_code, buf, bufsize));
+		if (desc == buf && (!bufsize || !*buf))
+			desc = NULL;
 		if (desc) {
 			errno = saved_errno;
-			if (!buf || strcmp(buf, "No error information"))
-				return buf;
+			if (!desc || strcmp(desc, "No error information"))
+				return desc;
 		} else if (errno == ERANGE) {
 			return buf;
 		} else {
 			errno = saved_errno;
 		}
 	}
-	if (!buf)
-		return buf;
-	*buf = '\0'; /* TODO what happended here? */
-	snprintf(buf, bufsize, "Unknown error #%i\n", error_code);
+	if (!bufsize)
+		return NULL;
+	snprintf(buf, bufsize, "Unknown error #%i", error_code);
 	return buf;
 }

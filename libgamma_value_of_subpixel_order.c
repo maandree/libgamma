@@ -8,7 +8,8 @@
  * @param   order  The name of the subpixel order, for example
  *                 "Horizontal RGB" or "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB"
  * @return         The subpixel order; for example `LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB`
- *                 for "Horizontal RGB" and "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB"
+ *                 for "Horizontal RGB" and "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB";
+ *                 `LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED` of not defined
  */
 int
 libgamma_value_of_subpixel_order(const char *order)
@@ -25,5 +26,5 @@ libgamma_value_of_subpixel_order(const char *order)
 	LIST_SUBPIXEL_ORDERS(X)
 #undef X
 
-	return 0;
+	return LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED;
 }

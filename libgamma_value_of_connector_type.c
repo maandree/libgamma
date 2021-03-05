@@ -8,7 +8,8 @@
  * @param   connector  The name of the connector type, for example
  *                     "VGA" or "LIBGAMMA_CONNECTOR_TYPE_VGA"
  * @return             The connector type; for example `LIBGAMMA_CONNECTOR_TYPE_VGA`
- *                     for "VGA" and "LIBGAMMA_CONNECTOR_TYPE_VGA"
+ *                     for "VGA" and "LIBGAMMA_CONNECTOR_TYPE_VGA";
+ *                     `LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED` of not defined
  */
 int
 libgamma_value_of_connector_type(const char *connector)
@@ -25,5 +26,5 @@ libgamma_value_of_connector_type(const char *connector)
 	LIST_CONNECTOR_TYPES(X)
 #undef X
 
-	return 0;
+	return LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
 }

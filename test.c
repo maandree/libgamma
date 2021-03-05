@@ -2,11 +2,18 @@
 #include "libgamma.h"
 
 #include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
+
+#ifdef __WIN32__
+# define gid_t short
+#endif
 
 
 #if LIBGAMMA_CRTC_INFO_COUNT != 13
@@ -179,9 +186,9 @@ list_methods(const char *description, int *methods, int operation)
 	size_t i, n = libgamma_list_methods(methods, LIBGAMMA_METHOD_COUNT, operation);
 
 	/* Print adjustment method list */
-	printf("%s:\n", description);
+	printf("%s:", description);
 	for (i = 0; i < n; i++)
-		printf("  %s\n", method_name(methods[i]));
+		printf(" %s", method_name(methods[i]));
 	printf("\n");
 }
 
@@ -205,6 +212,7 @@ list_methods_lists(void)
 	list_methods("Available real non-fake adjustment methods", methods, 2);
 	list_methods("Recommended adjustment methods",             methods, 1);
 	list_methods("Recommended non-fake adjustment methods",    methods, 0);
+	printf("\n");
 }
 
 
@@ -604,68 +612,733 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 
 
 /**
- * The error API
+ * Test that count macros are set to the same values as the count variables
  */
 void
-error_test(void)
+test_count_consts(void)
 {
-	int i;
-  
-	/* Test that naming and name dereferencing
-	   of errors work. Because the mappings in
-	   these [`libgamma_value_of_error` and
-	   `libgamma_name_of_error`] functions are
-	   generated, it should work if and only if
-	   one test passes, assumming the errors are
-	   unique whihc is tested in the end of this
-	   function. */
-	printf("Testing error API using LIBGAMMA_STATE_UNKNOWN:\n");
-	printf("  Expecting %i: %i\n", LIBGAMMA_STATE_UNKNOWN, libgamma_value_of_error("LIBGAMMA_STATE_UNKNOWN"));
-	printf("  Expecting %s: %s\n", "LIBGAMMA_STATE_UNKNOWN", libgamma_name_of_error(LIBGAMMA_STATE_UNKNOWN));
-	printf("\n");
-  
-	/* Test that `libgamma_perror` can print
-	   libgamma errors and system errors, and
-	   handle success in the same with as `perror`. */
-	printf("Testing libgamma_perror:\n");
-	libgamma_perror("  Expecting LIBGAMMA_STATE_UNKNOWN", LIBGAMMA_STATE_UNKNOWN);
-	libgamma_perror("  Expecting a description for ENOMEM", ENOMEM);
-	libgamma_perror("  Expecting a description for successfulness", 0);
-	/* Test that `libgamma_perror` handles
-	   `LIBGAMMA_ERRNO_SET` correctly. */
-	libgamma_perror("  Expecting a description for ENOMEM", (errno = ENOMEM, LIBGAMMA_ERRNO_SET));
-	/* That that `libgamma_perror` handles
-	   `LIBGAMMA_DEVICE_REQUIRE_GROUP`
-	   correctly both when the required
-	   group's name is known and when it
-	   is unknown. */
-	libgamma_group_gid_set(10);
-	libgamma_group_name_set("test");
-	libgamma_perror("  Expecting 'LIBGAMMA_DEVICE_REQUIRE_GROUP: test (10)'", LIBGAMMA_DEVICE_REQUIRE_GROUP);
-	libgamma_group_name_set(NULL);
-	libgamma_perror("  Expecting 'LIBGAMMA_DEVICE_REQUIRE_GROUP: 10'", LIBGAMMA_DEVICE_REQUIRE_GROUP);
-	printf("\n");
-  
-	/* That all libgamma error codes
-	   are unique. This is done by
-	   getting the name associated
-	   with an error code and the getting
-	   the error code associated that
-	   name and test that the same
-	   error code is returned as put in,
-	   for each libgamma error code. */
-	printf("Testing error code uniqueness: ");
-	for (i = -1; i >= LIBGAMMA_ERROR_MIN; i--) {
-		if (libgamma_value_of_error(libgamma_name_of_error(i)) != i) {
-			printf("failed\n");
-			goto not_unique;
-		}
+	if (LIBGAMMA_ERROR_MIN != libgamma_error_min) {
+		fprintf(stderr, "LIBGAMMA_ERROR_MIN != libgamma_error_min\n");
+		exit(1);
 	}
-	printf("passed\n");
-not_unique:
-	printf("\n");
+	if (LIBGAMMA_METHOD_COUNT != libgamma_method_count) {
+		fprintf(stderr, "LIBGAMMA_METHOD_COUNT != libgamma_method_count\n");
+		exit(1);
+	}
+	if (LIBGAMMA_CONNECTOR_TYPE_COUNT != libgamma_connector_type_count) {
+		fprintf(stderr, "LIBGAMMA_CONNECTOR_TYPE_COUNT != libgamma_connector_type_count\n");
+		exit(1);
+	}
+	if (LIBGAMMA_SUBPIXEL_ORDER_COUNT != libgamma_subpixel_order_count) {
+		fprintf(stderr, "LIBGAMMA_SUBPIXEL_ORDER_COUNT != libgamma_subpixel_order_count\n");
+		exit(1);
+	}
 }
 
+
+/**
+ * Test functions for connector types
+ */
+void
+test_connector_types(void)
+{
+	size_t n = 0;
+	char buf[128], *w;
+	const char *r;
+
+#define X(CONST)\
+	do {\
+		if ((unsigned int)CONST >= (unsigned int)LIBGAMMA_CONNECTOR_TYPE_COUNT) {\
+			fprintf(stderr, "%s >= LIBGAMMA_CONNECTOR_TYPE_COUNT\n", #CONST);\
+			exit(1);\
+		}\
+		if (!libgamma_const_of_connector_type(CONST)) {\
+			fprintf(stderr, "libgamma_const_of_connector_type(%s) == NULL\n", #CONST);\
+			exit(1);\
+		}\
+		if (!libgamma_name_of_connector_type(CONST)) {\
+			fprintf(stderr, "libgamma_name_of_connector_type(%s) == NULL\n", #CONST);\
+			exit(1);\
+		}\
+		if (strcmp(libgamma_const_of_connector_type(CONST), #CONST)) {\
+			fprintf(stderr, "libgamma_const_of_connector_type(%s) != \"%s\"\n", #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (libgamma_value_of_connector_type(#CONST) != CONST) {\
+			fprintf(stderr, "libgamma_value_of_connector_type(\"%s\") != %s\n", #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (libgamma_value_of_connector_type(libgamma_name_of_connector_type(CONST)) != CONST) {\
+			fprintf(stderr, "libgamma_value_of_connector_type(libgamma_name_of_connector_type(%s)) != %s\n",\
+			        #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (libgamma_value_of_connector_type(#CONST) != CONST) {\
+			fprintf(stderr, "libgamma_value_of_connector_type(\"%s\") != %s\n", #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (strlen(libgamma_name_of_connector_type(CONST)) >= sizeof(buf)) {\
+			fprintf(stderr, "strlen(libgamma_name_of_connector_type(%s) >= %zu\n", #CONST, sizeof(buf));\
+			exit(1);\
+		}\
+		r = libgamma_name_of_connector_type(CONST);\
+		for (w = buf; *r; r++)\
+			if (*r != ' ' && *r != '-')\
+				*w++ = *r;\
+		*w = '\0';\
+		if (strcasecmp(buf, &#CONST[sizeof("LIBGAMMA_CONNECTOR_TYPE_") - 1])) {\
+			fprintf(stderr, "libgamma_name_of_connector_type(%s) without [ -] != %s, ignoreing case\n",\
+			        #CONST, &#CONST[sizeof("LIBGAMMA_CONNECTOR_TYPE_") - 1]);\
+			exit(1);\
+		}\
+		n += 1;\
+	} while (0)
+
+	X(LIBGAMMA_CONNECTOR_TYPE_Unknown);
+	X(LIBGAMMA_CONNECTOR_TYPE_VGA);
+	X(LIBGAMMA_CONNECTOR_TYPE_DVI);
+	X(LIBGAMMA_CONNECTOR_TYPE_DVII);
+	X(LIBGAMMA_CONNECTOR_TYPE_DVID);
+	X(LIBGAMMA_CONNECTOR_TYPE_DVIA);
+	X(LIBGAMMA_CONNECTOR_TYPE_Composite);
+	X(LIBGAMMA_CONNECTOR_TYPE_SVIDEO);
+	X(LIBGAMMA_CONNECTOR_TYPE_LVDS);
+	X(LIBGAMMA_CONNECTOR_TYPE_Component);
+	X(LIBGAMMA_CONNECTOR_TYPE_9PinDIN);
+	X(LIBGAMMA_CONNECTOR_TYPE_DisplayPort);
+	X(LIBGAMMA_CONNECTOR_TYPE_HDMI);
+	X(LIBGAMMA_CONNECTOR_TYPE_HDMIA);
+	X(LIBGAMMA_CONNECTOR_TYPE_HDMIB);
+	X(LIBGAMMA_CONNECTOR_TYPE_TV);
+	X(LIBGAMMA_CONNECTOR_TYPE_eDP);
+	X(LIBGAMMA_CONNECTOR_TYPE_VIRTUAL);
+	X(LIBGAMMA_CONNECTOR_TYPE_DSI);
+	X(LIBGAMMA_CONNECTOR_TYPE_LFP);
+	X(LIBGAMMA_CONNECTOR_TYPE_DPI);
+	X(LIBGAMMA_CONNECTOR_TYPE_WRITEBACK);
+	X(LIBGAMMA_CONNECTOR_TYPE_SPI);
+
+#undef X
+
+	if (n != LIBGAMMA_CONNECTOR_TYPE_COUNT) {
+		fprintf(stderr, "List of connector types in `test_connector_types` must be updated");
+		exit(1);
+	}
+
+	if (libgamma_name_of_connector_type(-1)) {
+		fprintf(stderr, "libgamma_name_of_connector_type(<invalid>) != NULL\n");
+		exit(1);
+	}
+	if (libgamma_const_of_connector_type(-1)) {
+		fprintf(stderr, "libgamma_const_of_connector_type(<invalid>) != NULL\n");
+		exit(1);
+	}
+	if (libgamma_value_of_connector_type("") != LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED) {
+		fprintf(stderr, "libgamma_value_of_connector_type(<invalid>) != LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED\n");
+		exit(1);
+	}
+}
+
+
+/**
+ * Test functions for subpixel orders
+ */
+void
+test_subpixel_orders(void)
+{
+	size_t n = 0;
+	char buf[128], *w;
+	const char *r;
+
+#define X(CONST)\
+	do {\
+		if ((unsigned int)CONST >= (unsigned int)LIBGAMMA_SUBPIXEL_ORDER_COUNT) {\
+			fprintf(stderr, "%s >= LIBGAMMA_SUBPIXEL_ORDER_COUNT\n", #CONST);\
+			exit(1);\
+		}\
+		if (!libgamma_const_of_subpixel_order(CONST)) {\
+			fprintf(stderr, "libgamma_const_of_subpixel_order(%s) == NULL\n", #CONST);\
+			exit(1);\
+		}\
+		if (!libgamma_name_of_subpixel_order(CONST)) {\
+			fprintf(stderr, "libgamma_name_of_subpixel_order(%s) == NULL\n", #CONST);\
+			exit(1);\
+		}\
+		if (strcmp(libgamma_const_of_subpixel_order(CONST), #CONST)) {\
+			fprintf(stderr, "libgamma_const_of_subpixel_order(%s) != \"%s\"\n", #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (libgamma_value_of_subpixel_order(#CONST) != CONST) {\
+			fprintf(stderr, "libgamma_value_of_subpixel_order(\"%s\") != %s\n", #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (libgamma_value_of_subpixel_order(libgamma_name_of_subpixel_order(CONST)) != CONST) {\
+			fprintf(stderr, "libgamma_value_of_subpixel_order(libgamma_name_of_subpixel_order(%s)) != %s\n",\
+			        #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (libgamma_value_of_subpixel_order(#CONST) != CONST) {\
+			fprintf(stderr, "libgamma_value_of_subpixel_order(\"%s\") != %s\n", #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (strlen(libgamma_name_of_subpixel_order(CONST)) >= sizeof(buf)) {\
+			fprintf(stderr, "strlen(libgamma_name_of_subpixel_order(%s) >= %zu\n", #CONST, sizeof(buf));\
+			exit(1);\
+		}\
+		r = libgamma_name_of_subpixel_order(CONST);\
+		for (w = buf; *r; r++)\
+			*w++ = *r == ' ' ? '_' : *r;\
+		*w = '\0';\
+		if (strcasecmp(buf, &#CONST[sizeof("LIBGAMMA_SUBPIXEL_ORDER_") - 1])) {\
+			fprintf(stderr, "libgamma_name_of_subpixel_order(%s) with '_' for ' ' != %s, ignoreing case\n",\
+			        #CONST, &#CONST[sizeof("LIBGAMMA_SUBPIXEL_ORDER_") - 1]);\
+			exit(1);\
+		}\
+		n += 1;\
+	} while (0)
+
+	X(LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN);
+	X(LIBGAMMA_SUBPIXEL_ORDER_NONE);
+	X(LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB);
+	X(LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_BGR);
+	X(LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_RGB);
+	X(LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_BGR);
+
+#undef X
+
+	if (n != LIBGAMMA_SUBPIXEL_ORDER_COUNT) {
+		fprintf(stderr, "List of subpixel orders in `test_subpixel_orders` must be updated");
+		exit(1);
+	}
+
+	if (libgamma_name_of_subpixel_order(-1)) {
+		fprintf(stderr, "libgamma_name_of_subpixel_order(<invalid>) != NULL\n");
+		exit(1);
+	}
+	if (libgamma_const_of_subpixel_order(-1)) {
+		fprintf(stderr, "libgamma_const_of_subpixel_order(<invalid>) != NULL\n");
+		exit(1);
+	}
+	if (libgamma_value_of_subpixel_order("") != LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED) {
+		fprintf(stderr, "libgamma_value_of_subpixel_order(<invalid>) != LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED\n");
+		exit(1);
+	}
+}
+
+
+/**
+ * Test functions for errors
+ */
+void
+test_errors(void)
+{
+	int n = 0, fds[2], flags;
+	char buf[1024], buf2[1100];
+	FILE *fp, *err = stderr;
+	ssize_t r;
+
+	alarm(2);
+	pipe(fds);
+	fp = fdopen(fds[1], "w");
+	flags = fcntl(fds[0], F_GETFL);
+	fcntl(fds[0], F_SETFL, flags | O_NONBLOCK);
+
+#define X(CONST)\
+	do {\
+		if (CONST >= 0) {\
+			fprintf(stderr, "%s >= 0\n", #CONST);\
+			exit(1);\
+		}\
+		if (CONST < LIBGAMMA_ERROR_MIN) {\
+			fprintf(stderr, "%s < LIBGAMMA_ERROR_MIN\n", #CONST);\
+			exit(1);\
+		}\
+		if (!libgamma_name_of_error(CONST)) {\
+			fprintf(stderr, "libgamma_name_of_error(%s) == NULL\n", #CONST);\
+			exit(1);\
+		}\
+		if (strcmp(libgamma_name_of_error(CONST), #CONST)) {\
+			fprintf(stderr, "libgamma_name_of_error(%s) != \"%s\"\n", #CONST, #CONST);\
+			exit(1);\
+		}\
+		if (libgamma_value_of_error(#CONST) != CONST) {\
+			fprintf(stderr, "libgamma_value_of_error(\"%s\") != %s\n", #CONST, #CONST);\
+			exit(1);\
+		}\
+		libgamma_group_gid_set(0);\
+		libgamma_group_name_set(NULL);\
+		if (CONST != LIBGAMMA_ERRNO_SET) {\
+			if (!libgamma_strerror(CONST)) {\
+				fprintf(stderr, "libgamma_strerror(%s) == NULL\n", #CONST);\
+				exit(1);\
+			}\
+			if (!libgamma_strerror_r(CONST, buf, sizeof(buf))) {\
+				fprintf(stderr, "libgamma_strerror_r(%s, buf, sizeof(buf)) == NULL\n", #CONST);\
+				exit(1);\
+			}\
+			if (strcmp(libgamma_strerror_r(CONST, buf, sizeof(buf)), libgamma_strerror(CONST))) {\
+				fprintf(stderr, "libgamma_strerror_r(%s, buf, sizeof(buf)) != libgamma_strerror(%s)\n",\
+				        #CONST, #CONST);\
+				exit(1);\
+			}\
+			stderr = fp;\
+			libgamma_perror(NULL, CONST);\
+			stderr = err;\
+			fflush(fp);\
+			r = read(fds[0], buf, sizeof(buf));\
+			if (r <= 0 || buf[r - 1] != '\n') {\
+				fprintf(stderr, "libgamma_perror(NULL, %s) failed\n", #CONST);\
+				exit(1);\
+			}\
+			buf[r - 1] = '\0';\
+			if (strcmp(buf, libgamma_strerror(CONST))) {\
+				fprintf(stderr, "libgamma_perror(NULL, %s) failed\n", #CONST);\
+				exit(1);\
+			}\
+			stderr = fp;\
+			libgamma_perror("", CONST);\
+			stderr = err;\
+			fflush(fp);\
+			r = read(fds[0], buf, sizeof(buf));\
+			if (r <= 0 || buf[r - 1] != '\n') {\
+				fprintf(stderr, "libgamma_perror(\"\", %s) failed\n", #CONST);\
+				exit(1);\
+			}\
+			buf[r - 1] = '\0';\
+			if (strcmp(buf, libgamma_strerror(CONST))) {\
+				fprintf(stderr, "libgamma_perror(\"\", %s) failed\n", #CONST);\
+				exit(1);\
+			}\
+			stderr = fp;\
+			libgamma_perror("prefix", CONST);\
+			stderr = err;\
+			fflush(fp);\
+			r = read(fds[0], buf, sizeof(buf));\
+			if (r <= 0 || buf[r - 1] != '\n') {\
+				fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", #CONST);\
+				exit(1);\
+			}\
+			buf[r - 1] = '\0';\
+			if (strncmp(buf, "prefix: ", 8)) {\
+				fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", #CONST);\
+				exit(1);\
+			}\
+			if (strcmp(&buf[8], libgamma_strerror(CONST))) {\
+				fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", #CONST);\
+				exit(1);\
+			}\
+		}\
+		libgamma_group_gid_set((gid_t)n);\
+		if (libgamma_group_gid_get() != (gid_t)n) {\
+			fprintf(stderr, "libgamma_group_gid_get() != (gid_t)n\n");\
+			exit(1);\
+		}\
+		n += 1;\
+	} while (0)
+
+	X(LIBGAMMA_ERRNO_SET);
+	X(LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD);
+	X(LIBGAMMA_NO_SUCH_SITE);
+	X(LIBGAMMA_NO_SUCH_PARTITION);
+	X(LIBGAMMA_NO_SUCH_CRTC);
+	X(LIBGAMMA_IMPOSSIBLE_AMOUNT);
+	X(LIBGAMMA_CONNECTOR_DISABLED);
+	X(LIBGAMMA_OPEN_CRTC_FAILED);
+	X(LIBGAMMA_CRTC_INFO_NOT_SUPPORTED);
+	X(LIBGAMMA_GAMMA_RAMP_READ_FAILED);
+	X(LIBGAMMA_GAMMA_RAMP_WRITE_FAILED);
+	X(LIBGAMMA_GAMMA_RAMP_SIZE_CHANGED);
+	X(LIBGAMMA_MIXED_GAMMA_RAMP_SIZE);
+	X(LIBGAMMA_WRONG_GAMMA_RAMP_SIZE);
+	X(LIBGAMMA_SINGLETON_GAMMA_RAMP);
+	X(LIBGAMMA_LIST_CRTCS_FAILED);
+	X(LIBGAMMA_ACQUIRING_MODE_RESOURCES_FAILED);
+	X(LIBGAMMA_NEGATIVE_PARTITION_COUNT);
+	X(LIBGAMMA_NEGATIVE_CRTC_COUNT);
+	X(LIBGAMMA_DEVICE_RESTRICTED);
+	X(LIBGAMMA_DEVICE_ACCESS_FAILED);
+	X(LIBGAMMA_DEVICE_REQUIRE_GROUP);
+	X(LIBGAMMA_GRAPHICS_CARD_REMOVED);
+	X(LIBGAMMA_STATE_UNKNOWN);
+	X(LIBGAMMA_CONNECTOR_UNKNOWN);
+	X(LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED);
+	X(LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED);
+	X(LIBGAMMA_EDID_LENGTH_UNSUPPORTED);
+	X(LIBGAMMA_EDID_WRONG_MAGIC_NUMBER);
+	X(LIBGAMMA_EDID_REVISION_UNSUPPORTED);
+	X(LIBGAMMA_GAMMA_NOT_SPECIFIED);
+	X(LIBGAMMA_EDID_CHECKSUM_ERROR);
+	X(LIBGAMMA_GAMMA_NOT_SPECIFIED_AND_EDID_CHECKSUM_ERROR);
+	X(LIBGAMMA_GAMMA_RAMPS_SIZE_QUERY_FAILED);
+	X(LIBGAMMA_OPEN_PARTITION_FAILED);
+	X(LIBGAMMA_OPEN_SITE_FAILED);
+	X(LIBGAMMA_PROTOCOL_VERSION_QUERY_FAILED);
+	X(LIBGAMMA_PROTOCOL_VERSION_NOT_SUPPORTED);
+	X(LIBGAMMA_LIST_PARTITIONS_FAILED);
+	X(LIBGAMMA_NULL_PARTITION);
+	X(LIBGAMMA_NOT_CONNECTED);
+	X(LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED);
+	X(LIBGAMMA_EDID_NOT_FOUND);
+	X(LIBGAMMA_LIST_PROPERTIES_FAILED);
+	X(LIBGAMMA_PROPERTY_VALUE_QUERY_FAILED);
+	X(LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED);
+
+#undef X
+
+	if (-n != LIBGAMMA_ERROR_MIN) {
+		fprintf(stderr, "List of errors in `test_errors` must be updated");
+		exit(1);
+	}
+
+	if (libgamma_value_of_error(NULL)) {
+		fprintf(stderr, "libgamma_value_of_error(NULL) != 0\n");
+		exit(1);
+	}
+	if (libgamma_value_of_error("")) {
+		fprintf(stderr, "libgamma_value_of_error(<invalid>) != 0\n");
+		exit(1);
+	}
+	if (libgamma_name_of_error(1000)) {
+		fprintf(stderr, "libgamma_name_of_error(<invalid>) != NULL\n");
+		exit(1);
+	}
+	if (libgamma_strerror(LIBGAMMA_ERROR_MIN - 1)) {
+		fprintf(stderr, "libgamma_strerror(LIBGAMMA_ERROR_MIN - 1) != NULL\n");
+		exit(1);
+	}
+	if (!libgamma_strerror_r(LIBGAMMA_ERROR_MIN - 1, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(LIBGAMMA_ERROR_MIN - 1, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+	if (!libgamma_strerror_r(INT_MAX, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(INT_MAX, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+
+	/* Just a few of the errors */
+	if (strcmp(libgamma_strerror(LIBGAMMA_NO_SUCH_SITE), "No such site")) {
+		fprintf(stderr, "libgamma_strerror(LIBGAMMA_NO_SUCH_SITE) != \"No such site\"\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror(LIBGAMMA_NO_SUCH_PARTITION), "No such partition")) {
+		fprintf(stderr, "libgamma_strerror(LIBGAMMA_NO_SUCH_PARTITION) != \"No such partition\"\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror(LIBGAMMA_NO_SUCH_CRTC), "No such CRTC")) {
+		fprintf(stderr, "libgamma_strerror(LIBGAMMA_NO_SUCH_CRTC) != \"No such CRTC\"\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror(LIBGAMMA_SINGLETON_GAMMA_RAMP), "Single-stop gamma ramp")) {
+		fprintf(stderr, "libgamma_strerror(LIBGAMMA_SINGLETON_GAMMA_RAMP) != \"Single-stop gamma ramp\"\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror(LIBGAMMA_GRAPHICS_CARD_REMOVED), "Graphics card was removed")) {
+		fprintf(stderr, "libgamma_strerror(LIBGAMMA_GRAPHICS_CARD_REMOVED) != \"Graphics card was removed\"\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror(LIBGAMMA_DEVICE_RESTRICTED), "Device is restricted to root")) {
+		fprintf(stderr, "libgamma_strerror(LIBGAMMA_DEVICE_RESTRICTED) != \"Device is restricted to root\"\n");
+		exit(1);
+	}
+
+	errno = -1;
+	if (!libgamma_strerror(0)) {
+		fprintf(stderr, "libgamma_strerror(0) == NULL\n");
+		exit(1);
+	}
+	if (!libgamma_strerror(ENOMEM)) {
+		fprintf(stderr, "libgamma_strerror(ENOMEM) == NULL\n");
+		exit(1);
+	}
+	if (!libgamma_strerror(ERANGE)) {
+		fprintf(stderr, "libgamma_strerror(ERANGE) == NULL\n");
+		exit(1);
+	}
+	if (!libgamma_strerror(EDOM)) {
+		fprintf(stderr, "libgamma_strerror(EDOM) == NULL\n");
+		exit(1);
+	}
+	errno = 0;
+	if (!libgamma_strerror(LIBGAMMA_ERRNO_SET)) {
+		fprintf(stderr, "libgamma_strerror(0 via LIBGAMMA_ERRNO_SET) == NULL\n");
+		exit(1);
+	}
+	errno = ENOMEM;
+	if (!libgamma_strerror(LIBGAMMA_ERRNO_SET)) {
+		fprintf(stderr, "libgamma_strerror(ENOMEM via LIBGAMMA_ERRNO_SET) == NULL\n");
+		exit(1);
+	}
+	errno = ERANGE;
+	if (!libgamma_strerror(LIBGAMMA_ERRNO_SET)) {
+		fprintf(stderr, "libgamma_strerror(ERANGE via LIBGAMMA_ERRNO_SET) == NULL\n");
+		exit(1);
+	}
+	errno = EDOM;
+	if (!libgamma_strerror(LIBGAMMA_ERRNO_SET)) {
+		fprintf(stderr, "libgamma_strerror(EDOM via LIBGAMMA_ERRNO_SET) == NULL\n");
+		exit(1);
+	}
+
+	errno = -1;
+	if (strcmp(libgamma_strerror(0), strerror(0))) {
+		fprintf(stderr, "libgamma_strerror(0) != strerror(0)\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror(ENOMEM), strerror(ENOMEM))) {
+		fprintf(stderr, "libgamma_strerror(ENOMEM) != strerror(ENOMEM)\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror(ERANGE), strerror(ERANGE))) {
+		fprintf(stderr, "libgamma_strerror(ERANGE) != strerror(ERANGE)\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror(EDOM), strerror(EDOM))) {
+		fprintf(stderr, "libgamma_strerror(EDOM) != strerror(EDOM)\n");
+		exit(1);
+	}
+	errno = 0;
+	if (strcmp(libgamma_strerror(LIBGAMMA_ERRNO_SET), strerror(0))) {
+		fprintf(stderr, "libgamma_strerror(0 via LIBGAMMA_ERRNO_SET) != strerror(0)\n");
+		exit(1);
+	}
+	errno = ENOMEM;
+	if (strcmp(libgamma_strerror(LIBGAMMA_ERRNO_SET), strerror(ENOMEM))) {
+		fprintf(stderr, "libgamma_strerror(ENOMEM via LIBGAMMA_ERRNO_SET) != strerror(ENOMEM)\n");
+		exit(1);
+	}
+	errno = ERANGE;
+	if (strcmp(libgamma_strerror(LIBGAMMA_ERRNO_SET), strerror(ERANGE))) {
+		fprintf(stderr, "libgamma_strerror(ERANGE via LIBGAMMA_ERRNO_SET) != strerror(ERANGE)\n");
+		exit(1);
+	}
+	errno = EDOM;
+	if (strcmp(libgamma_strerror(LIBGAMMA_ERRNO_SET), strerror(EDOM))) {
+		fprintf(stderr, "libgamma_strerror(EDOM via LIBGAMMA_ERRNO_SET) != strerror(EDOM)\n");
+		exit(1);
+	}
+
+	errno = -1;
+	if (!libgamma_strerror_r(0, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(0, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+	if (!libgamma_strerror_r(ENOMEM, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(ENOMEM, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+	if (!libgamma_strerror_r(ERANGE, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(ERANGE, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+	if (!libgamma_strerror_r(EDOM, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(EDOM, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+	errno = 0;
+	if (!libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(0 via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+	errno = ENOMEM;
+	if (!libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(ENOMEM via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+	errno = ERANGE;
+	if (!libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(ERANGE via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+	errno = EDOM;
+	if (!libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf))) {
+		fprintf(stderr, "libgamma_strerror_r(EDOM via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) == NULL\n");
+		exit(1);
+	}
+
+	errno = -1;
+	if (strcmp(libgamma_strerror_r(0, buf, sizeof(buf)), strerror(0))) {
+		fprintf(stderr, "libgamma_strerror_r(0, buf, sizeof(buf)) != strerror(0)\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror_r(ENOMEM, buf, sizeof(buf)), strerror(ENOMEM))) {
+		fprintf(stderr, "libgamma_strerror_r(ENOMEM, buf, sizeof(buf)) != strerror(ENOMEM)\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror_r(ERANGE, buf, sizeof(buf)), strerror(ERANGE))) {
+		fprintf(stderr, "libgamma_strerror_r(ERANGE, buf, sizeof(buf)) != strerror(ERANGE)\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_strerror_r(EDOM, buf, sizeof(buf)), strerror(EDOM))) {
+		fprintf(stderr, "libgamma_strerror_r(EDOM, buf, sizeof(buf)) != strerror(EDOM)\n");
+		exit(1);
+	}
+	errno = 0;
+	if (strcmp(libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf)), strerror(0))) {
+		fprintf(stderr, "libgamma_strerror_r(0 via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) != strerror(0)\n");
+		exit(1);
+	}
+	errno = ENOMEM;
+	if (strcmp(libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf)), strerror(ENOMEM))) {
+		fprintf(stderr, "libgamma_strerror_r(ENOMEM via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) != strerror(ENOMEM)\n");
+		exit(1);
+	}
+	errno = ERANGE;
+	if (strcmp(libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf)), strerror(ERANGE))) {
+		fprintf(stderr, "libgamma_strerror_r(ERANGE via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) != strerror(ERANGE)\n");
+		exit(1);
+	}
+	errno = EDOM;
+	if (strcmp(libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf)), strerror(EDOM))) {
+		fprintf(stderr, "libgamma_strerror_r(EDOM via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) != strerror(EDOM)\n");
+		exit(1);
+	}
+
+	libgamma_group_name_set(NULL);
+	if (libgamma_group_name_get()) {
+		fprintf(stderr, "libgamma_group_name_get() != NULL\n");
+		exit(1);
+	}
+	libgamma_group_name_set("group");
+	if (!libgamma_group_name_get()) {
+		fprintf(stderr, "libgamma_group_name_get() == NULL\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_group_name_get(), "group")) {
+		fprintf(stderr, "libgamma_group_name_get() != \"group\"\n");
+		exit(1);
+	}
+	libgamma_group_name_set("");
+	if (libgamma_group_name_get()) {
+		fprintf(stderr, "libgamma_group_name_get() != NULL\n");
+		exit(1);
+	}
+	libgamma_group_name_set("name");
+	if (!libgamma_group_name_get()) {
+		fprintf(stderr, "libgamma_group_name_get() == NULL\n");
+		exit(1);
+	}
+	if (strcmp(libgamma_group_name_get(), "name")) {
+		fprintf(stderr, "libgamma_group_name_get() != \"name\"\n");
+		exit(1);
+	}
+	libgamma_group_name_set(NULL);
+	if (libgamma_group_name_get()) {
+		fprintf(stderr, "libgamma_group_name_get() != NULL\n");
+		exit(1);
+	}
+
+	libgamma_group_gid_set(5);
+	snprintf(buf2, sizeof(buf2), "%s in group 5", libgamma_strerror(LIBGAMMA_DEVICE_REQUIRE_GROUP));
+
+	stderr = fp;
+	libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP);
+	stderr = err;
+	fflush(fp);
+	r = read(fds[0], buf, sizeof(buf));
+	if (r <= 0 || buf[r - 1] != '\n') {
+		fprintf(stderr, "libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n"); 
+		exit(1);
+	}
+	buf[r - 1] = '\0';
+	if (strcmp(buf, buf2)) {
+		fprintf(stderr, "libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
+		exit(1);
+	}
+
+	stderr = fp;
+	libgamma_perror("", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+	stderr = err;
+	fflush(fp);
+	r = read(fds[0], buf, sizeof(buf));
+	if (r <= 0 || buf[r - 1] != '\n') {
+		fprintf(stderr, "libgamma_perror(\"\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
+		exit(1);
+	}
+	buf[r - 1] = '\0';
+	if (strcmp(buf, buf2)) {
+		fprintf(stderr, "libgamma_perror(\"\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
+		exit(1);
+	}
+
+	stderr = fp;
+	libgamma_perror("prefix", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+	stderr = err;
+	fflush(fp);
+	r = read(fds[0], buf, sizeof(buf));
+	if (r <= 0 || buf[r - 1] != '\n') {
+		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		exit(1);
+	}
+	buf[r - 1] = '\0';
+	if (strncmp(buf, "prefix: ", 8)) {
+		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		exit(1);
+	}
+	if (strcmp(&buf[8], buf2)) {
+		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		exit(1);
+	}
+
+	libgamma_group_gid_set(5);
+	libgamma_group_name_set("grp");
+	snprintf(buf2, sizeof(buf2), "%s in the grp group (5)", libgamma_strerror(LIBGAMMA_DEVICE_REQUIRE_GROUP));
+
+	stderr = fp;
+	libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP);
+	stderr = err;
+	fflush(fp);
+	r = read(fds[0], buf, sizeof(buf));
+	if (r <= 0 || buf[r - 1] != '\n') {
+		fprintf(stderr, "libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n"); 
+		exit(1);
+	}
+	buf[r - 1] = '\0';
+	if (strcmp(buf, buf2)) {
+		fprintf(stderr, "libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
+		exit(1);
+	}
+
+	stderr = fp;
+	libgamma_perror("", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+	stderr = err;
+	fflush(fp);
+	r = read(fds[0], buf, sizeof(buf));
+	if (r <= 0 || buf[r - 1] != '\n') {
+		fprintf(stderr, "libgamma_perror(\"\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
+		exit(1);
+	}
+	buf[r - 1] = '\0';
+	if (strcmp(buf, buf2)) {
+		fprintf(stderr, "libgamma_perror(\"\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
+		exit(1);
+	}
+
+	stderr = fp;
+	libgamma_perror("prefix", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+	stderr = err;
+	fflush(fp);
+	r = read(fds[0], buf, sizeof(buf));
+	if (r <= 0 || buf[r - 1] != '\n') {
+		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		exit(1);
+	}
+	buf[r - 1] = '\0';
+	if (strncmp(buf, "prefix: ", 8)) {
+		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		exit(1);
+	}
+	if (strcmp(&buf[8], buf2)) {
+		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		exit(1);
+	}
+
+	libgamma_group_gid_set(0);
+	libgamma_group_name_set(NULL);
+
+	fclose(fp);
+	close(fds[0]);
+	alarm(0);
+}
 
 
 /**
@@ -690,11 +1363,14 @@ main(void)
 	int r, rr = 0;
 
 	/* Test miscellaneous parts of the library */
+	test_count_consts();
+	test_connector_types();
+	test_subpixel_orders();
+	test_errors();
 	list_methods_lists();
 	method_availability();
 	list_default_sites();
 	method_capabilities();
-	error_test();
 
 	/* Select monitor for tests over CRTC:s, partitions and sites */
 	if (select_monitor(site_state, part_state, crtc_state))
