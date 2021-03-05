@@ -2,7 +2,6 @@
 #include "common.h"
 
 
-
 /**
  * Read information about a CRTC
  * 
@@ -18,7 +17,7 @@ libgamma_get_crtc_information(libgamma_crtc_information_t *restrict this, libgam
 	this->connector_name = NULL;
 
 	switch (crtc->partition->site->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		return libgamma_##CNAME##_get_crtc_information(this, crtc, fields);
 	LIST_AVAILABLE_METHODS(X)

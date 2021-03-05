@@ -18,8 +18,7 @@ int
 libgamma_crtc_set_gamma_ramps8_f(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps8_fun *red_function,
                                  libgamma_gamma_ramps8_fun *green_function, libgamma_gamma_ramps8_fun *blue_function)
 {
-#define TYPE  uint8_t
-#define RAMPS ramps8
+#define TYPE uint8_t
 #define APPEND_RAMPS(X) X##ramps8
 #include "set_ramps_fun.h"
 }

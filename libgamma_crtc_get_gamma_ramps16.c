@@ -14,7 +14,6 @@ int
 libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps16_t* restrict ramps)
 {
 #define DEPTH 16
-#define RAMPS ramps16
 #define TYPE bits16
 #define APPEND_RAMPS(X) X##ramps16
 #include "get_ramps.h"

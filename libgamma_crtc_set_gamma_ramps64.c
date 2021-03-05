@@ -11,10 +11,9 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps64_t ramps)
+libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t *restrict this, const libgamma_gamma_ramps64_t *restrict ramps)
 {
 #define DEPTH 64
-#define RAMPS ramps64
 #define TYPE bits64
 #define APPEND_RAMPS(X) X##ramps64
 #include "set_ramps.h"

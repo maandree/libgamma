@@ -18,8 +18,7 @@ int
 libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t *restrict this, libgamma_gamma_rampsd_fun *red_function,
                                  libgamma_gamma_rampsd_fun *green_function, libgamma_gamma_rampsd_fun *blue_function)
 {
-#define TYPE  double
-#define RAMPS rampsd
+#define TYPE double
 #define APPEND_RAMPS(X) X##rampsd
 #include "set_ramps_fun.h"
 }

@@ -18,8 +18,7 @@ int
 libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps64_fun *red_function,
                                  libgamma_gamma_ramps64_fun *green_function, libgamma_gamma_ramps64_fun *blue_function)
 {
-#define TYPE  uint64_t
-#define RAMPS ramps64
+#define TYPE uint64_t
 #define APPEND_RAMPS(X) X##ramps64
 #include "set_ramps_fun.h"
 }

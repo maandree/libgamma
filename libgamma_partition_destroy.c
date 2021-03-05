@@ -11,7 +11,7 @@ void
 libgamma_partition_destroy(libgamma_partition_state_t *restrict this)
 {
 	switch (this->site->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		libgamma_##CNAME##_partition_destroy(this);\
 		break;

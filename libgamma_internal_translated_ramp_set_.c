@@ -24,7 +24,7 @@
  *                        error identifier provided by this library
  */
 int
-libgamma_internal_translated_ramp_set_(libgamma_crtc_state_t *restrict this, gamma_ramps_any_t ramps,
+libgamma_internal_translated_ramp_set_(libgamma_crtc_state_t *restrict this, const gamma_ramps_any_t *restrict ramps,
                                        signed depth_user, signed depth_system, set_ramps_any_fun *fun)
 {
 	size_t n;
@@ -46,11 +46,11 @@ libgamma_internal_translated_ramp_set_(libgamma_crtc_state_t *restrict this, gam
 	/* Translate ramps to 64-bit integers. */
 	libgamma_internal_translate_to_64(depth_user, n, ramps_full, ramps);
 	/* Translate ramps to the proper format. */
-	libgamma_internal_translate_from_64(depth_system, n, ramps_sys, ramps_full);
+	libgamma_internal_translate_from_64(depth_system, n, &ramps_sys, ramps_full);
 	free(ramps_full);
 
 	/* Apply the ramps */
-	r = fun(this, ramps_sys);
+	r = fun(this, &ramps_sys);
 
 	free(ramps_sys.ANY.red);
 	return r;

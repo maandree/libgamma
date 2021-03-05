@@ -23,7 +23,7 @@ libgamma_site_initialise(libgamma_site_state_t *restrict this, int method, char 
 	this->site = site;
 
 	switch (method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		return libgamma_##CNAME##_site_initialise(this, site);
 	LIST_AVAILABLE_METHODS(X)

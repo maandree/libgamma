@@ -45,6 +45,6 @@ for (i = 0, n = ramps.blue_size; i < n; i++)
 	ramps.blue[i] = blue_function((float)i / (float)(n - 1));
 
 /* Apply the gamma ramps */
-e = APPEND_RAMPS(libgamma_crtc_set_gamma_)(this, ramps);
+e = APPEND_RAMPS(libgamma_crtc_set_gamma_)(this, &ramps);
 free(ramps.red);
 return e;

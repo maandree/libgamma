@@ -23,10 +23,6 @@ OS = linux
 include mk/$(OS).mk
 
 
-HDR_METHODS      =
-CPPFLAGS_METHODS =
-METHODS_PARAMS   =
-
 QUARTZ_CORE_GRAPHICS_METHOD = $(QUARTZ_CG_METHOD)
 include mk/method-x-randr=$(X_RANDR_METHOD).mk
 include mk/method-x-vidmode=$(X_VIDMODE_METHOD).mk
@@ -34,6 +30,20 @@ include mk/method-linux-drm=$(LINUX_DRM_METHOD).mk
 include mk/method-w32-gdi=$(W32_GDI_METHOD).mk
 include mk/method-quartz-cg=$(QUARTZ_CORE_GRAPHICS_METHOD).mk
 include mk/method-dummy=$(DUMMY_METHOD).mk
+
+# Need to do it this way since += is not in the POSIX make
+HDR_METHODS      = $(HDR_X_RANDR)      $(HDR_X_VIDMODE)      $(HDR_LINUX_DRM)\
+                   $(HDR_W32_GDI)      $(HDR_QUARTZ_GC)      $(HDR_DUMMY)
+OBJ_METHODS      = $(OBJ_X_RANDR)      $(OBJ_X_VIDMODE)      $(OBJ_LINUX_DRM)\
+                   $(OBJ_W32_GDI)      $(OBJ_QUARTZ_GC)      $(OBJ_DUMMY)
+METHODS_PARAMS   = $(PARAMS_X_RANDR)   $(PARAMS_X_VIDMODE)   $(PARAMS_LINUX_DRM)\
+                   $(PARAMS_W32_GDI)   $(PARAMS_QUARTZ_GC)   $(PARAMS_DUMMY)
+CPPFLAGS_METHODS = $(CPPFLAGS_X_RANDR) $(CPPFLAGS_X_VIDMODE) $(CPPFLAGS_LINUX_DRM)\
+                   $(CPPFLAGS_W32_GDI) $(CPPFLAGS_QUARTZ_GC) $(CPPFLAGS_DUMMY)
+CFLAGS_METHODS   = $(CFLAGS_X_RANDR)   $(CFLAGS_X_VIDMODE)   $(CFLAGS_LINUX_DRM)\
+                   $(CFLAGS_W32_GDI)   $(CFLAGS_QUARTZ_GC)   $(CFLAGS_DUMMY)
+LDFLAGS_METHODS  = $(LDFLAGS_X_RANDR)  $(LDFLAGS_X_VIDMODE)  $(LDFLAGS_LINUX_DRM)\
+                   $(LDFLAGS_W32_GDI)  $(LDFLAGS_QUARTZ_GC)  $(LDFLAGS_DUMMY)
 
 
 OBJ_PUBLIC =\
@@ -117,7 +127,8 @@ OBJ_PUBLIC =\
 	libgamma_value_of_connector_type.o\
 	libgamma_value_of_error.o\
 	libgamma_value_of_method.o\
-	libgamma_value_of_subpixel_order.o
+	libgamma_value_of_subpixel_order.o\
+	legacy.o
 
 OBJ_INTERNAL =\
 	libgamma_internal_allocated_any_ramp.o\
@@ -125,9 +136,9 @@ OBJ_INTERNAL =\
 	libgamma_internal_translated_ramp_get_.o\
 	libgamma_internal_translated_ramp_set_.o\
 	libgamma_internal_translate_from_64.o\
-	libgamma_internal_translate_to_64.o\
+	libgamma_internal_translate_to_64.o
 
-OBJ = $(OBJ_PUBLIC) $(OBJ_INTERNAL)
+OBJ = $(OBJ_PUBLIC) $(OBJ_INTERNAL) $(OBJ_METHODS)
 LOBJ = $(OBJ:.o=.lo)
 
 HDR =\

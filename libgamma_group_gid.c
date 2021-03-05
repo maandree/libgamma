@@ -2,7 +2,7 @@
 #include "common.h"
 
 #ifdef __WIN32__
-#define gid_t short
+# define gid_t short
 #endif
 
 

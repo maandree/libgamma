@@ -13,13 +13,13 @@
 int
 libgamma_value_of_subpixel_order(const char *order)
 {
-#define X(CONST, NAME)\
+#define X(CONST, NAME, ...)\
 	if (!strcmp(order, NAME))\
 		return CONST;
 	LIST_SUBPIXEL_ORDERS(X)
 #undef X
 
-#define X(CONST, NAME)\
+#define X(CONST, ...)\
 	if (!strcmp(order, #CONST))\
 		return CONST;
 	LIST_SUBPIXEL_ORDERS(X)

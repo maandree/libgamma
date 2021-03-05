@@ -6,4 +6,4 @@
  * The number of values defined in `libgamma_connector_type_t`
  * in the version of the library the program is linked against
  */
-extern const int libgamma_connector_type_count;
+const int libgamma_connector_type_count = LIBGAMMA_CONNECTOR_TYPE_COUNT;

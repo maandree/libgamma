@@ -18,7 +18,7 @@ libgamma_partition_initialise(libgamma_partition_state_t *restrict this, libgamm
 	this->partition = partition;
 
 	switch (site->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		return libgamma_##CNAME##_partition_initialise(this, site, partition);
 	LIST_AVAILABLE_METHODS(X)

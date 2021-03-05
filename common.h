@@ -1,10 +1,14 @@
 /* See LICENSE file for copyright and license details. */
 #include "libgamma.h"
 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <ctype.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <inttypes.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -17,6 +21,19 @@
 
 #if !defined(HAVE_INT128) && defined(__GNUC__)
 # define HAVE_INT128
+#endif
+
+
+#ifdef __linux__
+# ifndef O_CLOEXEC
+#  define O_CLOEXEC 02000000
+# endif
+# ifndef NGROUPS_MAX
+#  define NGROUPS_MAX 65536
+# endif
+# ifndef PATH_MAX
+#  define PATH_MAX 4096
+# endif
 #endif
 
 
@@ -69,7 +86,7 @@
 	_(LIBGAMMA_PROPERTY_VALUE_QUERY_FAILED, "Could not query the value of a property")\
 	_(LIBGAMMA_OUTPUT_INFORMATION_QUERY_FAILED, "Could not query information for output")
 
-#define X(A, B) -1
+#define X(...) -1
 # if (LIST_ERRORS(X)) != LIBGAMMA_ERROR_MIN
 #  error There is a mismatch between LIST_ERRORS and LIBGAMMA_ERROR_MIN
 # endif
@@ -113,6 +130,7 @@
 # define HAVE_METHOD_QUARTZ_CORE_GRAPHICS 0
 #endif
 
+/* CONST, NAME, CNAME, AVAILABLE */
 #define LIST_METHODS(_)\
 	_(LIBGAMMA_METHOD_X_RANDR, randr, x_randr, HAVE_METHOD_X_RANDR)\
 	_(LIBGAMMA_METHOD_X_VIDMODE, vidmode, x_vidmode, HAVE_METHOD_X_VIDMODE)\
@@ -129,29 +147,33 @@
 
 
 
+/* CONST, NAME, DRM_MODE_CONNECTOR_SUFFIX */
 #define LIST_CONNECTOR_TYPES(_)\
-	_(LIBGAMMA_CONNECTOR_TYPE_Unknown, "Unknown")\
-	_(LIBGAMMA_CONNECTOR_TYPE_VGA, "VGA")\
-	_(LIBGAMMA_CONNECTOR_TYPE_DVI, "DVI")\
-	_(LIBGAMMA_CONNECTOR_TYPE_DVII, "DVI-I")\
-	_(LIBGAMMA_CONNECTOR_TYPE_DVID, "DVI-D")\
-	_(LIBGAMMA_CONNECTOR_TYPE_DVIA, "DVI-A")\
-	_(LIBGAMMA_CONNECTOR_TYPE_Composite, "Composite")\
-	_(LIBGAMMA_CONNECTOR_TYPE_SVIDEO, "S-video")\
-	_(LIBGAMMA_CONNECTOR_TYPE_LVDS, "LVDS")\
-	_(LIBGAMMA_CONNECTOR_TYPE_Component, "Component")\
-	_(LIBGAMMA_CONNECTOR_TYPE_9PinDIN, "9 pin DIN")\
-	_(LIBGAMMA_CONNECTOR_TYPE_DisplayPort, "DisplayPort")\
-	_(LIBGAMMA_CONNECTOR_TYPE_HDMI, "HDMI")\
-	_(LIBGAMMA_CONNECTOR_TYPE_HDMIA, "HDMI-A")\
-	_(LIBGAMMA_CONNECTOR_TYPE_HDMIB, "HDMI-B")\
-	_(LIBGAMMA_CONNECTOR_TYPE_TV, "TV")\
-	_(LIBGAMMA_CONNECTOR_TYPE_eDP, "eDP")\
-	_(LIBGAMMA_CONNECTOR_TYPE_VIRTUAL, "Virtual")\
-	_(LIBGAMMA_CONNECTOR_TYPE_DSI, "DSI")\
-	_(LIBGAMMA_CONNECTOR_TYPE_LFP, "LFP")
+	_(LIBGAMMA_CONNECTOR_TYPE_Unknown, "Unknown", Unknown)\
+	_(LIBGAMMA_CONNECTOR_TYPE_VGA, "VGA", VGA)\
+	_(LIBGAMMA_CONNECTOR_TYPE_DVI, "DVI", DVI)\
+	_(LIBGAMMA_CONNECTOR_TYPE_DVII, "DVI-I", DVII)\
+	_(LIBGAMMA_CONNECTOR_TYPE_DVID, "DVI-D", DVID)\
+	_(LIBGAMMA_CONNECTOR_TYPE_DVIA, "DVI-A", DVIA)\
+	_(LIBGAMMA_CONNECTOR_TYPE_Composite, "Composite", Composite)\
+	_(LIBGAMMA_CONNECTOR_TYPE_SVIDEO, "S-Video", SVIDEO)\
+	_(LIBGAMMA_CONNECTOR_TYPE_LVDS, "LVDS", LVDS)\
+	_(LIBGAMMA_CONNECTOR_TYPE_Component, "Component", Component)\
+	_(LIBGAMMA_CONNECTOR_TYPE_9PinDIN, "9 pin DIN", 9PinDIN)\
+	_(LIBGAMMA_CONNECTOR_TYPE_DisplayPort, "DisplayPort", DisplayPort)\
+	_(LIBGAMMA_CONNECTOR_TYPE_HDMI, "HDMI", HDMI)\
+	_(LIBGAMMA_CONNECTOR_TYPE_HDMIA, "HDMI-A", HDMIA)\
+	_(LIBGAMMA_CONNECTOR_TYPE_HDMIB, "HDMI-B", HDMIB)\
+	_(LIBGAMMA_CONNECTOR_TYPE_TV, "TV", TV)\
+	_(LIBGAMMA_CONNECTOR_TYPE_eDP, "eDP", eDP)\
+	_(LIBGAMMA_CONNECTOR_TYPE_VIRTUAL, "Virtual", VIRTUAL)\
+	_(LIBGAMMA_CONNECTOR_TYPE_DSI, "DSI", DSI)\
+	_(LIBGAMMA_CONNECTOR_TYPE_LFP, "LFP", LFP)\
+	_(LIBGAMMA_CONNECTOR_TYPE_DPI, "DPI", DPI)\
+	_(LIBGAMMA_CONNECTOR_TYPE_WRITEBACK, "Writeback", WRITEBACK)\
+	_(LIBGAMMA_CONNECTOR_TYPE_SPI, "SPI", SPI)
 
-#define X(A, B) +1
+#define X(...) +1
 # if (LIST_CONNECTOR_TYPES(X)) != LIBGAMMA_CONNECTOR_TYPE_COUNT
 #  error There is a mismatch between LIST_CONNECTOR_TYPES and LIBGAMMA_CONNECTOR_TYPE_COUNT
 # endif
@@ -159,15 +181,16 @@
 
 
 
+/* CONST, NAME, DRM_MODE_SUBPIXEL_SUFFIX/XCB_RENDER_SUB_PIXEL_SUFFIX */
 #define LIST_SUBPIXEL_ORDERS(_)\
-	_(LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN, "Unknown")\
-	_(LIBGAMMA_SUBPIXEL_ORDER_NONE, "None")\
-	_(LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB, "Horizontal RGB")\
-	_(LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_BGR, "Horizontal BGR")\
-	_(LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_RGB, "Vertical RGB")\
-	_(LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_BGR, "Vertical BGR")
+	_(LIBGAMMA_SUBPIXEL_ORDER_UNKNOWN, "Unknown", UNKNOWN)\
+	_(LIBGAMMA_SUBPIXEL_ORDER_NONE, "None", NONE)\
+	_(LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB, "Horizontal RGB", HORIZONTAL_RGB)\
+	_(LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_BGR, "Horizontal BGR", HORIZONTAL_BGR)\
+	_(LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_RGB, "Vertical RGB", VERTICAL_RGB)\
+	_(LIBGAMMA_SUBPIXEL_ORDER_VERTICAL_BGR, "Vertical BGR", VERTICAL_BGR)
 
-#define X(A, B) +1
+#define X(...) +1
 # if (LIST_SUBPIXEL_ORDERS(X)) != LIBGAMMA_SUBPIXEL_ORDER_COUNT
 #  error There is a mismatch between LIST_SUBPIXEL_ORDERS and LIBGAMMA_SUBPIXEL_ORDER_COUNT
 # endif
@@ -220,6 +243,7 @@ typedef union gamma_ramps_any {
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
 typedef int get_ramps_any_fun(libgamma_crtc_state_t *restrict, gamma_ramps_any_t *restrict);
 
 /**
@@ -230,7 +254,8 @@ typedef int get_ramps_any_fun(libgamma_crtc_state_t *restrict, gamma_ramps_any_t
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-typedef int set_ramps_any_fun(libgamma_crtc_state_t *restrict, gamma_ramps_any_t);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
+typedef int set_ramps_any_fun(libgamma_crtc_state_t *restrict, const gamma_ramps_any_t *restrict);
 
 
 
@@ -285,6 +310,7 @@ typedef int set_ramps_any_fun(libgamma_crtc_state_t *restrict, gamma_ramps_any_t
  * @return                Zero on success, otherwise (negative) the value of an
  *                        error identifier provided by this library
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
 int libgamma_internal_translated_ramp_get_(libgamma_crtc_state_t *restrict, gamma_ramps_any_t *restrict,
                                            signed, signed, get_ramps_any_fun *);
 
@@ -303,7 +329,8 @@ int libgamma_internal_translated_ramp_get_(libgamma_crtc_state_t *restrict, gamm
  * @return                Zero on success, otherwise (negative) the value of an
  *                        error identifier provided by this library
  */
-int libgamma_internal_translated_ramp_set_(libgamma_crtc_state_t *restrict, gamma_ramps_any_t,
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
+int libgamma_internal_translated_ramp_set_(libgamma_crtc_state_t *restrict, const gamma_ramps_any_t *restrict,
                                            signed, signed, set_ramps_any_fun *);
 
 /**
@@ -314,7 +341,8 @@ int libgamma_internal_translated_ramp_set_(libgamma_crtc_state_t *restrict, gamm
  * @param  out    Output array
  * @param  in     Input gamma ramps
  */
-void libgamma_internal_translate_to_64(signed, size_t, uint64_t *restrict, gamma_ramps_any_t);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
+void libgamma_internal_translate_to_64(signed, size_t, uint64_t *restrict, const gamma_ramps_any_t *restrict);
 
 /**
  * Undo the actions of `libgamma_internal_translate_to_64`
@@ -324,7 +352,8 @@ void libgamma_internal_translate_to_64(signed, size_t, uint64_t *restrict, gamma
  * @param  out    Output gamma ramps
  * @param  in     Input array, may be modified
  */
-void libgamma_internal_translate_from_64(signed, size_t, gamma_ramps_any_t, uint64_t *restrict);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
+void libgamma_internal_translate_from_64(signed, size_t, gamma_ramps_any_t *restrict, const uint64_t *restrict);
 
 /**
  * Allocate and initalise a gamma ramp with any depth
@@ -337,7 +366,8 @@ void libgamma_internal_translate_from_64(signed, size_t, gamma_ramps_any_t, uint
  * @return             Zero on success, otherwise (negative) the value of an
  *                     error identifier provided by this library
  */
-int libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict, gamma_ramps_any_t, signed, size_t *restrict);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
+int libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict, const gamma_ramps_any_t *restrict, signed, size_t *restrict);
 
 
 /**
@@ -349,4 +379,5 @@ int libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict, gamma_ramp
  *                  fields that do not have to do with EDID are ignored
  * @return          Non-zero on error
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
 int libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict, int32_t);

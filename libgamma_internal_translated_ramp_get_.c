@@ -33,7 +33,7 @@ libgamma_internal_translated_ramp_get_(libgamma_crtc_state_t *restrict this, gam
 	uint64_t *restrict ramps_full;
   
 	/* Allocate ramps with proper data type */
-	if ((r = libgamma_internal_allocated_any_ramp(&ramps_sys, *ramps, depth_system, &n)))
+	if ((r = libgamma_internal_allocated_any_ramp(&ramps_sys, ramps, depth_system, &n)))
 		return r;
 
 	/* Fill the ramps */
@@ -50,11 +50,11 @@ libgamma_internal_translated_ramp_get_(libgamma_crtc_state_t *restrict this, gam
 	}
 
 	/* Translate ramps to 64-bit integers */
-	libgamma_internal_translate_to_64(depth_system, n, ramps_full, ramps_sys);
+	libgamma_internal_translate_to_64(depth_system, n, ramps_full, &ramps_sys);
 	free(ramps_sys.ANY.red);
 
 	/* Translate ramps to the user's format */
-	libgamma_internal_translate_from_64(depth_user, n, *ramps, ramps_full);
+	libgamma_internal_translate_from_64(depth_user, n, ramps, ramps_full);
 	free(ramps_full);
 	return 0;
 }

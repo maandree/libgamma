@@ -7,11 +7,6 @@
  */
 #define ANY bits64
 
-/**
- * Concatenation of all ramps
- */
-#define ALL red
-
 
 /**
  * Allocate and initalise a gamma ramp with any depth
@@ -25,11 +20,11 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict ramps_sys, gamma_ramps_any_t ramps,
+libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict ramps_sys, const gamma_ramps_any_t *restrict ramps,
                                      signed depth, size_t *restrict elements)
 {
 	/* Calculate the size of the allocation to do */
-	size_t d, n = ramps.ANY.red_size + ramps.ANY.green_size + ramps.ANY.blue_size;
+	size_t d, n = ramps->ANY.red_size + ramps->ANY.green_size + ramps->ANY.blue_size;
 	switch (depth) {
 	case  8:  d = sizeof(uint8_t);   break;
 	case 16:  d = sizeof(uint16_t);  break;
@@ -42,7 +37,7 @@ libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict ramps_sys, gamm
 	}
 
 	/* Copy the gamma ramp sizes */
-	ramps_sys->ANY = ramps.ANY;
+	ramps_sys->ANY = ramps->ANY;
 	/* Allocate the new ramps */
 #ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
 	/* Valgrind complains about us reading uninitialize memory if we just use malloc */
@@ -50,8 +45,8 @@ libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict ramps_sys, gamm
 #else
 	ramps_sys->ANY.red = malloc(n * d);
 #endif
-	ramps_sys->ANY.green = (void *)&((char *)ramps_sys->ANY.  red)[ramps.ANY.  red_size * d / sizeof(char)];
-	ramps_sys->ANY.blue  = (void *)&((char *)ramps_sys->ANY.green)[ramps.ANY.green_size * d / sizeof(char)];
+	ramps_sys->ANY.green = (void *)&((char *)ramps_sys->ANY.  red)[ramps->ANY.  red_size * d / sizeof(char)];
+	ramps_sys->ANY.blue  = (void *)&((char *)ramps_sys->ANY.green)[ramps->ANY.green_size * d / sizeof(char)];
 
 	/* Report the total gamma ramp size */
 	*elements = n;

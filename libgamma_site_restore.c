@@ -13,7 +13,7 @@ int
 libgamma_site_restore(libgamma_site_state_t *restrict this)
 {
 	switch (this->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		return libgamma_##CNAME##_site_restore(this);
 	LIST_AVAILABLE_METHODS(X)

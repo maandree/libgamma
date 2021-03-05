@@ -18,7 +18,7 @@ libgamma_crtc_initialise(libgamma_crtc_state_t *restrict this, libgamma_partitio
 	this->crtc = crtc;
 
 	switch (partition->site->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		return libgamma_##CNAME##_crtc_initialise(this, partition, crtc);
 	LIST_AVAILABLE_METHODS(X)

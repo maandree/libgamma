@@ -11,10 +11,9 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_crtc_set_gamma_ramps8(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps8_t ramps)
+libgamma_crtc_set_gamma_ramps8(libgamma_crtc_state_t *restrict this, const libgamma_gamma_ramps8_t *restrict ramps)
 {
 #define DEPTH 8
-#define RAMPS ramps8
 #define TYPE bits8
 #define APPEND_RAMPS(X) X##ramps8
 #include "set_ramps.h"

@@ -15,8 +15,9 @@ const char *
 libgamma_const_of_subpixel_order(int order)
 {
 	switch (order) {
-#define X(CONST, NAME)\
-	case CONST: return #CONST;
+#define X(CONST, ...)\
+	case CONST:\
+		return #CONST;
 	LIST_SUBPIXEL_ORDERS(X)
 #undef X
 	default:

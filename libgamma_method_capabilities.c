@@ -16,7 +16,7 @@ libgamma_method_capabilities(libgamma_method_capabilities_t *restrict this, int 
 	memset(this, 0, sizeof(*this));
 
 	switch (method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		libgamma_##CNAME##_method_capabilities(this);\
 		return 0;

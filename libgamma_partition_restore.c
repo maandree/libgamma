@@ -13,7 +13,7 @@ int
 libgamma_partition_restore(libgamma_partition_state_t *restrict this)
 {
 	switch (this->site->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		return libgamma_##CNAME##_partition_restore(this);
 	LIST_AVAILABLE_METHODS(X)

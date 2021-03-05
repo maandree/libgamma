@@ -13,13 +13,13 @@
 int
 libgamma_value_of_connector_type(const char *connector)
 {
-#define X(CONST, NAME)\
+#define X(CONST, NAME, ...)\
 	if (!strcmp(connector, NAME))\
 		return CONST;
 	LIST_CONNECTOR_TYPES(X)
 #undef X
 
-#define X(CONST, NAME)\
+#define X(CONST, ...)\
 	if (!strcmp(connector, #CONST))\
 		return CONST;
 	LIST_CONNECTOR_TYPES(X)

@@ -15,7 +15,8 @@ libgamma_is_method_available(int method)
 {
 	switch (method) {
 #define X(CONST, NAME, CNAME, ENABLED)\
-	case CONST: return ENABLED;
+	case CONST:\
+		return ENABLED;
 	LIST_METHODS(X)
 #undef X
 	default:

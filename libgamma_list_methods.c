@@ -125,7 +125,7 @@ libgamma_list_methods(int *restrict methods, size_t buf_size, int operation)
 {
 	size_t n = 0;
 
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, ...)\
 	if (list_method_test(CONST, operation) && n++ < buf_size)\
 		methods[n - 1] = CONST;
 	LIST_AVAILABLE_METHODS(X)

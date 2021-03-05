@@ -18,8 +18,9 @@ const char *
 libgamma_name_of_connector_type(int connector)
 {
 	switch (connector) {
-#define X(CONST, NAME)\
-	case CONST: return NAME;
+#define X(CONST, NAME, ...)\
+	case CONST:\
+		return NAME;
 	LIST_CONNECTOR_TYPES(X)
 #undef X
 	default:

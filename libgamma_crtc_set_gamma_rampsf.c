@@ -11,10 +11,9 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t *restrict this, libgamma_gamma_rampsf_t ramps)
+libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t *restrict this, const libgamma_gamma_rampsf_t *restrict ramps)
 {
 #define DEPTH -1
-#define RAMPS rampsf
 #define TYPE float_single
 #define APPEND_RAMPS(X) X##rampsf
 #include "set_ramps.h"

@@ -18,8 +18,7 @@ int
 libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t *restrict this, libgamma_gamma_rampsf_fun *red_function,
                                  libgamma_gamma_rampsf_fun *green_function, libgamma_gamma_rampsf_fun *blue_function)
 {
-#define TYPE  float
-#define RAMPS rampsf
+#define TYPE float
 #define APPEND_RAMPS(X) X##rampsf
 #include "set_ramps_fun.h"
 }

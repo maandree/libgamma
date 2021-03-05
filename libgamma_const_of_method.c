@@ -14,8 +14,9 @@ const char *
 libgamma_const_of_method(int method)
 {
 	switch (method) {
-#define X(CONST, NAME, CNAME, ENABLED)\
-	case CONST: return #CONST;
+#define X(CONST, ...)\
+	case CONST:\
+		return #CONST;
 	LIST_METHODS(X)
 #undef X
 	default:

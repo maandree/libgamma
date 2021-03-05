@@ -13,7 +13,7 @@ switch (this->partition->site->method) {
 #define X(CONST, CNAME, MDEPTH, MRAMPS)\
 case CONST:\
 	if (!(MDEPTH)) {\
-		return APPEND_RAMPS(libgamma_dummy_crtc_get_gamma_)(this, ramps);\
+		return APPEND_RAMPS(libgamma_dummy_crtc_get_gamma_)(this, (void *)ramps);\
 	} else if ((DEPTH) == (MDEPTH)) {\
 		return libgamma_##CNAME##_crtc_get_gamma_##MRAMPS(this, (void *)ramps);\
 	} else {\

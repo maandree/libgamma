@@ -14,7 +14,6 @@ int
 libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t *restrict this, libgamma_gamma_rampsd_t* restrict ramps)
 {
 #define DEPTH -2
-#define RAMPS rampsd
 #define TYPE float_double
 #define APPEND_RAMPS(X) X##rampsd
 #include "get_ramps.h"

@@ -11,7 +11,7 @@ void
 libgamma_site_destroy(libgamma_site_state_t *restrict this)
 {
 	switch (this->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		libgamma_##CNAME##_site_destroy(this);\
 		break;

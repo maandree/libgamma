@@ -13,7 +13,7 @@ int
 libgamma_crtc_restore(libgamma_crtc_state_t *restrict this)
 {
 	switch (this->partition->site->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		return libgamma_##CNAME##_crtc_restore(this);
 	LIST_AVAILABLE_METHODS(X)

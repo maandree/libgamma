@@ -13,8 +13,9 @@ const char *
 libgamma_name_of_error(int value)
 {
 	switch (value) {
-#define X(NAME, DESC)\
-	case NAME: return #NAME;
+#define X(NAME, ...)\
+	case NAME:\
+		return #NAME;
 	LIST_ERRORS(X)
 #undef X
 	default:

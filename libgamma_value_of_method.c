@@ -12,13 +12,13 @@
 int
 libgamma_value_of_method(const char *method)
 {
-#define X(CONST, NAME, CNAME, ENABLED)\
+#define X(CONST, NAME, ...)\
 	if (!strcmp(method, #NAME))\
 		return CONST;
 	LIST_METHODS(X)
 #undef X
 
-#define X(CONST, NAME, CNAME, ENABLED)\
+#define X(CONST, ...)\
 	if (!strcmp(method, #CONST))\
 		return CONST;
 	LIST_METHODS(X)

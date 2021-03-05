@@ -20,7 +20,7 @@ libgamma_strerror(int error_code)
 	switch (error_code) {
 #define X(NAME, DESC)\
 	case NAME:\
-		desc = #NAME;\
+		desc = DESC;\
 		break;
 	LIST_ERRORS(X)
 #undef X

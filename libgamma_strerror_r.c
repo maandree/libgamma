@@ -26,7 +26,7 @@ libgamma_strerror_r(int error_code, char buf[], size_t bufsize)
 	switch (error_code) {
 #define X(NAME, DESC)\
 	case NAME:\
-		desc = #NAME;\
+		desc = DESC;\
 		break;
 	LIST_ERRORS(X)
 #undef X
@@ -42,7 +42,7 @@ libgamma_strerror_r(int error_code, char buf[], size_t bufsize)
 		                /* XSI strerror_r */
 		                int: (errno = (int)(intptr_t)strerror_r(error_code, buf, bufsize)) ? NULL : buf,
 		                /* GNU strerror_r */
-		                char *: (desc = (char *)(uintptr_t)strerror_r(error_code, buf, bufsize)));
+		                char *: (char *)(intptr_t)strerror_r(error_code, buf, bufsize));
 		if (desc) {
 			errno = saved_errno;
 			if (!buf || strcmp(buf, "No error information"))

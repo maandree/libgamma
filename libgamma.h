@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 
-#ifndef __GNUC__
+#ifdef __GNUC__
 # define LIBGAMMA_GCC_ONLY__(X)  X
 #else
 # define LIBGAMMA_GCC_ONLY__(X)
@@ -499,9 +499,30 @@ typedef enum libgamma_connector_type {
 	/**
 	 * LFP connector
 	 * 
-	 * (What is this?)
+	 * (TODO What is a LFP connector?)
 	 */
-	LIBGAMMA_CONNECTOR_TYPE_LFP
+	LIBGAMMA_CONNECTOR_TYPE_LFP,
+
+	/**
+	 * DPI connector
+	 * 
+	 * (TODO What is a DPI connector?)
+	 */
+	LIBGAMMA_CONNECTOR_TYPE_DPI,
+
+	/**
+	 * A writeback connector
+	 * 
+	 * (TODO What is the difference between Virtual and Writeback?)
+	 */
+	LIBGAMMA_CONNECTOR_TYPE_WRITEBACK,
+
+	/**
+	 * SPI connector
+	 * 
+	 * (TODO What is an SPI connector?)
+	 */
+	LIBGAMMA_CONNECTOR_TYPE_SPI
 
 	/* DEVELOPERS: Remember to update LIBGAMMA_CONNECTOR_TYPE_COUNT below
 	 *             and LIST_CONNECTOR_TYPES in common.h when adding methods */
@@ -512,7 +533,7 @@ typedef enum libgamma_connector_type {
  * The number of values defined in `libgamma_connector_type_t`
  * in the version of the library the program is compiled against
  */
-#define LIBGAMMA_CONNECTOR_TYPE_COUNT 20
+#define LIBGAMMA_CONNECTOR_TYPE_COUNT 23
 
 /**
  * The number of values defined in `libgamma_connector_type_t`
@@ -1518,6 +1539,7 @@ typedef double libgamma_gamma_rampsd_fun(double);
  * @param  name        The text to add at the beginning
  * @param  error_code  The error code, may be an `errno` value
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__access__(__read_only__, 1))))
 void libgamma_perror(const char *, int);
 
 /**
@@ -1546,7 +1568,7 @@ const char *libgamma_strerror(int);
  *                      description is returned and `errno` is set to `ERANGE`;
  *                      `errno` is otherwise unmodified
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __access__(__write_only__, 2, 3))))
 const char *libgamma_strerror_r(int, char[], size_t);
 
 /**
@@ -1566,7 +1588,7 @@ const char *libgamma_name_of_error(int);
  * @return        The error code, zero if the name is `NULL`
  *                or does not refer to a `libgamma` error
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __pure__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __access__(__read_only__, 1), __pure__)))
 int libgamma_value_of_error(const char *);
 
 /**
@@ -1576,6 +1598,7 @@ int libgamma_value_of_error(const char *);
  * @return  The group that the user needs to be a member of
  *          if `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__)))
 #ifndef __WIN32__
 gid_t libgamma_group_gid_get(void);
 #else
@@ -1604,6 +1627,7 @@ void libgamma_group_gid_set(short);
  *          if the name of the group `libgamma_group_gid` cannot
  *          be determined
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__)))
 const char *libgamma_group_name_get(void);
 
 /**
@@ -1613,6 +1637,7 @@ const char *libgamma_group_name_get(void);
  * @param  value  The group that the user needs to be a member of if
  *                `LIBGAMMA_DEVICE_REQUIRE_GROUP` is returned, may be `NULL`
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__access__(__read_only__, 1))))
 void libgamma_group_name_set(const char *);
 
 
@@ -1661,7 +1686,7 @@ int libgamma_is_method_available(int);
  * @return          The adjustment method; for example `LIBGAMMA_METHOD_X_RANDR`
  *                  for "randr" and "LIBGAMMA_METHOD_X_RANDR"
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __pure__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
 int libgamma_value_of_method(const char *);
 
 
@@ -1670,9 +1695,10 @@ int libgamma_value_of_method(const char *);
  * Get the name of a connector type,
  * for example "VGA" for `LIBGAMMA_CONNECTOR_TYPE_VGA`
  * 
- * "Unknown" is returned for `LIBGAMMA_CONNECTOR_TYPE_Unknown`,
- * "TV"      is returned for `LIBGAMMA_CONNECTOR_TYPE_TV`,
- * "Virtual" is returned for `LIBGAMMA_CONNECTOR_TYPE_Virtual`
+ * "Unknown"   is returned for `LIBGAMMA_CONNECTOR_TYPE_Unknown`,
+ * "TV"        is returned for `LIBGAMMA_CONNECTOR_TYPE_TV`,
+ * "Virtual"   is returned for `LIBGAMMA_CONNECTOR_TYPE_VIRTUAL`,
+ * "Writeback" is returned for `LIBGAMMA_CONNECTOR_TYPE_WRITEBACK`
  * 
  * @param   connector  The connector type
  * @return             The name connector type, `NULL` if not
@@ -1701,7 +1727,7 @@ const char *libgamma_const_of_connector_type(int);
  * @return             The connector type; for example `LIBGAMMA_CONNECTOR_TYPE_VGA`
  *                     for "VGA" and "LIBGAMMA_CONNECTOR_TYPE_VGA"
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __pure__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
 int libgamma_value_of_connector_type(const char *);
 
 
@@ -1740,7 +1766,7 @@ const char *libgamma_const_of_subpixel_order(int);
  * @return         The subpixel order; for example `LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB`
  *                 for "Horizontal RGB" and "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB"
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __pure__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
 int libgamma_value_of_subpixel_order(const char *);
 
 
@@ -1973,7 +1999,7 @@ void libgamma_gamma_rampsd_free(libgamma_gamma_rampsd_t *restrict);
  * @return            The number of element that have been stored in `methods`, or should
  *                    have been stored if the buffer was large enough
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __access__(__write_only__, 1, 2))))
 size_t libgamma_list_methods(int *restrict, size_t, int);
 
 /**
@@ -1984,6 +2010,7 @@ size_t libgamma_list_methods(int *restrict, size_t, int);
  * @return          Zero on success, otherwise (negative) the value of an
  *                  error identifier provided by this library
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__access__(__write_only__, 1))))
 int libgamma_method_capabilities(libgamma_method_capabilities_t *restrict, int);
 
 /**
@@ -2006,7 +2033,7 @@ const char *libgamma_method_default_site(int);
  *                  default site, `NULL` if there is none, that is, if
  *                  the method does not support multiple sites
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __const__)))
 const char *libgamma_method_default_site_variable(int);
 
 
@@ -2161,7 +2188,7 @@ int libgamma_crtc_restore(libgamma_crtc_state_t *restrict);
  * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__write_only__, 1))))
 int libgamma_get_crtc_information(libgamma_crtc_information_t *restrict, libgamma_crtc_state_t *restrict, int32_t);
 
 /**
@@ -2178,6 +2205,7 @@ void libgamma_crtc_information_destroy(libgamma_crtc_information_t *restrict);
  * 
  * @param  this  The CRTC information
  */
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
 inline void
 libgamma_crtc_information_free(libgamma_crtc_information_t *restrict this__)
 {
@@ -2194,7 +2222,7 @@ libgamma_crtc_information_free(libgamma_crtc_information_t *restrict this__)
  * @return          The EDID in lowercase hexadecimal representation
  *                  `NULL` on allocation error, `errno` will be set accordingly
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __access__(__read_only__, 1, 2))))
 char *libgamma_behex_edid_lowercase(const unsigned char *restrict, size_t);
 
 /**
@@ -2205,7 +2233,7 @@ char *libgamma_behex_edid_lowercase(const unsigned char *restrict, size_t);
  * @return          The EDID in uppercase hexadecimal representation,
  *                  NULL` on allocation error, `errno` will be set accordingly
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __access__(__read_only__, 1, 2))))
 char *libgamma_behex_edid_uppercase(const unsigned char *restrict, size_t);
 
 /**
@@ -2216,7 +2244,7 @@ char *libgamma_behex_edid_uppercase(const unsigned char *restrict, size_t);
  * @return  :char*                     The EDID in lowercase hexadecimal representation,
  *                                     `NULL` on allocation error, `errno` will be set accordingly
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __access__(__read_only__, 1, 2))))
 inline char *
 libgamma_behex_edid(const unsigned char *restrict edid__, size_t length__)
 {
@@ -2231,7 +2259,7 @@ libgamma_behex_edid(const unsigned char *restrict edid__, size_t length__)
  *                of `edid` (the input value); `NULL` on allocation error or
  *                if the EDID is malformated, `errno` will be set accordingly
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __nonnull__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __nonnull__, __access__(__read_only__, 1))))
 unsigned char *libgamma_unhex_edid(const char *restrict);
 
 
@@ -2244,7 +2272,7 @@ unsigned char *libgamma_unhex_edid(const char *restrict);
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
 int libgamma_crtc_get_gamma_ramps8(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps8_t *restrict);
 
 /**
@@ -2255,8 +2283,10 @@ int libgamma_crtc_get_gamma_ramps8(libgamma_crtc_state_t *restrict, libgamma_gam
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_ramps8(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps8_t);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
+int libgamma_crtc_set_gamma_ramps8__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps8_t *restrict);
+#define libgamma_crtc_set_gamma_ramps8 libgamma_crtc_set_gamma_ramps8__new
+
 
 /**
  * Set the gamma ramps for a CRTC, 8-bit gamma-depth function version
@@ -2283,7 +2313,7 @@ int libgamma_crtc_set_gamma_ramps8_f(libgamma_crtc_state_t *restrict, libgamma_g
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __hot__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __hot__, __access__(__read_only__, 2))))
 int libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps16_t *restrict);
 
 /**
@@ -2294,8 +2324,9 @@ int libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict, libgamma_ga
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __hot__)))
-int libgamma_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps16_t);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __hot__, __access__(__read_only__, 2))))
+int libgamma_crtc_set_gamma_ramps16__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps16_t *restrict);
+#define libgamma_crtc_set_gamma_ramps16 libgamma_crtc_set_gamma_ramps16__new
 
 /**
  * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version
@@ -2322,7 +2353,7 @@ int libgamma_crtc_set_gamma_ramps16_f(libgamma_crtc_state_t *restrict, libgamma_
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
 int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps32_t *restrict);
 
 /**
@@ -2333,8 +2364,9 @@ int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t *restrict, libgamma_ga
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps32_t);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
+int libgamma_crtc_set_gamma_ramps32__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps32_t *restrict);
+#define libgamma_crtc_set_gamma_ramps32 libgamma_crtc_set_gamma_ramps32__new
 
 /**
  * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version
@@ -2361,7 +2393,7 @@ int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t *restrict, libgamma_
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
 int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps64_t *restrict);
 
 /**
@@ -2372,8 +2404,9 @@ int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t *restrict, libgamma_ga
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps64_t);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
+int libgamma_crtc_set_gamma_ramps64__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps64_t *restrict);
+#define libgamma_crtc_set_gamma_ramps64 libgamma_crtc_set_gamma_ramps64__new
 
 /**
  * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version
@@ -2393,17 +2426,6 @@ int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t *restrict, libgamma_
 
 
 /**
- * Set the gamma ramps for a CRTC, `float` version
- * 
- * @param   this   The CRTC state
- * @param   ramps  The gamma ramps to apply
- * @return         Zero on success, otherwise (negative) the value of an
- *                 error identifier provided by this library
- */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsf_t);
-
-/**
  * Get the current gamma ramps for a CRTC, `float` version
  * 
  * @param   this   The CRTC state
@@ -2411,8 +2433,20 @@ int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t *restrict, libgamma_gam
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
 int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsf_t *restrict);
+
+/**
+ * Set the gamma ramps for a CRTC, `float` version
+ * 
+ * @param   this   The CRTC state
+ * @param   ramps  The gamma ramps to apply
+ * @return         Zero on success, otherwise (negative) the value of an
+ *                 error identifier provided by this library
+ */
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
+int libgamma_crtc_set_gamma_rampsf__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_rampsf_t *restrict);
+#define libgamma_crtc_set_gamma_rampsf libgamma_crtc_set_gamma_rampsf__new
 
 /**
  * Set the gamma ramps for a CRTC, `float` function version
@@ -2439,7 +2473,7 @@ int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t *restrict, libgamma_g
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
 int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsd_t *restrict);
 
 /**
@@ -2450,7 +2484,9 @@ int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t *restrict, libgamma_gam
  * @return         Zero on success, otherwise (negative) the value of an
  *                 error identifier provided by this library
  */
-int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsd_t);
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
+int libgamma_crtc_set_gamma_rampsd__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_rampsd_t *restrict);
+#define libgamma_crtc_set_gamma_rampsd libgamma_crtc_set_gamma_rampsd__new
 
 /**
  * Set the gamma ramps for a CRTC, `double` function version
@@ -2469,6 +2505,4 @@ int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t *restrict, libgamma_g
                                      libgamma_gamma_rampsd_fun *, libgamma_gamma_rampsd_fun *);
 
 
-
-#undef LIBGAMMA_GCC_ONLY__
 #endif

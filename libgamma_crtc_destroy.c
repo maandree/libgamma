@@ -11,7 +11,7 @@ void
 libgamma_crtc_destroy(libgamma_crtc_state_t *restrict this)
 {
 	switch (this->partition->site->method) {
-#define X(CONST, CNAME, DEPTH, RAMPS)\
+#define X(CONST, CNAME, ...)\
 	case CONST:\
 		libgamma_##CNAME##_crtc_destroy(this);\
 		break;
