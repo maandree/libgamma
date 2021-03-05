@@ -26,7 +26,7 @@
  * The selected adjustment method does not exist
  * or has been excluded at compile-time
  */
-#define LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD (-2) /* TODO use separate error code if disable at compile-time */
+#define LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD (-2)
 
 /**
  * The selected site does not exist
