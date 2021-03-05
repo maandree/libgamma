@@ -14,3 +14,5 @@ Unsupported display servers:
 	Mir            I do not think Mir have gamma ramp support
 
 Add hotplug support.
+
+Generate librarian and pkg-config files.
