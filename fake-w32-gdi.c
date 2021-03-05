@@ -1,7 +1,6 @@
 /* See LICENSE file for copyright and license details. */
-#ifndef HAVE_LIBGAMMA_METHOD_W32_GDI
-# error Compiling fake-w32-gdi.c without FAKE_LIBGAMMA_METHOD_W32_GDI
-#endif
+#define IN_LIBGAMMA_W32_GDI
+#include "common.h"
 
 /* This file very sloppily translates Windows GDI calls to X RandR calls.
  * It should by no means be used, without additional modification, as a
@@ -10,16 +9,9 @@
  * a GNU/Linux system under X. */
 
 
-#include "fake-w32-gdi.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 
 #ifndef HAVE_LIBGAMMA_METHOD_X_RANDR
 /* Use dummy translation */
-
 
 
 /**
@@ -54,7 +46,6 @@ ReleaseDC(HWND hWnd, HDC hDC)
 	(void) hDC;
 	return 1;
 }
-
 
 
 /**
@@ -111,7 +102,6 @@ GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 	(void) lpRamp;
 	return TRUE;
 }
-
 
 
 /**
@@ -262,7 +252,6 @@ ReleaseDC(HWND hWnd, HDC hDC)
 }
 
 
-
 /**
  * Get information (capabilities) for a device context
  * 
@@ -306,7 +295,7 @@ SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 		xcb_randr_set_crtc_gamma_checked(connection, *(xcb_randr_crtc_t *)hDC, GAMMA_RAMP_SIZE,
 		                                 &((uint16_t *)lpRamp)[0 * GAMMA_RAMP_SIZE],
 		                                 &((uint16_t *)lpRamp)[1 * GAMMA_RAMP_SIZE],
-		                                 &((uint16_t *)lpRamp)[2 * GAMMA_RAMP_SIZE)];
+		                                 &((uint16_t *)lpRamp)[2 * GAMMA_RAMP_SIZE]);
 	xcb_generic_error_t *error = xcb_request_check(connection, gamma_cookie);
 	return !error ? TRUE : FALSE;
 }
@@ -348,7 +337,6 @@ GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 	free(gamma_reply);
 	return TRUE;
 }
-
 
 
 /**
@@ -469,7 +457,7 @@ EnumDisplayDevices(LPCTSTR restrict lpDevice, DWORD iDevNum, PDISPLAY_DEVICE res
 		return FALSE;
 	}
 	/* Store name for the CRTC */
-	sprintf(lpDisplayDevice->DeviceName, "%i", iDevNum);
+	sprintf(lpDisplayDevice->DeviceName, "%lu", (unsigned long int)iDevNum);
 	/* The connector that the CRTC belongs to is enabled */
 	lpDisplayDevice->StateFlags = DISPLAY_DEVICE_ACTIVE;
 	return TRUE;

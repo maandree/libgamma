@@ -1,7 +1,6 @@
 /* See LICENSE file for copyright and license details. */
-#ifndef FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-# error Compiling fake-quartz-cg.c without FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-#endif
+#define IN_LIBGAMMA_QUARTZ_CG
+#include "common.h"
 
 /* This file very sloppily translates Mac OS X Quartz calls to X RandR calls.
  * It should by no means be used, without additional modification, as a
@@ -9,12 +8,6 @@
  * it possible to test for logical errors in Max OS X specific code on
  * a GNU/Linux system under X. */
 
-
-#include "fake-quartz-cg.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 
 #ifndef HAVE_LIBGAMMA_METHOD_X_RANDR
@@ -148,7 +141,6 @@ close_fake_quartz(void)
 
 #include <xcb/xcb.h>
 #include <xcb/randr.h>
-
 
 
 /**
@@ -443,5 +435,6 @@ void close_fake_quartz_cg(void)
 	free(original_ramps);
 	original_ramps = NULL;
 }
+
 
 #endif

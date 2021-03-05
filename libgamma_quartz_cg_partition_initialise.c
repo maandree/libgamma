@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#define IN_LIBGAMMA_QUARTZ_CG
 #include "common.h"
 
 
@@ -41,7 +42,7 @@ libgamma_quartz_cg_partition_initialise(libgamma_partition_state_t *restrict thi
 		if (n < cap)
 			break;
 		/* Increase the number CRTC ID:s to ask for */
-		if (cap > SIZE_MAX / 2) /* We could also test ~0, but it is still too many */
+		if (cap > UINT32_MAX / 2) /* We could also test ~0, but it is still too many */
 			return free(crtcs), LIBGAMMA_IMPOSSIBLE_AMOUNT;
 		cap <<= 1;
 		/* Grow the array of CRTC ID:s so that it can fit all we are asking for */

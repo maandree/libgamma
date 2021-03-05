@@ -20,4 +20,5 @@ OBJ_QUARTZ_GC =\
 	libgamma_quartz_cg_crtc_restore.o\
 	libgamma_quartz_cg_get_crtc_information.o\
 	libgamma_quartz_cg_crtc_get_gamma_rampsf.o\
-	libgamma_quartz_cg_crtc_set_gamma_rampsf.o
+	libgamma_quartz_cg_crtc_set_gamma_rampsf.o\
+	$(OBJ_FAKE_QUARTZ_GC)

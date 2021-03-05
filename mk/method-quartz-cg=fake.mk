@@ -1,3 +1,6 @@
-HDR_QUARTZ_GC      = method-quartz-cg.h
-PARAMS_QUARTZ_GC   = LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS quartz_cg -1 rampsf
+include mk/method-quartz-cg=yes.mk
+HDR_QUARTZ_GC      = fake-quartz-cg.h method-quartz-cg.h
+OBJ_FAKE_QUARTZ_GC = fake-quartz-cg.o
 CPPFLAGS_QUARTZ_GC = -DHAVE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS -DFAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+CFLAGS_QUARTZ_GC   = 
+LDFLAGS_QUARTZ_GC  = 

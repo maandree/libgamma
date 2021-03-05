@@ -1,8 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <xf86drm.h>
-#include <xf86drmMode.h>
-
+#ifdef IN_LIBGAMMA_LINUX_DRM 
+# include <xf86drm.h>
+# include <xf86drmMode.h>
 
 /**
  * Graphics card data for the Direct Rendering Manager adjustment method
@@ -29,6 +29,7 @@ typedef struct libgamma_drm_card_data {
 	drmModeEncoder **encoders;
 
 } libgamma_drm_card_data_t;
+#endif
 
 
 
@@ -172,6 +173,7 @@ int libgamma_linux_drm_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict, c
 
 
 
+#ifdef IN_LIBGAMMA_LINUX_DRM 
 /**
  * Release all connectors and encoders
  * 
@@ -179,3 +181,4 @@ int libgamma_linux_drm_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict, c
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
 void libgamma_linux_drm_internal_release_connectors_and_encoders(libgamma_drm_card_data_t *restrict);
+#endif

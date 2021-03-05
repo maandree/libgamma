@@ -1,18 +1,20 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <xcb/xcb.h>
-#include <xcb/randr.h>
+
+#ifdef IN_LIBGAMMA_X_RANDR
+# include <xcb/xcb.h>
+# include <xcb/randr.h>
 
 
 /**
  * The major version of RandR the library expects
  */
-#define RANDR_VERSION_MAJOR  1
+# define RANDR_VERSION_MAJOR  1
 
 /**
  * The minor version of RandR the library expects
  */
-#define RANDR_VERSION_MINOR  3
+# define RANDR_VERSION_MINOR  3
 
 
 /**
@@ -48,6 +50,7 @@ typedef struct libgamma_x_randr_partition_data {
 	xcb_timestamp_t config_timestamp;
 
 } libgamma_x_randr_partition_data_t;
+#endif
 
 
 
@@ -191,6 +194,7 @@ int libgamma_x_randr_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict, con
 
 
 
+#ifdef IN_LIBGAMMA_X_RANDR
 /**
  * Translate an xcb error into a libgamma error
  * 
@@ -205,7 +209,6 @@ int libgamma_x_randr_internal_translate_error(int, int, int);
 
 
 /* xcb violates the rule to never return struct:s */
-#ifdef IN_LIBGAMMA_X_RANDR
 # ifdef __GNUC__
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Waggregate-return"

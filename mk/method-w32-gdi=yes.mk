@@ -15,4 +15,5 @@ OBJ_W32_GDI =\
 	libgamma_w32_gdi_crtc_restore.o\
 	libgamma_w32_gdi_get_crtc_information.o\
 	libgamma_w32_gdi_crtc_get_gamma_ramps16.o\
-	libgamma_w32_gdi_crtc_set_gamma_ramps16.o
+	libgamma_w32_gdi_crtc_set_gamma_ramps16.o\
+	$(OBJ_FAKE_W32_GDI)

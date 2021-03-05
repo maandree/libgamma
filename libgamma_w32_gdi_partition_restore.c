@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#define IN_LIBGAMMA_W32_GDI
 #include "common.h"
 
 

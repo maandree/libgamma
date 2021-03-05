@@ -2,6 +2,7 @@
 #if !defined(LIBGAMMA_DUMMY_GET_RAMPS) && !defined(LIBGAMMA_DUMMY_SET_RAMPS)
 
 
+#ifdef IN_LIBGAMMA_DUMMY
 /**
  * Configuration set for the dummy adjustment method
  */
@@ -182,6 +183,7 @@ typedef struct libgamma_dummy_site {
  * Configurations for the dummy adjustment method
  */
 extern libgamma_dummy_configurations_t libgamma_dummy_internal_configurations;
+#endif
 
 
 
@@ -440,6 +442,7 @@ int libgamma_dummy_crtc_set_gamma_rampsd(libgamma_crtc_state_t *restrict, const 
 
 
 
+#ifdef IN_LIBGAMMA_DUMMY
 /**
  * Restore the gamma ramps for a CRTC to the system settings for that CRTC
  * and ignore the method's capabilities
@@ -450,6 +453,7 @@ int libgamma_dummy_crtc_set_gamma_rampsd(libgamma_crtc_state_t *restrict, const 
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
 int libgamma_dummy_internal_crtc_restore_forced(libgamma_dummy_crtc_t *restrict);
+#endif
 
 
 #else

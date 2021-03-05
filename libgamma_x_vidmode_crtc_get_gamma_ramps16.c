@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#define IN_LIBGAMMA_X_VIDMODE
 #include "common.h"
 
 

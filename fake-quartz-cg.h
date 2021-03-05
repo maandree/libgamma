@@ -1,15 +1,5 @@
 /* See LICENSE file for copyright and license details. */
-#ifndef LIBGAMMA_FAKE_QUARTZ_CG_H
-#define LIBGAMMA_FAKE_QUARTZ_CG_H
-
-#ifndef FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-# error Including fake-quartz-cg.h without FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-#endif
-
-
-#ifndef __GNUC__
-# define __attribute__(x)
-#endif
+#ifdef IN_LIBGAMMA_QUARTZ_CG
 
 
 /* This header file contains some capabilities of
@@ -22,9 +12,6 @@
  * https://developer.apple.com/library/mac/documentation/GraphicsImaging/Reference/Quartz_Services_Ref/Reference/reference.html
  * 
  * https://developer.apple.com/library/mac/documentation/CoreGraphics/Reference/CoreGraphicsConstantsRef/Reference/reference.html#//apple_ref/c/tdef/CGError */
-
-
-#include <stdint.h>
 
 
 /**
@@ -46,6 +33,7 @@ typedef float CGGammaValue;
  * The data type for display ID:s
  */
 typedef uint32_t CGDirectDisplayID;
+
 
 
 /**
@@ -97,7 +85,8 @@ void CGDisplayRestoreColorSyncSettings(void);
  * @param   display  The ID of the display
  * @return           The number of stops in the gamma ramps
  */
-uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID) __attribute__((const));
+LIBGAMMA_GCC_ONLY__(__attribute__((__const__)))
+uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID);
 
 
 /* The follow part most only be used when this module is used,
@@ -111,10 +100,5 @@ uint32_t CGDisplayGammaTableCapacity(CGDirectDisplayID) __attribute__((const));
  */
 void close_fake_quartz_cg(void);
 
-
-
-#ifndef __GNUC__
-# undef __attribute__
-#endif
 
 #endif

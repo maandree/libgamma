@@ -1,11 +1,11 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifdef FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
-# include "fake-quartz-cg.h"
-#else
-# include <ApplicationServices/ApplicationServices.h>
-# include <CoreGraphics/CGDirectDisplay.h>
-# define close_fake_quartz_cg() /* For compatibility with "fake-quartz-cg.h" */
+#ifdef IN_LIBGAMMA_QUARTZ_CG
+# ifndef FAKE_LIBGAMMA_METHOD_QUARTZ_CORE_GRAPHICS
+#  include <ApplicationServices/ApplicationServices.h>
+#  include <CoreGraphics/CGDirectDisplay.h>
+#  define close_fake_quartz_cg() /* For compatibility with "fake-quartz-cg.h" */
+# endif
 #endif
 
 

@@ -1,17 +1,5 @@
 /* See LICENSE file for copyright and license details. */
-#ifndef LIBGAMMA_FAKE_W32_GDI_H
-#define LIBGAMMA_FAKE_W32_GDI_H
-
-#ifndef FAKE_LIBGAMMA_METHOD_W32_GDI
-# error Including fake-w32-gdi.h without FAKE_LIBGAMMA_METHOD_W32_GDI
-#endif
-
-
-#ifndef __GNUC__
-# define __attribute__(x)
-#endif
-
-#include <stdint.h>
+#ifdef IN_LIBGAMMA_W32_GDI
 
 
 /**
@@ -125,7 +113,8 @@ int ReleaseDC(HWND, HDC);
  *                  if `nIndex` is `COLORMGMTCAPS`
  * @see             http://msdn.microsoft.com/en-us/library/windows/desktop/dd144877(v=vs.85).aspx
  */
-int GetDeviceCaps(HDC, int) __attribute__((const));
+LIBGAMMA_GCC_ONLY__(__attribute__((__const__)))
+int GetDeviceCaps(HDC, int);
 
 /**
  * Colour management capabilities
@@ -237,12 +226,7 @@ typedef DISPLAY_DEVICE *PDISPLAY_DEVICE;
  *                           is greater than the largest device index on the system
  * @see                      http://msdn.microsoft.com/en-us/library/windows/desktop/dd162609(v=vs.85).aspx
  */
-BOOL EnumDisplayDevices(LPCTSTR restrict, DWORD, PDISPLAY_DEVICE restrict, DWORD)
+BOOL EnumDisplayDevices(LPCTSTR restrict, DWORD, PDISPLAY_DEVICE restrict, DWORD);
 
-
-
-#ifndef __GNUC__
-# undef __attribute__
-#endif
 
 #endif

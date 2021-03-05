@@ -1,14 +1,13 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef WINVER
-# define WINVER 0x0500
-#endif
-#ifdef FAKE_LIBGAMMA_METHOD_W32_GDI
-# include "fake-w32-gdi.h"
-#else
-# include <windows.h>
-# include <wingdi.h>
-#endif
+#ifdef IN_LIBGAMMA_W32_GDI
+# ifndef WINVER
+#  define WINVER 0x0500
+# endif
+# ifndef FAKE_LIBGAMMA_METHOD_W32_GDI
+#  include <windows.h>
+#  include <wingdi.h>
+# endif
 
 
 /**
@@ -16,7 +15,8 @@
  * 
  * @see  http://msdn.microsoft.com/en-us/library/windows/desktop/dd372194(v=vs.85).aspx
  */
-#define W32_GDI_GAMMA_RAMP_SIZE 256
+# define W32_GDI_GAMMA_RAMP_SIZE 256
+#endif
 
 
 
@@ -41,7 +41,7 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t *restri
  * @return          Zero on success, otherwise (negative) the value of an
  *                  error identifier provided by this library
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__(1)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__(1))))
 int libgamma_w32_gdi_site_initialise(libgamma_site_state_t *restrict, char *restrict);
 
 /**

@@ -1,7 +1,9 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <X11/Xlib.h>
-#include <X11/extensions/xf86vmode.h>
+#ifdef IN_LIBGAMMA_X_VIDMODE
+# include <X11/Xlib.h>
+# include <X11/extensions/xf86vmode.h>
+#endif
 
 
 /**
