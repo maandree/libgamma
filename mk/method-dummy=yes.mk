@@ -26,4 +26,5 @@ OBJ_DUMMY =\
 	libgamma_dummy_crtc_set_gamma_rampsf.o\
 	libgamma_dummy_crtc_get_gamma_rampsd.o\
 	libgamma_dummy_crtc_set_gamma_rampsd.o\
-	libgamma_dummy_internal_configurations.o
+	libgamma_dummy_internal_configurations.o\
+	libgamma_dummy_internal_crtc_restore_forced.o

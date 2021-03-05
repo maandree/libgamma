@@ -151,7 +151,7 @@ HDR =\
 	$(HDR_METHODS)
 
 
-all: libgamma.a libgamma.$(LIBEXT)
+all: libgamma.a libgamma.$(LIBEXT) test
 $(OBJ): $(@:.o=.c) $(HDR)
 $(LOBJ): $(@:.lo=.c) $(HDR)
 
@@ -177,6 +177,12 @@ libgamma.$(LIBEXT): $(LOBJ)
 .c.lo:
 	$(CC) -fPIC -c -o $@ $< $(CFLAGS) $(CFLAGS_METHODS) $(CPPFLAGS) $(CPPFLAGS_METHODS)
 
+test.o: test.c libgamma.h
+	$(CC) -c -o $@ test.c $(CFLAGS) $(CPPFLAGS)
+
+test: test.o
+	$(CC) -o $@ test.o libgamma.a $(LDFLAGS_METHODS) $(LDFLAGS)
+
 install: libgamma.a libgamma.$(LIBEXT)
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/lib/"
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/include/"
@@ -194,7 +200,7 @@ uninstall:
 	-rm -f -- "$(DESTDIR)$(PREFIX)/include/libgamma.h"
 
 clean:
-	-rm -f -- *.o *.lo *.su *.a *.$(LIBEXT)
+	-rm -f -- *.o *.lo *.su *.a *.$(LIBEXT) test config.h
 
 .SUFFIXES:
 .SUFFIXES: .lo .o .c
