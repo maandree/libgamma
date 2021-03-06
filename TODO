@@ -16,3 +16,5 @@ Unsupported display servers:
 Add hotplug support.
 
 Generate librarian and pkg-config files.
+
+Add suport for EDID 1.4.
