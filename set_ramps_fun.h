@@ -12,7 +12,7 @@ size_t i, n;
 int e;
 
 /* Get the size of the gamma ramps */
-if (libgamma_get_crtc_information(&info, this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE)) {
+if (libgamma_get_crtc_information(&info, sizeof(info), this, LIBGAMMA_CRTC_INFO_GAMMA_SIZE)) {
 	e = info.gamma_size_error;
 	if (e < 0)
 		return e;

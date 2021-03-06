@@ -380,4 +380,4 @@ int libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict, const gamm
  * @return          Non-zero on error
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict, int32_t);
+int libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict, unsigned long long);

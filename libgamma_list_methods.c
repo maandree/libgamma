@@ -48,7 +48,7 @@ list_method_test(int method, int operation)
 	libgamma_method_capabilities_t caps;
 	int fd, r, saved_errno;
 
-	libgamma_method_capabilities(&caps, method);
+	libgamma_method_capabilities(&caps, sizeof(caps), method);
 
 	switch (operation) {
 	case 0:

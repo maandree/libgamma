@@ -95,8 +95,8 @@ static int
 get_connector_type(libgamma_crtc_information_t *restrict this)
 {
 	/* Since we require the name of the output of get the type of the connected,
-	   copy any reported error on the output's name to the connector's type,
-	   and report failure if there was an error */
+	 * copy any reported error on the output's name to the connector's type,
+	 * and report failure if there was an error */
 	if ((this->connector_type_error = this->connector_name_error))
 		return -1;
 
@@ -198,8 +198,10 @@ get_edid(libgamma_crtc_information_t *restrict out, libgamma_crtc_state_t *restr
 	/* Acquire a list of all properties of the output */
 	prop_cookie = xcb_randr_list_output_properties(connection, output);
 	prop_reply = xcb_randr_list_output_properties_reply(connection, prop_cookie, &error);
-	if (error)
-		return out->edid_error = libgamma_x_randr_internal_translate_error(error->error_code, LIBGAMMA_LIST_PROPERTIES_FAILED, 1);
+	if (error) {
+		return out->edid_error = libgamma_x_randr_internal_translate_error(error->error_code,
+		                                                                   LIBGAMMA_LIST_PROPERTIES_FAILED, 1);
+	}
   
 	/* Extract the properties form the data structure that holds them, */
 	atoms = xcb_randr_list_output_properties_atoms(prop_reply);
@@ -289,7 +291,7 @@ get_edid(libgamma_crtc_information_t *restrict out, libgamma_crtc_state_t *restr
  */
 int
 libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t *restrict this,
-                                      libgamma_crtc_state_t *restrict crtc, int32_t fields)
+                                      libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
 {
 #define _E(FIELD) ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
 

@@ -9,11 +9,11 @@
  * @param   this    Instance of a data structure to fill with the information about the CRTC
  * @param   crtc    The state of the CRTC whose information should be read
  * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
- * @return          Zero on success, -1 on error; oOn error refer to the error reports in `this`
+ * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 int
 libgamma_x_vidmode_get_crtc_information(libgamma_crtc_information_t *restrict this,
-                                        libgamma_crtc_state_t *restrict crtc, int32_t fields)
+                                        libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
 {
 #define _E(FIELD)  ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
 

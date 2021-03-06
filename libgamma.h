@@ -631,50 +631,68 @@ typedef struct libgamma_method_capabilities {
 	/**
 	 * OR of the CRTC information fields in `libgamma_crtc_information_t`
 	 * that may (but can fail) be read successfully
+	 * 
+	 * @since  Always, deprecated as of .struct_version==1, replaced by .crtc_information
 	 */
-	int32_t crtc_information;
+	int32_t crtc_information__old;
 
 	/**
 	 * Whether the default site is known, if true the site is integrated
 	 * to the system or can be determined using environment variables
+	 * 
+	 * @since  Always
 	 */
 	unsigned default_site_known : 1;
 
 	/**
 	 * Whether the adjustment method supports multiple sites rather
 	 * than just the default site
+	 * 
+	 * @since  Always
 	 */
 	unsigned multiple_sites : 1;
 
 	/**
 	 * Whether the adjustment method supports multiple partitions
 	 * per site
+	 * 
+	 * @since  Always
 	 */
 	unsigned multiple_partitions : 1;
 
 	/**
 	 * Whether the adjustment method supports multiple CRTC:s
 	 * per partition per site
+	 * 
+	 * @since  Always
 	 */
 	unsigned multiple_crtcs : 1;
 
 	/**
 	 * Whether the partition to graphics card is a bijection
+	 * 
+	 * @since  Always
 	 */
 	unsigned partitions_are_graphics_cards : 1;
 
 	/**
 	 * Whether the adjustment method supports `libgamma_site_restore`
+	 * 
+	 * @since  Always
 	 */
 	unsigned site_restore : 1;
 
 	/**
 	 * Whether the adjustment method supports `libgamma_partition_restore`
+	 * 
+	 * @since  Always
 	 */
 	unsigned partition_restore : 1;
 
 	/**
 	 * Whether the adjustment method supports `libgamma_crtc_restore`
+	 * 
+	 * @since  Always
 	 */
 	unsigned crtc_restore : 1;
 
@@ -682,6 +700,8 @@ typedef struct libgamma_method_capabilities {
 	 * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
 	 * fields in `libgamma_crtc_information_t` will always have the same
 	 * values as each other for the adjustment method
+	 * 
+	 * @since  Always
 	 */
 	unsigned identical_gamma_sizes : 1;
 
@@ -689,32 +709,68 @@ typedef struct libgamma_method_capabilities {
 	 * Whether the `red_gamma_size`, `green_gamma_size` and `blue_gamma_size`
 	 * fields in `libgamma_crtc_information_t` will always be filled with the
 	 * same value for the adjustment method
+	 * 
+	 * @since  Always
 	 */
 	unsigned fixed_gamma_size : 1;
 
 	/**
 	 * Whether the `gamma_depth` field in `libgamma_crtc_information_t`
 	 * will always be filled with the same value for the adjustment method
+	 * 
+	 * @since  Always
 	 */
 	unsigned fixed_gamma_depth : 1;
 
 	/**
 	 * Whether the adjustment method will actually perform adjustments
+	 * 
+	 * @since  Always
 	 */
 	unsigned real : 1;
 
 	/**
 	 * Whether the adjustment method is implement using a translation layer
+	 * 
+	 * @since  Always
 	 */
 	unsigned fake : 1;
 
 	/**
 	 * Whether adjustments are undone when the process disconnects from
 	 * the display server
+	 * 
+	 * @since  Always
 	 */
 	unsigned auto_restore : 1;
 
+	/**
+	 * Set by the library to inform the program which fields
+	 * have been set
+	 * 
+	 * @since  .struct_version==1 (version 0.8 of the library, which made
+	 *         `libgamma_method_capabilities` a 3-parameter function)
+	 */
+	int struct_version;
+
+	/**
+	 * OR of the CRTC information fields in `libgamma_crtc_information_t`
+	 * that may (but can fail) be read successfully
+	 * 
+	 * @since  .struct_version==1, replaces .crtc_information__old (previously named .crtc_information)
+	 */
+	unsigned long long crtc_information;
+
 } libgamma_method_capabilities_t;
+
+/**
+ * The number the version of the library the program is
+ * compiled against will set the `struct_version` field
+ * in `libgamma_method_capabilities_t` to; note that the
+ * version of the library the program is linked against
+ * may set it to another value
+ */
+#define LIBGAMMA_METHOD_CAPABILITIES_STRUCT_VERSION 1
 
 
 /**
@@ -845,7 +901,7 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the values for
  * `edid` and `edid_length` and report errors to `edid_error`
  */
-#define LIBGAMMA_CRTC_INFO_EDID (1 << 0)
+#define LIBGAMMA_CRTC_INFO_EDID (1ULL << 0)
 
 	/**
 	 * The Extended Display Identification Data associated with
@@ -854,11 +910,15 @@ typedef struct libgamma_crtc_information {
 	 * This is raw byte array that is usually 128 bytes long.
 	 * It is not NUL-terminate, rather its length is stored in
 	 * `edid_length`.
+	 * 
+	 * @since  Always
 	 */
 	unsigned char *edid;
 
 	/**
 	 * The length of `edid`
+	 * 
+	 * @since  Always
 	 */
 	size_t edid_length;
 
@@ -866,6 +926,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int edid_error;
 
@@ -874,7 +936,7 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value
  * for `width_mm` and report errors to `width_mm_error`
  */
-#define LIBGAMMA_CRTC_INFO_WIDTH_MM (1 << 1)
+#define LIBGAMMA_CRTC_INFO_WIDTH_MM (1ULL << 1)
 
 	/**
 	 * The phyical width, in millimetres, of the viewport of the
@@ -886,6 +948,8 @@ typedef struct libgamma_crtc_information {
 	 * 
 	 * Zero means that its is not applicable, which is the case
 	 * for projectors
+	 * 
+	 * @since  Always
 	 */
 	size_t width_mm;
 
@@ -893,6 +957,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int width_mm_error;
 
@@ -901,7 +967,7 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value
  * for `height_mm` and report errors to `height_mm_error`
  */
-#define LIBGAMMA_CRTC_INFO_HEIGHT_MM (1 << 2)
+#define LIBGAMMA_CRTC_INFO_HEIGHT_MM (1ULL << 2)
 
 	/**
 	 * The phyical height, in millimetres, of the viewport of the
@@ -913,6 +979,8 @@ typedef struct libgamma_crtc_information {
 	 * 
 	 * Zero means that its is not applicable, which is the case
 	 * for projectors
+	 * 
+	 * @since  Always
 	 */
 	size_t height_mm;
 
@@ -920,6 +988,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int height_mm_error;
 
@@ -928,7 +998,7 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value for
  * `width_mm_edid` and report errors to `width_mm_edid_error`
  */
-#define LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID (1 << 3)
+#define LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID (1ULL << 3)
 
 	/**
 	 * The phyical width, in millimetres, of the viewport of the
@@ -941,6 +1011,8 @@ typedef struct libgamma_crtc_information {
 	 * 
 	 * Zero means that its is not applicable, which is the case
 	 * for projectors.
+	 * 
+	 * @since  Always
 	 */
 	size_t width_mm_edid;
 
@@ -948,6 +1020,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int width_mm_edid_error;
 
@@ -956,7 +1030,7 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value for
  * `height_mm_edid` and report errors to `height_mm_edid_error`
  */
-#define LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID (1 << 4)
+#define LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID (1ULL << 4)
 
 	/**
 	 * The phyical height, in millimetres, of the viewport of the
@@ -969,6 +1043,8 @@ typedef struct libgamma_crtc_information {
 	 * 
 	 * Zero means that its is not applicable, which is the case
 	 * for projectors
+	 * 
+	 * @since  Always
 	 */
 	size_t height_mm_edid;
 
@@ -976,6 +1052,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int height_mm_edid_error;
 
@@ -985,20 +1063,26 @@ typedef struct libgamma_crtc_information {
  * `red_gamma_size`, `green_gamma_size`, and `blue_gamma_size`,
  * and report errors to `gamma_size_error`
  */
-#define LIBGAMMA_CRTC_INFO_GAMMA_SIZE (1 << 5)
+#define LIBGAMMA_CRTC_INFO_GAMMA_SIZE (1ULL << 5)
 
 	/**
 	 * The size of the encoding axis of the red gamma ramp
+	 * 
+	 * @since  Always
 	 */
 	size_t red_gamma_size;
 
 	/**
 	 * The size of the encoding axis of the green gamma ramp
+	 * 
+	 * @since  Always
 	 */
 	size_t green_gamma_size;
 
 	/**
 	 * The size of the encoding axis of the blue gamma ramp
+	 * 
+	 * @since  Always
 	 */
 	size_t blue_gamma_size;
 
@@ -1006,6 +1090,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int gamma_size_error;
 
@@ -1014,12 +1100,14 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value for
  * `gamma_depth` and report errors to `gamma_depth_error`
  */
-#define LIBGAMMA_CRTC_INFO_GAMMA_DEPTH (1 << 6)
+#define LIBGAMMA_CRTC_INFO_GAMMA_DEPTH (1ULL << 6)
 
 	/**
 	 * The bit-depth of the value axes of gamma ramps,
 	 * -1 for single precision floating point, and -2 for
 	 * double precision floating point
+	 * 
+	 * @since  Always
 	 */
 	signed gamma_depth;
 
@@ -1027,6 +1115,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int gamma_depth_error;
 
@@ -1035,7 +1125,7 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value for
  * `gamma_support` and report errors to `gamma_support_error`
  */
-#define LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT (1 << 7)
+#define LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT (1ULL << 7)
 
 	/**
 	 * `LIBGAMMA_NO` indicates that the CRTC does not support
@@ -1044,6 +1134,8 @@ typedef struct libgamma_crtc_information {
 	 * meaning that the display server really does not know, but
 	 * the protocol is available. `LIBGAMMA_NO` indicates that
 	 * the CRTC does support gamma ramp adjustments.
+	 * 
+	 * @since  Always
 	 */
 	libgamma_decision_t gamma_support;
 
@@ -1051,6 +1143,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int gamma_support_error;
 
@@ -1059,7 +1153,7 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value for
  * `subpixel_order` and report errors to `subpixel_order_error`
  */
-#define LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER (1 << 8)
+#define LIBGAMMA_CRTC_INFO_SUBPIXEL_ORDER (1ULL << 8)
 
 	/**
 	 * The layout of the subpixels
@@ -1067,6 +1161,8 @@ typedef struct libgamma_crtc_information {
 	 * You cannot count on this value — especially for CRT:s —
 	 * but it is provided anyway as a means of distinguishing
 	 * monitors
+	 * 
+	 * @since  Always
 	 */
 	libgamma_subpixel_order_t subpixel_order;
 
@@ -1074,6 +1170,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int subpixel_order_error;
 
@@ -1082,10 +1180,12 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the
  * value for `active` and report errors to `active_error`
  */
-#define LIBGAMMA_CRTC_INFO_ACTIVE  (1 << 9)
+#define LIBGAMMA_CRTC_INFO_ACTIVE  (1ULL << 9)
 
 	/**
 	 * Whether there is a monitor connected to the CRTC
+	 * 
+	 * @since  Always
 	 */
 	int active;
 
@@ -1093,6 +1193,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int active_error;
 
@@ -1101,12 +1203,14 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value for
  * `connector_name` and report errors to `connector_name_error`
  */
-#define LIBGAMMA_CRTC_INFO_CONNECTOR_NAME (1 << 10)
+#define LIBGAMMA_CRTC_INFO_CONNECTOR_NAME (1ULL << 10)
 
 	/**
 	 * The name of the connector as designated by the display
 	 * server or as give by this library in case the display
 	 * server lacks this feature.
+	 * 
+	 * @since  Always
 	 */
 	char *connector_name;
 
@@ -1114,6 +1218,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int connector_name_error;
 
@@ -1122,10 +1228,12 @@ typedef struct libgamma_crtc_information {
  * For a `libgamma_crtc_information_t` fill in the value for
  * `connector_type` and report errors to `connector_type_error`
  */
-#define LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE (1 << 11)
+#define LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE (1ULL << 11)
 
 	/**
 	 * The type of the connector that is associated with the CRTC
+	 * 
+	 * @since  Always
 	 */
 	libgamma_connector_type_t connector_type;
 
@@ -1133,6 +1241,8 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int connector_type_error;
 
@@ -1142,7 +1252,7 @@ typedef struct libgamma_crtc_information {
  * values for `gamma_red`, `gamma_green`, and `gamma_blue`
  * and report errors to `gamma_error`
  */
-#define LIBGAMMA_CRTC_INFO_GAMMA (1 << 12)
+#define LIBGAMMA_CRTC_INFO_GAMMA (1ULL << 12)
 
 	/**
 	 * The gamma characteristics of the monitor as reported
@@ -1153,6 +1263,8 @@ typedef struct libgamma_crtc_information {
 	 * gamma for the monitor this could be used to give a rought
 	 * gamma correction; simply divide the value with 2.2 and use
 	 * the result for the red channel in the gamma correction
+	 * 
+	 * @since  Always
 	 */
 	float gamma_red;
 
@@ -1165,6 +1277,8 @@ typedef struct libgamma_crtc_information {
 	 * gamma for the monitor this could be used to give a rought
 	 * gamma correction; simply divide the value with 2.2 and use
 	 * the result for the green channel in the gamma correction
+	 * 
+	 * @since  Always
 	 */
 	float gamma_green;
 
@@ -1177,6 +1291,8 @@ typedef struct libgamma_crtc_information {
 	 * gamma for the monitor this could be used to give a rought
 	 * gamma correction; simply divide the value with 2.2 and use
 	 * the result for the blue channel in the gamma correction
+	 * 
+	 * @since  Always
 	 */
 	float gamma_blue;
 
@@ -1184,13 +1300,138 @@ typedef struct libgamma_crtc_information {
 	 * Zero on success, positive it holds the value `errno` had
 	 * when the reading failed, otherwise (negative) the value
 	 * of an error identifier provided by this library
+	 * 
+	 * @since  Always
 	 */
 	int gamma_error;
 
-	/* DEVELOPERS: Remember to update LIBGAMMA_CRTC_INFO_COUNT below and maybe
-	 *             also some of the list of LIBGAMMA_CRTC_INFO_* macros below */
+
+
+	/**
+	 * Set by the library to inform the program which fields
+	 * have been set
+	 * 
+	 * @since  .struct_version==1 (version 0.8 of the library, which made
+	 *         `libgamma_get_crtc_information` a 4-parameter function)
+	 */
+	int struct_version;
+
+
+/**
+ * For a `libgamma_crtc_information_t` fill in the values
+ * for `red_chroma_x`, `red_chroma_y`, `green_chroma_x`,
+ * `green_chroma_y`, `blue_chroma_x`, and `blue_chroma_y`
+ * and report errors to `gamma_error`
+ */
+#define LIBGAMMA_CRTC_INFO_CHROMA (1ULL << 13)
+
+	/**
+	 * The x coordinate of the red subpixels chroma
+	 * 
+	 * 2° CIE 1931 xy coordinates are used
+	 * 
+	 * @since  .struct_version==1
+	 */
+	float red_chroma_x;
+
+	/**
+	 * The y coordinate of the red subpixels chroma
+	 * 
+	 * 2° CIE 1931 xy coordinates are used
+	 * 
+	 * @since  .struct_version==1
+	 */
+	float red_chroma_y;
+
+	/**
+	 * The x coordinate of the green subpixels chroma
+	 * 
+	 * 2° CIE 1931 xy coordinates are used
+	 * 
+	 * @since  .struct_version==1
+	 */
+	float green_chroma_x;
+
+	/**
+	 * The y coordinate of the green subpixels chroma
+	 * 
+	 * 2° CIE 1931 xy coordinates are used
+	 * 
+	 * @since  .struct_version==1
+	 */
+	float green_chroma_y;
+
+	/**
+	 * The x coordinate of the blue subpixels chroma
+	 * 
+	 * 2° CIE 1931 xy coordinates are used
+	 * 
+	 * @since  .struct_version==1
+	 */
+	float blue_chroma_x;
+
+	/**
+	 * The y coordinate of the blue subpixels chroma
+	 * 
+	 * 2° CIE 1931 xy coordinates are used
+	 * 
+	 * @since  .struct_version==1
+	 */
+	float blue_chroma_y;
+
+	/**
+	 * Zero on success, positive it holds the value `errno` had
+	 * when the reading failed, otherwise (negative) the value
+	 * of an error identifier provided by this library
+	 * 
+	 * @since  .struct_version==1
+	 */
+	int chroma_error;
+
+	
+/**
+ * For a `libgamma_crtc_information_t` fill in the values
+ * for `white_point_x`, `white_point_y` and report errors
+ * to `white_point_error`
+ */
+#define LIBGAMMA_CRTC_INFO_WHITE_POINT (1ULL << 14)
+
+	/**
+	 * The x coordinate of the white point
+	 * 
+	 * 2° CIE 1931 xy coordinates are used
+	 * 
+	 * @since  .struct_version==1
+	 */
+	float white_point_x;
+
+	/**
+	 * The y coordinate of the white point
+	 * 
+	 * 2° CIE 1931 xy coordinates are used
+	 * 
+	 * @since  .struct_version==1
+	 */
+	float white_point_y;
+
+	/**
+	 * Zero on success, positive it holds the value `errno` had
+	 * when the reading failed, otherwise (negative) the value
+	 * of an error identifier provided by this library
+	 * 
+	 * @since  .struct_version==1
+	 */
+	int white_point_error;
+
+
+
+	/* DEVELOPERS: Remember to update LIBGAMMA_CRTC_INFORMATION_STRUCT_VERSION,
+	 *             LIBGAMMA_CRTC_INFO_COUNT, and LIBGAMMA_CRTC_INFO_MACRO_EDID
+	 *             macros below and may add additional LIBGAMMA_CRTC_INFO_MACRO_*
+	 *             macros below */
 
 } libgamma_crtc_information_t;
+
 
 /**
  * The number of `LIBGAMMA_CRTC_INFO_*` values defined in
@@ -1198,13 +1439,22 @@ typedef struct libgamma_crtc_information {
  * 
  * This exclude the combining macros defined below this macro
  */
-#define LIBGAMMA_CRTC_INFO_COUNT 13
+#define LIBGAMMA_CRTC_INFO_COUNT 15
 
 /**
  * The number of `LIBGAMMA_CRTC_INFO_*` values defined in
  * the version of the library the program is linked against
  */
 extern const int libgamma_crtc_info_count;
+
+/**
+ * The number the version of the library the program is
+ * compiled against will set the `struct_version` field
+ * in `libgamma_crtc_information_t` to; note that the
+ * version of the library the program is linked against
+ * may set it to another value
+ */
+#define LIBGAMMA_CRTC_INFORMATION_STRUCT_VERSION 1
 
 /**
  * Macro for both `libgamma_crtc_information_t` fields
@@ -1220,7 +1470,14 @@ extern const int libgamma_crtc_info_count;
  * support for reading the monitors' Extended Display
  * Information Data
  */
-#define LIBGAMMA_CRTC_INFO_MACRO_EDID (LIBGAMMA_CRTC_INFO_EDID | LIBGAMMA_CRTC_INFO_MACRO_EDID_VIEWPORT | LIBGAMMA_CRTC_INFO_GAMMA)
+#define LIBGAMMA_CRTC_INFO_MACRO_EDID (LIBGAMMA_CRTC_INFO_EDID | LIBGAMMA_CRTC_INFO_MACRO_EDID_VIEWPORT |\
+                                       LIBGAMMA_CRTC_INFO_GAMMA | LIBGAMMA_CRTC_INFO_MACRO_COLOUR_SPACE)
+
+/**
+ * Macro for the `libgamma_crtc_information_t` fields
+ * that specifies the monitors colour space
+ */
+#define LIBGAMMA_CRTC_INFO_MACRO_COLOUR_SPACE (LIBGAMMA_CRTC_INFO_CHROMA | LIBGAMMA_CRTC_INFO_WHITE_POINT)
 
 /**
  * Macro for both `libgamma_crtc_information_t` fields
@@ -2007,12 +2264,15 @@ size_t libgamma_list_methods(int *restrict, size_t, int);
  * Return the capabilities of an adjustment method
  * 
  * @param   this    The data structure to fill with the method's capabilities
+ * @param   size    Should be `sizeof(*this)`, used to let the library know which version
+ *                  of the structure is used so that it does not write outside of it
  * @param   method  The adjustment method (display server and protocol)
  * @return          Zero on success, otherwise (negative) the value of an
  *                  error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__access__(__write_only__, 1))))
-int libgamma_method_capabilities(libgamma_method_capabilities_t *restrict, int);
+int libgamma_method_capabilities__new(libgamma_method_capabilities_t *restrict, size_t, int);
+#define libgamma_method_capabilities libgamma_method_capabilities__new
 
 /**
  * Return the default site for an adjustment method
@@ -2185,12 +2445,16 @@ int libgamma_crtc_restore(libgamma_crtc_state_t *restrict);
  * Read information about a CRTC
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC
+ * @param   size    Should be `sizeof(*this)`, used to let the library know which version
+ *                  of the structure is used so that it does not write outside of it
  * @param   crtc    The state of the CRTC whose information should be read
  * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__write_only__, 1))))
-int libgamma_get_crtc_information(libgamma_crtc_information_t *restrict, libgamma_crtc_state_t *restrict, int32_t);
+int libgamma_get_crtc_information__new(libgamma_crtc_information_t *restrict, size_t,
+                                       libgamma_crtc_state_t *restrict, unsigned long long);
+#define libgamma_get_crtc_information libgamma_get_crtc_information__new
 
 /**
  * Release all resources in an information data structure for a CRTC

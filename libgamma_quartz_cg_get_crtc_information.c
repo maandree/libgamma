@@ -9,12 +9,12 @@
  * 
  * @param   this    Instance of a data structure to fill with the information about the CRTC
  * @param   crtc    The state of the CRTC whose information should be read
- * @param   fields  OR:ed identifiers for the information about the CRTC that should be read.
- * @return          Zero on success, -1 on error. On error refer to the error reports in `this`
+ * @param   fields  OR:ed identifiers for the information about the CRTC that should be read
+ * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 int
 libgamma_quartz_cg_get_crtc_information(libgamma_crtc_information_t *restrict this,
-                                        libgamma_crtc_state_t *restrict crtc, int32_t fields)
+                                        libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
 {
 #define SUPPORTED_FIELDS (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH)
 #define _E(FIELD)        ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
@@ -29,7 +29,7 @@ libgamma_quartz_cg_get_crtc_information(libgamma_crtc_information_t *restrict th
 	this->width_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID);
 	this->height_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID);
 	/* Quartz/CoreGraphics does support gamma ramp size query
-	   The gamma ramps are identical but not fixed, and the query can fail */
+	 * The gamma ramps are identical but not fixed, and the query can fail */
 	this->gamma_size_error = 0;
 	if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE)) {
 		crtcs = crtc->partition->data;

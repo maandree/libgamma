@@ -147,7 +147,8 @@ int libgamma_linux_drm_crtc_restore(libgamma_crtc_state_t *restrict);
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t *restrict, libgamma_crtc_state_t *restrict, int32_t);
+int libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t *restrict,
+                                            libgamma_crtc_state_t *restrict, unsigned long long);
 
 /**
  * Get the current gamma ramps for a CRTC, 16-bit gamma-depth version

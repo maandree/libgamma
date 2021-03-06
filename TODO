@@ -1,11 +1,3 @@
-Important functionality:
-	CRTC info. shall report the x and y (CIE xyY) values
-	of the monitor's red, green, and blue colour, as well
-	as the default white point. CRTC info shall also
-	report the colour space of the monitors (sRGB, other RGB,
-	non-RGB, and monochrome/greyscale). This information
-	is obtainable from the monitor's EDID.
-
 Unsupported display servers:
 	GNU Hurd TTY   Does it have gamma ramp support?
 	The BSD TTY:s  Do they have gamma ramp support?
@@ -16,5 +8,3 @@ Unsupported display servers:
 Add hotplug support.
 
 Generate librarian and pkg-config files.
-
-Add suport for EDID 1.4.

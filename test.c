@@ -16,8 +16,8 @@
 #endif
 
 
-#if LIBGAMMA_CRTC_INFO_COUNT != 13
-# warning CRTC information fields have been updated
+#if LIBGAMMA_CRTC_INFO_COUNT != 15
+# error CRTC information fields have been updated
 #endif
 
 
@@ -278,7 +278,11 @@ method_capabilities(void)
 			/* Print adjustment method name and get the
 			 * adjustment method's capabilities. */
 			printf("Capabilities of %s:\n", method_name(method));
-			libgamma_method_capabilities(&caps, method);
+			libgamma_method_capabilities(&caps, sizeof(caps), method);
+			if (caps.struct_version != LIBGAMMA_METHOD_CAPABILITIES_STRUCT_VERSION) {
+				fprintf(stderr, "LIBGAMMA_METHOD_CAPABILITIES_STRUCT_VERSION must be updated\n");
+				exit(1);
+			}
 
 			/* Print capabilities. The CRTC information
 			 * capabilities is printed hexadecimal. See
@@ -515,16 +519,20 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 {
 	libgamma_method_capabilities_t caps;
 	libgamma_crtc_information_t info;
-	int fields, field;
+	unsigned long long int fields, field;
 	char *edid_lc, *edid_uc;
 	unsigned char *edid_raw;
 
 	/* Get supported CRTC informations fields */
-	libgamma_method_capabilities(&caps, crtc->partition->site->method);
+	libgamma_method_capabilities(&caps, sizeof(caps), crtc->partition->site->method);
+	if (caps.struct_version != LIBGAMMA_METHOD_CAPABILITIES_STRUCT_VERSION) {
+		fprintf(stderr, "LIBGAMMA_METHOD_CAPABILITIES_STRUCT_VERSION must be updated\n");
+		exit(1);
+	}
 
 	/* List unsupport information fields by testing them one by one */
 	for (fields = caps.crtc_information; field = fields & -fields, fields; fields ^= field) {
-		if (libgamma_get_crtc_information(&info, crtc, field))
+		if (libgamma_get_crtc_information(&info, sizeof(info), crtc, field))
 			printf("Could not read CRTC information field %i\n", field);
 		free(info.edid);
 		free(info.connector_name);
@@ -532,8 +540,12 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 
 	/* Get CRTC information, that is supported */
 	fields = caps.crtc_information;
-	if (libgamma_get_crtc_information(&info, crtc, fields))
+	if (libgamma_get_crtc_information(&info, sizeof(info), crtc, fields))
 		printf("An error occurred while reading CRTC information\n");
+	if (info.struct_version != LIBGAMMA_CRTC_INFORMATION_STRUCT_VERSION) {
+		fprintf(stderr, "LIBGAMMA_CRTC_INFORMATION_STRUCT_VERSION must be updated\n");
+		exit(1);
+	}
 
 	/* Macros for printing CRTC information */
 #define print2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, ERROR_VAR)\
@@ -599,6 +611,16 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 	print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "red gamma characteristics", gamma_red, gamma_error);
 	print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "green gamma characteristics", gamma_green, gamma_error);
 	print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "blue gamma characteristics", gamma_blue, gamma_error);
+	/* Print the colour space of the monitor */
+	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "red chroma x", red_chroma_x, chroma_error);
+	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "red chroma y", red_chroma_y, chroma_error);
+	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "green chroma x", green_chroma_x, chroma_error);
+	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "green chroma y", green_chroma_y, chroma_error);
+	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "blue chroma x", blue_chroma_x, chroma_error);
+	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "blue chroma y", blue_chroma_y, chroma_error);
+	print2(float, LIBGAMMA_CRTC_INFO_WHITE_POINT, "white point x", white_point_x, white_point_error);
+	print2(float, LIBGAMMA_CRTC_INFO_WHITE_POINT, "white point y", white_point_y, white_point_error);
+
 	printf("\n");
 
 
@@ -1380,7 +1402,7 @@ main(void)
 	crtc_information(crtc_state);
 
 	/* Get the sizes of the gamma ramps for the selected CRTC */
-	libgamma_get_crtc_information(&info, crtc_state, LIBGAMMA_CRTC_INFO_GAMMA_SIZE);
+	libgamma_get_crtc_information(&info, sizeof(info), crtc_state, LIBGAMMA_CRTC_INFO_GAMMA_SIZE);
 
 	/* Create gamma ramps for each depth */
 #define X(R)\

@@ -189,7 +189,7 @@ get_connector_type(libgamma_crtc_information_t *restrict out, const drmModeConne
  */
 static int
 read_connector_data(libgamma_crtc_state_t *restrict crtc, libgamma_crtc_information_t *restrict out,
-                    const drmModeConnector *restrict connector, int32_t fields)
+                    const drmModeConnector *restrict connector, unsigned long long int fields)
 {
 	const char *connector_name_base = NULL;
 	libgamma_drm_card_data_t *restrict card;
@@ -314,7 +314,7 @@ get_edid(libgamma_crtc_state_t *restrict crtc, libgamma_crtc_information_t *rest
  */
 int
 libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t *restrict this,
-                                        libgamma_crtc_state_t *restrict crtc, int32_t fields)
+                                        libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
 {
 #define _E(FIELD) ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
 
