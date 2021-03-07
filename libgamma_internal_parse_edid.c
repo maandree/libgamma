@@ -26,8 +26,6 @@
 int
 libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict this, unsigned long long fields)
 {
-#define __test_version(edid, major, minor_min, minor_max)\
-	((edid)[18] == (major) && (minor_min) <= (edid)[19] && (edid)[19] <= (minor_max))
 #define __m(value)\
 	(this->edid[index++] != (value))
 
@@ -44,14 +42,10 @@ libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict this, unsigne
 	/* Check that the magic number of that of the EDID structure */
 	else if (__m(0x00) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0x00))
 		error = LIBGAMMA_EDID_WRONG_MAGIC_NUMBER;
-	/* Check that EDID structure revision 1.1–1.4 is used, those are the only
-	 * version we support. EDID structure revisions 1.3 and 1.4 is also by far
-	 * the most commonly use revision and it is currently the newest revisions.
-	 * We know that parsing works for revisions 1.1, 1.3, and 1.4, because of
-	 * this we assume it is also correct for revision 1.2. However, we are not
-	 * assuming this for revision 1.0 which appeared in August 1994 and was
-	 * replaced by revision 1.1 in April 1996. */
-	else if (!__test_version(this->edid, 1, 1, 4))
+	/* Check that EDID structure revision 1.x is used. We only know that we
+	 * support revisions 1.1, 1.3, and 1.4, and since they are all comptible,
+	 * we assume that all 1.x are compatible. */
+	else if (this->edid[18] != 1)
 		error = LIBGAMMA_EDID_REVISION_UNSUPPORTED;
 
 	/* If we have encountered an error, report it for the fields that require
@@ -127,5 +121,4 @@ libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict this, unsigne
 	return error | this->gamma_error;
 
 #undef __m
-#undef __test_version
 }
