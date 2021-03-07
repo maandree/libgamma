@@ -1,0 +1,262 @@
+.TH LIBGAMMA 7 LIBGAMMA
+.SH NAME
+libgamma - Display server abstraction layer for gamma ramps
+
+.SH DESCRIPTION
+.B libgamma
+is a C library that aims to abstract away the display server
+when adjusting the colours curves for monitors via gamma ramps.
+
+.B libgamma
+have support for the RandR (Resize and Rotate) extension for X,
+the VidMode extension for X and under Linux the Direct Rendering
+Manager which lets software work with graphics outside of
+graphical environments. Additionally
+.B libgamma
+have support for Windows Graphics Device Interface (Windows GDI)
+under Windows and Quartz using CoreGraphics under OS X. However
+Windows GDI and Quartz/CoreGraphics do not receive first-party
+testing on their target platforms but do receive first-party
+testing using a compatibility layer that translates the calls to
+RandR calls. Neither does
+.BR libgamma ,
+currently, receive testing on any of the BSD:s, it is only tested
+on Linux. Furthermore
+.B libgamma
+provides a dummy adjustment method.
+
+
+.SH JARGON
+.B libgamma
+uses a small jargon, parts of which is loaned from X.org
+and redshift, and some is commonly used jargon.
+.TP
+.BR "adjustment method" " [redshift]"
+A combination of the display server and a protocol used to
+tell to the display server.
+.TP
+.BR "display server" " [X.org]"
+The program used to display graphical elements to the
+monitors. In
+.B libgamma
+we also call the non-graphical environment a display server.
+.TP
+.BR "display" " [X.org]"
+.TQ
+.BR "site" " [libgamma]"
+An instance of a display server. Non-graphical environment are
+only covered by \(aqsite\(aq.
+.TP
+.BR "screen" " [X.org]"
+A group of CRTC:s within a display.
+.TP
+.B CRTC
+.TQ
+.B cathode ray tube controller
+Controller for the output on monitor. The mapping from CRTC:s
+to encoders is an injection.
+.TP
+.B monitor
+The physical medium used to display text and graphics.
+.TP
+.BR "partition" " [libgamma]"
+Umbrella term for \(aqscreen\(aq and \(aqgraphics card\(aq.
+.TP
+.BR "page" " [libgamma]"
+The desktop workspace or virtual terminal that is displayed
+on a CRTC. (This jargon is not currently used, but is reserved
+for future features.)
+.TP
+.BR "output" " [X.org]"
+A connector and its encoder.
+.TP
+.B connector
+Physical port on the graphics card where a monitor can be
+plugged in. If and only if the connector is disabled it does
+not have a port and does not have a CRTC.
+.TP
+.B encoder
+Translation layer between CRTC:s and connectors.
+.TP
+.B gamma ramp
+.TQ
+.B colour curve
+.TQ
+.B CLUT
+.TQ
+.B colour lookup table
+A lookup table that translates an encoded value for a subpixel
+into its output value.
+.TP
+.B subpixel
+.TQ
+.B colour channel
+One of the three colours that makes up a pixel: red, green or blue.
+.TP
+.B gamma ramp size
+.TQ
+.B gamma stops
+The number of possible values on the encoding axis of a gamma ramp.
+
+.SH SEE ALSO
+.BR libgamma_behex_edid (3),
+.br
+.BR libgamma_behex_edid_lowercase (3),
+.br
+.BR libgamma_behex_edid_uppercase (3),
+.br
+.BR libgamma_connector_type_count (3),
+.br
+.BR libgamma_const_of_connector_type (3),
+.br
+.BR libgamma_const_of_method (3),
+.br
+.BR libgamma_const_of_subpixel_order (3),
+.br
+.BR libgamma_crtc_destroy (3),
+.br
+.BR libgamma_crtc_free (3),
+.br
+.BR libgamma_crtc_get_gamma_ramps8 (3),
+.br
+.BR libgamma_crtc_get_gamma_ramps16 (3),
+.br
+.BR libgamma_crtc_get_gamma_ramps32 (3),
+.br
+.BR libgamma_crtc_get_gamma_ramps64 (3),
+.br
+.BR libgamma_crtc_get_gamma_rampsf (3),
+.br
+.BR libgamma_crtc_get_gamma_rampsd (3),
+.br
+.BR libgamma_crtc_info_count (3),
+.br
+.BR libgamma_crtc_information_destroy (3),
+.br
+.BR libgamma_crtc_information_free (3),
+.br
+.BR libgamma_crtc_initialise (3),
+.br
+.BR libgamma_crtc_restore (3),
+.br
+.BR libgamma_crtc_set_gamma_ramps8 (3),
+.br
+.BR libgamma_crtc_set_gamma_ramps16 (3),
+.br
+.BR libgamma_crtc_set_gamma_ramps32 (3),
+.br
+.BR libgamma_crtc_set_gamma_ramps64 (3),
+.br
+.BR libgamma_crtc_set_gamma_rampsf (3),
+.br
+.BR libgamma_crtc_set_gamma_rampsd (3),
+.br
+.BR libgamma_crtc_set_gamma_ramps8_f (3),
+.br
+.BR libgamma_crtc_set_gamma_ramps16_f (3),
+.br
+.BR libgamma_crtc_set_gamma_ramps32_f (3),
+.br
+.BR libgamma_crtc_set_gamma_ramps64_f (3),
+.br
+.BR libgamma_crtc_set_gamma_rampsf_f (3),
+.br
+.BR libgamma_crtc_set_gamma_rampsd_f (3),
+.br
+.BR libgamma_error_min (3),
+.br
+.BR libgamma_gamma_ramps8_destroy (3),
+.br
+.BR libgamma_gamma_ramps16_destroy (3),
+.br
+.BR libgamma_gamma_ramps32_destroy (3),
+.br
+.BR libgamma_gamma_ramps64_destroy (3),
+.br
+.BR libgamma_gamma_rampsf_destroy (3),
+.br
+.BR libgamma_gamma_rampsd_destroy (3),
+.br
+.BR libgamma_gamma_ramps8_free (3),
+.br
+.BR libgamma_gamma_ramps16_free (3),
+.br
+.BR libgamma_gamma_ramps32_free (3),
+.br
+.BR libgamma_gamma_ramps64_free (3),
+.br
+.BR libgamma_gamma_rampsf_free (3),
+.br
+.BR libgamma_gamma_rampsd_free (3),
+.br
+.BR libgamma_gamma_ramps8_initialise (3),
+.br
+.BR libgamma_gamma_ramps16_initialise (3),
+.br
+.BR libgamma_gamma_ramps32_initialise (3),
+.br
+.BR libgamma_gamma_ramps64_initialise (3),
+.br
+.BR libgamma_gamma_rampsf_initialise (3),
+.br
+.BR libgamma_gamma_rampsd_initialise (3),
+.br
+.BR libgamma_get_crtc_information (3),
+.br
+.BR libgamma_group_gid (3),
+.br
+.BR libgamma_group_name (3),
+.br
+.BR libgamma_is_method_available (3),
+.br
+.BR libgamma_list_methods (3),
+.br
+.BR libgamma_method_capabilities (3),
+.br
+.BR libgamma_method_count (3),
+.br
+.BR libgamma_method_default_site (3),
+.br
+.BR libgamma_method_default_site_variable (3),
+.br
+.BR libgamma_name_of_connector_type (3),
+.br
+.BR libgamma_name_of_error (3),
+.br
+.BR libgamma_name_of_method (3),
+.br
+.BR libgamma_name_of_subpixel_order (3),
+.br
+.BR libgamma_partition_destroy (3),
+.br
+.BR libgamma_partition_free (3),
+.br
+.BR libgamma_partition_initialise (3),
+.br
+.BR libgamma_partition_restore (3),
+.br
+.BR libgamma_perror (3),
+.br
+.BR libgamma_site_destroy (3),
+.br
+.BR libgamma_site_free (3),
+.br
+.BR libgamma_site_initialise (3),
+.br
+.BR libgamma_site_restore (3),
+.br
+.BR libgamma_strerror (3),
+.br
+.BR libgamma_strerror_r (3),
+.br
+.BR libgamma_subpixel_order_count (3),
+.br
+.BR libgamma_unhex_edid (3),
+.br
+.BR libgamma_value_of_connector_type (3),
+.br
+.BR libgamma_value_of_error (3),
+.br
+.BR libgamma_value_of_method (3),
+.br
+.BR libgamma_value_of_subpixel_order (3)

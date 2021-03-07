@@ -150,6 +150,8 @@ HDR =\
 	set_ramps_fun.h\
 	$(HDR_METHODS)
 
+MAN7 = libgamma.7
+
 
 all: libgamma.a libgamma.$(LIBEXT) test
 $(OBJ): $(@:.o=.c) $(HDR)
@@ -186,11 +188,13 @@ test: test.o libgamma.a
 install: libgamma.a libgamma.$(LIBEXT)
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/lib/"
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/include/"
+	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man7/"
 	cp -- libgamma.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMINOREXT)"
 	ln -sf -- libgamma.$(LIBMINOREXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMAJOREXT)"
 	ln -sf -- libgamma.$(LIBMAJOREXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBEXT)"
 	cp -- libgamma.a "$(DESTDIR)$(PREFIX)/lib/"
 	cp -- libgamma.h "$(DESTDIR)$(PREFIX)/include/"
+	cp -- $(MAN7) "$(DESTDIR)$(MANPREFIX)/man7/"
 
 uninstall:
 	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMAJOREXT)"
@@ -198,6 +202,7 @@ uninstall:
 	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBEXT)"
 	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.a"
 	-rm -f -- "$(DESTDIR)$(PREFIX)/include/libgamma.h"
+	-cd -- "$(DESTDIR)$(MANPREFIX)/man7/" && rm -f -- $(MAN7)
 
 clean:
 	-rm -f -- *.o *.lo *.su *.a *.$(LIBEXT) test config.h
