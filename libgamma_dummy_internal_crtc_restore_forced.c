@@ -17,6 +17,9 @@ libgamma_dummy_internal_crtc_restore_forced(struct libgamma_dummy_crtc *restrict
 	size_t rn = data->info.  red_gamma_size;
 	size_t gn = data->info.green_gamma_size;
 	size_t bn = data->info. blue_gamma_size;
+	double rm = (double)(rn - 1);
+	double gm = (double)(gn - 1);
+	double bm = (double)(bn - 1);
 	size_t i;
 
 	if (!data->gamma_red)
@@ -27,9 +30,9 @@ libgamma_dummy_internal_crtc_restore_forced(struct libgamma_dummy_crtc *restrict
 		TYPE *red   = data->gamma_red;\
 		TYPE *green = data->gamma_green;\
 		TYPE *blue  = data->gamma_blue;\
-		for (i = 0; i < rn; i++) red  [i] = (TYPE)((double)(MAX) * ((double)i / (double)(rn - 1)));\
-		for (i = 0; i < gn; i++) green[i] = (TYPE)((double)(MAX) * ((double)i / (double)(gn - 1)));\
-		for (i = 0; i < bn; i++) blue [i] = (TYPE)((double)(MAX) * ((double)i / (double)(bn - 1)));\
+		for (i = 0; i < rn; i++) red  [i] = (TYPE)((double)(MAX) * ((double)i / rm));\
+		for (i = 0; i < gn; i++) green[i] = (TYPE)((double)(MAX) * ((double)i / gm));\
+		for (i = 0; i < bn; i++) blue [i] = (TYPE)((double)(MAX) * ((double)i / bm));\
 	} while (0)
 
 	if      (data->info.gamma_depth ==  8) RESET_RAMPS(uint8_t,  INT8_MAX);

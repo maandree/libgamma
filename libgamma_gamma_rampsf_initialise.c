@@ -16,6 +16,14 @@ int
 libgamma_gamma_rampsf_initialise(struct libgamma_gamma_rampsf *restrict this)
 {
 	size_t n = this->red_size + this->green_size + this->blue_size;
+	if (!n) {
+		this->red = this->green = this->blue = NULL;
+		return 0;
+	}
+	if (n > SIZE_MAX / sizeof(*this->red)) {
+		errno = ENOMEM;
+		return -1;
+	}
 	this->red   = malloc(n * sizeof(*this->red));
 	this->green = &this->  red[this->  red_size];
 	this->blue  = &this->green[this->green_size];

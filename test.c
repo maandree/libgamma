@@ -335,7 +335,7 @@ select_monitor(struct libgamma_site_state *site_state, struct libgamma_partition
 		printf("    %i:  %s\n", method, method_name(method));
 	printf("> ");
 	fflush(stdout);
-	fgets(buf, sizeof(buf) / sizeof(char), stdin);
+	fgets(buf, sizeof(buf), stdin);
 	method = atoi(buf);
 
 
@@ -344,7 +344,7 @@ select_monitor(struct libgamma_site_state *site_state, struct libgamma_partition
 	/* Let the user select site */
 	printf("Select site: ");
 	fflush(stdout);
-	fgets(buf, sizeof(buf) / sizeof(char), stdin);
+	fgets(buf, sizeof(buf), stdin);
 	tmp = strchr(buf, '\n');
 	if (tmp)
 		*tmp = '\0';
@@ -375,7 +375,7 @@ select_monitor(struct libgamma_site_state *site_state, struct libgamma_partition
 	/* Let the user select partition */
 	printf("Select partition [0, %lu]: ", site_state->partitions_available - 1);
 	fflush(stdout);
-	fgets(buf, sizeof(buf) / sizeof(char), stdin);
+	fgets(buf, sizeof(buf), stdin);
 
 	/* Initialise partition state */
 	if ((r = libgamma_partition_initialise(part_state, site_state, (size_t)atoll(buf)))) {
@@ -398,7 +398,7 @@ select_monitor(struct libgamma_site_state *site_state, struct libgamma_partition
 	/* Let the user select CRTC */
 	printf("Select CRTC [0, %lu]: ", part_state->crtcs_available - 1);
 	fflush(stdout);
-	fgets(buf, sizeof(buf) / sizeof(char), stdin);
+	fgets(buf, sizeof(buf), stdin);
 
 	/* Initialise CRTC state. */
 	if ((r = libgamma_crtc_initialise(crtc_state, part_state, (size_t)atoll(buf)))) {
@@ -431,7 +431,7 @@ select_monitor(struct libgamma_site_state *site_state, struct libgamma_partition
 		char buf[256];\
 		if (do_print) {\
 			if (error) {\
-				snprintf(buf, sizeof(buf) / sizeof(char), "  (error) %s", description);\
+				snprintf(buf, sizeof(buf), "  (error) %s", description);\
 				libgamma_perror(buf, error);\
 			} else {\
 				printf("  %s: %" notation "\n", description, value);\
@@ -666,6 +666,7 @@ test_connector_types(void)
 	size_t n = 0;
 	char buf[128], *w;
 	const char *r;
+	enum libgamma_connector_type type;
 
 #define X(CONST)\
 	do {\
@@ -685,16 +686,19 @@ test_connector_types(void)
 			fprintf(stderr, "libgamma_const_of_connector_type(%s) != \"%s\"\n", #CONST, #CONST);\
 			exit(1);\
 		}\
-		if (libgamma_value_of_connector_type(#CONST) != CONST) {\
+		type = (enum libgamma_connector_type)-1;\
+		if (libgamma_value_of_connector_type(#CONST, &type) || type != CONST) { \
 			fprintf(stderr, "libgamma_value_of_connector_type(\"%s\") != %s\n", #CONST, #CONST);\
 			exit(1);\
 		}\
-		if (libgamma_value_of_connector_type(libgamma_name_of_connector_type(CONST)) != CONST) {\
+		type = (enum libgamma_connector_type)-1;\
+		if (libgamma_value_of_connector_type(libgamma_name_of_connector_type(CONST), &type) || type != CONST) { \
 			fprintf(stderr, "libgamma_value_of_connector_type(libgamma_name_of_connector_type(%s)) != %s\n",\
 			        #CONST, #CONST);\
 			exit(1);\
 		}\
-		if (libgamma_value_of_connector_type(#CONST) != CONST) {\
+		type = (enum libgamma_connector_type)-1;\
+		if (libgamma_value_of_connector_type(#CONST, &type) || type != CONST) { \
 			fprintf(stderr, "libgamma_value_of_connector_type(\"%s\") != %s\n", #CONST, #CONST);\
 			exit(1);\
 		}\
@@ -754,7 +758,7 @@ test_connector_types(void)
 		fprintf(stderr, "libgamma_const_of_connector_type(<invalid>) != NULL\n");
 		exit(1);
 	}
-	if (libgamma_value_of_connector_type("") != LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED) {
+	if (libgamma_value_of_connector_type("", &type) != LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED) {
 		fprintf(stderr, "libgamma_value_of_connector_type(<invalid>) != LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED\n");
 		exit(1);
 	}
@@ -770,6 +774,7 @@ test_subpixel_orders(void)
 	size_t n = 0;
 	char buf[128], *w;
 	const char *r;
+	enum libgamma_subpixel_order order;
 
 #define X(CONST)\
 	do {\
@@ -789,16 +794,19 @@ test_subpixel_orders(void)
 			fprintf(stderr, "libgamma_const_of_subpixel_order(%s) != \"%s\"\n", #CONST, #CONST);\
 			exit(1);\
 		}\
-		if (libgamma_value_of_subpixel_order(#CONST) != CONST) {\
+		order = (enum libgamma_subpixel_order)-1;\
+		if (libgamma_value_of_subpixel_order(#CONST, &order) || order != CONST) { \
 			fprintf(stderr, "libgamma_value_of_subpixel_order(\"%s\") != %s\n", #CONST, #CONST);\
 			exit(1);\
 		}\
-		if (libgamma_value_of_subpixel_order(libgamma_name_of_subpixel_order(CONST)) != CONST) {\
+		order = (enum libgamma_subpixel_order)-1;\
+		if (libgamma_value_of_subpixel_order(libgamma_name_of_subpixel_order(CONST), &order) || order != CONST) { \
 			fprintf(stderr, "libgamma_value_of_subpixel_order(libgamma_name_of_subpixel_order(%s)) != %s\n",\
 			        #CONST, #CONST);\
 			exit(1);\
 		}\
-		if (libgamma_value_of_subpixel_order(#CONST) != CONST) {\
+		order = (enum libgamma_subpixel_order)-1;\
+		if (libgamma_value_of_subpixel_order(#CONST, &order) || order != CONST) { \
 			fprintf(stderr, "libgamma_value_of_subpixel_order(\"%s\") != %s\n", #CONST, #CONST);\
 			exit(1);\
 		}\
@@ -840,7 +848,7 @@ test_subpixel_orders(void)
 		fprintf(stderr, "libgamma_const_of_subpixel_order(<invalid>) != NULL\n");
 		exit(1);
 	}
-	if (libgamma_value_of_subpixel_order("") != LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED) {
+	if (libgamma_value_of_subpixel_order("", &order) != LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED) {
 		fprintf(stderr, "libgamma_value_of_subpixel_order(<invalid>) != LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED\n");
 		exit(1);
 	}

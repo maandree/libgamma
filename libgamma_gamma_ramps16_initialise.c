@@ -16,6 +16,14 @@ int
 libgamma_gamma_ramps16_initialise(struct libgamma_gamma_ramps16 *restrict this)
 {
 	size_t n = this->red_size + this->green_size + this->blue_size;
+	if (!n) {
+		this->red = this->green = this->blue = NULL;
+		return 0;
+	}
+	if (n > SIZE_MAX / sizeof(*this->red)) {
+		errno = ENOMEM;
+		return -1;
+	}
 #ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
 	/* Valgrind complains about us reading uninitialize memory if we just use malloc */
 	this->red = calloc(n, sizeof(*this->red));

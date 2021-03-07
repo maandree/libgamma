@@ -26,7 +26,7 @@ libgamma_w32_gdi_partition_initialise(struct libgamma_partition_state *restrict 
 		return LIBGAMMA_NO_SUCH_PARTITION;
 
 	/* Count CRTC:s by iteration over all possible identifiers
-	   until we reach on that does not exist */
+	 * until we reach on that does not exist */
 	display.cb = sizeof(DISPLAY_DEVICE);
 	while (EnumDisplayDevices(NULL, n, &display, 0))
 		if (n++ == UINT32_MAX)

@@ -14,7 +14,7 @@ is_vt_proper(int fd)
 	char buf[32], digit0;
 
 	/* Get TTY */
-	if (ttyname_r(fd, buf, sizeof(buf) / sizeof(char)))
+	if (ttyname_r(fd, buf, sizeof(buf)))
 		return 0;
 
 	/* Validate TTY path */

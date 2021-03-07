@@ -3,7 +3,6 @@
 #include "common.h"
 
 
-
 /**
  * Initialise an allocated CRTC state
  * 

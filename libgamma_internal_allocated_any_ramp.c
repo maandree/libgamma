@@ -24,7 +24,17 @@ libgamma_internal_allocated_any_ramp(union gamma_ramps_any *restrict ramps_sys, 
                                      signed depth, size_t *restrict elements)
 {
 	/* Calculate the size of the allocation to do */
-	size_t d, n = ramps->ANY.red_size + ramps->ANY.green_size + ramps->ANY.blue_size;
+	size_t d, n = ramps->ANY.red_size;
+	if (n > SIZE_MAX - ramps->ANY.green_size) {
+		goto enomem;
+	}
+	n += ramps->ANY.green_size;
+	if (n > SIZE_MAX - ramps->ANY.blue_size) {
+	enomem:
+		errno = ENOMEM;
+		return LIBGAMMA_ERRNO_SET;
+	}
+	n += ramps->ANY.blue_size;
 	switch (depth) {
 	case  8:  d = sizeof(uint8_t);   break;
 	case 16:  d = sizeof(uint16_t);  break;
@@ -33,16 +43,26 @@ libgamma_internal_allocated_any_ramp(union gamma_ramps_any *restrict ramps_sys, 
 	case -1:  d = sizeof(float);     break;
 	case -2:  d = sizeof(double);    break;
 	default:
-		return errno = EINVAL, LIBGAMMA_ERRNO_SET;
+		errno = EINVAL;
+		return LIBGAMMA_ERRNO_SET;
 	}
 
 	/* Copy the gamma ramp sizes */
 	ramps_sys->ANY = ramps->ANY;
 	/* Allocate the new ramps */
+	if (!n) {
+		ramps_sys->ANY.red   = NULL;
+		ramps_sys->ANY.green = NULL;
+		ramps_sys->ANY.blue  = NULL;
+		*elements = n;
+		return 0;
+	}
 #ifdef HAVE_LIBGAMMA_METHOD_LINUX_DRM
 	/* Valgrind complains about us reading uninitialize memory if we just use malloc */
 	ramps_sys->ANY.red = calloc(n, d);
 #else
+	if (n > SIZE_MAX / d)
+		goto enomem;
 	ramps_sys->ANY.red = malloc(n * d);
 #endif
 	ramps_sys->ANY.green = (void *)&((char *)ramps_sys->ANY.  red)[ramps->ANY.  red_size * d / sizeof(char)];

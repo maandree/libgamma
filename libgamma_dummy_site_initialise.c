@@ -45,6 +45,10 @@ libgamma_dummy_site_initialise(struct libgamma_site_state *restrict this, char *
 	if (!libgamma_dummy_internal_configurations.capabilities.multiple_crtcs)
 		crtcs = !!crtcs;
 
+	if (data->partition_count * sizeof(*data->partitions)) {
+		errno = ENOMEM;
+		goto fail;
+	}
 	data->partitions = malloc(data->partition_count * sizeof(*data->partitions));
 	if (!data->partitions)
 		goto fail;

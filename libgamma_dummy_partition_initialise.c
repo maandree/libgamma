@@ -45,11 +45,11 @@ libgamma_dummy_partition_initialise(struct libgamma_partition_state *restrict th
 			memcpy(crtc_data->info.edid, template.edid, crtc_data->info.edid_length * sizeof(char));
 		}
 		if (crtc_data->info.connector_name) {
-			n = strlen(crtc_data->info.connector_name);
-			crtc_data->info.connector_name = malloc((n + 1) * sizeof(char));
+			n = strlen(crtc_data->info.connector_name) + 1;
+			crtc_data->info.connector_name = malloc(n * sizeof(char));
 			if (!crtc_data->info.connector_name)
 				goto fail;
-			memcpy(crtc_data->info.connector_name, template.connector_name, (n + 1) * sizeof(char));
+			memcpy(crtc_data->info.connector_name, template.connector_name, n * sizeof(char));
 		}
 	}
 

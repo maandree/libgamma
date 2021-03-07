@@ -84,7 +84,7 @@ libgamma_internal_parse_edid(struct libgamma_crtc_information *restrict this, un
 		blue_x  = (uint16_t)((((uint16_t)this->edid[26] >> 6) & 2) | ((uint16_t)this->edid[31] << 2));
 		blue_y  = (uint16_t)((((uint16_t)this->edid[26] >> 4) & 2) | ((uint16_t)this->edid[32] << 2));
 		white_x = (uint16_t)((((uint16_t)this->edid[26] >> 2) & 2) | ((uint16_t)this->edid[33] << 2));
-		white_y = (uint16_t)((((uint16_t)this->edid[26] >> 6) & 2) | ((uint16_t)this->edid[34] << 2));
+		white_y = (uint16_t)((((uint16_t)this->edid[26] >> 0) & 2) | ((uint16_t)this->edid[34] << 2));
 		/* Even though the maximum value as encoded is 1023, the values should be divided by 1024 */
 		this->red_chroma_x   = (float)red_x   / 1024.f;
 		this->red_chroma_y   = (float)red_y   / 1024.f;

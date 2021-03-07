@@ -28,8 +28,8 @@ libgamma_quartz_cg_crtc_get_gamma_rampsf(struct libgamma_crtc_state *restrict th
 	if (r != kCGErrorSuccess)
 		return LIBGAMMA_GAMMA_RAMP_READ_FAILED;
 	/* I hope that it will not actually ever change,
-	   but it does return the the gamma ramp size despite
-	   that it can be queried without querying for more */
+	 * but it does return the the gamma ramp size despite
+	 * that it can be queried without querying for more */
 	if (gamma_size_out != ramps->red_size)
 		return LIBGAMMA_GAMMA_RAMP_SIZE_CHANGED;
 	return 0;

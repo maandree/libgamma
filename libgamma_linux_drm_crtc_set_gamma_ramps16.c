@@ -17,6 +17,7 @@ libgamma_linux_drm_crtc_set_gamma_ramps16(struct libgamma_crtc_state *restrict t
 {
 	struct libgamma_drm_card_data *restrict card = this->partition->data;
 	int r;
+
 #ifdef DEBUG
 	/* Gamma ramp sizes are identical but not fixed */
 	if (ramps->red_size != ramps->green_size || ramps->red_size != ramps->blue_size)

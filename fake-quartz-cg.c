@@ -6,7 +6,8 @@
  * It should by no means be used, without additional modification, as a
  * part of a compatibility layer. The purpose of this file is only to make
  * it possible to test for logical errors in Max OS X specific code on
- * a GNU/Linux system under X. */
+ * a Linux system under X.
+ */
 
 
 
@@ -217,7 +218,7 @@ CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID *restrict displays_o
 		}
 
 		/* Get the number of CRTC:s */
-		crtc_count = (uint32_t)(res_reply->num_crtcs);
+		crtc_count = (uint32_t)res_reply->num_crtcs;
 		/* Get the CRTC ID:s */
 		crtcs = xcb_randr_get_screen_resources_current_crtcs(res_reply);
 
@@ -227,8 +228,13 @@ CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID *restrict displays_o
 		 * `CGDisplayRestoreColorSyncSettings` which restore the
 		 * all gamma ramps on the system to the system settnigs.
 		 */
+		if (crtc_count > SIZE_MAX / sizeof(*original_ramps) / 256 / 3) {
+			errno = ENOMEM;
+			goto original_ramps_malloc_fail;
+		}
 		original_ramps = malloc(crtc_count * 3 * 256 * sizeof(*original_ramps));
 		if (!original_ramps) {
+		original_ramps_malloc_fail:
 			perror("malloc");
 			xcb_disconnect(connection);
 			crtc_count = 0;

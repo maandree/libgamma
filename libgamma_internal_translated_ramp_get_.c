@@ -30,7 +30,7 @@ libgamma_internal_translated_ramp_get_(struct libgamma_crtc_state *restrict this
 	size_t n;
 	int r;
 	union gamma_ramps_any ramps_sys;
-	uint64_t *restrict ramps_full;
+	uint64_t *restrict ramps_full = NULL;
   
 	/* Allocate ramps with proper data type */
 	if ((r = libgamma_internal_allocated_any_ramp(&ramps_sys, ramps, depth_system, &n)))
@@ -43,10 +43,17 @@ libgamma_internal_translated_ramp_get_(struct libgamma_crtc_state *restrict this
 	}
 
 	/* Allocate intermediary ramps */
-	ramps_full = malloc(n * sizeof(*ramps_full));
-	if (!ramps_full) {
-		free(ramps_sys.ANY.red);
-		return LIBGAMMA_ERRNO_SET;
+	if (n) {
+		if (n > SIZE_MAX / sizeof(*ramps_full)) {
+			errno = ENOMEM;
+			free(ramps_sys.ANY.red);
+			return LIBGAMMA_ERRNO_SET;
+		}
+		ramps_full = malloc(n * sizeof(*ramps_full));
+		if (!ramps_full) {
+			free(ramps_sys.ANY.red);
+			return LIBGAMMA_ERRNO_SET;
+		}
 	}
 
 	/* Translate ramps to 64-bit integers */

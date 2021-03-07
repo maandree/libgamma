@@ -28,7 +28,7 @@ libgamma_x_vidmode_get_crtc_information(struct libgamma_crtc_information *restri
 	this->height_mm_edid_error = _E(LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID);
 	this->gamma_size_error = 0;
 	/* X VidMode does support gamma ramp size query. The gamma
-	   ramps are identical but not fixed, and the query can fail. */
+	 * ramps are identical but not fixed, and the query can fail. */
 	if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SIZE)) {
 		connection = crtc->partition->site->data;
 		if (!XF86VidModeGetGammaRampSize(connection, (int)crtc->partition->partition, &stops))

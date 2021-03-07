@@ -20,7 +20,7 @@ find_connector(struct libgamma_crtc_state *restrict this, int *restrict error)
 	/* Open connectors and encoders if not already opened */
 	if (!card->connectors) {
 		/* Allocate connector and encoder arrays; we use `calloc`
-		   so all non-loaded elements are `NULL` after an error */
+		 * so all non-loaded elements are `NULL` after an error */
 		card->connectors = calloc(n, sizeof(drmModeConnector *));
 		if (!card->connectors)
 			goto fail;
@@ -34,8 +34,8 @@ find_connector(struct libgamma_crtc_state *restrict this, int *restrict error)
 			if (!card->connectors[i])
 				goto fail;
 			/* Get encoder if the connector is enabled. If it is disabled it
-			   will not have an encoder, which is indicated by the encoder
-			   ID being 0. In such case, leave the encoder to be `NULL`. */
+			 * will not have an encoder, which is indicated by the encoder
+			 * ID being 0. In such case, leave the encoder to be `NULL`. */
 			if (card->connectors[i]->encoder_id) {
 				card->encoders[i] = drmModeGetEncoder(card->fd, card->connectors[i]->encoder_id);
 				if (!card->encoders[i])
@@ -55,7 +55,7 @@ find_connector(struct libgamma_crtc_state *restrict this, int *restrict error)
 
 fail:
 	/* Report the error that got us here, release
-	   resouces and exit with `NULL` for failure */
+	 * resouces and exit with `NULL` for failure */
 	*error = errno;
 	libgamma_linux_drm_internal_release_connectors_and_encoders(card);
 	return NULL;
@@ -194,7 +194,7 @@ read_connector_data(struct libgamma_crtc_state *restrict crtc, struct libgamma_c
 	const char *connector_name_base = NULL;
 	struct libgamma_drm_card_data *restrict card;
 	uint32_t type;
-	size_t i, n, c;
+	size_t i, n, c, len;
 
 	/* Get some information that does not require too much work */
 	if (fields & (LIBGAMMA_CRTC_INFO_MACRO_ACTIVE | LIBGAMMA_CRTC_INFO_MACRO_CONNECTOR)) {
@@ -227,9 +227,16 @@ read_connector_data(struct libgamma_crtc_state *restrict crtc, struct libgamma_c
 		n = (size_t)card->res->count_connectors;
 
 		/* Allocate memory for the name of the connector */
-		out->connector_name = malloc((strlen(connector_name_base) + 12) * sizeof(char));
-		if (!out->connector_name)
+		len = strlen(connector_name_base);
+		if (len > SIZE_MAX / sizeof(char) - 12) {
+			errno = ENOMEM;
+			out->connector_name = NULL;
 			return (out->connector_name_error = errno);
+		} else {
+			out->connector_name = malloc((len + 12) * sizeof(char));
+			if (!out->connector_name)
+				return (out->connector_name_error = errno);
+		}
 
 		/* Get the number of connectors with the same type on the same graphics card */
 		for (i = c = 0; i < n && card->connectors[i] != connector; i++)
@@ -285,7 +292,7 @@ get_edid(struct libgamma_crtc_state *restrict crtc, struct libgamma_crtc_informa
 					out->edid_error = errno;
 				} else {
 					/* Copy the EDID so we can free resources that got us here */
-					memcpy(out->edid, blob->data, (size_t)out->edid_length * sizeof(char));
+					memcpy(out->edid, blob->data, (size_t)out->edid_length * sizeof(unsigned char));
 				}
 				/* Free the propriety value and the propery */
 				drmModeFreePropertyBlob(blob);

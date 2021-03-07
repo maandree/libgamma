@@ -3,7 +3,6 @@
 #include "common.h"
 
 
-
 /**
  * Read information about a CRTC
  * 
@@ -36,9 +35,9 @@ libgamma_w32_gdi_get_crtc_information(struct libgamma_crtc_information *restrict
 	this->gamma_depth = 16;
 	this->gamma_depth_error = 0;
 	/* It is possible to query Windows GDI whether the device
-	   have gamma ramp support. It cannot fail. However, I think
-	   the result is incorrect if multiple monitors are active,
-	   so we cannot include this. */
+	 * have gamma ramp support. It cannot fail. However, I think
+	 * the result is incorrect if multiple monitors are active,
+	 * so we cannot include this. */
 	/*
 	if ((fields & LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT))
 		this->gamma_support = GetDeviceCaps(crtc->data, COLORMGMTCAPS) == CM_GAMMA_RAMP;

@@ -8,3 +8,5 @@ Unsupported display servers:
 Add hotplug support.
 
 Generate librarian and pkg-config files.
+
+Replace use of atoi and atoll.

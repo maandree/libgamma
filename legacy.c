@@ -62,7 +62,7 @@ libgamma_get_crtc_information(struct libgamma_crtc_information *restrict this,
                               struct libgamma_crtc_state *restrict crtc, int32_t fields)
 {
 	return libgamma_get_crtc_information__new(this, offsetof(struct libgamma_crtc_information, gamma_error) +
-	                                          sizeof(this->gamma_error), crtc, (unsigned long long int)fields);
+	                                          sizeof(this->gamma_error), crtc, (unsigned long long)fields);
 }
 
 int

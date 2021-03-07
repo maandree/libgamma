@@ -787,9 +787,9 @@ struct libgamma_method_capabilities {
  * 
  * On operating systems that integrate a graphical environment
  * there is usually just one site. However, one systems with
- * pluggable graphics, like Unix-like systems such as GNU/Linux
- * and the BSD:s, there can usually be any (feasible) number of
- * sites. In X.org parlance they are called displays.
+ * pluggable graphics, like Unix-like systems such as Linux
+ * and the BSD:s, there can usually be any (feasible) number
+ * of sites. In X.org parlance they are called displays.
  */
 struct libgamma_site_state {
 	/**
@@ -1974,12 +1974,13 @@ const char *libgamma_const_of_connector_type(enum libgamma_connector_type);
  * 
  * @param   connector  The name of the connector type, for example
  *                     "VGA" or "LIBGAMMA_CONNECTOR_TYPE_VGA"
- * @return             The connector type; for example `LIBGAMMA_CONNECTOR_TYPE_VGA`
- *                     for "VGA" and "LIBGAMMA_CONNECTOR_TYPE_VGA";
- *                     `LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED` of not defined
+ * @param   out        Output parameter for the connector type, only set on success;
+ *                     for example `LIBGAMMA_CONNECTOR_TYPE_VGA` for "VGA" and
+ *                     "LIBGAMMA_CONNECTOR_TYPE_VGA";
+ * @return             Zero on success, `LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED` of not defined
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
-int libgamma_value_of_connector_type(const char *); /* FIXME return type */
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 1), __access__(__write_only__, 2), __pure__)))
+int libgamma_value_of_connector_type(const char *, enum libgamma_connector_type *);
 
 
 
@@ -2014,12 +2015,13 @@ const char *libgamma_const_of_subpixel_order(enum libgamma_subpixel_order);
  * 
  * @param   order  The name of the subpixel order, for example
  *                 "Horizontal RGB" or "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB"
- * @return         The subpixel order; for example `LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB`
- *                 for "Horizontal RGB" and "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB";
- *                 `LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED` of not defined
+ * @param   out    Output parameter for the subpixel order, only set on success;
+ *                 for example `LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB` for
+ *                 "Horizontal RGB" and "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB";
+ * @return         Zero on success, `LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED` of not defined
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
-int libgamma_value_of_subpixel_order(const char *); /* FIXME return type */
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 1), __access__(__write_only__, 2), __pure__)))
+int libgamma_value_of_subpixel_order(const char *, enum libgamma_subpixel_order *);
 
 
 
@@ -2496,10 +2498,10 @@ char *libgamma_behex_edid_uppercase(const unsigned char *restrict, size_t);
 /**
  * Convert a raw representation of an EDID to a lowercase hexadecimal representation
  * 
- * @param   edid:const unsigned char*  The EDID in raw representation
- * @param   length:size_t              The length of `edid`
- * @return  :char*                     The EDID in lowercase hexadecimal representation,
- *                                     `NULL` on allocation error, `errno` will be set accordingly
+ * @param   edid    The EDID in raw representation
+ * @param   length  The length of `edid`
+ * @return          The EDID in lowercase hexadecimal representation,
+ *                  `NULL` on allocation error, `errno` will be set accordingly
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __access__(__read_only__, 1, 2))))
 inline char *

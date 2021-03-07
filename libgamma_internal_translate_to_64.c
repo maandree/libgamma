@@ -30,17 +30,17 @@ float_to_64(float value)
   
 #if defined(HAVE_INT128) && __WORDSIZE == 64
 	/* `__int128` is a GNU C extension, which
-	   (because it is not ISO C) emits a warning
-	   under -pedantic */
+	 * (because it is not ISO C) emits a warning
+	 * under -pedantic */
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wpedantic"
 
 	/* In GCC we can use `__int128`, this is
-	   a signed 128-bit integer. It fits all
-	   uint64_t values but also native values,
-	   which is a nice because it eleminates
-	   some overflow condition tests. It is
-	   also more readable. */
+	 * a signed 128-bit integer. It fits all
+	 * uint64_t values but also native values,
+	 * which is a nice because it eleminates
+	 * some overflow condition tests. It is
+	 * also more readable. */
 
 	/* Convert to integer */
 	__int128 product = (__int128)(value * (float)UINT64_MAX);
@@ -57,22 +57,22 @@ float_to_64(float value)
 #else
 
 	/* If we are not using GCC we cannot be
-	   sure that we have `__int128` so we have
-	   to use `uint64_t` and perform overflow
-	   checkes based on the input value */
+	 * sure that we have `__int128` so we have
+	 * to use `uint64_t` and perform overflow
+	 * checkes based on the input value */
   
 	/* Convert to integer. */
 	uint64_t product = (uint64_t)(value * (float)UINT64_MAX);
 	/* Negative overflow,
-	   if the input is less than 0.5 but
-	   the output is greater then we got
-	   -1 when we should have gotten 0 */
+	 * if the input is less than 0.5 but
+	 * the output is greater then we got
+	 * -1 when we should have gotten 0 */
 	if (value < 0.1f && product > 0xF000000000000000ULL)
 		return 0;
 	/* Positive overflow,
-	   if the input is greater than 0.5
-	   but the output is less then we got
-	   0 when we should have gotten ~0 */
+	 * if the input is greater than 0.5
+	 * but the output is less then we got
+	 * 0 when we should have gotten ~0 */
 	else if (value > 0.9f && product < 0x1000000000000000ULL)
 		return (uint64_t)~0;
 	/* Did not overflow */
@@ -97,17 +97,17 @@ double_to_64(double value)
 
 #if defined(HAVE_INT128) && __WORDSIZE == 64
 	/* `__int128` is a GNU C extension, which
-	   (because it is not ISO C) emits a warning
-	   under -pedantic */
+	 * (because it is not ISO C) emits a warning
+	 * under -pedantic */
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wpedantic"
 
 	/* In GCC we can use `__int128`, this is
-	   a signed 128-bit integer. It fits all
-	   uint64_t values but also native values,
-	   which is a nice because it eleminates
-	   some overflow condition tests. It is
-	   also more readable. */
+	 * a signed 128-bit integer. It fits all
+	 * uint64_t values but also native values,
+	 * which is a nice because it eleminates
+	 * some overflow condition tests. It is
+	 * also more readable. */
 
 	/* Convert to integer */
 	__int128 product = (__int128)(value * (double)UINT64_MAX);
@@ -124,23 +124,23 @@ double_to_64(double value)
 #else
 
 	/* If we are not using GCC we cannot be
-	   sure that we have `__int128` so we have
-	   to use `uint64_t` and perform overflow
-	   checkes based on the input value. */
+	 * sure that we have `__int128` so we have
+	 * to use `uint64_t` and perform overflow
+	 * checkes based on the input value. */
 
 	/* Convert to integer. */
 	uint64_t product = (uint64_t)(value * (double)UINT64_MAX);
 	/* Negative overflow,
-	   if the input is less than 0.5 but
-	   the output is greater then we got
-	   -1 when we should have gotten 0 */
+	 * if the input is less than 0.5 but
+	 * the output is greater then we got
+	 * -1 when we should have gotten 0 */
 	if (value < (double)0.1f && product > 0xF000000000000000ULL)
 		product = 0;
 	/* Positive overflow,
-	   if the input is greater than 0.5
-	   but the output is less then we got
-	   0 when we should have gotten ~0 */
-	else if ((value > (double)0.9f) && (product < 0x1000000000000000ULL))
+	 * if the input is greater than 0.5
+	 * but the output is less then we got
+	 * 0 when we should have gotten ~0 */
+	else if (value > (double)0.9f && (product < 0x1000000000000000ULL))
 		product = (uint64_t)~0;
 	/* Did not overflow */
 	return product;

@@ -35,15 +35,32 @@ libgamma_dummy_crtc_initialise(struct libgamma_crtc_state *restrict this,
 	else
 		stop_size = (size_t)data->info.gamma_depth / 8;
 
-	data->gamma_red = malloc(data->info.red_gamma_size * stop_size);
-	if (!data->gamma_red)
+	data->gamma_red   = NULL;
+	data->gamma_green = NULL;
+	data->gamma_blue  = NULL;
+
+	if (data->info.red_gamma_size   > SIZE_MAX / stop_size ||
+	    data->info.green_gamma_size > SIZE_MAX / stop_size ||
+	    data->info.blue_gamma_size  > SIZE_MAX / stop_size) {
+		errno = ENOMEM;
 		goto fail;
-	data->gamma_green = malloc(data->info.green_gamma_size * stop_size);
-	if (!data->gamma_green)
-		goto fail;
-	data->gamma_blue = malloc(data->info.blue_gamma_size * stop_size);
-	if (!data->gamma_blue)
-		goto fail;
+	}
+
+	if (data->info.red_gamma_size) {
+		data->gamma_red = malloc(data->info.red_gamma_size * stop_size);
+		if (!data->gamma_red)
+			goto fail;
+	}
+	if (data->info.green_gamma_size) {
+		data->gamma_green = malloc(data->info.green_gamma_size * stop_size);
+		if (!data->gamma_green)
+			goto fail;
+	}
+	if (data->info.blue_gamma_size) {
+		data->gamma_blue = malloc(data->info.blue_gamma_size * stop_size);
+		if (!data->gamma_blue)
+			goto fail;
+	}
 
 	return libgamma_dummy_internal_crtc_restore_forced(data);
 

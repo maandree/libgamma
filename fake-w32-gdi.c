@@ -6,7 +6,8 @@
  * It should by no means be used, without additional modification, as a
  * part of a compatibility layer. The purpose of this file is only to make
  * it possible to test for logical errors in Windows specific code on
- * a GNU/Linux system under X. */
+ * a Linux system under X.
+ */
 
 
 
@@ -291,11 +292,10 @@ SetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 {
 	/* We assume that our gamma ramps are of the same size
 	 * as used by Windows GDI (we are so sloppy) */
-	xcb_void_cookie_t gamma_cookie =
-		xcb_randr_set_crtc_gamma_checked(connection, *(xcb_randr_crtc_t *)hDC, GAMMA_RAMP_SIZE,
-		                                 &((uint16_t *)lpRamp)[0 * GAMMA_RAMP_SIZE],
-		                                 &((uint16_t *)lpRamp)[1 * GAMMA_RAMP_SIZE],
-		                                 &((uint16_t *)lpRamp)[2 * GAMMA_RAMP_SIZE]);
+	uint16_t *ramp = lpRamp;
+	xcb_void_cookie_t gamma_cookie = xcb_randr_set_crtc_gamma_checked(connection, *(xcb_randr_crtc_t *)hDC, GAMMA_RAMP_SIZE,
+	                                                                  &ramp[0 * GAMMA_RAMP_SIZE], &ramp[1 * GAMMA_RAMP_SIZE],
+	                                                                  &ramp[2 * GAMMA_RAMP_SIZE]);
 	xcb_generic_error_t *error = xcb_request_check(connection, gamma_cookie);
 	return !error ? TRUE : FALSE;
 }
@@ -386,8 +386,8 @@ CreateDC(LPCTSTR restrict lpszDriver, LPCTSTR restrict lpszDevice, LPCTSTR restr
 	/* Was the index too high */
 	if (crtc_index >= crtc_count) {
 		/* Disconnect and release resouces and mark that
-		   we do not know the number of available CRTC:s
-		   if we have not opened any monitors yet */
+		 * we do not know the number of available CRTC:s
+		 * if we have not opened any monitors yet */
 		if (!dc_count) {
 			xcb_disconnect(connection);
 			free(res_reply);

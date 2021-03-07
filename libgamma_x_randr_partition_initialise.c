@@ -7,13 +7,20 @@
  * Duplicate a memory area
  * 
  * @param   ptr    The memory area
- * @param   bytes  The size, in bytes, of the memory area
+ * @param   nelem  The number of elements in the memory area
+ * @param   size   The size, in bytes, of each element
  * @return         A duplication of the memory, `NULL` if zero-length or on error
  */
 static inline void *
-xmemdup(void *restrict ptr, size_t bytes)
+duparray(void *restrict ptr, size_t nelem, size_t size)
 {
 	char *restrict rc;
+	size_t bytes;
+	if (nelem > SIZE_MAX / size) {
+		errno = ENOMEM;
+		return NULL;
+	}
+	bytes = nelem * size;
 	if (!bytes)
 		return NULL;
 	rc = malloc(bytes);
@@ -91,18 +98,18 @@ libgamma_x_randr_partition_initialise(struct libgamma_partition_state *restrict 
 	}
 
 	/* Allocate adjustment method dependent data memory area.
-	   We use `calloc` because we want `data`'s pointers to be `NULL` if not allocated at `fail`. */
+	 * We use `calloc` because we want `data`'s pointers to be `NULL` if not allocated at `fail`. */
 	data = calloc(1, sizeof(*data));
 	if (!data)
 		goto fail;
 
 	/* Copy the CRTC:s, just so we do not have to keep the reply in memory */
-	data->crtcs = xmemdup(crtcs, (size_t)reply->num_crtcs * sizeof(*crtcs));
+	data->crtcs = duparray(crtcs, (size_t)reply->num_crtcs, sizeof(*crtcs));
 	if (!data->crtcs && reply->num_crtcs > 0)
 		goto fail;
 
 	/* Copy the outputs as well */
-	data->outputs = xmemdup(outputs, (size_t)reply->num_outputs * sizeof(*outputs));
+	data->outputs = duparray(outputs, (size_t)reply->num_outputs, sizeof(*outputs));
 	if (!data->outputs && reply->num_outputs > 0)
 		goto fail;
 
@@ -110,11 +117,17 @@ libgamma_x_randr_partition_initialise(struct libgamma_partition_state *restrict 
 	data->outputs_count = (size_t)reply->num_outputs;
 
 	/* Create mapping table from CRTC indices to output indicies. (injection) */
-	data->crtc_to_output = malloc((size_t)reply->num_crtcs * sizeof(*data->crtc_to_output));
-	if (!data->crtc_to_output)
-		goto fail;
+	if (reply->num_crtcs) {
+		if (reply->num_crtcs > SIZE_MAX / sizeof(*data->crtc_to_output)) {
+			errno = ENOMEM;
+			goto fail;
+		}
+		data->crtc_to_output = malloc((size_t)reply->num_crtcs * sizeof(*data->crtc_to_output));
+		if (!data->crtc_to_output)
+			goto fail;
+	}
 	/* All CRTC:s should be mapped, but incase they are not, all unmapped CRTC:s should have
-	   an invalid target, namely `SIZE_MAX`, which is 1 more than the theoretical limit */
+	 * an invalid target, namely `SIZE_MAX`, which is 1 more than the theoretical limit */
 	for (i = 0; i < (size_t)reply->num_crtcs; i++)
 		data->crtc_to_output[i] = SIZE_MAX;
 	/* Fill the table */

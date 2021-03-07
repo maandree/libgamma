@@ -13,7 +13,7 @@ libgamma_x_randr_method_capabilities(struct libgamma_method_capabilities *restri
 {
 	char *display = getenv("DISPLAY");
 	/* Support for all information except active status and gamma ramp support.
-	   Active status can be queried but it is not guaranteed produces an up to date result. */
+	 * Active status can be queried but it is not guaranteed produces an up to date result. */
 	this->crtc_information = LIBGAMMA_CRTC_INFO_MACRO_EDID
 	                       | LIBGAMMA_CRTC_INFO_MACRO_VIEWPORT
 	                       | LIBGAMMA_CRTC_INFO_MACRO_RAMP

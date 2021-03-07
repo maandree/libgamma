@@ -51,7 +51,7 @@ libgamma_x_randr_site_initialise(struct libgamma_site_state *restrict this, char
 	}
 
 	/* Check protocol compatibility,
-	   we require 1.3 but 2.x may not be backwards compatible */
+	 * we require 1.3 but 2.x may not be backwards compatible */
 	if (reply->major_version != RANDR_VERSION_MAJOR || reply->minor_version < RANDR_VERSION_MINOR) {
 #ifdef DEBUG
 		/* Print used protocol */

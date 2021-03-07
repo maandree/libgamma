@@ -22,7 +22,7 @@ libgamma_dummy_partition_restore(struct libgamma_partition_state *restrict this)
 	}
 
 	for (i = 0; i < data->crtc_count; i++)
-		if (libgamma_dummy_internal_crtc_restore_forced(data->crtcs + i) < 0)
+		if (libgamma_dummy_internal_crtc_restore_forced(data->crtcs + i))
 			return -1;
 
 	return 0;

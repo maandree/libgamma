@@ -17,6 +17,10 @@ libgamma_behex_edid_lowercase(const unsigned char *restrict edid, size_t length)
 	size_t i;
 
 	/* Allocate memory area for the output string */
+	if (length > (SIZE_MAX / sizeof(char) - 1) / 2) {
+		errno = ENOMEM;
+		return NULL;
+	}
 	out = malloc((length * 2 + 1) * sizeof(char));
 	if (!out)
 		return NULL;

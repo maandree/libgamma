@@ -32,7 +32,7 @@ figure_out_card_open_error(const char *pathname)
 		return LIBGAMMA_ERRNO_SET;
 	}
 
-	/* TODO Can this be simplified? */
+	/* TODO Can this be simplified? Is this even correct? */
 #define TEST(R, W) ((attr.st_mode & ((R) | (W))) == ((R) | (W)))
 
 	/* Get permission requirement for the file */
@@ -45,7 +45,7 @@ figure_out_card_open_error(const char *pathname)
 		return LIBGAMMA_DEVICE_ACCESS_FAILED;
 
 	/* The group should be "video", but perhaps
-	   it is "root" to restrict users */
+	 * it is "root" to restrict users */
 	if (!attr.st_gid /* root group */ || TEST(S_IRGRP, S_IWGRP))
 		return LIBGAMMA_DEVICE_RESTRICTED;
 
@@ -56,19 +56,19 @@ figure_out_card_open_error(const char *pathname)
 		return LIBGAMMA_ERRNO_SET;
 
 	/* Test whether any of the supplemental
-	   group should be satisfactory */
+	 * group should be satisfactory */
 	for (i = 0; i < n; i++)
 		if (supplemental_groups[i] == attr.st_gid)
 			break;
 
 	/* If one of the supplemental groups should be satisfactory,
-	   then we do not know anything more than that access failed */
+	 * then we do not know anything more than that access failed */
 	if (i != n)
 		return LIBGAMMA_DEVICE_ACCESS_FAILED;
 
 	/* Otherwise, try to get the name of the group that is
-	   required and report the missing group membership */ 
-	errno = getgrgid_r(attr.st_gid, &_grp, buf, sizeof(buf) / sizeof(char), &group);
+	 * required and report the missing group membership */ 
+	errno = getgrgid_r(attr.st_gid, &_grp, buf, sizeof(buf), &group);
 	if (errno == ERANGE) {
 		/* The lenght of the group's name is absurdly long, degrade to thread-unsafe. */
 		errno = 0;
@@ -118,7 +118,7 @@ libgamma_linux_drm_partition_initialise(struct libgamma_partition_state *restric
 	data->connectors = NULL;
   
 	/* Get the pathname for the graphics card */
-	snprintf(pathname, sizeof(pathname) / sizeof(char), DRM_DEV_NAME, DRM_DIR_NAME, (int)partition);
+	snprintf(pathname, sizeof(pathname), DRM_DEV_NAME, DRM_DIR_NAME, (int)partition);
 
 	/* Acquire access to the graphics card */
 	data->fd = open(pathname, O_RDWR | O_CLOEXEC);

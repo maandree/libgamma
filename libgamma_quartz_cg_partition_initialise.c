@@ -36,16 +36,24 @@ libgamma_quartz_cg_partition_initialise(struct libgamma_partition_state *restric
 	 * of CRTC:s and ask for more if we got as many as we asked for. */
 	for (;;) {
 		/* Ask for CRTC ID:s */
-		if (CGGetOnlineDisplayList(cap, crtcs, &n) != kCGErrorSuccess)
-			return free(crtcs), LIBGAMMA_LIST_CRTCS_FAILED;
+		if (CGGetOnlineDisplayList(cap, crtcs, &n) != kCGErrorSuccess) {
+			free(crtcs);
+			return LIBGAMMA_LIST_CRTCS_FAILED;
+		}
 		/* If we did not get as many as we asked for then we have all */
 		if (n < cap)
 			break;
 		/* Increase the number CRTC ID:s to ask for */
-		if (cap > UINT32_MAX / 2) /* We could also test ~0, but it is still too many */
-			return free(crtcs), LIBGAMMA_IMPOSSIBLE_AMOUNT;
+		if (cap > UINT32_MAX / 2) { /* We could also test ~0, but it is still too many */
+			free(crtcs);
+			return LIBGAMMA_IMPOSSIBLE_AMOUNT;
+		}
 		cap <<= 1;
 		/* Grow the array of CRTC ID:s so that it can fit all we are asking for */
+		if ((size_t)cap > SIZE_MAX / sizeof(CGDirectDisplayID)) {
+			errno = ENOMEM;
+			return LIBGAMMA_ERRNO_SET;
+		}
 		crtcs = realloc(crtcs_old = crtcs, (size_t)cap * sizeof(CGDirectDisplayID));
 		if (!crtcs) {
 			free(crtcs_old);

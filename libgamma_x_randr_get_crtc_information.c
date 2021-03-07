@@ -109,19 +109,19 @@ get_connector_type(struct libgamma_crtc_information *restrict this)
 	} while (0)
 
 	/* Check begin on the name of the output to find out what type the connector is of */
-	SELECT ("None",        Unknown);
-	SELECT ("VGA",         VGA);
-	SELECT ("DVI-I",       DVII);
-	SELECT ("DVI-D",       DVID);
-	SELECT ("DVI-A",       DVIA);
-	SELECT ("DVI",         DVI);
-	SELECT ("Composite",   Composite);
-	SELECT ("S-Video",     SVIDEO);
-	SELECT ("Component",   Component);
-	SELECT ("LFP",         LFP);
-	SELECT ("Proprietary", Unknown);
-	SELECT ("HDMI",        HDMI);
-	SELECT ("DisplayPort", DisplayPort);
+	SELECT("None",        Unknown);
+	SELECT("VGA",         VGA);
+	SELECT("DVI-I",       DVII);
+	SELECT("DVI-D",       DVID);
+	SELECT("DVI-A",       DVIA);
+	SELECT("DVI",         DVI);
+	SELECT("Composite",   Composite);
+	SELECT("S-Video",     SVIDEO);
+	SELECT("Component",   Component);
+	SELECT("LFP",         LFP);
+	SELECT("Proprietary", Unknown);
+	SELECT("HDMI",        HDMI);
+	SELECT("DisplayPort", DisplayPort);
 
 #undef SELECT
 
@@ -153,6 +153,11 @@ get_output_name(struct libgamma_crtc_information *restrict out, xcb_randr_get_ou
 		return out->connector_name_error = LIBGAMMA_REPLY_VALUE_EXTRACTION_FAILED;
 
 	/* Allocate a memory area for a NUL-terminated copy of the name */
+	if (length > SIZE_MAX / sizeof(char) - 1) {
+		out->connector_name = NULL;
+		out->connector_name_error = errno = ENOMEM;
+		return -1;
+	}
 	store = out->connector_name = malloc(((size_t)length + 1) * sizeof(char));
 	if (!store) {
 		out->connector_name_error = errno;

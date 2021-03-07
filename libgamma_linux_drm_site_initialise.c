@@ -30,8 +30,7 @@ libgamma_linux_drm_site_initialise(struct libgamma_site_state *restrict this, ch
 	this->partitions_available = 0;
 	for (;;) {
 		/* Construct pathname of graphics card device */
-		snprintf(pathname, sizeof(pathname) / sizeof(char),
-		          DRM_DEV_NAME, DRM_DIR_NAME, (int)(this->partitions_available));
+		snprintf(pathname, sizeof(pathname), DRM_DEV_NAME, DRM_DIR_NAME, (int)this->partitions_available);
 		/* `stat` the graphics card's existence */
 		if (stat(pathname, &_attr))
 			break;
