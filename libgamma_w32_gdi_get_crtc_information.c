@@ -13,8 +13,8 @@
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 int
-libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t *restrict this,
-                                      libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
+libgamma_w32_gdi_get_crtc_information(struct libgamma_crtc_information *restrict this,
+                                      struct libgamma_crtc_state *restrict crtc, unsigned long long fields)
 {
 #define KNOWN_FIELDS (LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH)
 #define _E(FIELD)    ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)

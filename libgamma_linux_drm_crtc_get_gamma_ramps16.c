@@ -12,9 +12,9 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_linux_drm_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps16_t *restrict ramps)
+libgamma_linux_drm_crtc_get_gamma_ramps16(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_ramps16 *restrict ramps)
 {
-	libgamma_drm_card_data_t *restrict card = this->partition->data;
+	struct libgamma_drm_card_data *restrict card = this->partition->data;
 	int r;
 #ifdef DEBUG
 	/* Gamma ramp sizes are identical but not fixed */

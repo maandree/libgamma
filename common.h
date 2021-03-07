@@ -201,38 +201,37 @@
 /**
  * Gamma ramp structure union for different depths
  */
-typedef union gamma_ramps_any {
+union gamma_ramps_any {
 	/**
 	 * 8-bit gamma ramps
 	 */
-	libgamma_gamma_ramps8_t bits8;
+	struct libgamma_gamma_ramps8 bits8;
 
 	/**
 	 * 16-bit gamma ramps
 	 */
-	libgamma_gamma_ramps16_t bits16;
+	struct libgamma_gamma_ramps16 bits16;
 
 	/**
 	 * 32-bit gamma ramps
 	 */
-	libgamma_gamma_ramps32_t bits32;
+	struct libgamma_gamma_ramps32 bits32;
 
 	/**
 	 * 64-bit gamma ramps
 	 */
-	libgamma_gamma_ramps64_t bits64;
+	struct libgamma_gamma_ramps64 bits64;
 
 	/**
 	 * Single precision float gamma ramps
 	 */
-	libgamma_gamma_rampsf_t float_single;
+	struct libgamma_gamma_rampsf float_single;
 
 	/**
 	 * Double precision float gamma ramps
 	 */
-	libgamma_gamma_rampsd_t float_double;
-
-} gamma_ramps_any_t;
+	struct libgamma_gamma_rampsd float_double;
+};
 
 
 /**
@@ -244,7 +243,7 @@ typedef union gamma_ramps_any {
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-typedef int get_ramps_any_fun(libgamma_crtc_state_t *restrict, gamma_ramps_any_t *restrict);
+typedef int get_ramps_any_fun(struct libgamma_crtc_state *restrict, union gamma_ramps_any *restrict);
 
 /**
  * A function for writing the gamma ramps to a CRTC
@@ -255,7 +254,7 @@ typedef int get_ramps_any_fun(libgamma_crtc_state_t *restrict, gamma_ramps_any_t
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-typedef int set_ramps_any_fun(libgamma_crtc_state_t *restrict, const gamma_ramps_any_t *restrict);
+typedef int set_ramps_any_fun(struct libgamma_crtc_state *restrict, const union gamma_ramps_any *restrict);
 
 
 
@@ -311,7 +310,7 @@ typedef int set_ramps_any_fun(libgamma_crtc_state_t *restrict, const gamma_ramps
  *                        error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_internal_translated_ramp_get_(libgamma_crtc_state_t *restrict, gamma_ramps_any_t *restrict,
+int libgamma_internal_translated_ramp_get_(struct libgamma_crtc_state *restrict, union gamma_ramps_any *restrict,
                                            signed, signed, get_ramps_any_fun *);
 
 /**
@@ -330,7 +329,7 @@ int libgamma_internal_translated_ramp_get_(libgamma_crtc_state_t *restrict, gamm
  *                        error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_internal_translated_ramp_set_(libgamma_crtc_state_t *restrict, const gamma_ramps_any_t *restrict,
+int libgamma_internal_translated_ramp_set_(struct libgamma_crtc_state *restrict, const union gamma_ramps_any *restrict,
                                            signed, signed, set_ramps_any_fun *);
 
 /**
@@ -342,7 +341,7 @@ int libgamma_internal_translated_ramp_set_(libgamma_crtc_state_t *restrict, cons
  * @param  in     Input gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_internal_translate_to_64(signed, size_t, uint64_t *restrict, const gamma_ramps_any_t *restrict);
+void libgamma_internal_translate_to_64(signed, size_t, uint64_t *restrict, const union gamma_ramps_any *restrict);
 
 /**
  * Undo the actions of `libgamma_internal_translate_to_64`
@@ -353,7 +352,7 @@ void libgamma_internal_translate_to_64(signed, size_t, uint64_t *restrict, const
  * @param  in     Input array, may be modified
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_internal_translate_from_64(signed, size_t, gamma_ramps_any_t *restrict, const uint64_t *restrict);
+void libgamma_internal_translate_from_64(signed, size_t, union gamma_ramps_any *restrict, const uint64_t *restrict);
 
 /**
  * Allocate and initalise a gamma ramp with any depth
@@ -367,7 +366,8 @@ void libgamma_internal_translate_from_64(signed, size_t, gamma_ramps_any_t *rest
  *                     error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict, const gamma_ramps_any_t *restrict, signed, size_t *restrict);
+int libgamma_internal_allocated_any_ramp(union gamma_ramps_any *restrict, const union gamma_ramps_any *restrict,
+                                         signed, size_t *restrict);
 
 
 /**
@@ -380,4 +380,4 @@ int libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict, const gamm
  * @return          Non-zero on error
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict, unsigned long long);
+int libgamma_internal_parse_edid(struct libgamma_crtc_information *restrict, unsigned long long);

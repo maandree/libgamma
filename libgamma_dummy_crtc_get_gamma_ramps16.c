@@ -12,7 +12,7 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_dummy_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps16_t *restrict ramps)
+libgamma_dummy_crtc_get_gamma_ramps16(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_ramps16 *restrict ramps)
 {
 #define LIBGAMMA_DUMMY_GET_RAMPS
 #define TYPE uint16_t

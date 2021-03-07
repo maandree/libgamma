@@ -32,20 +32,21 @@ figure_out_card_open_error(const char *pathname)
 		return LIBGAMMA_ERRNO_SET;
 	}
 
-#define __test(R, W) ((attr.st_mode & ((R) | (W))) == ((R) | (W)))
+	/* TODO Can this be simplified? */
+#define TEST(R, W) ((attr.st_mode & ((R) | (W))) == ((R) | (W)))
 
 	/* Get permission requirement for the file */
 	if (stat(pathname, &attr))
 		return errno == EACCES ? LIBGAMMA_NO_SUCH_PARTITION : LIBGAMMA_ERRNO_SET;
 
 	/* Test owner's, group's and others' permissions */
-	if ((attr.st_uid == geteuid() && __test(S_IRUSR, S_IWUSR)) ||
-	    (attr.st_gid == getegid() && __test(S_IRGRP, S_IWGRP)) || __test(S_IROTH, S_IWOTH))
+	if ((attr.st_uid == geteuid() && TEST(S_IRUSR, S_IWUSR)) ||
+	    (attr.st_gid == getegid() && TEST(S_IRGRP, S_IWGRP)) || TEST(S_IROTH, S_IWOTH))
 		return LIBGAMMA_DEVICE_ACCESS_FAILED;
 
 	/* The group should be "video", but perhaps
 	   it is "root" to restrict users */
-	if (!attr.st_gid /* root group */ || __test(S_IRGRP, S_IWGRP))
+	if (!attr.st_gid /* root group */ || TEST(S_IRGRP, S_IWGRP))
 		return LIBGAMMA_DEVICE_RESTRICTED;
 
 
@@ -79,7 +80,7 @@ figure_out_card_open_error(const char *pathname)
 	libgamma_group_gid_set(attr.st_gid);
 	libgamma_group_name_set(group ? group->gr_name : NULL);
 	return LIBGAMMA_DEVICE_REQUIRE_GROUP;
-#undef __test
+#undef TEST
 }
 
 
@@ -93,11 +94,11 @@ figure_out_card_open_error(const char *pathname)
  *                     error identifier provided by this library
  */
 int
-libgamma_linux_drm_partition_initialise(libgamma_partition_state_t *restrict this,
-                                        libgamma_site_state_t *restrict site, size_t partition)
+libgamma_linux_drm_partition_initialise(struct libgamma_partition_state *restrict this,
+                                        struct libgamma_site_state *restrict site, size_t partition)
 {
 	int rc = 0;
-	libgamma_drm_card_data_t *restrict data;
+	struct libgamma_drm_card_data *restrict data;
 	char pathname[PATH_MAX];
 
 	(void) site;
@@ -108,7 +109,7 @@ libgamma_linux_drm_partition_initialise(libgamma_partition_state_t *restrict thi
 
 	/* Allocate and initialise graphics card data */
 	this->data = NULL;
-	data = malloc(sizeof(libgamma_drm_card_data_t));
+	data = malloc(sizeof(*data));
 	if (!data)
 		return LIBGAMMA_ERRNO_SET;
 	data->fd = -1;

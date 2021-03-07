@@ -9,7 +9,7 @@
  * @param  this  The CRTC state
  */
 void
-libgamma_quartz_cg_crtc_destroy(libgamma_crtc_state_t *restrict this)
+libgamma_quartz_cg_crtc_destroy(struct libgamma_crtc_state *restrict this)
 {
 	(void) this;
 }

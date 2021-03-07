@@ -13,11 +13,11 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_dummy_crtc_initialise(libgamma_crtc_state_t *restrict this,
-                               libgamma_partition_state_t *restrict partition, size_t crtc)
+libgamma_dummy_crtc_initialise(struct libgamma_crtc_state *restrict this,
+                               struct libgamma_partition_state *restrict partition, size_t crtc)
 {
-	libgamma_dummy_partition_t *partition_data = partition->data;
-	libgamma_dummy_crtc_t *data = &partition_data->crtcs[crtc];
+	struct libgamma_dummy_partition *partition_data = partition->data;
+	struct libgamma_dummy_crtc *data = &partition_data->crtcs[crtc];
 	size_t stop_size;
 
 	this->data = NULL;

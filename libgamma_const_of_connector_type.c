@@ -12,9 +12,9 @@
  *                     `NULL` if not recognised (errno is not changed)
  */
 const char *
-libgamma_const_of_connector_type(int connector)
+libgamma_const_of_connector_type(enum libgamma_connector_type connector)
 {
-	switch (connector) {
+	switch ((int)connector) {
 #define X(CONST, ...)\
 	case CONST:\
 		return #CONST;

@@ -12,7 +12,7 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_x_randr_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps16_t *restrict ramps)
+libgamma_x_randr_crtc_get_gamma_ramps16(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_ramps16 *restrict ramps)
 {
 	xcb_connection_t *restrict connection = this->partition->site->data;
 	xcb_randr_get_crtc_gamma_cookie_t cookie;
@@ -41,9 +41,9 @@ libgamma_x_randr_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict this, li
 	green = xcb_randr_get_crtc_gamma_green(reply);
 	blue  = xcb_randr_get_crtc_gamma_blue(reply);
 	/* Copy over the gamma ramps to our memory */
-	memcpy(ramps->red,   red,   ramps->red_size   * sizeof(uint16_t));
-	memcpy(ramps->green, green, ramps->green_size * sizeof(uint16_t));
-	memcpy(ramps->blue,  blue,  ramps->blue_size  * sizeof(uint16_t));
+	memcpy(ramps->red,   red,   ramps->red_size   * sizeof(*red));
+	memcpy(ramps->green, green, ramps->green_size * sizeof(*green));
+	memcpy(ramps->blue,  blue,  ramps->blue_size  * sizeof(*blue));
 
 	free(reply);
 	return 0;

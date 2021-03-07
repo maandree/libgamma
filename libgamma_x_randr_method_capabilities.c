@@ -9,7 +9,7 @@
  * @param  this  The data structure to fill with the method's capabilities
  */
 void
-libgamma_x_randr_method_capabilities(libgamma_method_capabilities_t *restrict this)
+libgamma_x_randr_method_capabilities(struct libgamma_method_capabilities *restrict this)
 {
 	char *display = getenv("DISPLAY");
 	/* Support for all information except active status and gamma ramp support.

@@ -8,4 +8,4 @@
  * 
  * @param  this  The CRTC state
  */
-extern inline void libgamma_crtc_free(libgamma_crtc_state_t *restrict);
+extern inline void libgamma_crtc_free(struct libgamma_crtc_state *restrict);

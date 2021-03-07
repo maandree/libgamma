@@ -10,7 +10,7 @@
  * @param  this  The gamma ramps
  */
 void
-libgamma_gamma_ramps32_destroy(libgamma_gamma_ramps32_t *restrict this)
+libgamma_gamma_ramps32_destroy(struct libgamma_gamma_ramps32 *restrict this)
 {
 	free(this->red);
 }

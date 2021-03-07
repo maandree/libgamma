@@ -11,9 +11,9 @@
  *                error identifier provided by this library
  */
 int
-libgamma_dummy_partition_restore(libgamma_partition_state_t *restrict this)
+libgamma_dummy_partition_restore(struct libgamma_partition_state *restrict this)
 {
-	libgamma_dummy_partition_t *data = this->data;
+	struct libgamma_dummy_partition *data = this->data;
 	size_t i;
 
 	if (!libgamma_dummy_internal_configurations.capabilities.partition_restore) {

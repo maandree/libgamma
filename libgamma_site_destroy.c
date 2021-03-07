@@ -8,7 +8,7 @@
  * @param  this  The site state
  */
 void
-libgamma_site_destroy(libgamma_site_state_t *restrict this)
+libgamma_site_destroy(struct libgamma_site_state *restrict this)
 {
 	switch (this->method) {
 #define X(CONST, CNAME, ...)\

@@ -12,11 +12,11 @@
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 int
-libgamma_dummy_get_crtc_information(libgamma_crtc_information_t *restrict this,
-                                    libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
+libgamma_dummy_get_crtc_information(struct libgamma_crtc_information *restrict this,
+                                    struct libgamma_crtc_state *restrict crtc, unsigned long long fields)
 {
-	libgamma_dummy_crtc_t *restrict data = crtc->data;
-	int supported = libgamma_dummy_internal_configurations.capabilities.crtc_information;
+	struct libgamma_dummy_crtc *restrict data = crtc->data;
+	unsigned long long supported = libgamma_dummy_internal_configurations.capabilities.crtc_information;
 	int e = 0;
 	size_t n;
 

@@ -9,7 +9,7 @@
  * @param  this  The data structure to fill with the method's capabilities
  */
 void
-libgamma_x_vidmode_method_capabilities(libgamma_method_capabilities_t *restrict this)
+libgamma_x_vidmode_method_capabilities(struct libgamma_method_capabilities *restrict this)
 {
 	char *restrict display = getenv("DISPLAY");
 	/* Gamma ramps size and depth can be queried */

@@ -45,7 +45,7 @@ is_vt_proper(int fd)
 static int
 list_method_test(int method, int operation)
 {
-	libgamma_method_capabilities_t caps;
+	struct libgamma_method_capabilities caps;
 	int fd, r, saved_errno;
 
 	libgamma_method_capabilities(&caps, sizeof(caps), method);

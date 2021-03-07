@@ -16,13 +16,13 @@ libgamma_x_randr_internal_translate_error(int error_code, int default_error, int
 {
 	int r = LIBGAMMA_ERRNO_SET;
 	switch (error_code) {
-	case XCB_CONN_ERROR:                    errno = ECONNABORTED;  break;
-	case XCB_CONN_CLOSED_EXT_NOTSUPPORTED:  errno = ENOPROTOOPT;  break;
-	case XCB_CONN_CLOSED_MEM_INSUFFICIENT:  errno = ENOMEM;  break;
-	case XCB_CONN_CLOSED_REQ_LEN_EXCEED:    errno = EMSGSIZE;  break;
-	case XCB_CONN_CLOSED_PARSE_ERR:         r = LIBGAMMA_NO_SUCH_SITE;  break;
+	case XCB_CONN_ERROR:                    errno = ECONNABORTED;            break;
+	case XCB_CONN_CLOSED_EXT_NOTSUPPORTED:  errno = ENOPROTOOPT;             break;
+	case XCB_CONN_CLOSED_MEM_INSUFFICIENT:  errno = ENOMEM;                  break;
+	case XCB_CONN_CLOSED_REQ_LEN_EXCEED:    errno = EMSGSIZE;                break;
+	case XCB_CONN_CLOSED_PARSE_ERR:         r = LIBGAMMA_NO_SUCH_SITE;       break;
 	case XCB_CONN_CLOSED_INVALID_SCREEN:    r = LIBGAMMA_NO_SUCH_PARTITION;  break;
-	case XCB_CONN_CLOSED_FDPASSING_FAILED:  errno = EIO;  break;
+	case XCB_CONN_CLOSED_FDPASSING_FAILED:  errno = EIO;                     break;
 	default:
 		r = default_error;
 		break;

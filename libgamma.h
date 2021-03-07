@@ -16,6 +16,19 @@
 
 
 
+/* Some functions have been new signatures, the old ones are still
+ * available at link time */
+#define libgamma_method_capabilities libgamma_method_capabilities__new
+#define libgamma_get_crtc_information libgamma_get_crtc_information__new
+#define libgamma_crtc_set_gamma_ramps8 libgamma_crtc_set_gamma_ramps8__new
+#define libgamma_crtc_set_gamma_ramps16 libgamma_crtc_set_gamma_ramps16__new
+#define libgamma_crtc_set_gamma_ramps32 libgamma_crtc_set_gamma_ramps32__new
+#define libgamma_crtc_set_gamma_ramps64 libgamma_crtc_set_gamma_ramps64__new
+#define libgamma_crtc_set_gamma_rampsf libgamma_crtc_set_gamma_rampsf__new
+#define libgamma_crtc_set_gamma_rampsd libgamma_crtc_set_gamma_rampsd__new
+
+
+
 /**
  * `errno` has be set with a standard error number
  * to indicate the what has gone wrong
@@ -398,7 +411,7 @@ extern const int libgamma_method_count;
 /**
  * Types for connectors
  */
-typedef enum libgamma_connector_type {
+enum libgamma_connector_type {
 	/**
 	 * The adjustment method does not know the connector's type
 	 * 
@@ -526,8 +539,7 @@ typedef enum libgamma_connector_type {
 
 	/* DEVELOPERS: Remember to update LIBGAMMA_CONNECTOR_TYPE_COUNT below
 	 *             and LIST_CONNECTOR_TYPES in common.h when adding methods */
-
-} libgamma_connector_type_t;
+};
 
 /**
  * The number of values defined in `libgamma_connector_type_t`
@@ -549,7 +561,7 @@ extern const int libgamma_connector_type_count;
  * Currently the possible values are very biased
  * to LCD, Plasma and monochrome monitors
  */
-typedef enum libgamma_subpixel_order {
+enum libgamma_subpixel_order {
 	/**
 	 * The adjustment method does not know the order of the subpixels
 	 * 
@@ -584,8 +596,7 @@ typedef enum libgamma_subpixel_order {
 
 	/* DEVELOPERS: Remember to update LIBGAMMA_SUBPIXEL_ORDER_COUNT below
 	 *             and LIST_SUBPIXEL_ORDERS in common.h when adding methods */
-
-} libgamma_subpixel_order_t;
+};
 
 /**
  * The number of values defined in `libgamma_subpixel_order_t`
@@ -604,7 +615,7 @@ extern const int libgamma_subpixel_order_count;
 /**
  * Answer enum to a decision problem
  */
-typedef enum libgamma_decision {
+enum libgamma_decision {
 	/**
 	 * The answer is negative
 	 */
@@ -619,15 +630,14 @@ typedef enum libgamma_decision {
 	 * The answer is positive
 	 */
 	LIBGAMMA_YES = 2
-
-} libgamma_decision_t;
+};
 
 
 
 /**
  * Capabilities of adjustment methods
  */
-typedef struct libgamma_method_capabilities {
+struct libgamma_method_capabilities {
 	/**
 	 * OR of the CRTC information fields in `libgamma_crtc_information_t`
 	 * that may (but can fail) be read successfully
@@ -760,8 +770,7 @@ typedef struct libgamma_method_capabilities {
 	 * @since  .struct_version==1, replaces .crtc_information__old (previously named .crtc_information)
 	 */
 	unsigned long long crtc_information;
-
-} libgamma_method_capabilities_t;
+};
 
 /**
  * The number the version of the library the program is
@@ -782,7 +791,7 @@ typedef struct libgamma_method_capabilities {
  * and the BSD:s, there can usually be any (feasible) number of
  * sites. In X.org parlance they are called displays.
  */
-typedef struct libgamma_site_state {
+struct libgamma_site_state {
 	/**
 	 * Adjustment method implementation specific data
 	 * 
@@ -818,8 +827,7 @@ typedef struct libgamma_site_state {
 	 * Rendering Manager, a partition is a graphics card.
 	 */
 	size_t partitions_available;
-
-} libgamma_site_state_t;
+};
 
 
 /**
@@ -834,7 +842,7 @@ typedef struct libgamma_site_state {
  * On hardware-level adjustment methods, such as Direct
  * Rendering Manager, a partition is a graphics card.
  */
-typedef struct libgamma_partition_state {
+struct libgamma_partition_state {
 	/**
 	 * Adjustment method implementation specific data
 	 * 
@@ -845,7 +853,7 @@ typedef struct libgamma_partition_state {
 	/**
 	 * The site this partition belongs to
 	 */
-	libgamma_site_state_t *site;
+	struct libgamma_site_state *site;
 
 	/**
 	 * The index of the partition
@@ -860,8 +868,7 @@ typedef struct libgamma_partition_state {
 	 * online
 	 */
 	size_t crtcs_available;
-
-} libgamma_partition_state_t;
+};
 
 
 /**
@@ -871,7 +878,7 @@ typedef struct libgamma_partition_state {
  * monitor that is plugged in to the connector
  * that the CRTC belongs to
  */
-typedef struct libgamma_crtc_state {
+struct libgamma_crtc_state {
 	/**
 	 * Adjustment method implementation specific data
 	 * 
@@ -882,20 +889,19 @@ typedef struct libgamma_crtc_state {
 	/**
 	 * The partition this CRTC belongs to
 	 */
-	libgamma_partition_state_t *partition;
+	struct libgamma_partition_state *partition;
 
 	/**
 	 * The index of the CRTC within its partition
 	 */
 	size_t crtc;
-
-} libgamma_crtc_state_t;
+};
 
 
 /**
  * Cathode ray tube controller information data structure
  */
-typedef struct libgamma_crtc_information {
+struct libgamma_crtc_information {
 
 /**
  * For a `libgamma_crtc_information_t` fill in the values for
@@ -1137,7 +1143,7 @@ typedef struct libgamma_crtc_information {
 	 * 
 	 * @since  Always
 	 */
-	libgamma_decision_t gamma_support;
+	enum libgamma_decision gamma_support;
 
 	/**
 	 * Zero on success, positive it holds the value `errno` had
@@ -1164,7 +1170,7 @@ typedef struct libgamma_crtc_information {
 	 * 
 	 * @since  Always
 	 */
-	libgamma_subpixel_order_t subpixel_order;
+	enum libgamma_subpixel_order subpixel_order;
 
 	/**
 	 * Zero on success, positive it holds the value `errno` had
@@ -1235,7 +1241,7 @@ typedef struct libgamma_crtc_information {
 	 * 
 	 * @since  Always
 	 */
-	libgamma_connector_type_t connector_type;
+	enum libgamma_connector_type connector_type;
 
 	/**
 	 * Zero on success, positive it holds the value `errno` had
@@ -1429,8 +1435,7 @@ typedef struct libgamma_crtc_information {
 	 *             LIBGAMMA_CRTC_INFO_COUNT, and LIBGAMMA_CRTC_INFO_MACRO_EDID
 	 *             macros below and may add additional LIBGAMMA_CRTC_INFO_MACRO_*
 	 *             macros below */
-
-} libgamma_crtc_information_t;
+};
 
 
 /**
@@ -1515,7 +1520,7 @@ extern const int libgamma_crtc_info_count;
 /**
  * Gamma ramp structure for 8-bit gamma ramps
  */
-typedef struct libgamma_gamma_ramps8 {
+struct libgamma_gamma_ramps8 {
 	/**
 	 * The size of `red`
 	 */
@@ -1545,15 +1550,13 @@ typedef struct libgamma_gamma_ramps8 {
 	 * The gamma ramp for the blue channel
 	 */
 	uint8_t *blue;
-
-} libgamma_gamma_ramps8_t;
+};
 
 
 /**
  * Gamma ramp structure for 16-bit gamma ramps
  */
-typedef struct libgamma_gamma_ramps16
-{
+struct libgamma_gamma_ramps16 {
 	/**
 	 * The size of `red`
 	 */
@@ -1583,15 +1586,13 @@ typedef struct libgamma_gamma_ramps16
 	 * The gamma ramp for the blue channel
 	 */
 	uint16_t *blue;
-
-} libgamma_gamma_ramps16_t;
+};
 
 
 /**
  * Gamma ramp structure for 32-bit gamma ramps
  */
-typedef struct libgamma_gamma_ramps32
-{
+struct libgamma_gamma_ramps32 {
 	/**
 	 * The size of `red`
 	 */
@@ -1621,15 +1622,13 @@ typedef struct libgamma_gamma_ramps32
 	 * The gamma ramp for the blue channel
 	 */
 	uint32_t *blue;
-
-} libgamma_gamma_ramps32_t;
+};
 
 
 /**
  * Gamma ramp structure for 64-bit gamma ramps
  */
-typedef struct libgamma_gamma_ramps64
-{
+struct libgamma_gamma_ramps64 {
 	/**
 	 * The size of `red`
 	 */
@@ -1659,15 +1658,13 @@ typedef struct libgamma_gamma_ramps64
 	 * The gamma ramp for the blue channel
 	 */
 	uint64_t *blue;
-
-} libgamma_gamma_ramps64_t;
+};
 
 
 /**
  * Gamma ramp structure for `float` gamma ramps
  */
-typedef struct libgamma_gamma_rampsf
-{
+struct libgamma_gamma_rampsf {
 	/**
 	 * The size of `red`
 	 */
@@ -1697,15 +1694,13 @@ typedef struct libgamma_gamma_rampsf
 	 * The gamma ramp for the blue channel
 	 */
 	float *blue;
-
-} libgamma_gamma_rampsf_t;
+};
 
 
 /**
  * Gamma ramp structure for `double` gamma ramps
  */
-typedef struct libgamma_gamma_rampsd
-{
+struct libgamma_gamma_rampsd {
 	/**
 	 * The size of `red`
 	 */
@@ -1735,8 +1730,7 @@ typedef struct libgamma_gamma_rampsd
 	 * The gamma ramp for the blue channel
 	 */
 	double *blue;
-
-} libgamma_gamma_rampsd_t;
+};
 
 
 /**
@@ -1961,7 +1955,7 @@ int libgamma_value_of_method(const char *);
  *                     recognised (errno is not changed)
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __const__)))
-const char *libgamma_name_of_connector_type(int);
+const char *libgamma_name_of_connector_type(enum libgamma_connector_type);
 
 /**
  * Get the name of the constant for a connector
@@ -1973,7 +1967,7 @@ const char *libgamma_name_of_connector_type(int);
  *                     `NULL` if not recognised (errno is not changed)
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __const__)))
-const char *libgamma_const_of_connector_type(int);
+const char *libgamma_const_of_connector_type(enum libgamma_connector_type);
 
 /**
  * Get the value of a connector type
@@ -1985,7 +1979,7 @@ const char *libgamma_const_of_connector_type(int);
  *                     `LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED` of not defined
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
-int libgamma_value_of_connector_type(const char *);
+int libgamma_value_of_connector_type(const char *); /* FIXME return type */
 
 
 
@@ -2001,7 +1995,7 @@ int libgamma_value_of_connector_type(const char *);
  *                 recognised (errno is not changed)
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __const__)))
-const char *libgamma_name_of_subpixel_order(int);
+const char *libgamma_name_of_subpixel_order(enum libgamma_subpixel_order);
 
 /**
  * Get the name of the constant for a subpixel order,
@@ -2013,7 +2007,7 @@ const char *libgamma_name_of_subpixel_order(int);
  *                 `NULL` if not recognised (errno is not changed)
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__warn_unused_result__, __const__)))
-const char *libgamma_const_of_subpixel_order(int);
+const char *libgamma_const_of_subpixel_order(enum libgamma_subpixel_order);
 
 /**
  * Get the value of a subpixel order
@@ -2025,7 +2019,7 @@ const char *libgamma_const_of_subpixel_order(int);
  *                 `LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED` of not defined
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__, __access__(__read_only__, 1), __pure__)))
-int libgamma_value_of_subpixel_order(const char *);
+int libgamma_value_of_subpixel_order(const char *); /* FIXME return type */
 
 
 
@@ -2040,7 +2034,7 @@ int libgamma_value_of_subpixel_order(const char *);
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_gamma_ramps8_initialise(libgamma_gamma_ramps8_t *restrict);
+int libgamma_gamma_ramps8_initialise(struct libgamma_gamma_ramps8 *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2050,7 +2044,7 @@ int libgamma_gamma_ramps8_initialise(libgamma_gamma_ramps8_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_ramps8_destroy(libgamma_gamma_ramps8_t *restrict);
+void libgamma_gamma_ramps8_destroy(struct libgamma_gamma_ramps8 *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2061,7 +2055,7 @@ void libgamma_gamma_ramps8_destroy(libgamma_gamma_ramps8_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_ramps8_free(libgamma_gamma_ramps8_t *restrict);
+void libgamma_gamma_ramps8_free(struct libgamma_gamma_ramps8 *restrict);
 
 
 /**
@@ -2075,7 +2069,7 @@ void libgamma_gamma_ramps8_free(libgamma_gamma_ramps8_t *restrict);
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_gamma_ramps16_initialise(libgamma_gamma_ramps16_t *restrict);
+int libgamma_gamma_ramps16_initialise(struct libgamma_gamma_ramps16 *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2085,7 +2079,7 @@ int libgamma_gamma_ramps16_initialise(libgamma_gamma_ramps16_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_ramps16_destroy(libgamma_gamma_ramps16_t *restrict);
+void libgamma_gamma_ramps16_destroy(struct libgamma_gamma_ramps16 *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2096,7 +2090,7 @@ void libgamma_gamma_ramps16_destroy(libgamma_gamma_ramps16_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_ramps16_free(libgamma_gamma_ramps16_t *restrict);
+void libgamma_gamma_ramps16_free(struct libgamma_gamma_ramps16 *restrict);
 
 
 /**
@@ -2110,7 +2104,7 @@ void libgamma_gamma_ramps16_free(libgamma_gamma_ramps16_t *restrict);
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_gamma_ramps32_initialise(libgamma_gamma_ramps32_t *restrict);
+int libgamma_gamma_ramps32_initialise(struct libgamma_gamma_ramps32 *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2120,7 +2114,7 @@ int libgamma_gamma_ramps32_initialise(libgamma_gamma_ramps32_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_ramps32_destroy(libgamma_gamma_ramps32_t *restrict);
+void libgamma_gamma_ramps32_destroy(struct libgamma_gamma_ramps32 *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2131,7 +2125,7 @@ void libgamma_gamma_ramps32_destroy(libgamma_gamma_ramps32_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_ramps32_free(libgamma_gamma_ramps32_t *restrict);
+void libgamma_gamma_ramps32_free(struct libgamma_gamma_ramps32 *restrict);
 
 
 /**
@@ -2145,7 +2139,7 @@ void libgamma_gamma_ramps32_free(libgamma_gamma_ramps32_t *restrict);
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_gamma_ramps64_initialise(libgamma_gamma_ramps64_t *restrict);
+int libgamma_gamma_ramps64_initialise(struct libgamma_gamma_ramps64 *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2155,7 +2149,7 @@ int libgamma_gamma_ramps64_initialise(libgamma_gamma_ramps64_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_ramps64_destroy(libgamma_gamma_ramps64_t *restrict);
+void libgamma_gamma_ramps64_destroy(struct libgamma_gamma_ramps64 *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2166,7 +2160,7 @@ void libgamma_gamma_ramps64_destroy(libgamma_gamma_ramps64_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_ramps64_free(libgamma_gamma_ramps64_t *restrict);
+void libgamma_gamma_ramps64_free(struct libgamma_gamma_ramps64 *restrict);
 
 
 /**
@@ -2180,7 +2174,7 @@ void libgamma_gamma_ramps64_free(libgamma_gamma_ramps64_t *restrict);
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_gamma_rampsf_initialise(libgamma_gamma_rampsf_t *restrict);
+int libgamma_gamma_rampsf_initialise(struct libgamma_gamma_rampsf *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2190,7 +2184,7 @@ int libgamma_gamma_rampsf_initialise(libgamma_gamma_rampsf_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_rampsf_destroy(libgamma_gamma_rampsf_t *restrict);
+void libgamma_gamma_rampsf_destroy(struct libgamma_gamma_rampsf *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2201,7 +2195,7 @@ void libgamma_gamma_rampsf_destroy(libgamma_gamma_rampsf_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_rampsf_free(libgamma_gamma_rampsf_t *restrict);
+void libgamma_gamma_rampsf_free(struct libgamma_gamma_rampsf *restrict);
 
 
 /**
@@ -2215,7 +2209,7 @@ void libgamma_gamma_rampsf_free(libgamma_gamma_rampsf_t *restrict);
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_gamma_rampsd_initialise(libgamma_gamma_rampsd_t *restrict);
+int libgamma_gamma_rampsd_initialise(struct libgamma_gamma_rampsd *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2225,7 +2219,7 @@ int libgamma_gamma_rampsd_initialise(libgamma_gamma_rampsd_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_rampsd_destroy(libgamma_gamma_rampsd_t *restrict);
+void libgamma_gamma_rampsd_destroy(struct libgamma_gamma_rampsd *restrict);
 
 /**
  * Release resources that are held by a gamma ramp strcuture that
@@ -2236,7 +2230,7 @@ void libgamma_gamma_rampsd_destroy(libgamma_gamma_rampsd_t *restrict);
  * @param  this  The gamma ramps
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_gamma_rampsd_free(libgamma_gamma_rampsd_t *restrict);
+void libgamma_gamma_rampsd_free(struct libgamma_gamma_rampsd *restrict);
 
 
 
@@ -2271,8 +2265,7 @@ size_t libgamma_list_methods(int *restrict, size_t, int);
  *                  error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__access__(__write_only__, 1))))
-int libgamma_method_capabilities__new(libgamma_method_capabilities_t *restrict, size_t, int);
-#define libgamma_method_capabilities libgamma_method_capabilities__new
+int libgamma_method_capabilities(struct libgamma_method_capabilities *restrict, size_t, int);
 
 /**
  * Return the default site for an adjustment method
@@ -2314,7 +2307,7 @@ const char *libgamma_method_default_site_variable(int);
  *                  error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__(1))))
-int libgamma_site_initialise(libgamma_site_state_t *restrict, int, char *restrict);
+int libgamma_site_initialise(struct libgamma_site_state *restrict, int, char *restrict);
 
 /**
  * Release all resources held by a site state
@@ -2322,7 +2315,7 @@ int libgamma_site_initialise(libgamma_site_state_t *restrict, int, char *restric
  * @param  this  The site state
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_site_destroy(libgamma_site_state_t *restrict);
+void libgamma_site_destroy(struct libgamma_site_state *restrict);
 
 /**
  * Release all resources held by a site state
@@ -2332,7 +2325,7 @@ void libgamma_site_destroy(libgamma_site_state_t *restrict);
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
 inline void
-libgamma_site_free(libgamma_site_state_t *restrict this__)
+libgamma_site_free(struct libgamma_site_state *restrict this__)
 {
 	libgamma_site_destroy(this__);
 	free(this__);
@@ -2346,7 +2339,7 @@ libgamma_site_free(libgamma_site_state_t *restrict this__)
  *                error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_site_restore(libgamma_site_state_t *restrict);
+int libgamma_site_restore(struct libgamma_site_state *restrict);
 
 
 
@@ -2360,7 +2353,7 @@ int libgamma_site_restore(libgamma_site_state_t *restrict);
  *                     error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_partition_initialise(libgamma_partition_state_t *restrict, libgamma_site_state_t *restrict, size_t);
+int libgamma_partition_initialise(struct libgamma_partition_state *restrict, struct libgamma_site_state *restrict, size_t);
 
 /**
  * Release all resources held by a partition state
@@ -2368,7 +2361,7 @@ int libgamma_partition_initialise(libgamma_partition_state_t *restrict, libgamma
  * @param  this  The partition state
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_partition_destroy(libgamma_partition_state_t *restrict);
+void libgamma_partition_destroy(struct libgamma_partition_state *restrict);
 
 /**
  * Release all resources held by a partition state
@@ -2378,7 +2371,7 @@ void libgamma_partition_destroy(libgamma_partition_state_t *restrict);
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
 inline void
-libgamma_partition_free(libgamma_partition_state_t *restrict this__)
+libgamma_partition_free(struct libgamma_partition_state *restrict this__)
 {
 	libgamma_partition_destroy(this__);
 	free(this__);
@@ -2392,7 +2385,7 @@ libgamma_partition_free(libgamma_partition_state_t *restrict this__)
  *                error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_partition_restore(libgamma_partition_state_t *restrict);
+int libgamma_partition_restore(struct libgamma_partition_state *restrict);
 
 
 
@@ -2406,7 +2399,7 @@ int libgamma_partition_restore(libgamma_partition_state_t *restrict);
  *                     error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_initialise(libgamma_crtc_state_t *restrict, libgamma_partition_state_t *restrict, size_t);
+int libgamma_crtc_initialise(struct libgamma_crtc_state *restrict, struct libgamma_partition_state *restrict, size_t);
 
 /**
  * Release all resources held by a CRTC state
@@ -2414,7 +2407,7 @@ int libgamma_crtc_initialise(libgamma_crtc_state_t *restrict, libgamma_partition
  * @param  this  The CRTC state
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_crtc_destroy(libgamma_crtc_state_t *restrict);
+void libgamma_crtc_destroy(struct libgamma_crtc_state *restrict);
 
 /**
  * Release all resources held by a CRTC state
@@ -2424,7 +2417,7 @@ void libgamma_crtc_destroy(libgamma_crtc_state_t *restrict);
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
 inline void
-libgamma_crtc_free(libgamma_crtc_state_t *restrict this__)
+libgamma_crtc_free(struct libgamma_crtc_state *restrict this__)
 {
 	libgamma_crtc_destroy(this__);
 	free(this__);
@@ -2438,7 +2431,7 @@ libgamma_crtc_free(libgamma_crtc_state_t *restrict this__)
  *                error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_restore(libgamma_crtc_state_t *restrict);
+int libgamma_crtc_restore(struct libgamma_crtc_state *restrict);
 
 
 /**
@@ -2452,9 +2445,8 @@ int libgamma_crtc_restore(libgamma_crtc_state_t *restrict);
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__write_only__, 1))))
-int libgamma_get_crtc_information__new(libgamma_crtc_information_t *restrict, size_t,
-                                       libgamma_crtc_state_t *restrict, unsigned long long);
-#define libgamma_get_crtc_information libgamma_get_crtc_information__new
+int libgamma_get_crtc_information(struct libgamma_crtc_information *restrict, size_t,
+                                  struct libgamma_crtc_state *restrict, unsigned long long);
 
 /**
  * Release all resources in an information data structure for a CRTC
@@ -2462,7 +2454,7 @@ int libgamma_get_crtc_information__new(libgamma_crtc_information_t *restrict, si
  * @param  this  The CRTC information
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_crtc_information_destroy(libgamma_crtc_information_t *restrict);
+void libgamma_crtc_information_destroy(struct libgamma_crtc_information *restrict);
 
 /**
  * Release all resources in an information data structure for a CRTC
@@ -2472,7 +2464,7 @@ void libgamma_crtc_information_destroy(libgamma_crtc_information_t *restrict);
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
 inline void
-libgamma_crtc_information_free(libgamma_crtc_information_t *restrict this__)
+libgamma_crtc_information_free(struct libgamma_crtc_information *restrict this__)
 {
 	libgamma_crtc_information_destroy(this__);
 	free(this__);
@@ -2538,7 +2530,7 @@ unsigned char *libgamma_unhex_edid(const char *restrict);
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_get_gamma_ramps8(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps8_t *restrict);
+int libgamma_crtc_get_gamma_ramps8(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps8 *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, 8-bit gamma-depth version.
@@ -2549,8 +2541,7 @@ int libgamma_crtc_get_gamma_ramps8(libgamma_crtc_state_t *restrict, libgamma_gam
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_set_gamma_ramps8__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps8_t *restrict);
-#define libgamma_crtc_set_gamma_ramps8 libgamma_crtc_set_gamma_ramps8__new
+int libgamma_crtc_set_gamma_ramps8(struct libgamma_crtc_state *restrict, const struct libgamma_gamma_ramps8 *restrict);
 
 
 /**
@@ -2566,7 +2557,7 @@ int libgamma_crtc_set_gamma_ramps8__new(libgamma_crtc_state_t *restrict, const l
  *                          error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_ramps8_f(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps8_fun *,
+int libgamma_crtc_set_gamma_ramps8_f(struct libgamma_crtc_state *restrict, libgamma_gamma_ramps8_fun *,
                                      libgamma_gamma_ramps8_fun *, libgamma_gamma_ramps8_fun *);
 
 
@@ -2579,7 +2570,7 @@ int libgamma_crtc_set_gamma_ramps8_f(libgamma_crtc_state_t *restrict, libgamma_g
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __hot__, __access__(__read_only__, 2))))
-int libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps16_t *restrict);
+int libgamma_crtc_get_gamma_ramps16(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps16 *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, 16-bit gamma-depth version
@@ -2590,8 +2581,7 @@ int libgamma_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict, libgamma_ga
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __hot__, __access__(__read_only__, 2))))
-int libgamma_crtc_set_gamma_ramps16__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps16_t *restrict);
-#define libgamma_crtc_set_gamma_ramps16 libgamma_crtc_set_gamma_ramps16__new
+int libgamma_crtc_set_gamma_ramps16(struct libgamma_crtc_state *restrict, const struct libgamma_gamma_ramps16 *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, 16-bit gamma-depth function version
@@ -2606,7 +2596,7 @@ int libgamma_crtc_set_gamma_ramps16__new(libgamma_crtc_state_t *restrict, const 
  *                          error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __hot__)))
-int libgamma_crtc_set_gamma_ramps16_f(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps16_fun *,
+int libgamma_crtc_set_gamma_ramps16_f(struct libgamma_crtc_state *restrict, libgamma_gamma_ramps16_fun *,
                                       libgamma_gamma_ramps16_fun *, libgamma_gamma_ramps16_fun *);
 
 
@@ -2619,7 +2609,7 @@ int libgamma_crtc_set_gamma_ramps16_f(libgamma_crtc_state_t *restrict, libgamma_
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps32_t *restrict);
+int libgamma_crtc_get_gamma_ramps32(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps32 *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, 32-bit gamma-depth version
@@ -2630,8 +2620,7 @@ int libgamma_crtc_get_gamma_ramps32(libgamma_crtc_state_t *restrict, libgamma_ga
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_set_gamma_ramps32__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps32_t *restrict);
-#define libgamma_crtc_set_gamma_ramps32 libgamma_crtc_set_gamma_ramps32__new
+int libgamma_crtc_set_gamma_ramps32(struct libgamma_crtc_state *restrict, const struct libgamma_gamma_ramps32 *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, 32-bit gamma-depth function version
@@ -2646,7 +2635,7 @@ int libgamma_crtc_set_gamma_ramps32__new(libgamma_crtc_state_t *restrict, const 
  *                          error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps32_fun *,
+int libgamma_crtc_set_gamma_ramps32_f(struct libgamma_crtc_state *restrict, libgamma_gamma_ramps32_fun *,
                                       libgamma_gamma_ramps32_fun *, libgamma_gamma_ramps32_fun *);
 
 
@@ -2659,7 +2648,7 @@ int libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t *restrict, libgamma_
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps64_t *restrict);
+int libgamma_crtc_get_gamma_ramps64(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps64 *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, 64-bit gamma-depth version
@@ -2670,8 +2659,7 @@ int libgamma_crtc_get_gamma_ramps64(libgamma_crtc_state_t *restrict, libgamma_ga
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_set_gamma_ramps64__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps64_t *restrict);
-#define libgamma_crtc_set_gamma_ramps64 libgamma_crtc_set_gamma_ramps64__new
+int libgamma_crtc_set_gamma_ramps64(struct libgamma_crtc_state *restrict, const struct libgamma_gamma_ramps64 *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, 64-bit gamma-depth function version
@@ -2686,7 +2674,7 @@ int libgamma_crtc_set_gamma_ramps64__new(libgamma_crtc_state_t *restrict, const 
  *                          error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps64_fun *,
+int libgamma_crtc_set_gamma_ramps64_f(struct libgamma_crtc_state *restrict, libgamma_gamma_ramps64_fun *,
                                       libgamma_gamma_ramps64_fun *, libgamma_gamma_ramps64_fun *);
 
 
@@ -2699,7 +2687,7 @@ int libgamma_crtc_set_gamma_ramps64_f(libgamma_crtc_state_t *restrict, libgamma_
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsf_t *restrict);
+int libgamma_crtc_get_gamma_rampsf(struct libgamma_crtc_state *restrict, struct libgamma_gamma_rampsf *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, `float` version
@@ -2710,8 +2698,7 @@ int libgamma_crtc_get_gamma_rampsf(libgamma_crtc_state_t *restrict, libgamma_gam
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_set_gamma_rampsf__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_rampsf_t *restrict);
-#define libgamma_crtc_set_gamma_rampsf libgamma_crtc_set_gamma_rampsf__new
+int libgamma_crtc_set_gamma_rampsf(struct libgamma_crtc_state *restrict, const struct libgamma_gamma_rampsf *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, `float` function version
@@ -2726,7 +2713,7 @@ int libgamma_crtc_set_gamma_rampsf__new(libgamma_crtc_state_t *restrict, const l
  *                          error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsf_fun *,
+int libgamma_crtc_set_gamma_rampsf_f(struct libgamma_crtc_state *restrict, libgamma_gamma_rampsf_fun *,
                                      libgamma_gamma_rampsf_fun *, libgamma_gamma_rampsf_fun *);
 
 
@@ -2739,7 +2726,7 @@ int libgamma_crtc_set_gamma_rampsf_f(libgamma_crtc_state_t *restrict, libgamma_g
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsd_t *restrict);
+int libgamma_crtc_get_gamma_rampsd(struct libgamma_crtc_state *restrict, struct libgamma_gamma_rampsd *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, `double` version
@@ -2750,8 +2737,7 @@ int libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t *restrict, libgamma_gam
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 2))))
-int libgamma_crtc_set_gamma_rampsd__new(libgamma_crtc_state_t *restrict, const libgamma_gamma_rampsd_t *restrict);
-#define libgamma_crtc_set_gamma_rampsd libgamma_crtc_set_gamma_rampsd__new
+int libgamma_crtc_set_gamma_rampsd(struct libgamma_crtc_state *restrict, const struct libgamma_gamma_rampsd *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, `double` function version
@@ -2766,8 +2752,31 @@ int libgamma_crtc_set_gamma_rampsd__new(libgamma_crtc_state_t *restrict, const l
  *                          error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-int libgamma_crtc_set_gamma_rampsd_f(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsd_fun *,
+int libgamma_crtc_set_gamma_rampsd_f(struct libgamma_crtc_state *restrict, libgamma_gamma_rampsd_fun *,
                                      libgamma_gamma_rampsd_fun *, libgamma_gamma_rampsd_fun *);
+
+
+
+#define LIBGAMMA_TYPEDEF__(T, N)\
+	LIBGAMMA_GCC_ONLY__(__attribute__((__deprecated__("Use "#T" "#N" instead of "#N"_t"))))\
+	typedef T N N##_t
+
+LIBGAMMA_TYPEDEF__(enum, libgamma_connector_type);
+LIBGAMMA_TYPEDEF__(enum, libgamma_subpixel_order);
+LIBGAMMA_TYPEDEF__(enum, libgamma_decision);
+LIBGAMMA_TYPEDEF__(struct, libgamma_method_capabilities);
+LIBGAMMA_TYPEDEF__(struct, libgamma_site_state);
+LIBGAMMA_TYPEDEF__(struct, libgamma_partition_state);
+LIBGAMMA_TYPEDEF__(struct, libgamma_crtc_state);
+LIBGAMMA_TYPEDEF__(struct, libgamma_crtc_information);
+LIBGAMMA_TYPEDEF__(struct, libgamma_gamma_ramps8);
+LIBGAMMA_TYPEDEF__(struct, libgamma_gamma_ramps16);
+LIBGAMMA_TYPEDEF__(struct, libgamma_gamma_ramps32);
+LIBGAMMA_TYPEDEF__(struct, libgamma_gamma_ramps64);
+LIBGAMMA_TYPEDEF__(struct, libgamma_gamma_rampsf);
+LIBGAMMA_TYPEDEF__(struct, libgamma_gamma_rampsd);
+
+#undef LIBGAMMA_TYPEDEF__
 
 
 #endif

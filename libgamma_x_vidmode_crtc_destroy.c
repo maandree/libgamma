@@ -9,7 +9,7 @@
  * @param  this  The CRTC state
  */
 void
-libgamma_x_vidmode_crtc_destroy(libgamma_crtc_state_t *restrict this)
+libgamma_x_vidmode_crtc_destroy(struct libgamma_crtc_state *restrict this)
 {
 	(void) this;
 }

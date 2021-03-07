@@ -15,7 +15,7 @@
  *                          error identifier provided by this library
  */
 int
-libgamma_crtc_set_gamma_ramps8_f(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps8_fun *red_function,
+libgamma_crtc_set_gamma_ramps8_f(struct libgamma_crtc_state *restrict this, libgamma_gamma_ramps8_fun *red_function,
                                  libgamma_gamma_ramps8_fun *green_function, libgamma_gamma_ramps8_fun *blue_function)
 {
 #define TYPE uint8_t

@@ -15,8 +15,8 @@
  *                          error identifier provided by this library
  */
 int
-libgamma_crtc_set_gamma_ramps32_f(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps32_fun *red_function,
-                                 libgamma_gamma_ramps32_fun *green_function, libgamma_gamma_ramps32_fun *blue_function)
+libgamma_crtc_set_gamma_ramps32_f(struct libgamma_crtc_state *restrict this, libgamma_gamma_ramps32_fun *red_function,
+                                  libgamma_gamma_ramps32_fun *green_function, libgamma_gamma_ramps32_fun *blue_function)
 {
 #define TYPE uint32_t
 #define APPEND_RAMPS(X) X##ramps32

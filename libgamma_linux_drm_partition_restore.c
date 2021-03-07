@@ -11,7 +11,7 @@
  *                error identifier provided by this library.
  */
 int
-libgamma_linux_drm_partition_restore(libgamma_partition_state_t *restrict this)
+libgamma_linux_drm_partition_restore(struct libgamma_partition_state *restrict this)
 {
 	(void) this;
 	errno = ENOTSUP;

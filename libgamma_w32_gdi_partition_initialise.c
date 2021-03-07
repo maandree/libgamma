@@ -14,8 +14,8 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t *restrict this,
-                                      libgamma_site_state_t *restrict site, size_t partition)
+libgamma_w32_gdi_partition_initialise(struct libgamma_partition_state *restrict this,
+                                      struct libgamma_site_state *restrict site, size_t partition)
 {
 	DWORD n = 0;
 	DISPLAY_DEVICE display;

@@ -12,7 +12,7 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_dummy_crtc_get_gamma_rampsf(libgamma_crtc_state_t *restrict this, libgamma_gamma_rampsf_t *restrict ramps)
+libgamma_dummy_crtc_get_gamma_rampsf(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_rampsf *restrict ramps)
 {
 #define LIBGAMMA_DUMMY_GET_RAMPS
 #define TYPE float

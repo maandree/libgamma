@@ -9,9 +9,9 @@
  * @param  this  The CRTC state
  */
 void
-libgamma_dummy_crtc_destroy(libgamma_crtc_state_t *restrict this)
+libgamma_dummy_crtc_destroy(struct libgamma_crtc_state *restrict this)
 {
-	libgamma_dummy_crtc_t *data = this->data;
+	struct libgamma_dummy_crtc *data = this->data;
 	if (data) {
 		free(data->gamma_red);
 		data->gamma_red = NULL;

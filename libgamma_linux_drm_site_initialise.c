@@ -17,7 +17,7 @@
  *                  error identifier provided by this library
  */
 int
-libgamma_linux_drm_site_initialise(libgamma_site_state_t *restrict this, char *restrict site)
+libgamma_linux_drm_site_initialise(struct libgamma_site_state *restrict this, char *restrict site)
 {
 	char pathname[PATH_MAX];
 	struct stat _attr;

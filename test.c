@@ -203,8 +203,6 @@ list_methods_lists(void)
 	/* Allocate a list for adjustment methods that is large
 	 * enough if the program is up to date with the library */
 	int methods[LIBGAMMA_METHOD_COUNT];
-	/* Get a list of all adjustment methods */
-	size_t n = libgamma_list_methods(methods, LIBGAMMA_METHOD_COUNT, 4);
 
 	/* Print adjustment method lists. */
 	list_methods("Available adjustment methods",               methods, 4);
@@ -271,7 +269,7 @@ list_default_sites(void)
 static void
 method_capabilities(void)
 {
-	libgamma_method_capabilities_t caps;
+	struct libgamma_method_capabilities caps;
 	int method;
 	for (method = 0; method < LIBGAMMA_METHOD_COUNT; method++) {
 		if (libgamma_is_method_available(method)) {
@@ -288,21 +286,21 @@ method_capabilities(void)
 			 * capabilities is printed hexadecimal. See
 			 * the `LIBGAMMA_CRTC_INFO_*` definitions in
 			 * `libgamma.h` for what each bit represents. */
-			printf("  %s: %X\n", "CRTC information",      caps.crtc_information);
-			printf("  %s: %s\n", "Default site known",    caps.default_site_known            ? "yes" : "no");
-			printf("  %s: %s\n", "Multiple sites",        caps.multiple_sites                ? "yes" : "no");
-			printf("  %s: %s\n", "Multiple partitions",   caps.multiple_partitions           ? "yes" : "no");
-			printf("  %s: %s\n", "Multiple crtcs",        caps.multiple_crtcs                ? "yes" : "no");
-			printf("  %s: %s\n", "Graphics cards",        caps.partitions_are_graphics_cards ? "yes" : "no");
-			printf("  %s: %s\n", "Site restore",          caps.site_restore                  ? "yes" : "no");
-			printf("  %s: %s\n", "Partition restore",     caps.partition_restore             ? "yes" : "no");
-			printf("  %s: %s\n", "CRTC restore",          caps.crtc_restore                  ? "yes" : "no");
-			printf("  %s: %s\n", "Identical gamma sizes", caps.identical_gamma_sizes         ? "yes" : "no");
-			printf("  %s: %s\n", "Fixed gamma size",      caps.fixed_gamma_size              ? "yes" : "no");
-			printf("  %s: %s\n", "Fixed gamma depth",     caps.fixed_gamma_depth             ? "yes" : "no");
-			printf("  %s: %s\n", "Real method",           caps.real                          ? "yes" : "no");
-			printf("  %s: %s\n", "Fake method",           caps.fake                          ? "yes" : "no");
-			printf("  %s: %s\n", "Auto restore",          caps.auto_restore                  ? "yes" : "no");
+			printf("  %s: %llx\n", "CRTC information",      caps.crtc_information);
+			printf("  %s: %s\n",   "Default site known",    caps.default_site_known            ? "yes" : "no");
+			printf("  %s: %s\n",   "Multiple sites",        caps.multiple_sites                ? "yes" : "no");
+			printf("  %s: %s\n",   "Multiple partitions",   caps.multiple_partitions           ? "yes" : "no");
+			printf("  %s: %s\n",   "Multiple crtcs",        caps.multiple_crtcs                ? "yes" : "no");
+			printf("  %s: %s\n",   "Graphics cards",        caps.partitions_are_graphics_cards ? "yes" : "no");
+			printf("  %s: %s\n",   "Site restore",          caps.site_restore                  ? "yes" : "no");
+			printf("  %s: %s\n",   "Partition restore",     caps.partition_restore             ? "yes" : "no");
+			printf("  %s: %s\n",   "CRTC restore",          caps.crtc_restore                  ? "yes" : "no");
+			printf("  %s: %s\n",   "Identical gamma sizes", caps.identical_gamma_sizes         ? "yes" : "no");
+			printf("  %s: %s\n",   "Fixed gamma size",      caps.fixed_gamma_size              ? "yes" : "no");
+			printf("  %s: %s\n",   "Fixed gamma depth",     caps.fixed_gamma_depth             ? "yes" : "no");
+			printf("  %s: %s\n",   "Real method",           caps.real                          ? "yes" : "no");
+			printf("  %s: %s\n",   "Fake method",           caps.fake                          ? "yes" : "no");
+			printf("  %s: %s\n",   "Auto restore",          caps.auto_restore                  ? "yes" : "no");
 			printf("\n");
 		}
 	}
@@ -319,7 +317,8 @@ method_capabilities(void)
  * @return              Zero on and only on success
  */
 static int
-select_monitor(libgamma_site_state_t *site_state, libgamma_partition_state_t *part_state, libgamma_crtc_state_t *crtc_state)
+select_monitor(struct libgamma_site_state *site_state, struct libgamma_partition_state *part_state,
+               struct libgamma_crtc_state *crtc_state)
 {
 	int method;
 	char *site;
@@ -425,7 +424,7 @@ select_monitor(libgamma_site_state_t *site_state, libgamma_partition_state_t *pa
  * @param  error                    The error of the information field
  * @param  value                    The value of the information field
  */
-#define print_crtc_information_(type, notation)\
+#define PRINT_CRTC_INFORMATION(type, notation)\
 	static void\
 	print_crtc_information_##type(int do_print, const char *description, int error, type value)\
 	{\
@@ -447,19 +446,19 @@ select_monitor(libgamma_site_state_t *site_state, libgamma_partition_state_t *pa
  */
 typedef const char *str;
 /* Create `print_crtc_information_*` variants */
-print_crtc_information_(size_t, "lu")
-print_crtc_information_(signed, "i")
-print_crtc_information_(int, "i")
-#ifdef __GCC__
+PRINT_CRTC_INFORMATION(size_t, "lu")
+PRINT_CRTC_INFORMATION(signed, "i")
+PRINT_CRTC_INFORMATION(int, "i")
+#ifdef __GNUC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wdouble-promotion"
 #endif
-print_crtc_information_(float, "f")
-#ifdef __GCC__
+PRINT_CRTC_INFORMATION(float, "f")
+#ifdef __GNUC__
 # pragma GCC diagnostic pop
 #endif
-print_crtc_information_(str, "s")
-#undef print_crtc_information_
+PRINT_CRTC_INFORMATION(str, "s")
+#undef PRINT_CRTC_INFORMATION
 
 
 /**
@@ -469,7 +468,7 @@ print_crtc_information_(str, "s")
  * @return         String representation
  */
 static const char *
-subpixel_order_str(libgamma_subpixel_order_t value)
+subpixel_order_str(enum libgamma_subpixel_order value)
 {
 	const char *r = libgamma_name_of_subpixel_order(value);
 	return r ? r : "(unknown)";
@@ -483,7 +482,7 @@ subpixel_order_str(libgamma_subpixel_order_t value)
  * @return         String representation
  */
 static const char *
-connector_type_str(libgamma_connector_type_t value)
+connector_type_str(enum libgamma_connector_type value)
 {
 	const char *r = libgamma_name_of_connector_type(value);
 	return r ? r : "(unknown)";
@@ -497,7 +496,7 @@ connector_type_str(libgamma_connector_type_t value)
  * @return         String representation
  */
 static const char *
-decision_str(libgamma_decision_t value)
+decision_str(enum libgamma_decision value)
 {
 	switch (value) {
 	case LIBGAMMA_NO:    return "LIBGAMMA_NO"; 
@@ -515,11 +514,11 @@ decision_str(libgamma_decision_t value)
  * @param  crtc  The CRTC
  */
 static void
-crtc_information(libgamma_crtc_state_t *restrict crtc)
+crtc_information(struct libgamma_crtc_state *restrict crtc)
 {
-	libgamma_method_capabilities_t caps;
-	libgamma_crtc_information_t info;
-	unsigned long long int fields, field;
+	struct libgamma_method_capabilities caps;
+	struct libgamma_crtc_information info;
+	unsigned long long fields, field;
 	char *edid_lc, *edid_uc;
 	unsigned char *edid_raw;
 
@@ -533,7 +532,7 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 	/* List unsupport information fields by testing them one by one */
 	for (fields = caps.crtc_information; field = fields & -fields, fields; fields ^= field) {
 		if (libgamma_get_crtc_information(&info, sizeof(info), crtc, field))
-			printf("Could not read CRTC information field %i\n", field);
+			printf("Could not read CRTC information field %llu\n", field);
 		free(info.edid);
 		free(info.connector_name);
 	}
@@ -548,10 +547,10 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 	}
 
 	/* Macros for printing CRTC information */
-#define print2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, ERROR_VAR)\
+#define PRINT2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, ERROR_VAR)\
 	print_crtc_information_##TYPE(fields & FIELD_ID, DESCRIPTION, info.ERROR_VAR, info.FIELD_VAR);
-#define print(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR)\
-	print2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, FIELD_VAR##_error);
+#define PRINT(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR)\
+	PRINT2(TYPE, FIELD_ID, DESCRIPTION, FIELD_VAR, FIELD_VAR##_error);
   
   
 	/* Print CRTC information */
@@ -575,15 +574,15 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 		}
 	}
 	/* Print physical dimensions of the monitor */
-	print(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM, "width", width_mm);
-	print(size_t, LIBGAMMA_CRTC_INFO_HEIGHT_MM, "height", height_mm);
-	print(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID, "width per EDID", width_mm_edid);
-	print(size_t, LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID, "height per EDID", height_mm_edid);
+	PRINT(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM, "width", width_mm);
+	PRINT(size_t, LIBGAMMA_CRTC_INFO_HEIGHT_MM, "height", height_mm);
+	PRINT(size_t, LIBGAMMA_CRTC_INFO_WIDTH_MM_EDID, "width per EDID", width_mm_edid);
+	PRINT(size_t, LIBGAMMA_CRTC_INFO_HEIGHT_MM_EDID, "height per EDID", height_mm_edid);
 	/* Print gamma ramp information */
-	print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "red gamma ramp size", red_gamma_size, gamma_size_error);
-	print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "green gamma ramp size", green_gamma_size, gamma_size_error);
-	print2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "blue gamma ramp size", blue_gamma_size, gamma_size_error);
-	print(signed, LIBGAMMA_CRTC_INFO_GAMMA_DEPTH, "gamma ramp depth", gamma_depth);
+	PRINT2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "red gamma ramp size", red_gamma_size, gamma_size_error);
+	PRINT2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "green gamma ramp size", green_gamma_size, gamma_size_error);
+	PRINT2(size_t, LIBGAMMA_CRTC_INFO_GAMMA_SIZE, "blue gamma ramp size", blue_gamma_size, gamma_size_error);
+	PRINT(signed, LIBGAMMA_CRTC_INFO_GAMMA_DEPTH, "gamma ramp depth", gamma_depth);
 	/* Print gamma ramp support */
 	if (fields & LIBGAMMA_CRTC_INFO_GAMMA_SUPPORT) {
 		if (info.gamma_support_error)
@@ -599,8 +598,8 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 			printf("  subpixel order: %s\n", subpixel_order_str(info.subpixel_order));
 	}
 	/* Print connector information */
-	print(int, LIBGAMMA_CRTC_INFO_ACTIVE, "active", active);
-	print(str, LIBGAMMA_CRTC_INFO_CONNECTOR_NAME, "connector name", connector_name);
+	PRINT(int, LIBGAMMA_CRTC_INFO_ACTIVE, "active", active);
+	PRINT(str, LIBGAMMA_CRTC_INFO_CONNECTOR_NAME, "connector name", connector_name);
 	if (fields & LIBGAMMA_CRTC_INFO_CONNECTOR_TYPE) {
 		if (info.connector_type_error)
 			libgamma_perror("  (error) subpixel order", info.connector_type_error);
@@ -608,24 +607,24 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 			printf("  subpixel order: %s\n", connector_type_str(info.connector_type));
 	}
 	/* Print the gamma characteristics of the monitor */
-	print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "red gamma characteristics", gamma_red, gamma_error);
-	print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "green gamma characteristics", gamma_green, gamma_error);
-	print2(float, LIBGAMMA_CRTC_INFO_GAMMA, "blue gamma characteristics", gamma_blue, gamma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_GAMMA, "red gamma characteristics", gamma_red, gamma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_GAMMA, "green gamma characteristics", gamma_green, gamma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_GAMMA, "blue gamma characteristics", gamma_blue, gamma_error);
 	/* Print the colour space of the monitor */
-	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "red chroma x", red_chroma_x, chroma_error);
-	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "red chroma y", red_chroma_y, chroma_error);
-	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "green chroma x", green_chroma_x, chroma_error);
-	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "green chroma y", green_chroma_y, chroma_error);
-	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "blue chroma x", blue_chroma_x, chroma_error);
-	print2(float, LIBGAMMA_CRTC_INFO_CHROMA, "blue chroma y", blue_chroma_y, chroma_error);
-	print2(float, LIBGAMMA_CRTC_INFO_WHITE_POINT, "white point x", white_point_x, white_point_error);
-	print2(float, LIBGAMMA_CRTC_INFO_WHITE_POINT, "white point y", white_point_y, white_point_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_CHROMA, "red chroma x", red_chroma_x, chroma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_CHROMA, "red chroma y", red_chroma_y, chroma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_CHROMA, "green chroma x", green_chroma_x, chroma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_CHROMA, "green chroma y", green_chroma_y, chroma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_CHROMA, "blue chroma x", blue_chroma_x, chroma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_CHROMA, "blue chroma y", blue_chroma_y, chroma_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_WHITE_POINT, "white point x", white_point_x, white_point_error);
+	PRINT2(float, LIBGAMMA_CRTC_INFO_WHITE_POINT, "white point y", white_point_y, white_point_error);
 
 	printf("\n");
 
 
-#undef print
-#undef print2
+#undef PRINT
+#undef PRINT2
 
 	/* Release resouces */
 	free(info.edid);
@@ -636,7 +635,7 @@ crtc_information(libgamma_crtc_state_t *restrict crtc)
 /**
  * Test that count macros are set to the same values as the count variables
  */
-void
+static void
 test_count_consts(void)
 {
 	if (LIBGAMMA_ERROR_MIN != libgamma_error_min) {
@@ -661,7 +660,7 @@ test_count_consts(void)
 /**
  * Test functions for connector types
  */
-void
+static void
 test_connector_types(void)
 {
 	size_t n = 0;
@@ -765,7 +764,7 @@ test_connector_types(void)
 /**
  * Test functions for subpixel orders
  */
-void
+static void
 test_subpixel_orders(void)
 {
 	size_t n = 0;
@@ -851,7 +850,7 @@ test_subpixel_orders(void)
 /**
  * Test functions for errors
  */
-void
+static void
 test_errors(void)
 {
 	int n = 0, fds[2], flags;
@@ -1288,16 +1287,16 @@ test_errors(void)
 	fflush(fp);
 	r = read(fds[0], buf, sizeof(buf));
 	if (r <= 0 || buf[r - 1] != '\n') {
-		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		fprintf(stderr, "libgamma_perror(\"prefix\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
 		exit(1);
 	}
 	buf[r - 1] = '\0';
 	if (strncmp(buf, "prefix: ", 8)) {
-		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		fprintf(stderr, "libgamma_perror(\"prefix\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
 		exit(1);
 	}
 	if (strcmp(&buf[8], buf2)) {
-		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		fprintf(stderr, "libgamma_perror(\"prefix\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
 		exit(1);
 	}
 
@@ -1341,16 +1340,16 @@ test_errors(void)
 	fflush(fp);
 	r = read(fds[0], buf, sizeof(buf));
 	if (r <= 0 || buf[r - 1] != '\n') {
-		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		fprintf(stderr, "libgamma_perror(\"prefix\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
 		exit(1);
 	}
 	buf[r - 1] = '\0';
 	if (strncmp(buf, "prefix: ", 8)) {
-		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		fprintf(stderr, "libgamma_perror(\"prefix\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
 		exit(1);
 	}
 	if (strcmp(&buf[8], buf2)) {
-		fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", LIBGAMMA_DEVICE_REQUIRE_GROUP);
+		fprintf(stderr, "libgamma_perror(\"prefix\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
 		exit(1);
 	}
 
@@ -1372,13 +1371,13 @@ test_errors(void)
 int
 main(void)
 {
-	libgamma_site_state_t *site_state = malloc(sizeof(libgamma_site_state_t));
-	libgamma_partition_state_t *part_state = malloc(sizeof(libgamma_partition_state_t));
-	libgamma_crtc_state_t *crtc_state = malloc(sizeof(libgamma_crtc_state_t));
-	libgamma_crtc_information_t info;
+	struct libgamma_site_state      *site_state = malloc(sizeof(*site_state));
+	struct libgamma_partition_state *part_state = malloc(sizeof(*part_state));
+	struct libgamma_crtc_state      *crtc_state = malloc(sizeof(*crtc_state));
+	struct libgamma_crtc_information info;
 #define X(RAMPS)\
-	libgamma_gamma_##RAMPS##_t old_##RAMPS, RAMPS;\
-	libgamma_gamma_##RAMPS##_fun* f_##RAMPS = dim_##RAMPS;
+	struct libgamma_gamma_##RAMPS old_##RAMPS, RAMPS;\
+	libgamma_gamma_##RAMPS##_fun *f_##RAMPS = dim_##RAMPS;
 	LIST_RAMPS(X)
 #undef X
 	size_t i, n;
@@ -1476,27 +1475,27 @@ main(void)
 #define Y(R, C)  printf("  \033[3" C "m%1.8lf\033[00m", (double)(R[i]))
 	LIST_FLOAT_RAMPS(X)
 #undef Y
-#define Y(R, C)  printf("  \033[3" C "m%16llX\033[00m", (uint64_t)(R[i]))
+#define Y(R, C)  printf("  \033[3" C "m%16llX\033[00m", (unsigned long long int)(R[i]))
 	LIST_INTEGER_RAMPS(X)
 #undef Y
 #undef X
 
 	/* Test order of gamma ramps */
-	memcpy(ramps16.red, old_ramps16.red, ramps16.red_size * sizeof(uint16_t));
-	memset(ramps16.green, 0, ramps16.green_size * sizeof(uint16_t));
-	memset(ramps16.blue, 0, ramps16.blue_size * sizeof(uint16_t));
+	memcpy(ramps16.red, old_ramps16.red, ramps16.red_size * sizeof(*ramps16.red));
+	memset(ramps16.green, 0, ramps16.green_size * sizeof(*ramps16.green));
+	memset(ramps16.blue, 0, ramps16.blue_size * sizeof(*ramps16.blue));
 	printf("Making the monitor red-only for 1 second...\n");
 	if ((rr |= r = libgamma_crtc_set_gamma_ramps16(crtc_state, &ramps16)))
 		libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
 	sleep(1);
-	memset(ramps16.red, 0, ramps16.red_size * sizeof(uint16_t));
-	memcpy(ramps16.green, old_ramps16.green, ramps16.green_size * sizeof(uint16_t));
+	memset(ramps16.red, 0, ramps16.red_size * sizeof(*ramps16.red));
+	memcpy(ramps16.green, old_ramps16.green, ramps16.green_size * sizeof(*ramps16.green));
 	printf("Making the monitor green-only for 1 second...\n");
 	if ((rr |= r = libgamma_crtc_set_gamma_ramps16(crtc_state, &ramps16)))
 		libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
 	sleep(1);
-	memset(ramps16.green, 0, ramps16.green_size * sizeof(uint16_t));
-	memcpy(ramps16.blue, old_ramps16.blue, ramps16.blue_size * sizeof(uint16_t));
+	memset(ramps16.green, 0, ramps16.green_size * sizeof(*ramps16.green));
+	memcpy(ramps16.blue, old_ramps16.blue, ramps16.blue_size * sizeof(*ramps16.blue));
 	printf("Making the monitor green-only for 1 second...\n");
 	if ((rr |= r = libgamma_crtc_set_gamma_ramps16(crtc_state, &ramps16)))
 		libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);

@@ -12,7 +12,7 @@
  * Preform installation in an `for (i = 0; i < n; i++)`
  * loop and do a `break` afterwords
  */
-#define __translate(instruction)  for (i = 0; i < n; i++) instruction;  break
+#define TRANSLATE(instruction)  for (i = 0; i < n; i++) instruction;  break
 
 
 /**
@@ -158,19 +158,19 @@ double_to_64(double value)
  * @param  in     Input gamma ramps
  */
 void
-libgamma_internal_translate_to_64(signed depth, size_t n, uint64_t *restrict out, const gamma_ramps_any_t *restrict in)
+libgamma_internal_translate_to_64(signed depth, size_t n, uint64_t *restrict out, const union gamma_ramps_any *restrict in)
 {
 	size_t i;
 	switch (depth) {
 	/* Translate integer */
-	case  8:  __translate(out[i] = (uint64_t)in->bits8. ALL[i] * UINT64_C(0x0101010101010101));
-	case 16:  __translate(out[i] = (uint64_t)in->bits16.ALL[i] * UINT64_C(0x0001000100010001));
-	case 32:  __translate(out[i] = (uint64_t)in->bits32.ALL[i] * UINT64_C(0x0000000100000001));
+	case  8:  TRANSLATE(out[i] = (uint64_t)in->bits8. ALL[i] * UINT64_C(0x0101010101010101));
+	case 16:  TRANSLATE(out[i] = (uint64_t)in->bits16.ALL[i] * UINT64_C(0x0001000100010001));
+	case 32:  TRANSLATE(out[i] = (uint64_t)in->bits32.ALL[i] * UINT64_C(0x0000000100000001));
 	/* Identity translation */
-	case 64:  __translate(out[i] = in->bits64.ALL[i]);
+	case 64:  TRANSLATE(out[i] = in->bits64.ALL[i]);
 	/* Translate floating point */
-	case -1:  __translate(out[i] =  float_to_64(in->float_single.ALL[i]));
-	case -2:  __translate(out[i] = double_to_64(in->float_double.ALL[i]));
+	case -1:  TRANSLATE(out[i] =  float_to_64(in->float_single.ALL[i]));
+	case -2:  TRANSLATE(out[i] = double_to_64(in->float_double.ALL[i]));
 	default:
 		/* This is not possible */
 		abort();

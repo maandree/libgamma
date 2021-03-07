@@ -9,7 +9,7 @@
  * @param  this  The site state
  */
 void
-libgamma_x_randr_site_destroy(libgamma_site_state_t *restrict this)
+libgamma_x_randr_site_destroy(struct libgamma_site_state *restrict this)
 {
 	xcb_disconnect((xcb_connection_t *)this->data);
 }

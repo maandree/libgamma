@@ -9,7 +9,7 @@
  * @param  this  The site state
  */
 void
-libgamma_quartz_cg_site_destroy(libgamma_site_state_t *restrict this)
+libgamma_quartz_cg_site_destroy(struct libgamma_site_state *restrict this)
 {
 	(void) this;
 	close_fake_quartz_cg();

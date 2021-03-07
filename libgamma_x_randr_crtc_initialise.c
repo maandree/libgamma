@@ -13,10 +13,10 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_x_randr_crtc_initialise(libgamma_crtc_state_t *restrict this,
-                                 libgamma_partition_state_t *restrict partition, size_t crtc)
+libgamma_x_randr_crtc_initialise(struct libgamma_crtc_state *restrict this,
+                                 struct libgamma_partition_state *restrict partition, size_t crtc)
 {
-	libgamma_x_randr_partition_data_t *restrict screen_data = partition->data;
+	struct libgamma_x_randr_partition_data *restrict screen_data = partition->data;
 	xcb_randr_crtc_t *restrict crtc_ids = screen_data->crtcs;
 	this->data = crtc_ids + crtc;
 	return crtc < partition->crtcs_available ? 0 : LIBGAMMA_NO_SUCH_CRTC;

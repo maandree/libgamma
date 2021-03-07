@@ -12,7 +12,7 @@
  *                error identifier provided by this library
  */
 int
-libgamma_dummy_internal_crtc_restore_forced(libgamma_dummy_crtc_t *restrict data)
+libgamma_dummy_internal_crtc_restore_forced(struct libgamma_dummy_crtc *restrict data)
 {
 	size_t rn = data->info.  red_gamma_size;
 	size_t gn = data->info.green_gamma_size;
@@ -22,7 +22,7 @@ libgamma_dummy_internal_crtc_restore_forced(libgamma_dummy_crtc_t *restrict data
 	if (!data->gamma_red)
 		return 0;
 
-#define __reset_ramps(TYPE, MAX)\
+#define RESET_RAMPS(TYPE, MAX)\
 	do {\
 		TYPE *red   = data->gamma_red;\
 		TYPE *green = data->gamma_green;\
@@ -32,14 +32,14 @@ libgamma_dummy_internal_crtc_restore_forced(libgamma_dummy_crtc_t *restrict data
 		for (i = 0; i < bn; i++) blue [i] = (TYPE)((double)(MAX) * ((double)i / (double)(bn - 1)));\
 	} while (0)
 
-	if      (data->info.gamma_depth ==  8) __reset_ramps(uint8_t,  INT8_MAX);
-	else if (data->info.gamma_depth == 16) __reset_ramps(uint16_t, INT16_MAX);
-	else if (data->info.gamma_depth == 32) __reset_ramps(uint32_t, INT32_MAX);
-	else if (data->info.gamma_depth == 64) __reset_ramps(uint64_t, INT64_MAX);
-	else if (data->info.gamma_depth == -1) __reset_ramps(float,    1);
-	else                                   __reset_ramps(double,   1);
+	if      (data->info.gamma_depth ==  8) RESET_RAMPS(uint8_t,  INT8_MAX);
+	else if (data->info.gamma_depth == 16) RESET_RAMPS(uint16_t, INT16_MAX);
+	else if (data->info.gamma_depth == 32) RESET_RAMPS(uint32_t, INT32_MAX);
+	else if (data->info.gamma_depth == 64) RESET_RAMPS(uint64_t, INT64_MAX);
+	else if (data->info.gamma_depth == -1) RESET_RAMPS(float,    1);
+	else                                   RESET_RAMPS(double,   1);
 
-#undef __reset_ramps
+#undef RESET_RAMPS
 
 	return 0;
 }

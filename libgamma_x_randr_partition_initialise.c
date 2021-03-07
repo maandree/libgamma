@@ -34,8 +34,8 @@ xmemdup(void *restrict ptr, size_t bytes)
  *                     error identifier provided by this library
  */
 int
-libgamma_x_randr_partition_initialise(libgamma_partition_state_t *restrict this,
-                                      libgamma_site_state_t *restrict site, size_t partition)
+libgamma_x_randr_partition_initialise(struct libgamma_partition_state *restrict this,
+                                      struct libgamma_site_state *restrict site, size_t partition)
 {
 	int fail_rc = LIBGAMMA_ERRNO_SET;
 	xcb_connection_t *restrict connection = site->data;
@@ -47,7 +47,7 @@ libgamma_x_randr_partition_initialise(libgamma_partition_state_t *restrict this,
 	xcb_randr_get_screen_resources_current_reply_t *restrict reply;
 	xcb_randr_crtc_t *restrict crtcs;
 	xcb_randr_output_t *restrict outputs;
-	libgamma_x_randr_partition_data_t *restrict data;
+	struct libgamma_x_randr_partition_data *restrict data;
 	xcb_randr_get_output_info_cookie_t out_cookie;
 	xcb_randr_get_output_info_reply_t *out_reply;
 	size_t i;
@@ -92,17 +92,17 @@ libgamma_x_randr_partition_initialise(libgamma_partition_state_t *restrict this,
 
 	/* Allocate adjustment method dependent data memory area.
 	   We use `calloc` because we want `data`'s pointers to be `NULL` if not allocated at `fail`. */
-	data = calloc(1, sizeof(libgamma_x_randr_partition_data_t));
+	data = calloc(1, sizeof(*data));
 	if (!data)
 		goto fail;
 
 	/* Copy the CRTC:s, just so we do not have to keep the reply in memory */
-	data->crtcs = xmemdup(crtcs, (size_t)(reply->num_crtcs) * sizeof(xcb_randr_crtc_t));
+	data->crtcs = xmemdup(crtcs, (size_t)reply->num_crtcs * sizeof(*crtcs));
 	if (!data->crtcs && reply->num_crtcs > 0)
 		goto fail;
 
 	/* Copy the outputs as well */
-	data->outputs = xmemdup(outputs, (size_t)reply->num_outputs * sizeof(xcb_randr_output_t));
+	data->outputs = xmemdup(outputs, (size_t)reply->num_outputs * sizeof(*outputs));
 	if (!data->outputs && reply->num_outputs > 0)
 		goto fail;
 
@@ -110,7 +110,7 @@ libgamma_x_randr_partition_initialise(libgamma_partition_state_t *restrict this,
 	data->outputs_count = (size_t)reply->num_outputs;
 
 	/* Create mapping table from CRTC indices to output indicies. (injection) */
-	data->crtc_to_output = malloc((size_t)reply->num_crtcs * sizeof(size_t));
+	data->crtc_to_output = malloc((size_t)reply->num_crtcs * sizeof(*data->crtc_to_output));
 	if (!data->crtc_to_output)
 		goto fail;
 	/* All CRTC:s should be mapped, but incase they are not, all unmapped CRTC:s should have

@@ -13,11 +13,11 @@
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 int
-libgamma_get_crtc_information(libgamma_crtc_information_t *restrict this, size_t size,
-                              libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
+libgamma_get_crtc_information(struct libgamma_crtc_information *restrict this, size_t size,
+                              struct libgamma_crtc_state *restrict crtc, unsigned long long fields)
 {
-	libgamma_crtc_information_t info_;
-	int r, (*func)(libgamma_crtc_information_t *restrict, libgamma_crtc_state_t *restrict, unsigned long long);
+	struct libgamma_crtc_information info_;
+	int r, (*func)(struct libgamma_crtc_information *restrict, struct libgamma_crtc_state *restrict, unsigned long long);
 
 	this->edid = NULL;
 	this->connector_name = NULL;

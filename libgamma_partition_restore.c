@@ -10,7 +10,7 @@
  *                error identifier provided by this library
  */
 int
-libgamma_partition_restore(libgamma_partition_state_t *restrict this)
+libgamma_partition_restore(struct libgamma_partition_state *restrict this)
 {
 	switch (this->site->method) {
 #define X(CONST, CNAME, ...)\

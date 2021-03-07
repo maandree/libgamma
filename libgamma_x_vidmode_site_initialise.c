@@ -17,7 +17,7 @@
  *                  error identifier provided by this library
  */
 int
-libgamma_x_vidmode_site_initialise(libgamma_site_state_t *restrict this, char *restrict site)
+libgamma_x_vidmode_site_initialise(struct libgamma_site_state *restrict this, char *restrict site)
 {
 	/* Connect to the display */
 	Display *restrict connection;

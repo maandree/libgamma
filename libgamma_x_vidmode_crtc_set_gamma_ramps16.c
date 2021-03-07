@@ -12,7 +12,8 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_x_vidmode_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict this, const libgamma_gamma_ramps16_t *restrict ramps)
+libgamma_x_vidmode_crtc_set_gamma_ramps16(struct libgamma_crtc_state *restrict this,
+                                          const struct libgamma_gamma_ramps16 *restrict ramps)
 {
 #ifdef DEBUG
 	/* Gamma ramp sizes are identical but not fixed */

@@ -8,7 +8,7 @@
  * @param  this  The CRTC state
  */
 void
-libgamma_crtc_destroy(libgamma_crtc_state_t *restrict this)
+libgamma_crtc_destroy(struct libgamma_crtc_state *restrict this)
 {
 	switch (this->partition->site->method) {
 #define X(CONST, CNAME, ...)\

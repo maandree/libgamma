@@ -11,7 +11,7 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_crtc_get_gamma_rampsd(libgamma_crtc_state_t *restrict this, libgamma_gamma_rampsd_t* restrict ramps)
+libgamma_crtc_get_gamma_rampsd(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_rampsd *restrict ramps)
 {
 #define DEPTH -2
 #define TYPE float_double

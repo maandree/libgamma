@@ -13,10 +13,10 @@
  * @return        Zero on success, -1 on allocation error, `errno` will be set accordingly
  */
 int
-libgamma_gamma_ramps8_initialise(libgamma_gamma_ramps8_t *restrict this)
+libgamma_gamma_ramps8_initialise(struct libgamma_gamma_ramps8 *restrict this)
 {
 	size_t n = this->red_size + this->green_size + this->blue_size;
-	this->red   = malloc(n * sizeof(uint8_t));
+	this->red   = malloc(n * sizeof(*this->red));
 	this->green = &this->  red[this->  red_size];
 	this->blue  = &this->green[this->green_size];
 	return this->red ? 0 : -1;

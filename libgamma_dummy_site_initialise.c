@@ -17,9 +17,9 @@
  *                  error identifier provided by this library
  */
 int
-libgamma_dummy_site_initialise(libgamma_site_state_t *restrict this, char *restrict site)
+libgamma_dummy_site_initialise(struct libgamma_site_state *restrict this, char *restrict site)
 {
-	libgamma_dummy_site_t *data = NULL;
+	struct libgamma_dummy_site *data = NULL;
 	size_t i, sites, crtcs;
 
 	sites = libgamma_dummy_internal_configurations.site_count;
@@ -27,10 +27,10 @@ libgamma_dummy_site_initialise(libgamma_site_state_t *restrict this, char *restr
 		sites = !!sites;
 	this->data = NULL;
 
-	if (site && *site && (atoll(site) < 0 || sites <= (unsigned long long)atoll(site)))
+	if (site && *site && (atoll(site) < 0 || sites <= (size_t)atoll(site)))
 		return LIBGAMMA_NO_SUCH_SITE;
 
-	data = malloc(sizeof(libgamma_dummy_site_t));
+	data = malloc(sizeof(*data));
 	if (!data)
 		goto fail;
 
@@ -45,7 +45,7 @@ libgamma_dummy_site_initialise(libgamma_site_state_t *restrict this, char *restr
 	if (!libgamma_dummy_internal_configurations.capabilities.multiple_crtcs)
 		crtcs = !!crtcs;
 
-	data->partitions = malloc(data->partition_count * sizeof(libgamma_dummy_partition_t));
+	data->partitions = malloc(data->partition_count * sizeof(*data->partitions));
 	if (!data->partitions)
 		goto fail;
 

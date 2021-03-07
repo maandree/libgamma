@@ -20,7 +20,7 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_internal_allocated_any_ramp(gamma_ramps_any_t *restrict ramps_sys, const gamma_ramps_any_t *restrict ramps,
+libgamma_internal_allocated_any_ramp(union gamma_ramps_any *restrict ramps_sys, const union gamma_ramps_any *restrict ramps,
                                      signed depth, size_t *restrict elements)
 {
 	/* Calculate the size of the allocation to do */

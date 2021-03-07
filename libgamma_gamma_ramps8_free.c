@@ -11,7 +11,7 @@
  * @param  this  The gamma ramps
  */
 void
-libgamma_gamma_ramps8_free(libgamma_gamma_ramps8_t *restrict this)
+libgamma_gamma_ramps8_free(struct libgamma_gamma_ramps8 *restrict this)
 {
 	free(this->red);
 	free(this);

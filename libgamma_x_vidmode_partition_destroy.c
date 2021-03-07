@@ -9,7 +9,7 @@
  * @param  this  The partition state
  */
 void
-libgamma_x_vidmode_partition_destroy(libgamma_partition_state_t *restrict this)
+libgamma_x_vidmode_partition_destroy(struct libgamma_partition_state *restrict this)
 {
 	(void) this;
 }

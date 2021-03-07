@@ -316,6 +316,7 @@ GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 	xcb_randr_get_crtc_gamma_cookie_t gamma_cookie;
 	xcb_randr_get_crtc_gamma_reply_t *restrict gamma_reply;
 	xcb_generic_error_t *error;
+	uint16_t *restrict ramp = lpRamp;
 
 	/* Read current gamma ramps */
 	gamma_cookie = xcb_randr_get_crtc_gamma(connection, *(xcb_randr_crtc_t *)hDC);
@@ -323,16 +324,10 @@ GetDeviceGammaRamp(HDC hDC, LPVOID restrict lpRamp)
 	if (error)
 		return FALSE;
 
-#define DEST_RAMP(I) (&((uint16_t *)lpRamp)[(I) * GAMMA_RAMP_SIZE])
-#define SRC_RAMP(C)  (xcb_randr_get_crtc_gamma_##C(gamma_reply))
-
 	/* Copy the ramps into the output parameter (coalesced) */
-	memcpy(DEST_RAMP(0), SRC_RAMP(red),   GAMMA_RAMP_SIZE * sizeof(uint16_t));
-	memcpy(DEST_RAMP(1), SRC_RAMP(green), GAMMA_RAMP_SIZE * sizeof(uint16_t));
-	memcpy(DEST_RAMP(2), SRC_RAMP(blue),  GAMMA_RAMP_SIZE * sizeof(uint16_t));
-
-#undef SRC_RAMP
-#undef DEST_RAMP
+	memcpy(&ramp[0 * GAMMA_RAMP_SIZE], xcb_randr_get_crtc_gamma_red(gamma_reply),   GAMMA_RAMP_SIZE * sizeof(*ramp));
+	memcpy(&ramp[1 * GAMMA_RAMP_SIZE], xcb_randr_get_crtc_gamma_green(gamma_reply), GAMMA_RAMP_SIZE * sizeof(*ramp));
+	memcpy(&ramp[2 * GAMMA_RAMP_SIZE], xcb_randr_get_crtc_gamma_blue(gamma_reply),  GAMMA_RAMP_SIZE * sizeof(*ramp));
 
 	free(gamma_reply);
 	return TRUE;

@@ -12,10 +12,10 @@
 '* @return         The CRTC's conncetor, `NULL` on error
  */
 static drmModeConnector *
-find_connector(libgamma_crtc_state_t *restrict this, int *restrict error)
+find_connector(struct libgamma_crtc_state *restrict this, int *restrict error)
 {
 	uint32_t crtc_id = (uint32_t)(size_t)this->data;
-	libgamma_drm_card_data_t *restrict card = this->partition->data;
+	struct libgamma_drm_card_data *restrict card = this->partition->data;
 	size_t i, n = (size_t)card->res->count_connectors;
 	/* Open connectors and encoders if not already opened */
 	if (!card->connectors) {
@@ -70,9 +70,9 @@ fail:
  * @return        The value stored in `out->gamma_size_error`
  */
 static int
-get_gamma_ramp_size(libgamma_crtc_information_t *restrict out, const libgamma_crtc_state_t *restrict crtc)
+get_gamma_ramp_size(struct libgamma_crtc_information *restrict out, const struct libgamma_crtc_state *restrict crtc)
 {
-	libgamma_drm_card_data_t *restrict card = crtc->partition->data;
+	struct libgamma_drm_card_data *restrict card = crtc->partition->data;
 	uint32_t crtc_id = card->res->crtcs[crtc->crtc];
 	drmModeCrtc *restrict crtc_info;
 	/* Get CRTC information */
@@ -99,7 +99,7 @@ get_gamma_ramp_size(libgamma_crtc_information_t *restrict out, const libgamma_cr
  * @param  connector  The connector
  */
 static void
-get_subpixel_order(libgamma_crtc_information_t *restrict out, const drmModeConnector *restrict connector)
+get_subpixel_order(struct libgamma_crtc_information *restrict out, const drmModeConnector *restrict connector)
 {
 	switch (connector->subpixel) {
 #define X(CONST, NAME, DRM_SUFFIX)\
@@ -123,7 +123,7 @@ get_subpixel_order(libgamma_crtc_information_t *restrict out, const drmModeConne
  * @param  connector_name_base  Output for the basename of the connector
  */
 static void
-get_connector_type(libgamma_crtc_information_t *restrict out, const drmModeConnector *restrict connector,
+get_connector_type(struct libgamma_crtc_information *restrict out, const drmModeConnector *restrict connector,
                    const char **restrict connector_name_base)
 {
 	/* These may not have been included by <xf86drmMode.h>,
@@ -188,11 +188,11 @@ get_connector_type(libgamma_crtc_information_t *restrict out, const drmModeConne
  * @return             Non-zero if at least on error occured
  */
 static int
-read_connector_data(libgamma_crtc_state_t *restrict crtc, libgamma_crtc_information_t *restrict out,
+read_connector_data(struct libgamma_crtc_state *restrict crtc, struct libgamma_crtc_information *restrict out,
                     const drmModeConnector *restrict connector, unsigned long long int fields)
 {
 	const char *connector_name_base = NULL;
-	libgamma_drm_card_data_t *restrict card;
+	struct libgamma_drm_card_data *restrict card;
 	uint32_t type;
 	size_t i, n, c;
 
@@ -254,9 +254,9 @@ read_connector_data(libgamma_crtc_state_t *restrict crtc, libgamma_crtc_informat
  * @reutnr             Non-zero on error
  */
 static int
-get_edid(libgamma_crtc_state_t *restrict crtc, libgamma_crtc_information_t *restrict out, drmModeConnector *connector)
+get_edid(struct libgamma_crtc_state *restrict crtc, struct libgamma_crtc_information *restrict out, drmModeConnector *connector)
 {
-	libgamma_drm_card_data_t *restrict card = crtc->partition->data;
+	struct libgamma_drm_card_data *restrict card = crtc->partition->data;
 	int prop_n = connector->count_props;
 	int prop_i;
 	drmModePropertyRes *restrict prop;
@@ -313,8 +313,8 @@ get_edid(libgamma_crtc_state_t *restrict crtc, libgamma_crtc_information_t *rest
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 int
-libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t *restrict this,
-                                        libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
+libgamma_linux_drm_get_crtc_information(struct libgamma_crtc_information *restrict this,
+                                        struct libgamma_crtc_state *restrict crtc, unsigned long long fields)
 {
 #define _E(FIELD) ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
 
@@ -322,7 +322,7 @@ libgamma_linux_drm_get_crtc_information(libgamma_crtc_information_t *restrict th
 	drmModeConnector *restrict connector;
 
 	/* Wipe all error indicators */
-	memset(this, 0, sizeof(libgamma_crtc_information_t));
+	memset(this, 0, sizeof(*this));
 
 	/* We need to free the EDID after us if it is not explicitly requested */
 	free_edid = !(fields & LIBGAMMA_CRTC_INFO_EDID);

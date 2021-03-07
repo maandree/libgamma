@@ -8,4 +8,4 @@
  * 
  * @param  this  The CRTC information
  */
-extern inline void libgamma_crtc_information_free(libgamma_crtc_information_t *restrict);
+extern inline void libgamma_crtc_information_free(struct libgamma_crtc_information *restrict);

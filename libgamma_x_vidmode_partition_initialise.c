@@ -13,8 +13,8 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_x_vidmode_partition_initialise(libgamma_partition_state_t *restrict this,
-                                        libgamma_site_state_t *restrict site, size_t partition)
+libgamma_x_vidmode_partition_initialise(struct libgamma_partition_state *restrict this,
+                                        struct libgamma_site_state *restrict site, size_t partition)
 {
 	this->crtcs_available = 1;
 	return partition < site->partitions_available ? 0 : LIBGAMMA_NO_SUCH_PARTITION;

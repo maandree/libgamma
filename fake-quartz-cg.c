@@ -227,7 +227,7 @@ CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID *restrict displays_o
 		 * `CGDisplayRestoreColorSyncSettings` which restore the
 		 * all gamma ramps on the system to the system settnigs.
 		 */
-		original_ramps = malloc(crtc_count * 3 * 256 * sizeof(uint16_t));
+		original_ramps = malloc(crtc_count * 3 * 256 * sizeof(*original_ramps));
 		if (!original_ramps) {
 			perror("malloc");
 			xcb_disconnect(connection);
@@ -248,13 +248,12 @@ CGGetOnlineDisplayList(uint32_t max_size, CGDirectDisplayID *restrict displays_o
 			}
 
 			/* Copy over the gamma ramps to the memory area we have allocated */
-#define __DEST(C)  original_ramps + (C + 3 * i) * 256
-#define __SRC(C)  xcb_randr_get_crtc_gamma_##C(gamma_reply)
-			memcpy(__DEST(0), __SRC(red),   256 * sizeof(uint16_t));
-			memcpy(__DEST(1), __SRC(green), 256 * sizeof(uint16_t));
-			memcpy(__DEST(2), __SRC(blue),  256 * sizeof(uint16_t));
-#undef __SRC
-#undef __DEST
+			memcpy(&original_ramps[(3 * i + 0) * 256], xcb_randr_get_crtc_gamma_red(gamma_reply)
+			       256 * sizeof(*original_ramps));
+			memcpy(&original_ramps[(3 * i + 1) * 256], xcb_randr_get_crtc_gamma_green(gamma_reply),
+			       256 * sizeof(*original_ramps));
+			memcpy(&original_ramps[(3 * i + 2) * 256], xcb_randr_get_crtc_gamma_blue(gamma_reply),
+			       256 * sizeof(*original_ramps));
 
 			/* Release resouces */
 			free(gamma_reply);

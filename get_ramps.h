@@ -8,7 +8,7 @@
 #define CONCAT(A, B)  A##B
 
 
-gamma_ramps_any_t ramps_;
+union gamma_ramps_any ramps_;
 switch (this->partition->site->method) {
 #define X(CONST, CNAME, MDEPTH, MRAMPS)\
 case CONST:\

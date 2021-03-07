@@ -8,4 +8,4 @@
  * 
  * @param  this  The partition state
  */
-extern inline void libgamma_partition_free(libgamma_partition_state_t *restrict);
+extern inline void libgamma_partition_free(struct libgamma_partition_state *restrict);

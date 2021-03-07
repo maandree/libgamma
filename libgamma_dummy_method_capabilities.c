@@ -9,7 +9,7 @@
  * @param  this  The data structure to fill with the method's capabilities
  */
 void
-libgamma_dummy_method_capabilities(libgamma_method_capabilities_t *restrict this)
+libgamma_dummy_method_capabilities(struct libgamma_method_capabilities *restrict this)
 {
 	int real_method = libgamma_dummy_internal_configurations.real_method;
 	*this = libgamma_dummy_internal_configurations.capabilities;

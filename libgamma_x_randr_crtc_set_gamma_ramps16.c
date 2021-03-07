@@ -12,7 +12,7 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_x_randr_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict this, const libgamma_gamma_ramps16_t *ramps)
+libgamma_x_randr_crtc_set_gamma_ramps16(struct libgamma_crtc_state *restrict this, const struct libgamma_gamma_ramps16 *ramps)
 {
 	xcb_connection_t *restrict connection = this->partition->site->data;
 	xcb_void_cookie_t cookie;

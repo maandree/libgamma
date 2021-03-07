@@ -8,7 +8,7 @@
  * @param  this  The partition state
  */
 void
-libgamma_partition_destroy(libgamma_partition_state_t *restrict this)
+libgamma_partition_destroy(struct libgamma_partition_state *restrict this)
 {
 	switch (this->site->method) {
 #define X(CONST, CNAME, ...)\

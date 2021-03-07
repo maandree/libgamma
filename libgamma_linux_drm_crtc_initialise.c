@@ -13,13 +13,13 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_linux_drm_crtc_initialise(libgamma_crtc_state_t *restrict this,
-                                   libgamma_partition_state_t *restrict partition, size_t crtc)
+libgamma_linux_drm_crtc_initialise(struct libgamma_crtc_state *restrict this,
+                                   struct libgamma_partition_state *restrict partition, size_t crtc)
 {
-	libgamma_drm_card_data_t *restrict card = partition->data;
+	struct libgamma_drm_card_data *restrict card = partition->data;
 
 	if (crtc >= partition->crtcs_available)
 		return LIBGAMMA_NO_SUCH_CRTC;
-	this->data = (void*)(size_t)card->res->crtcs[crtc];
+	this->data = (void *)(size_t)card->res->crtcs[crtc];
 	return 0;
 }

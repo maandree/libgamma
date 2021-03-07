@@ -9,9 +9,9 @@
  * @param  this  The site state
  */
 void
-libgamma_dummy_site_destroy(libgamma_site_state_t *restrict this)
+libgamma_dummy_site_destroy(struct libgamma_site_state *restrict this)
 {
-	libgamma_dummy_site_t *data = this->data;
+	struct libgamma_dummy_site *data = this->data;
 	if (data) {
 		free(data->partitions);
 		free(data);

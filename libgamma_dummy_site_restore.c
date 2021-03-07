@@ -11,9 +11,9 @@
  *                error identifier provided by this library
  */
 int
-libgamma_dummy_site_restore(libgamma_site_state_t *restrict this)
+libgamma_dummy_site_restore(struct libgamma_site_state *restrict this)
 {
-	libgamma_dummy_site_t *data = this->data;
+	struct libgamma_dummy_site *data = this->data;
 	size_t i, j;
 
 	if (!libgamma_dummy_internal_configurations.capabilities.site_restore) {

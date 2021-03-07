@@ -10,7 +10,7 @@
  *                error identifier provided by this library
  */
 int
-libgamma_site_restore(libgamma_site_state_t *restrict this)
+libgamma_site_restore(struct libgamma_site_state *restrict this)
 {
 	switch (this->method) {
 #define X(CONST, CNAME, ...)\

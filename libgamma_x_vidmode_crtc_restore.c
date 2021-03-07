@@ -11,7 +11,7 @@
  *                error identifier provided by this library
  */
 int
-libgamma_x_vidmode_crtc_restore(libgamma_crtc_state_t *restrict this)
+libgamma_x_vidmode_crtc_restore(struct libgamma_crtc_state *restrict this)
 {
 	(void) this;
 	errno = ENOTSUP;

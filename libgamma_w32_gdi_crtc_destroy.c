@@ -9,7 +9,7 @@
  * @param  this  The CRTC state
  */
 void
-libgamma_w32_gdi_crtc_destroy(libgamma_crtc_state_t *restrict this)
+libgamma_w32_gdi_crtc_destroy(struct libgamma_crtc_state *restrict this)
 {
 	if (this->data)
 		ReleaseDC(NULL, this->data);

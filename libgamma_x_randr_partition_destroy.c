@@ -9,9 +9,9 @@
  * @param  this  The partition state
  */
 void
-libgamma_x_randr_partition_destroy(libgamma_partition_state_t *restrict this)
+libgamma_x_randr_partition_destroy(struct libgamma_partition_state *restrict this)
 {
-	libgamma_x_randr_partition_data_t *restrict data = this->data;
+	struct libgamma_x_randr_partition_data *restrict data = this->data;
 	free(data->crtcs);
 	free(data->outputs);
 	free(data->crtc_to_output);

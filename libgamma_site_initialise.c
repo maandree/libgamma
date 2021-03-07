@@ -17,7 +17,7 @@
  *                  error identifier provided by this library
  */
 int
-libgamma_site_initialise(libgamma_site_state_t *restrict this, int method, char *restrict site)
+libgamma_site_initialise(struct libgamma_site_state *restrict this, int method, char *restrict site)
 {
 	this->method = method;
 	this->site = site;

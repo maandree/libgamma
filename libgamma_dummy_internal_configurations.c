@@ -6,7 +6,7 @@
 /**
  * Configurations for the dummy adjustment method
  */
-libgamma_dummy_configurations_t libgamma_dummy_internal_configurations = {
+struct libgamma_dummy_configurations libgamma_dummy_internal_configurations = {
 	.capabilities = {
 		.crtc_information = (1 << LIBGAMMA_CRTC_INFO_COUNT) - 1,
 		.default_site_known = 1,

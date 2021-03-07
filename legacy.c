@@ -11,61 +11,62 @@
 #undef libgamma_method_capabilities
 
 
-int libgamma_crtc_set_gamma_ramps8(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps8_t);
-int libgamma_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps16_t);
-int libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps32_t);
-int libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps64_t);
-int libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsf_t);
-int libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t *restrict, libgamma_gamma_rampsd_t);
-int libgamma_get_crtc_information(libgamma_crtc_information_t *restrict, libgamma_crtc_state_t *restrict, int32_t);
-int libgamma_method_capabilities(libgamma_method_capabilities_t *restrict, int);
+int libgamma_crtc_set_gamma_ramps8(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps8);
+int libgamma_crtc_set_gamma_ramps16(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps16);
+int libgamma_crtc_set_gamma_ramps32(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps32);
+int libgamma_crtc_set_gamma_ramps64(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps64);
+int libgamma_crtc_set_gamma_rampsf(struct libgamma_crtc_state *restrict, struct libgamma_gamma_rampsf);
+int libgamma_crtc_set_gamma_rampsd(struct libgamma_crtc_state *restrict, struct libgamma_gamma_rampsd);
+int libgamma_get_crtc_information(struct libgamma_crtc_information *restrict, struct libgamma_crtc_state *restrict, int32_t);
+int libgamma_method_capabilities(struct libgamma_method_capabilities__new *restrict, int);
 
 
 int
-libgamma_crtc_set_gamma_ramps8(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps8_t ramps)
+libgamma_crtc_set_gamma_ramps8(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_ramps8 ramps)
 {
 	return libgamma_crtc_set_gamma_ramps8__new(this, &ramps);
 }
 
 int
-libgamma_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps16_t ramps)
+libgamma_crtc_set_gamma_ramps16(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_ramps16 ramps)
 {
 	return libgamma_crtc_set_gamma_ramps16__new(this, &ramps);
 }
 
 int
-libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps32_t ramps)
+libgamma_crtc_set_gamma_ramps32(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_ramps32 ramps)
 {
 	return libgamma_crtc_set_gamma_ramps32__new(this, &ramps);
 }
 
 int
-libgamma_crtc_set_gamma_ramps64(libgamma_crtc_state_t *restrict this, libgamma_gamma_ramps64_t ramps)
+libgamma_crtc_set_gamma_ramps64(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_ramps64 ramps)
 {
 	return libgamma_crtc_set_gamma_ramps64__new(this, &ramps);
 }
 
 int
-libgamma_crtc_set_gamma_rampsf(libgamma_crtc_state_t *restrict this, libgamma_gamma_rampsf_t ramps)
+libgamma_crtc_set_gamma_rampsf(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_rampsf ramps)
 {
 	return libgamma_crtc_set_gamma_rampsf__new(this, &ramps);
 }
 
 int
-libgamma_crtc_set_gamma_rampsd(libgamma_crtc_state_t *restrict this, libgamma_gamma_rampsd_t ramps)
+libgamma_crtc_set_gamma_rampsd(struct libgamma_crtc_state *restrict this, struct libgamma_gamma_rampsd ramps)
 {
 	return libgamma_crtc_set_gamma_rampsd__new(this, &ramps);
 }
 
 int
-libgamma_get_crtc_information(libgamma_crtc_information_t *restrict this, libgamma_crtc_state_t *restrict crtc, int32_t fields)
+libgamma_get_crtc_information(struct libgamma_crtc_information *restrict this,
+                              struct libgamma_crtc_state *restrict crtc, int32_t fields)
 {
-	return libgamma_get_crtc_information__new(this, offsetof(libgamma_crtc_information_t, gamma_error) +
+	return libgamma_get_crtc_information__new(this, offsetof(struct libgamma_crtc_information, gamma_error) +
 	                                          sizeof(this->gamma_error), crtc, (unsigned long long int)fields);
 }
 
 int
-libgamma_method_capabilities(libgamma_method_capabilities_t *restrict this, int method)
+libgamma_method_capabilities(struct libgamma_method_capabilities__new *restrict this, int method)
 {
 	const size_t size = (_Alignof(unsigned) > sizeof(int32_t) ? _Alignof(unsigned) : sizeof(int32_t)) + sizeof(unsigned);
 	return libgamma_method_capabilities__new(this, size, method);

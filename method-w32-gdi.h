@@ -26,7 +26,7 @@
  * @param  this  The data structure to fill with the method's capabilities
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t *restrict);
+void libgamma_w32_gdi_method_capabilities(struct libgamma_method_capabilities *restrict);
 
 /**
  * Initialise an allocated site state
@@ -42,7 +42,7 @@ void libgamma_w32_gdi_method_capabilities(libgamma_method_capabilities_t *restri
  *                  error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__(1))))
-int libgamma_w32_gdi_site_initialise(libgamma_site_state_t *restrict, char *restrict);
+int libgamma_w32_gdi_site_initialise(struct libgamma_site_state *restrict, char *restrict);
 
 /**
  * Release all resources held by a site state
@@ -50,7 +50,7 @@ int libgamma_w32_gdi_site_initialise(libgamma_site_state_t *restrict, char *rest
  * @param  this  The site state
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_w32_gdi_site_destroy(libgamma_site_state_t *restrict);
+void libgamma_w32_gdi_site_destroy(struct libgamma_site_state *restrict);
 
 /**
  * Restore the gamma ramps all CRTC:s with a site to the system settings
@@ -60,7 +60,7 @@ void libgamma_w32_gdi_site_destroy(libgamma_site_state_t *restrict);
  *                error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_w32_gdi_site_restore(libgamma_site_state_t *restrict);
+int libgamma_w32_gdi_site_restore(struct libgamma_site_state *restrict);
 
 
 /**
@@ -73,7 +73,7 @@ int libgamma_w32_gdi_site_restore(libgamma_site_state_t *restrict);
  *                     error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t *restrict, libgamma_site_state_t *restrict, size_t);
+int libgamma_w32_gdi_partition_initialise(struct libgamma_partition_state *restrict, struct libgamma_site_state *restrict, size_t);
 
 /**
  * Release all resources held by a partition state
@@ -81,7 +81,7 @@ int libgamma_w32_gdi_partition_initialise(libgamma_partition_state_t *restrict, 
  * @param  this  The partition state
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_w32_gdi_partition_destroy(libgamma_partition_state_t *restrict);
+void libgamma_w32_gdi_partition_destroy(struct libgamma_partition_state *restrict);
 
 /**
  * Restore the gamma ramps all CRTC:s with a partition to the system settings
@@ -91,7 +91,7 @@ void libgamma_w32_gdi_partition_destroy(libgamma_partition_state_t *restrict);
  *                error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_w32_gdi_partition_restore(libgamma_partition_state_t *restrict);
+int libgamma_w32_gdi_partition_restore(struct libgamma_partition_state *restrict);
 
 
 /**
@@ -104,7 +104,7 @@ int libgamma_w32_gdi_partition_restore(libgamma_partition_state_t *restrict);
  *                     error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_w32_gdi_crtc_initialise(libgamma_crtc_state_t *restrict, libgamma_partition_state_t *restrict, size_t);
+int libgamma_w32_gdi_crtc_initialise(struct libgamma_crtc_state *restrict, struct libgamma_partition_state *restrict, size_t);
 
 /**
  * Release all resources held by a CRTC state
@@ -112,7 +112,7 @@ int libgamma_w32_gdi_crtc_initialise(libgamma_crtc_state_t *restrict, libgamma_p
  * @param  this  The CRTC state
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__)))
-void libgamma_w32_gdi_crtc_destroy(libgamma_crtc_state_t *restrict);
+void libgamma_w32_gdi_crtc_destroy(struct libgamma_crtc_state *restrict);
 
 /**
  * Restore the gamma ramps for a CRTC to the system settings for that CRTC
@@ -122,7 +122,7 @@ void libgamma_w32_gdi_crtc_destroy(libgamma_crtc_state_t *restrict);
  *                error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_w32_gdi_crtc_restore(libgamma_crtc_state_t *restrict);
+int libgamma_w32_gdi_crtc_restore(struct libgamma_crtc_state *restrict);
 
 
 /**
@@ -134,7 +134,8 @@ int libgamma_w32_gdi_crtc_restore(libgamma_crtc_state_t *restrict);
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t *restrict, libgamma_crtc_state_t *restrict, unsigned long long);
+int libgamma_w32_gdi_get_crtc_information(struct libgamma_crtc_information *restrict,
+                                          struct libgamma_crtc_state *restrict, unsigned long long);
 
 /**
  * Get the current gamma ramps for a CRTC, 16-bit gamma-depth version
@@ -145,7 +146,7 @@ int libgamma_w32_gdi_get_crtc_information(libgamma_crtc_information_t *restrict,
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_w32_gdi_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict, libgamma_gamma_ramps16_t *restrict);
+int libgamma_w32_gdi_crtc_get_gamma_ramps16(struct libgamma_crtc_state *restrict, struct libgamma_gamma_ramps16 *restrict);
 
 /**
  * Set the gamma ramps for a CRTC, 16-bit gamma-depth version
@@ -156,4 +157,4 @@ int libgamma_w32_gdi_crtc_get_gamma_ramps16(libgamma_crtc_state_t *restrict, lib
  *                 error identifier provided by this library
  */
 LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __warn_unused_result__)))
-int libgamma_w32_gdi_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict, const libgamma_gamma_ramps16_t *restrict);
+int libgamma_w32_gdi_crtc_set_gamma_ramps16(struct libgamma_crtc_state *restrict, const struct libgamma_gamma_ramps16 *restrict);

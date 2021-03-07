@@ -24,12 +24,12 @@
  *                        error identifier provided by this library
  */
 int
-libgamma_internal_translated_ramp_get_(libgamma_crtc_state_t *restrict this, gamma_ramps_any_t *restrict ramps,
+libgamma_internal_translated_ramp_get_(struct libgamma_crtc_state *restrict this, union gamma_ramps_any *restrict ramps,
                                        signed depth_user, signed depth_system, get_ramps_any_fun *fun)
 {
 	size_t n;
 	int r;
-	gamma_ramps_any_t ramps_sys;
+	union gamma_ramps_any ramps_sys;
 	uint64_t *restrict ramps_full;
   
 	/* Allocate ramps with proper data type */
@@ -43,7 +43,7 @@ libgamma_internal_translated_ramp_get_(libgamma_crtc_state_t *restrict this, gam
 	}
 
 	/* Allocate intermediary ramps */
-	ramps_full = malloc(n * sizeof(uint64_t));
+	ramps_full = malloc(n * sizeof(*ramps_full));
 	if (!ramps_full) {
 		free(ramps_sys.ANY.red);
 		return LIBGAMMA_ERRNO_SET;

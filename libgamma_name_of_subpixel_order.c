@@ -14,9 +14,9 @@
  *                 recognised (errno is not changed)
  */
 const char *
-libgamma_name_of_subpixel_order(int order)
+libgamma_name_of_subpixel_order(enum libgamma_subpixel_order order)
 {
-	switch (order) {
+	switch ((int)order) {
 #define X(CONST, NAME, ...)\
 	case CONST:\
 		return NAME;

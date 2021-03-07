@@ -13,10 +13,10 @@
  *                  error identifier provided by this library
  */
 int
-libgamma_method_capabilities(libgamma_method_capabilities_t *restrict this, size_t size, int method)
+libgamma_method_capabilities(struct libgamma_method_capabilities *restrict this, size_t size, int method)
 {
-	libgamma_method_capabilities_t caps_;
-	void (*func)(libgamma_method_capabilities_t *restrict);
+	struct libgamma_method_capabilities caps_;
+	void (*func)(struct libgamma_method_capabilities *restrict);
 
 	memset(this, 0, sizeof(*this));
 
@@ -45,4 +45,5 @@ libgamma_method_capabilities(libgamma_method_capabilities_t *restrict this, size
 		}
 	}
 	this->crtc_information__old = (int32_t)this->crtc_information;
+	return 0;
 }

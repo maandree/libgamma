@@ -14,8 +14,8 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_quartz_cg_crtc_initialise(libgamma_crtc_state_t *restrict this,
-                                   libgamma_partition_state_t *restrict partition, size_t crtc)
+libgamma_quartz_cg_crtc_initialise(struct libgamma_crtc_state *restrict this,
+                                   struct libgamma_partition_state *restrict partition, size_t crtc)
 {
 	(void) this;
 	return crtc < partition->crtcs_available ? 0 : LIBGAMMA_NO_SUCH_CRTC;

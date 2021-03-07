@@ -11,7 +11,7 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_crtc_set_gamma_ramps32(libgamma_crtc_state_t *restrict this, const libgamma_gamma_ramps32_t *restrict ramps)
+libgamma_crtc_set_gamma_ramps32(struct libgamma_crtc_state *restrict this, const struct libgamma_gamma_ramps32 *restrict ramps)
 {
 #define DEPTH 32
 #define TYPE bits32

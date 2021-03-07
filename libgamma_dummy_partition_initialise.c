@@ -13,13 +13,13 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_dummy_partition_initialise(libgamma_partition_state_t *restrict this,
-                                    libgamma_site_state_t *restrict site, size_t partition)
+libgamma_dummy_partition_initialise(struct libgamma_partition_state *restrict this,
+                                    struct libgamma_site_state *restrict site, size_t partition)
 {
-	libgamma_crtc_information_t template = libgamma_dummy_internal_configurations.crtc_info_template;
-	libgamma_dummy_site_t *site_data = site->data;
-	libgamma_dummy_partition_t *data = &site_data->partitions[partition];
-	libgamma_dummy_crtc_t *crtc_data;
+	struct libgamma_crtc_information template = libgamma_dummy_internal_configurations.crtc_info_template;
+	struct libgamma_dummy_site *site_data = site->data;
+	struct libgamma_dummy_partition *data = &site_data->partitions[partition];
+	struct libgamma_dummy_crtc *crtc_data;
 	size_t i, n;
 
 	this->data = NULL;
@@ -30,7 +30,7 @@ libgamma_dummy_partition_initialise(libgamma_partition_state_t *restrict this,
 	this->data = data;
 	data->state = this;
 
-	data->crtcs = calloc(data->crtc_count, sizeof(libgamma_dummy_crtc_t));
+	data->crtcs = calloc(data->crtc_count, sizeof(*data->crtcs));
 	if (!data->crtcs)
 		goto fail;
 	for (i = 0; i < data->crtc_count; i++) {

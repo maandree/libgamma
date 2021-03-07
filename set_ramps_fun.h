@@ -6,7 +6,7 @@
  */
 
 
-libgamma_crtc_information_t info;
+struct libgamma_crtc_information info;
 struct APPEND_RAMPS(libgamma_gamma_) ramps;
 size_t i, n;
 int e;

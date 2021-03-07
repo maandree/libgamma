@@ -8,4 +8,4 @@
  * 
  * @param  this  The site state
  */
-extern inline void libgamma_site_free(libgamma_site_state_t *restrict this);
+extern inline void libgamma_site_free(struct libgamma_site_state *restrict this);

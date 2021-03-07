@@ -12,7 +12,7 @@
  *                 error identifier provided by this library
  */
 int
-libgamma_w32_gdi_crtc_set_gamma_ramps16(libgamma_crtc_state_t *restrict this, const libgamma_gamma_ramps16_t *restrict ramps)
+libgamma_w32_gdi_crtc_set_gamma_ramps16(struct libgamma_crtc_state *restrict this, const struct libgamma_gamma_ramps16 *restrict ramps)
 {
 #ifdef DEBUG
 	/* Windows GDI have fixed gamma ramp sizes */

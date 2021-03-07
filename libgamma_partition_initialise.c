@@ -12,7 +12,8 @@
  *                     error identifier provided by this library
  */
 int
-libgamma_partition_initialise(libgamma_partition_state_t *restrict this, libgamma_site_state_t *restrict site, size_t partition)
+libgamma_partition_initialise(struct libgamma_partition_state *restrict this,
+                              struct libgamma_site_state *restrict site, size_t partition)
 {
 	this->site = site;
 	this->partition = partition;

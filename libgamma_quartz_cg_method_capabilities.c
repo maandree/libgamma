@@ -9,7 +9,7 @@
  * @param  this  The data structure to fill with the method's capabilities
  */
 void
-libgamma_quartz_cg_method_capabilities(libgamma_method_capabilities_t* restrict this)
+libgamma_quartz_cg_method_capabilities(struct libgamma_method_capabilities *restrict this)
 {
 	/* Gamma ramps size and depth can be queried */
 	this->crtc_information = LIBGAMMA_CRTC_INFO_GAMMA_SIZE | LIBGAMMA_CRTC_INFO_GAMMA_DEPTH;

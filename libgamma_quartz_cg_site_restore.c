@@ -11,7 +11,7 @@
  *                error identifier provided by this library
  */
 int
-libgamma_quartz_cg_site_restore(libgamma_site_state_t *restrict this)
+libgamma_quartz_cg_site_restore(struct libgamma_site_state *restrict this)
 {
 	(void) this;
 	CGDisplayRestoreColorSyncSettings();

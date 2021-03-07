@@ -11,7 +11,7 @@
  *                error identifier provided by this library
  */
 int
-libgamma_dummy_crtc_restore(libgamma_crtc_state_t *restrict this)
+libgamma_dummy_crtc_restore(struct libgamma_crtc_state *restrict this)
 {
 	if (!libgamma_dummy_internal_configurations.capabilities.crtc_restore) {
 		errno = ENOTSUP;

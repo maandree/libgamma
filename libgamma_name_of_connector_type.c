@@ -15,9 +15,9 @@
  *                     recognised (errno is not changed)
  */
 const char *
-libgamma_name_of_connector_type(int connector)
+libgamma_name_of_connector_type(enum libgamma_connector_type connector)
 {
-	switch (connector) {
+	switch ((int)connector) {
 #define X(CONST, NAME, ...)\
 	case CONST:\
 		return NAME;

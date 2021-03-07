@@ -9,7 +9,7 @@
  * @param  this  The data structure to fill with the method's capabilities
  */
 void
-libgamma_linux_drm_method_capabilities(libgamma_method_capabilities_t *restrict this)
+libgamma_linux_drm_method_capabilities(struct libgamma_method_capabilities *restrict this)
 {
 	/* Support for all information except gamma ramp support */
 	this->crtc_information = LIBGAMMA_CRTC_INFO_MACRO_EDID

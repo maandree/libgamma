@@ -11,7 +11,7 @@
  * @return        Non-zero on error
  */
 static int
-get_gamma_ramp_size(libgamma_crtc_information_t *restrict out, libgamma_crtc_state_t *restrict crtc)
+get_gamma_ramp_size(struct libgamma_crtc_information *restrict out, struct libgamma_crtc_state *restrict crtc)
 {
 	xcb_connection_t *restrict connection = crtc->partition->site->data;
 	xcb_randr_crtc_t *restrict crtc_id = crtc->data;
@@ -47,7 +47,7 @@ get_gamma_ramp_size(libgamma_crtc_information_t *restrict out, libgamma_crtc_sta
  * @return          Non-zero if at least on error occured
  */
 static int
-read_output_data(libgamma_crtc_information_t *restrict out, xcb_randr_get_output_info_reply_t *restrict output)
+read_output_data(struct libgamma_crtc_information *restrict out, xcb_randr_get_output_info_reply_t *restrict output)
 {
 	switch (output->connection) {
 	case XCB_RANDR_CONNECTION_CONNECTED:
@@ -92,7 +92,7 @@ read_output_data(libgamma_crtc_information_t *restrict out, xcb_randr_get_output
  * @param        Non-zero on error
  */
 static int
-get_connector_type(libgamma_crtc_information_t *restrict this)
+get_connector_type(struct libgamma_crtc_information *restrict this)
 {
 	/* Since we require the name of the output of get the type of the connected,
 	 * copy any reported error on the output's name to the connector's type,
@@ -100,7 +100,7 @@ get_connector_type(libgamma_crtc_information_t *restrict this)
 	if ((this->connector_type_error = this->connector_name_error))
 		return -1;
 
-#define __select(name, type)\
+#define SELECT(name, type)\
 	do {\
 		if (strstr(this->connector_name, name "-") == this->connector_name) {\
 			this->connector_type = LIBGAMMA_CONNECTOR_TYPE_##type;\
@@ -109,21 +109,21 @@ get_connector_type(libgamma_crtc_information_t *restrict this)
 	} while (0)
 
 	/* Check begin on the name of the output to find out what type the connector is of */
-	__select ("None",        Unknown);
-	__select ("VGA",         VGA);
-	__select ("DVI-I",       DVII);
-	__select ("DVI-D",       DVID);
-	__select ("DVI-A",       DVIA);
-	__select ("DVI",         DVI);
-	__select ("Composite",   Composite);
-	__select ("S-Video",     SVIDEO);
-	__select ("Component",   Component);
-	__select ("LFP",         LFP);
-	__select ("Proprietary", Unknown);
-	__select ("HDMI",        HDMI);
-	__select ("DisplayPort", DisplayPort);
+	SELECT ("None",        Unknown);
+	SELECT ("VGA",         VGA);
+	SELECT ("DVI-I",       DVII);
+	SELECT ("DVI-D",       DVID);
+	SELECT ("DVI-A",       DVIA);
+	SELECT ("DVI",         DVI);
+	SELECT ("Composite",   Composite);
+	SELECT ("S-Video",     SVIDEO);
+	SELECT ("Component",   Component);
+	SELECT ("LFP",         LFP);
+	SELECT ("Proprietary", Unknown);
+	SELECT ("HDMI",        HDMI);
+	SELECT ("DisplayPort", DisplayPort);
 
-#undef __select
+#undef SELECT
 
 	/* If there was no matching output name pattern report that and exit with an error */
 	this->connector_name_error = LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED;
@@ -139,7 +139,7 @@ get_connector_type(libgamma_crtc_information_t *restrict this)
  * @return          Non-zero on error
  */
 static int
-get_output_name(libgamma_crtc_information_t *restrict out, xcb_randr_get_output_info_reply_t *restrict output)
+get_output_name(struct libgamma_crtc_information *restrict out, xcb_randr_get_output_info_reply_t *restrict output)
 {
 	char *restrict store;
 	uint8_t *restrict name;
@@ -178,7 +178,7 @@ get_output_name(libgamma_crtc_information_t *restrict out, xcb_randr_get_output_
  * @return          Non-zero on error
  */
 static int
-get_edid(libgamma_crtc_information_t *restrict out, libgamma_crtc_state_t *restrict crtc, xcb_randr_output_t output)
+get_edid(struct libgamma_crtc_information *restrict out, struct libgamma_crtc_state *restrict crtc, xcb_randr_output_t output)
 {
 	xcb_connection_t *restrict connection = crtc->partition->site->data;
 	xcb_randr_list_output_properties_cookie_t prop_cookie;
@@ -192,7 +192,7 @@ get_edid(libgamma_crtc_information_t *restrict out, libgamma_crtc_state_t *restr
 	int atom_name_len;
 	xcb_randr_get_output_property_cookie_t atom_cookie;
 	xcb_randr_get_output_property_reply_t *restrict atom_reply;
-	unsigned char* restrict atom_data;
+	unsigned char *restrict atom_data;
 	int length;
 
 	/* Acquire a list of all properties of the output */
@@ -290,8 +290,8 @@ get_edid(libgamma_crtc_information_t *restrict out, libgamma_crtc_state_t *restr
  * @return          Zero on success, -1 on error; on error refer to the error reports in `this`
  */
 int
-libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t *restrict this,
-                                      libgamma_crtc_state_t *restrict crtc, unsigned long long fields)
+libgamma_x_randr_get_crtc_information(struct libgamma_crtc_information *restrict this,
+                                      struct libgamma_crtc_state *restrict crtc, unsigned long long fields)
 {
 #define _E(FIELD) ((fields & FIELD) ? LIBGAMMA_CRTC_INFO_NOT_SUPPORTED : 0)
 
@@ -300,13 +300,13 @@ libgamma_x_randr_get_crtc_information(libgamma_crtc_information_t *restrict this
 	xcb_randr_output_t output;
 	int free_edid, free_name;
 	xcb_connection_t *restrict connection;
-	libgamma_x_randr_partition_data_t *restrict screen_data;
+	struct libgamma_x_randr_partition_data *restrict screen_data;
 	size_t output_index;
 	xcb_randr_get_output_info_cookie_t cookie;
 	xcb_generic_error_t *error;
 
 	/* Wipe all error indicators */
-	memset(this, 0, sizeof(libgamma_crtc_information_t));
+	memset(this, 0, sizeof(*this));
 
 	/* We need to free the EDID after us if it is not explicitly requested */
 	free_edid = !(fields & LIBGAMMA_CRTC_INFO_EDID);

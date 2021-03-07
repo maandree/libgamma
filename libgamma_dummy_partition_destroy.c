@@ -9,9 +9,9 @@
  * @param  this  The partition state
  */
 void
-libgamma_dummy_partition_destroy(libgamma_partition_state_t *restrict this)
+libgamma_dummy_partition_destroy(struct libgamma_partition_state *restrict this)
 {
-	libgamma_dummy_partition_t *data = this->data;
+	struct libgamma_dummy_partition *data = this->data;
 	size_t i;
 
 	if (data) {

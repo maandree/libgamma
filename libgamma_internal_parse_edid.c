@@ -24,9 +24,9 @@
  * @return          Non-zero on error
  */
 int
-libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict this, unsigned long long fields)
+libgamma_internal_parse_edid(struct libgamma_crtc_information *restrict this, unsigned long long fields)
 {
-#define __m(value)\
+#define M(value)\
 	(this->edid[index++] != (value))
 
 	uint16_t red_x, green_x, blue_x, white_x;
@@ -40,7 +40,7 @@ libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict this, unsigne
 	if (this->edid_length < 128)
 		error = LIBGAMMA_EDID_LENGTH_UNSUPPORTED;
 	/* Check that the magic number of that of the EDID structure */
-	else if (__m(0x00) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0xFF) || __m(0x00))
+	else if (M(0x00) || M(0xFF) || M(0xFF) || M(0xFF) || M(0xFF) || M(0xFF) || M(0xFF) || M(0x00))
 		error = LIBGAMMA_EDID_WRONG_MAGIC_NUMBER;
 	/* Check that EDID structure revision 1.x is used. We only know that we
 	 * support revisions 1.1, 1.3, and 1.4, and since they are all comptible,
@@ -77,14 +77,14 @@ libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict this, unsigne
 
 	/* Retrieve the monitor's subpixel chromas */
 	if (fields & (LIBGAMMA_CRTC_INFO_CHROMA | LIBGAMMA_CRTC_INFO_WHITE_POINT)) {
-		red_x   = (((uint16_t)this->edid[25] >> 6) & 2) | ((uint16_t)this->edid[27] << 2);
-		red_y   = (((uint16_t)this->edid[25] >> 4) & 2) | ((uint16_t)this->edid[28] << 2);
-		green_x = (((uint16_t)this->edid[25] >> 2) & 2) | ((uint16_t)this->edid[29] << 2);
-		green_y = (((uint16_t)this->edid[25] >> 0) & 2) | ((uint16_t)this->edid[30] << 2);
-		blue_x  = (((uint16_t)this->edid[26] >> 6) & 2) | ((uint16_t)this->edid[31] << 2);
-		blue_y  = (((uint16_t)this->edid[26] >> 4) & 2) | ((uint16_t)this->edid[32] << 2);
-		white_x = (((uint16_t)this->edid[26] >> 2) & 2) | ((uint16_t)this->edid[33] << 2);
-		white_y = (((uint16_t)this->edid[26] >> 6) & 2) | ((uint16_t)this->edid[34] << 2);
+		red_x   = (uint16_t)((((uint16_t)this->edid[25] >> 6) & 2) | ((uint16_t)this->edid[27] << 2));
+		red_y   = (uint16_t)((((uint16_t)this->edid[25] >> 4) & 2) | ((uint16_t)this->edid[28] << 2));
+		green_x = (uint16_t)((((uint16_t)this->edid[25] >> 2) & 2) | ((uint16_t)this->edid[29] << 2));
+		green_y = (uint16_t)((((uint16_t)this->edid[25] >> 0) & 2) | ((uint16_t)this->edid[30] << 2));
+		blue_x  = (uint16_t)((((uint16_t)this->edid[26] >> 6) & 2) | ((uint16_t)this->edid[31] << 2));
+		blue_y  = (uint16_t)((((uint16_t)this->edid[26] >> 4) & 2) | ((uint16_t)this->edid[32] << 2));
+		white_x = (uint16_t)((((uint16_t)this->edid[26] >> 2) & 2) | ((uint16_t)this->edid[33] << 2));
+		white_y = (uint16_t)((((uint16_t)this->edid[26] >> 6) & 2) | ((uint16_t)this->edid[34] << 2));
 		/* Even though the maximum value as encoded is 1023, the values should be divided by 1024 */
 		this->red_chroma_x   = (float)red_x   / 1024.f;
 		this->red_chroma_y   = (float)red_y   / 1024.f;
@@ -120,5 +120,5 @@ libgamma_internal_parse_edid(libgamma_crtc_information_t *restrict this, unsigne
 	 * specified in the monitor's EDID */
 	return error | this->gamma_error;
 
-#undef __m
+#undef M
 }
