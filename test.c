@@ -687,14 +687,14 @@ test_connector_types(void)
 			exit(1);\
 		}\
 		type = (enum libgamma_connector_type)-1;\
-		if (libgamma_value_of_connector_type(#CONST, &type) || type != CONST) { \
+		if (libgamma_value_of_connector_type(#CONST, &type) || type != CONST) {\
 			fprintf(stderr, "libgamma_value_of_connector_type(\"%s\") != %s\n", #CONST, #CONST);\
 			exit(1);\
 		}\
 		type = (enum libgamma_connector_type)-1;\
-		if (libgamma_value_of_connector_type(libgamma_name_of_connector_type(CONST), &type) || type != CONST) { \
+		if (libgamma_value_of_connector_type(libgamma_name_of_connector_type(CONST), &type) || type != CONST) {\
 			fprintf(stderr, "libgamma_value_of_connector_type(libgamma_name_of_connector_type(%s)) != %s\n",\
-			        #CONST, #CONST);\
+			        #CONST, #CONST); \
 			exit(1);\
 		}\
 		type = (enum libgamma_connector_type)-1;\
@@ -795,18 +795,18 @@ test_subpixel_orders(void)
 			exit(1);\
 		}\
 		order = (enum libgamma_subpixel_order)-1;\
-		if (libgamma_value_of_subpixel_order(#CONST, &order) || order != CONST) { \
+		if (libgamma_value_of_subpixel_order(#CONST, &order) || order != CONST) {\
 			fprintf(stderr, "libgamma_value_of_subpixel_order(\"%s\") != %s\n", #CONST, #CONST);\
 			exit(1);\
 		}\
 		order = (enum libgamma_subpixel_order)-1;\
-		if (libgamma_value_of_subpixel_order(libgamma_name_of_subpixel_order(CONST), &order) || order != CONST) { \
+		if (libgamma_value_of_subpixel_order(libgamma_name_of_subpixel_order(CONST), &order) || order != CONST) {\
 			fprintf(stderr, "libgamma_value_of_subpixel_order(libgamma_name_of_subpixel_order(%s)) != %s\n",\
 			        #CONST, #CONST);\
 			exit(1);\
 		}\
 		order = (enum libgamma_subpixel_order)-1;\
-		if (libgamma_value_of_subpixel_order(#CONST, &order) || order != CONST) { \
+		if (libgamma_value_of_subpixel_order(#CONST, &order) || order != CONST) {\
 			fprintf(stderr, "libgamma_value_of_subpixel_order(\"%s\") != %s\n", #CONST, #CONST);\
 			exit(1);\
 		}\

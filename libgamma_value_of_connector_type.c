@@ -16,15 +16,14 @@ int
 libgamma_value_of_connector_type(const char *connector, enum libgamma_connector_type *out)
 {
 #define X(CONST, NAME, ...)\
-	if (!strcmp(connector, NAME)) {\
-		*out = CONST;\
-		return 0;\
-	}
+	if (!strcmp(connector, NAME))\
+		goto case_##CONST;
 	LIST_CONNECTOR_TYPES(X)
 #undef X
 
 #define X(CONST, ...)\
 	if (!strcmp(connector, #CONST)) {\
+	case_##CONST:\
 		*out = CONST;\
 		return 0;\
 	}

@@ -1979,7 +1979,7 @@ const char *libgamma_const_of_connector_type(enum libgamma_connector_type);
  *                     "LIBGAMMA_CONNECTOR_TYPE_VGA";
  * @return             Zero on success, `LIBGAMMA_CONNECTOR_TYPE_NOT_RECOGNISED` of not defined
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 1), __access__(__write_only__, 2), __pure__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 1), __access__(__write_only__, 2))))
 int libgamma_value_of_connector_type(const char *, enum libgamma_connector_type *);
 
 
@@ -2020,7 +2020,7 @@ const char *libgamma_const_of_subpixel_order(enum libgamma_subpixel_order);
  *                 "Horizontal RGB" and "LIBGAMMA_SUBPIXEL_ORDER_HORIZONTAL_RGB";
  * @return         Zero on success, `LIBGAMMA_SUBPIXEL_ORDER_NOT_RECOGNISED` of not defined
  */
-LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 1), __access__(__write_only__, 2), __pure__)))
+LIBGAMMA_GCC_ONLY__(__attribute__((__nonnull__, __access__(__read_only__, 1), __access__(__write_only__, 2))))
 int libgamma_value_of_subpixel_order(const char *, enum libgamma_subpixel_order *);
 
 

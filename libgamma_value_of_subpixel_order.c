@@ -16,15 +16,14 @@ int
 libgamma_value_of_subpixel_order(const char *order, enum libgamma_subpixel_order *out)
 {
 #define X(CONST, NAME, ...)\
-	if (!strcmp(order, NAME)) {\
-		*out = CONST;\
-		return 0;\
-	}
+	if (!strcmp(order, NAME))\
+		goto case_##CONST;
 	LIST_SUBPIXEL_ORDERS(X)
 #undef X
 
 #define X(CONST, ...)\
 	if (!strcmp(order, #CONST)) {\
+	case_##CONST:\
 		*out = CONST;\
 		return 0;\
 	}
