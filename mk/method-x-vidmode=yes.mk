@@ -1,8 +1,8 @@
 HDR_X_VIDMODE      = method-x-vidmode.h
 PARAMS_X_VIDMODE   = LIBGAMMA_METHOD_X_VIDMODE x_vidmode 16 ramps16
 CPPFLAGS_X_VIDMODE = -DHAVE_LIBGAMMA_METHOD_X_VIDMODE
-CFLAGS_X_VIDMODE   = $$(pkg-config --cflags x11 xxf86vm)
-LDFLAGS_X_VIDMODE  = $$(pkg-config --libs x11 xxf86vm)
+CFLAGS_X_VIDMODE   = $$(pkg-config $(PKGCONFIG_FLAGS) --cflags x11 xxf86vm)
+LDFLAGS_X_VIDMODE  = $$(pkg-config $(PKGCONFIG_FLAGS) --libs x11 xxf86vm)
 DEPS_X_VIDMODE     = x11 xxf86vm
 
 OBJ_X_VIDMODE =\

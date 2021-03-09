@@ -1,8 +1,8 @@
 HDR_X_RANDR      = method-x-randr.h
 PARAMS_X_RANDR   = LIBGAMMA_METHOD_X_RANDR x_randr 16 ramps16
 CPPFLAGS_X_RANDR = -DHAVE_LIBGAMMA_METHOD_X_RANDR
-CFLAGS_X_RANDR   = $$(pkg-config --cflags xcb xcb-randr)
-LDFLAGS_X_RANDR  = $$(pkg-config --libs xcb xcb-randr)
+CFLAGS_X_RANDR   = $$(pkg-config $(PKGCONFIG_FLAGS) --cflags xcb xcb-randr)
+LDFLAGS_X_RANDR  = $$(pkg-config $(PKGCONFIG_FLAGS) --libs xcb xcb-randr)
 DEPS_X_RANDR     = xcb xcb-randr
 
 OBJ_X_RANDR =\

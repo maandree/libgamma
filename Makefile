@@ -188,7 +188,7 @@ libgamma.pc: config.h Makefile $(METHOD_CONFS)
 	printf '%s\n'\
 		'Cflags: -I$${includedir}'\
 		'Libs: -L$${libdir} -lgamma'\
-		"Libs.private: $$(pkg-config --libs $(DEPS_METHODS)) $(LDFLAGS_QUARTZ_GC)"\
+		"Libs.private: $$(pkg-config $(PKGCONFIG_FLAGS) --libs $(DEPS_METHODS)) $(LDFLAGS_QUARTZ_GC)"\
 		>> $@
 
 libgamma.librarian: config.h Makefile $(METHOD_CONFS)
