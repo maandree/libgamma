@@ -5,15 +5,13 @@
  * libgamma_crtc_get_gamma_ramps{8,16,32,64,f,d}
  */
 
-#define CONCAT(A, B)  A##B
-
 
 union gamma_ramps_any ramps_;
 switch (this->partition->site->method) {
 #define X(CONST, CNAME, MDEPTH, MRAMPS)\
 case CONST:\
 	if (!(MDEPTH)) {\
-		return APPEND_RAMPS(libgamma_dummy_crtc_get_gamma_)(this, (void *)ramps);\
+		return APPEND_RAMPS(libgamma_dummy_crtc_get_gamma_)(this, (void *)ramps); /* only dummy is flexible */\
 	} else if ((DEPTH) == (MDEPTH)) {\
 		return libgamma_##CNAME##_crtc_get_gamma_##MRAMPS(this, (void *)ramps);\
 	} else {\
@@ -25,6 +23,3 @@ LIST_AVAILABLE_METHODS(X)
 default:
 	return LIBGAMMA_NO_SUCH_ADJUSTMENT_METHOD;
 }
-
-
-#undef CONCAT
