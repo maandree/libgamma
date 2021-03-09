@@ -24,12 +24,20 @@ include mk/$(OS).mk
 
 
 QUARTZ_CORE_GRAPHICS_METHOD = $(QUARTZ_CG_METHOD)
-include mk/method-x-randr=$(X_RANDR_METHOD).mk
-include mk/method-x-vidmode=$(X_VIDMODE_METHOD).mk
-include mk/method-linux-drm=$(LINUX_DRM_METHOD).mk
-include mk/method-w32-gdi=$(W32_GDI_METHOD).mk
-include mk/method-quartz-cg=$(QUARTZ_CORE_GRAPHICS_METHOD).mk
-include mk/method-dummy=$(DUMMY_METHOD).mk
+X_RANDR_CONF   = mk/method-x-randr=$(X_RANDR_METHOD).mk
+X_VIDMODE_CONF = mk/method-x-vidmode=$(X_VIDMODE_METHOD).mk
+LINUX_DRM_CONF = mk/method-linux-drm=$(LINUX_DRM_METHOD).mk
+W32_GDI_CONF   = mk/method-w32-gdi=$(W32_GDI_METHOD).mk
+QUARTZ_CG_CONF = mk/method-quartz-cg=$(QUARTZ_CORE_GRAPHICS_METHOD).mk
+DUMMY_CONF     = mk/method-dummy=$(DUMMY_METHOD).mk
+
+include $(X_RANDR_CONF)
+include $(X_VIDMODE_CONF)
+include $(LINUX_DRM_CONF)
+include $(W32_GDI_CONF)
+include $(QUARTZ_CG_CONF)
+include $(DUMMY_CONF)
+METHOD_CONFS = $(X_RANDR_CONF) $(X_VIDMODE_CONF) $(LINUX_DRM_CONF) $(W32_GDI_CONF) $(QUARTZ_CG_CONF) $(DUMMY_CONF)
 
 # Need to do it this way since += is not in the POSIX make
 HDR_METHODS      = $(HDR_X_RANDR)      $(HDR_X_VIDMODE)      $(HDR_LINUX_DRM)\
@@ -44,6 +52,8 @@ CFLAGS_METHODS   = $(CFLAGS_X_RANDR)   $(CFLAGS_X_VIDMODE)   $(CFLAGS_LINUX_DRM)
                    $(CFLAGS_W32_GDI)   $(CFLAGS_QUARTZ_GC)   $(CFLAGS_DUMMY)
 LDFLAGS_METHODS  = $(LDFLAGS_X_RANDR)  $(LDFLAGS_X_VIDMODE)  $(LDFLAGS_LINUX_DRM)\
                    $(LDFLAGS_W32_GDI)  $(LDFLAGS_QUARTZ_GC)  $(LDFLAGS_DUMMY)
+DEPS_METHODS     = $(DEPS_X_RANDR)     $(DEPS_X_VIDMODE)     $(DEPS_LINUX_DRM)\
+                   $(DEPS_W32_GDI)     $(DEPS_QUARTZ_GC)     $(DEPS_DUMMY)
 
 
 OBJ_PUBLIC =\
@@ -153,7 +163,7 @@ HDR =\
 MAN7 = libgamma.7
 
 
-all: libgamma.a libgamma.$(LIBEXT) test
+all: libgamma.a libgamma.$(LIBEXT) test libgamma.pc libgamma.librarian
 $(OBJ): $(@:.o=.c) $(HDR)
 $(LOBJ): $(@:.lo=.c) $(HDR)
 
@@ -164,6 +174,30 @@ config.h: FORCE
 	printf '\\\n\t_(%s, %s, %s, %s)' $(METHODS_PARAMS) >> $@~
 	printf '\n' >> $@~
 	if ! test -f $@ || ! test "$$(cat < $@)" = "$$(cat < $@~)"; then mv -- $@~ $@; fi
+
+libgamma.pc: config.h Makefile $(METHOD_CONFS)
+	printf '%s\n'\
+		prefix="$(PREFIX)"\
+		libdir='$${prefix}/lib'\
+		includedir='$${prefix}/include'\
+		''\
+		'Name: libgamma'\
+		'Description: Display server abstraction layer for gamma ramps'\
+		'Version: $(LIB_VERSION)'\
+		> $@
+	printf '%s\n'\
+		'Cflags: -I$${includedir}'\
+		'Libs: -L$${libdir} -lgamma'\
+		"Libs.private: $$(pkg-config --libs $(DEPS_METHODS)) $(LDFLAGS_QUARTZ_GC)"\
+		>> $@
+
+libgamma.librarian: config.h Makefile $(METHOD_CONFS)
+	printf '%s\n'\
+		"CPPFLAGS -I$(PREFIX)/include"\
+		"LDFLAGS -L$(PREFIX)/lib -lgamma $(LDFLAGS_QUARTZ_GC)"\
+		"static LDFLAGS -L$(PREFIX)/lib -lgamma"\
+		"deps $(DEPS_METHODS)"\
+		> $@
 
 libgamma.a: $(OBJ)
 	-rm -f -- $@
@@ -185,15 +219,19 @@ test.o: test.c libgamma.h
 test: test.o libgamma.a
 	$(CC) -o $@ test.o libgamma.a $(LDFLAGS_METHODS) $(LDFLAGS)
 
-install: libgamma.a libgamma.$(LIBEXT)
+install: libgamma.a libgamma.$(LIBEXT) libgamma.pc libgamma.librarian
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/lib/"
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/include/"
+	mkdir -p -- "$(DESTDIR)$(PREFIX)/share/pkgconfig/"
+	mkdir -p -- "$(DESTDIR)$(PREFIX)/share/librarian/"
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man7/"
 	cp -- libgamma.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMINOREXT)"
 	ln -sf -- libgamma.$(LIBMINOREXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMAJOREXT)"
 	ln -sf -- libgamma.$(LIBMAJOREXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBEXT)"
 	cp -- libgamma.a "$(DESTDIR)$(PREFIX)/lib/"
 	cp -- libgamma.h "$(DESTDIR)$(PREFIX)/include/"
+	cp -- libgamma.pc "$(DESTDIR)$(PREFIX)/share/pkgconfig/"
+	cp -- libgamma.librarian "$(DESTDIR)$(PREFIX)/share/librarian/libgamma=$(LIB_VERSION)"
 	cp -- $(MAN7) "$(DESTDIR)$(MANPREFIX)/man7/"
 
 uninstall:
@@ -202,10 +240,12 @@ uninstall:
 	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBEXT)"
 	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libgamma.a"
 	-rm -f -- "$(DESTDIR)$(PREFIX)/include/libgamma.h"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/share/pkgconfig/libgamma.pc"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/share/librarian/libgamma=$(LIB_VERSION)"
 	-cd -- "$(DESTDIR)$(MANPREFIX)/man7/" && rm -f -- $(MAN7)
 
 clean:
-	-rm -f -- *.o *.lo *.su *.a *.$(LIBEXT) test config.h
+	-rm -f -- *.o *.lo *.su *.a *.$(LIBEXT) *.pc *.librarian test config.h
 
 .SUFFIXES:
 .SUFFIXES: .lo .o .c

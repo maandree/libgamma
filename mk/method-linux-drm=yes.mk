@@ -3,6 +3,7 @@ PARAMS_LINUX_DRM   = LIBGAMMA_METHOD_LINUX_DRM linux_drm 16 ramps16
 CPPFLAGS_LINUX_DRM = -DHAVE_LIBGAMMA_METHOD_LINUX_DRM
 CFLAGS_LINUX_DRM   = $$(pkg-config --cflags libdrm)
 LDFLAGS_LINUX_DRM  = $$(pkg-config --libs libdrm)
+DEPS_LINUX_DRM     = libdrm
 
 OBJ_LINUX_DRM =\
 	libgamma_linux_drm_method_capabilities.o\
