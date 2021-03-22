@@ -49,6 +49,27 @@
 
 
 /**
+ * Invertion mapping function from [0, 1] float encoding value to [0, 2¹⁶ − 1] integer output value
+ * 
+ * @param   encoding  [0, 1] float encoding value
+ * @return            [0, 2¹⁶ − 1] integer output value
+ */
+LIBGAMMA_GCC_ONLY__(__attribute__((__const__)))
+static uint16_t
+inv_ramps16(float encoding)
+{
+	double i_encoding = (double)(1.f - encoding);
+	double f_output = (double)UINT16_MAX * i_encoding;
+	uint16_t output = (uint16_t)f_output;
+	if (i_encoding < (double)0.25f && output > UINT16_MAX / 2)
+		output = 0;
+	if (i_encoding > (double)0.75f && output < UINT16_MAX / 2)
+		output = UINT16_MAX;
+	return output;
+}
+
+
+/**
  * Test mapping function from [0, 1] float encoding value to [0, 2⁸ − 1] integer output value
  * 
  * @param   encoding  [0, 1] float encoding value
@@ -1515,6 +1536,16 @@ main(void)
 	if ((rr |= r = libgamma_crtc_set_gamma_ramps64(crtc_state, &old_ramps64)))
 		libgamma_perror("libgamma_crtc_set_gamma_ramps64", r);
 	printf("Done!\n");
+
+	/* Test inversion (does not work properly on all devices) */
+	printf("Inverting monitor output for 1 second... (does not work properly on all devices) (ramps16)\n");
+	if ((rr |= r = libgamma_crtc_set_gamma_ramps16_f(crtc_state, inv_ramps16, inv_ramps16, inv_ramps16)))
+		libgamma_perror("libgamma_crtc_set_gamma_ramps16_f", r);
+	sleep(1);
+	if ((rr |= r = libgamma_crtc_set_gamma_ramps16(crtc_state, &old_ramps16)))
+		libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
+	printf("Done!\n");
+	sleep(1);
 
 	/* TODO Test gamma ramp restore functions */
   
