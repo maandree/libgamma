@@ -861,16 +861,15 @@ test_subpixel_orders(void)
 static void
 test_errors(void)
 {
-	int n = 0, fds[2], flags;
+	int n = 0, fds[2], flags, err;
 	char buf[1024], buf2[1100];
-	FILE *fp, *err = stderr;
 	ssize_t r;
 
 	alarm(2);
 	pipe(fds);
-	fp = fdopen(fds[1], "w");
 	flags = fcntl(fds[0], F_GETFL);
 	fcntl(fds[0], F_SETFL, flags | O_NONBLOCK);
+	err = dup(STDERR_FILENO);
 
 #define X(CONST)\
 	do {\
@@ -910,10 +909,10 @@ test_errors(void)
 				        #CONST, #CONST);\
 				exit(1);\
 			}\
-			stderr = fp;\
+			dup2(fds[1], STDERR_FILENO);\
 			libgamma_perror(NULL, CONST);\
-			stderr = err;\
-			fflush(fp);\
+			fflush(stderr);\
+			dup2(err, STDERR_FILENO);\
 			r = read(fds[0], buf, sizeof(buf));\
 			if (r <= 0 || buf[r - 1] != '\n') {\
 				fprintf(stderr, "libgamma_perror(NULL, %s) failed\n", #CONST);\
@@ -924,10 +923,10 @@ test_errors(void)
 				fprintf(stderr, "libgamma_perror(NULL, %s) failed\n", #CONST);\
 				exit(1);\
 			}\
-			stderr = fp;\
+			dup2(fds[1], STDERR_FILENO);\
 			libgamma_perror("", CONST);\
-			stderr = err;\
-			fflush(fp);\
+			fflush(stderr);\
+			dup2(err, STDERR_FILENO);\
 			r = read(fds[0], buf, sizeof(buf));\
 			if (r <= 0 || buf[r - 1] != '\n') {\
 				fprintf(stderr, "libgamma_perror(\"\", %s) failed\n", #CONST);\
@@ -938,10 +937,10 @@ test_errors(void)
 				fprintf(stderr, "libgamma_perror(\"\", %s) failed\n", #CONST);\
 				exit(1);\
 			}\
-			stderr = fp;\
+			dup2(fds[1], STDERR_FILENO);\
 			libgamma_perror("prefix", CONST);\
-			stderr = err;\
-			fflush(fp);\
+			fflush(stderr);\
+			dup2(err, STDERR_FILENO);\
 			r = read(fds[0], buf, sizeof(buf));\
 			if (r <= 0 || buf[r - 1] != '\n') {\
 				fprintf(stderr, "libgamma_perror(\"prefix\", %s) failed\n", #CONST);\
@@ -1185,10 +1184,12 @@ test_errors(void)
 	}
 
 	errno = -1;
+#ifdef ERRNO_0_HAS_MESSAGE
 	if (strcmp(libgamma_strerror_r(0, buf, sizeof(buf)), strerror(0))) {
 		fprintf(stderr, "libgamma_strerror_r(0, buf, sizeof(buf)) != strerror(0)\n");
 		exit(1);
 	}
+#endif
 	if (strcmp(libgamma_strerror_r(ENOMEM, buf, sizeof(buf)), strerror(ENOMEM))) {
 		fprintf(stderr, "libgamma_strerror_r(ENOMEM, buf, sizeof(buf)) != strerror(ENOMEM)\n");
 		exit(1);
@@ -1201,11 +1202,13 @@ test_errors(void)
 		fprintf(stderr, "libgamma_strerror_r(EDOM, buf, sizeof(buf)) != strerror(EDOM)\n");
 		exit(1);
 	}
+#ifdef ERRNO_0_HAS_MESSAGE
 	errno = 0;
 	if (strcmp(libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf)), strerror(0))) {
 		fprintf(stderr, "libgamma_strerror_r(0 via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) != strerror(0)\n");
 		exit(1);
 	}
+#endif
 	errno = ENOMEM;
 	if (strcmp(libgamma_strerror_r(LIBGAMMA_ERRNO_SET, buf, sizeof(buf)), strerror(ENOMEM))) {
 		fprintf(stderr, "libgamma_strerror_r(ENOMEM via LIBGAMMA_ERRNO_SET, buf, sizeof(buf)) != strerror(ENOMEM)\n");
@@ -1259,10 +1262,10 @@ test_errors(void)
 	libgamma_group_gid_set(5);
 	snprintf(buf2, sizeof(buf2), "%s in group 5", libgamma_strerror(LIBGAMMA_DEVICE_REQUIRE_GROUP));
 
-	stderr = fp;
+	dup2(fds[1], STDERR_FILENO);
 	libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP);
-	stderr = err;
-	fflush(fp);
+	fflush(stderr);
+	dup2(err, STDERR_FILENO);
 	r = read(fds[0], buf, sizeof(buf));
 	if (r <= 0 || buf[r - 1] != '\n') {
 		fprintf(stderr, "libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n"); 
@@ -1274,10 +1277,10 @@ test_errors(void)
 		exit(1);
 	}
 
-	stderr = fp;
+	dup2(fds[1], STDERR_FILENO);
 	libgamma_perror("", LIBGAMMA_DEVICE_REQUIRE_GROUP);
-	stderr = err;
-	fflush(fp);
+	fflush(stderr);
+	dup2(err, STDERR_FILENO);
 	r = read(fds[0], buf, sizeof(buf));
 	if (r <= 0 || buf[r - 1] != '\n') {
 		fprintf(stderr, "libgamma_perror(\"\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
@@ -1289,10 +1292,10 @@ test_errors(void)
 		exit(1);
 	}
 
-	stderr = fp;
+	dup2(fds[1], STDERR_FILENO);
 	libgamma_perror("prefix", LIBGAMMA_DEVICE_REQUIRE_GROUP);
-	stderr = err;
-	fflush(fp);
+	fflush(stderr);
+	dup2(err, STDERR_FILENO);
 	r = read(fds[0], buf, sizeof(buf));
 	if (r <= 0 || buf[r - 1] != '\n') {
 		fprintf(stderr, "libgamma_perror(\"prefix\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
@@ -1312,10 +1315,10 @@ test_errors(void)
 	libgamma_group_name_set("grp");
 	snprintf(buf2, sizeof(buf2), "%s in the grp group (5)", libgamma_strerror(LIBGAMMA_DEVICE_REQUIRE_GROUP));
 
-	stderr = fp;
+	dup2(fds[1], STDERR_FILENO);
 	libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP);
-	stderr = err;
-	fflush(fp);
+	fflush(stderr);
+	dup2(err, STDERR_FILENO);
 	r = read(fds[0], buf, sizeof(buf));
 	if (r <= 0 || buf[r - 1] != '\n') {
 		fprintf(stderr, "libgamma_perror(NULL, LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n"); 
@@ -1327,10 +1330,10 @@ test_errors(void)
 		exit(1);
 	}
 
-	stderr = fp;
+	dup2(fds[1], STDERR_FILENO);
 	libgamma_perror("", LIBGAMMA_DEVICE_REQUIRE_GROUP);
-	stderr = err;
-	fflush(fp);
+	fflush(stderr);
+	dup2(err, STDERR_FILENO);
 	r = read(fds[0], buf, sizeof(buf));
 	if (r <= 0 || buf[r - 1] != '\n') {
 		fprintf(stderr, "libgamma_perror(\"\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
@@ -1342,10 +1345,10 @@ test_errors(void)
 		exit(1);
 	}
 
-	stderr = fp;
+	dup2(fds[1], STDERR_FILENO);
 	libgamma_perror("prefix", LIBGAMMA_DEVICE_REQUIRE_GROUP);
-	stderr = err;
-	fflush(fp);
+	fflush(stderr);
+	dup2(err, STDERR_FILENO);
 	r = read(fds[0], buf, sizeof(buf));
 	if (r <= 0 || buf[r - 1] != '\n') {
 		fprintf(stderr, "libgamma_perror(\"prefix\", LIBGAMMA_DEVICE_REQUIRE_GROUP) failed\n");
@@ -1364,8 +1367,9 @@ test_errors(void)
 	libgamma_group_gid_set(0);
 	libgamma_group_name_set(NULL);
 
-	fclose(fp);
 	close(fds[0]);
+	close(fds[1]);
+	close(err);
 	alarm(0);
 }
 
@@ -1504,7 +1508,7 @@ main(void)
 	sleep(1);
 	memset(ramps16.green, 0, ramps16.green_size * sizeof(*ramps16.green));
 	memcpy(ramps16.blue, old_ramps16.blue, ramps16.blue_size * sizeof(*ramps16.blue));
-	printf("Making the monitor green-only for 1 second...\n");
+	printf("Making the monitor blue-only for 1 second...\n");
 	if ((rr |= r = libgamma_crtc_set_gamma_ramps16(crtc_state, &ramps16)))
 		libgamma_perror("libgamma_crtc_set_gamma_ramps16", r);
 	sleep(1);
