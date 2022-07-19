@@ -226,6 +226,7 @@ install: libgamma.a libgamma.$(LIBEXT) libgamma.pc libgamma.librarian
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/share/librarian/"
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man7/"
 	cp -- libgamma.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMINOREXT)"
+	$(FIX_INSTALL_NAME) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMINOREXT)"
 	ln -sf -- libgamma.$(LIBMINOREXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBMAJOREXT)"
 	ln -sf -- libgamma.$(LIBMAJOREXT) "$(DESTDIR)$(PREFIX)/lib/libgamma.$(LIBEXT)"
 	cp -- libgamma.a "$(DESTDIR)$(PREFIX)/lib/"
