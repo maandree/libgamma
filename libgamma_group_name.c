@@ -2,7 +2,7 @@
 #include "common.h"
 
 
-static _Thread_local char group_name[64]; /* Group names can only be up to 16 bytes logn, 63 is a very safe number */
+static _Thread_local char group_name[64]; /* Group names can only be up to 16 bytes long, 63 is a very safe number */
 
 
 /**
